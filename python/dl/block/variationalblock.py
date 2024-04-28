@@ -1,0 +1,54 @@
+__author__ = "Patrick Nicolas"
+__copyright__ = "Copyright 2023, 2024  All rights reserved."
+
+import torch
+from torch import nn
+from torch.autograd import Variable
+from python.dl.block.neuralblock import NeuralBlock
+from typing import Self
+from python.dl.dlexception import DLException
+
+
+class VariationalBlock(NeuralBlock):
+    def __init__(self,  hidden_dim: int, latent_size: int):
+        """
+        Constructor for the variational Neural block of a variational auto-encoder
+        @param hidden_dim:  Number of hidden unit to the variational block
+        @type hidden_dim:  int
+        @param latent_size:  Number of hidden unit for the latent space the variational block
+        @type latent_size:  int
+        """
+        mu = nn.Linear(hidden_dim, latent_size)
+        log_var = nn.Linear(hidden_dim, latent_size)
+        sampler_fc = nn.Linear(latent_size, hidden_dim)
+        super(VariationalBlock, self).__init__('Gaussian', [mu, log_var, sampler_fc])
+
+        self.mu = mu
+        self.log_var = log_var
+        self.sampler_fc = sampler_fc
+
+
+
+    def invert(self) -> Self:
+        raise DLException('Cannot invert variational Neural block')
+
+    def in_features(self) -> int:
+        return self.mu.in_features
+
+    def __repr__(self):
+        return f'\n      Id: {self.block_id}\n      Mean: {repr(self.mu)}\n      logvar: {repr(self.log_var)}\n' \
+               f'      Sampler: {repr(self.sampler_fc)}'
+
+    @classmethod
+    def re_parameterize(cls, mu: torch.Tensor, log_var: torch.Tensor) -> torch.Tensor:
+        """
+        random sample the z-space using the mean and log variance
+        @param mu: Mean of the distribution in the z-space (latent)
+        @param log_var: Logarithm of the variance of the distribution in the z-space
+        @return: Sampled data point from z-space
+        """
+        std = log_var.mul(0.5).exp_()
+        std_dev = std.data.new(std.size()).normal_()
+        eps = Variable(std_dev)
+        return eps.mul_(std).add_(mu)
+
