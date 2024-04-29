@@ -119,7 +119,7 @@ class NeuralNet(object):
                 epoch: int,
                 train_loader: DataLoader,
                 model: torch.nn.Module) -> float:
-        total_loss = 0
+        total_loss = 0.0
         model.train()
         # Initialize the gradient for the optimizer
         loss_function = self.hyper_params.loss_function

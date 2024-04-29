@@ -12,7 +12,11 @@ logger = logging.getLogger('dataset.LabeledDataset')
 
 
 class LabeledDataset(TDataset):
-    def __init__(self, features: torch.Tensor, labels: torch.Tensor, transform: Optional[Callable] = None):
+    def __init__(self,
+                 features: torch.Tensor,
+                 labels: torch.Tensor,
+                 transform: Optional[Callable] = None,
+                 dtype: AnyStr = 'float64'):
         """
         Constructor for a Tensor dataset
         @param features: Tensor containing features sets
@@ -21,10 +25,19 @@ class LabeledDataset(TDataset):
         @type labels: torch.Tensor
         @param transform: Apply pre-processing transform to input data
         @type transform: Callable transform
+        @param dtype: Type of float used in computation
+        @type dtype: str
         """
+        # Make sure that the tensor are using the correct types
+        default_type = super()._torch_type()
+        if features.dtype != default_type:
+            features.to(default_type)
+        if labels.dtype != default_type:
+            labels.to(default_type)
+
         self.features = features
         self.labels = labels
-        super(LabeledDataset, self).__init__(transform)
+        super(LabeledDataset, self).__init__(transform, dtype)
 
     @classmethod
     def from_numpy(cls, features: np.array, labels: np.array, transform: Optional[Callable] = None) -> Self:
@@ -56,7 +69,7 @@ class LabeledDataset(TDataset):
         """
         assert len(features) > 0, 'Cannot create a features tensor dataset from undefined Python list'
         assert len(labels) > 0, 'Cannot create a label tensor dataset from undefined Python list'
-        return cls(torch.Tensor(features), torch.Tensor(labels), transform)
+        return cls(torch.tensor(features), torch.Tensor(labels), transform)
 
     @classmethod
     def from_df(cls, df_train: pd.DataFrame, df_eval: pd.DataFrame, transform: Optional[Callable] = None) -> Self:
@@ -130,5 +143,6 @@ class LabeledDataset(TDataset):
         return nn_features, self.labels[idx]
 
     def __repr__(self):
-        return f'Features:\n{str(self.features.numpy())}\nLabels:\n{str(self.labels.numpy())}\nTransform:{self.transform}'
+        return f'Features:\n{str(self.features.numpy())}\nLabels:\n{str(self.labels.numpy())}' \
+               f'\nTransform:{self.transform}\nDtype: {self.dtype}'
 

@@ -5,14 +5,36 @@ import torch
 from torch.utils.data import Dataset
 from typing import Optional, Callable, AnyStr, List
 import pandas as pd
+import numpy as np
 from python.dataset.datasetexception import DatasetException
 import logging
 logger = logging.getLogger('dataset.TDataset')
 
 
 class TDataset(Dataset):
-    def __init__(self, transform: Optional[Callable] = None):
+    supported_dtypes = ['float64', 'float32', 'float16', 'double']
+
+    def __init__(self, transform: Optional[Callable] = None, dtype: AnyStr = 'float64'):
         self.transform = transform
+        # Make sure the type is supported
+        if dtype not in TDataset.supported_dtypes:
+            raise DatasetException(f'Data type {dtype} is not supported')
+        self.dtype = dtype
+
+    def _torch_type(self) -> torch:
+        match self.dtype:
+            case 'float64': return torch.float64
+            case 'float32': return torch.float32
+            case 'float16': return torch.float16
+            case 'double': return torch.double
+            case _: return torch.float32
+
+    def numpy_type(self) -> np:
+        match self.dtype:
+            case 'float64': return np.float64
+            case 'float32': return np.float32
+            case 'float16': return np.float16
+            case _: return np.float32
 
     @staticmethod
     def data_frame(filename: AnyStr) -> pd.DataFrame:
@@ -20,9 +42,9 @@ class TDataset(Dataset):
             ext = TDataset._extract_extension(filename)
             match ext:
                 case '.csv':
-                    df = pd.read_csv(filename)
+                    df = pd.read_csv(filename, dtype=float)
                 case '.json':
-                    df = pd.read_json(filename)
+                    df = pd.read_json(filename, dtype=float)
                 case _:
                     raise DatasetException(f'Extension {ext} is not supported!')
             return df

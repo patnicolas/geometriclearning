@@ -16,7 +16,7 @@ class TLoader(object):
         @param split_ratio: Training-validation random split ratio
         @type split_ratio: float
         """
-        assert batch_size >= 4, f'Batch size {batch_size} should be >= 4'
+        assert batch_size >= 2, f'Batch size {batch_size} should be >= 4'
         assert 0.5 <= split_ratio <= 0.95, f'Training-validation split ratio {split_ratio} should be [0.5, 0.95]'
 
         self.batch_size = batch_size

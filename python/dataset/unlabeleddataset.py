@@ -18,7 +18,7 @@ All exceptions thrown by the various methods are consolidated into DatasetExcept
 
 
 class UnlabeledDataset(TDataset):
-    def __init__(self, data: torch.Tensor, transform: Optional[Callable] = None):
+    def __init__(self, data: torch.Tensor, transform: Optional[Callable] = None, dtype: AnyStr='float64'):
         """
         Constructor for a Tensor dataset
         @param data: Tensor containing data
@@ -26,8 +26,12 @@ class UnlabeledDataset(TDataset):
         @param transform: Apply pre-processing transform to input data
         @type transform: Callable transform
         """
+        # Make sure that the tensor are using the correct types
+        default_type = super()._torch_type()
+        if data.dtype != default_type:
+            data.to(default_type)
         self.data = data
-        super(UnlabeledDataset, self).__init__(transform)
+        super(UnlabeledDataset, self).__init__(transform, dtype)
 
     @classmethod
     def from_numpy(cls, data: np.array, transform: Optional[Callable] = None) -> Self:
