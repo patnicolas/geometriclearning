@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 import torch
 from torch.utils.data import Dataset
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from typing import Optional, Callable, AnyStr, List
 import pandas as pd
 import numpy as np
@@ -13,7 +13,9 @@ logger = logging.getLogger('dataset.TDataset')
 
 
 def std_scaler(x: torch.Tensor) -> torch.Tensor:
-    return StandardScaler().fit_transform(x)
+    y = MinMaxScaler().fit_transform(x)
+    z = torch.tensor(y, dtype=x.dtype)
+    return z
 
 
 class TDataset(Dataset):
@@ -33,13 +35,16 @@ class TDataset(Dataset):
             case 'float32': return torch.float32
             case 'float16': return torch.float16
             case 'double': return torch.double
+            case 'long': return torch.long
             case _: return torch.float32
 
-    def numpy_type(self) -> np:
-        match self.dtype:
+    @staticmethod
+    def numpy_type(dtype: AnyStr) -> np:
+        match dtype:
             case 'float64': return np.float64
             case 'float32': return np.float32
             case 'float16': return np.float16
+            case 'double': return np.float64
             case _: return np.float32
 
     @staticmethod

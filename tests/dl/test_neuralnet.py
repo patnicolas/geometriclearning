@@ -48,16 +48,16 @@ class NeuralNetTest(unittest.TestCase):
 
         input_block = FFNNBlock.build('input', 5, 4, nn.ReLU())
         hidden_block = FFNNBlock.build('hidden', 4, 4, nn.ReLU())
-        output_block = FFNNBlock.build('output', 4, 1)
+        output_block = FFNNBlock.build('output', 4, 1, nn.Sigmoid())
         binary_classifier = FFNNModel('test1', [input_block, hidden_block, output_block])
         print(repr(binary_classifier))
         hyper_parameters = HyperParams(
             lr=0.001,
             momentum=0.95,
-            epochs=12,
+            epochs=36,
             optim_label='adam',
             batch_size=8,
-            loss_function=nn.CrossEntropyLoss(),
+            loss_function=nn.BCELoss(),
             drop_out=0.2,
             train_eval_ratio=0.9)
         patience = 2

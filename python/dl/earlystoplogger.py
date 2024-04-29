@@ -40,7 +40,7 @@ class EarlyStopLogger(object):
             @type early_stopping_enabled: bool
         """
         self.patience = patience
-        self.metrics = {}
+        self.metrics: Dict[AnyStr, List[float]] = {}
         self.min_loss = -1.0
         self.min_diff_loss = min_diff_loss
         self.early_stopping_enabled = early_stopping_enabled
@@ -49,7 +49,7 @@ class EarlyStopLogger(object):
     def build(cls, patience: int) -> Self:
         return cls(patience, EarlyStopLogger.default_min_loss, True)
 
-    def __call__(self, epoch: int, train_loss: float, eval_loss: float, metrics: Dict[AnyStr, float] = None) -> bool:
+    def __call__(self, epoch: int, train_loss: float, eval_metrics: Dict[AnyStr, float] = None) -> bool:
         """
             Implement the early stop and logging of training, evaluation loss. It is assumed that at least one
             metric is provided
@@ -60,30 +60,40 @@ class EarlyStopLogger(object):
             @param eval_loss: Current evaluation loss
             @type eval_loss: float
             @param metrics: List of pair metrics to be recorded (i.e. accuracy, precision,....)
-            @type metrics: List[float]
+            @type metrics: Dictionary
             @return: True if early stopping, False otherwise
+            @rtype: Boolean
         """
         # Step 1. Apply early stopping criteria
-        is_early_stopping = self.__evaluate(eval_loss)
+        is_early_stopping = self.__evaluate(eval_metrics[EarlyStopLogger.eval_loss_label])
         # Step 2: Record training, evaluation losses and metric
-        self.__record(epoch, train_loss, eval_loss, metrics)
+        self.__record(epoch, train_loss, eval_metrics)
         logger.info(f'Is early stopping {is_early_stopping}')
         return is_early_stopping
 
-    def summary(self) -> None:
+    def update_metrics(self, metrics: Dict[AnyStr, float]) -> NoReturn:
+        """
+        Update the quality metrics with new pair key-values.
+        @param metrics: Set of metrics
+        @type metrics: Dictionary
+        """
+        for key, value in metrics.items():
+            if key in self.metrics:
+                values = self.metrics[key]
+                values.append(value)
+                self.metrics[key] = values
+            else:
+                self.metrics[key] = [value]
+
+    def summary(self) -> NoReturn:
+        """
+        Plots for the various metrics
+        """
         parameters = [PlotterParameters(0, x_label='x', y_label='y', title=k, fig_size=(12, 8))
                       for k, v in self.metrics.items()]
         Plotter.multi_plot(self.metrics, parameters)
 
     """ -----------------------  Private helper methods ----------------------  """
-
-    def __update_dict(self, value: float, label: AnyStr) -> NoReturn:
-        if label in self.metrics:
-            lst = self.metrics[label]
-            lst.append(value)
-        else:
-            lst = [value]
-        self.metrics[label] = lst
 
     def __evaluate(self, eval_loss: float) -> bool:
         is_early_stopping = False
@@ -99,17 +109,12 @@ class EarlyStopLogger(object):
                 is_early_stopping = True
         return is_early_stopping
 
-    def __record(self, epoch: int, train_loss: float, eval_loss: float, metrics: Dict[AnyStr, float]):
+    def __record(self, epoch: int, train_loss: float, metrics: Dict[AnyStr, float]):
         metric_str = ', '.join([f'{k}: {v}' for k, v in metrics.items()])
-        status_msg = f'Epoch: {epoch}, Train loss: {train_loss}, Eval loss: {eval_loss}{metric_str}'
+        status_msg = f'Epoch: {epoch}, Train loss: {train_loss}, Evaluation metric: {metric_str}'
         logger.info(status_msg)
-
-        self.__update_dict(train_loss, EarlyStopLogger.train_loss_label)
-        self.__update_dict(eval_loss, EarlyStopLogger.eval_loss_label)
-
-        # If metric is valid, record it
-        for key, value in metrics.items():
-            self.__update_dict(value, key)
+        self.update_metrics({EarlyStopLogger.train_loss_label: train_loss})
+        self.update_metrics(metrics)
 
 
 

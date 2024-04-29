@@ -19,6 +19,20 @@ class EarlyStopLoggerTest(unittest.TestCase):
                 metrics[label] = [loss]
         print(str(metrics))
 
+    def test_update_metrics(self):
+        patience = 2
+        min_diff_loss = -0.001
+        early_stopping_enabled = True
+        early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
+
+        new_metrics = {'Accuracy': 0.5, 'F1': 0.6}
+        early_stop_logger.update_metrics(new_metrics)
+        new_metrics = {'Accuracy': 0.67, 'F1': 0.62}
+        early_stop_logger.update_metrics(new_metrics)
+        new_metrics = {'Accuracy': 0.69, 'F1': 0.67}
+        early_stop_logger.update_metrics(new_metrics)
+        early_stop_logger.summary()
+
     def test_summary(self):
         import math
         patience = 2

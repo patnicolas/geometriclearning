@@ -154,7 +154,6 @@ class LabeledDataset(TDataset):
         """
         if idx >= len(self.features):
             raise IndexError(f'getitem index {idx} should be < {len(self.features)}')
-
         return self.features[idx], self.labels[idx]
 
     def __repr__(self):

@@ -4,7 +4,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 import torch
 from torch.utils.data import Dataset, DataLoader
 from abc import abstractmethod
-from typing import AnyStr
+from typing import AnyStr, Dict
 from python.dl.model.neuralmodel import NeuralModel
 from python.dl.dlexception import DLException
 from python.dl.hyperparams import HyperParams
@@ -75,10 +75,10 @@ class NeuralNet(object):
             # Set training mode and execute training
             train_loss = self.__train(optimizer, epoch, train_loader, self.model)
             # constants.log_info(f'Epoch # {epoch} training loss {train_loss}')
-            # Set evaluation mode and execute evaluation
-            eval_loss, ave_accuracy = self.__eval(epoch, test_loader)
+            # Set mode and execute evaluation
+            eval_metrics = self.__eval(epoch, test_loader)
             # constants.log_info(f'Epoch # {epoch} eval loss {eval_loss}')
-            self.early_stop_logger(epoch, train_loss, eval_loss, ave_accuracy)
+            self.early_stop_logger(epoch, train_loss, eval_metrics)
         # Generate summary
         if self.plot_parameters is not None:
             self.early_stop_logger.summary()
@@ -124,13 +124,14 @@ class NeuralNet(object):
         # Initialize the gradient for the optimizer
         loss_function = self.hyper_params.loss_function
 
-        for features, labels in train_loader:
+        for features, labels in tqdm(train_loader):
             try:
                 # Reset the gradient to zero
                 for params in model.parameters():
                     params.grad = None
 
                 predicted = model(features)  # Call forward - prediction
+                labels = labels.unsqueeze(dim=-1)
                 raw_loss = loss_function(predicted, labels)
                 # Set back propagation
                 raw_loss.backward(retain_graph=True)
@@ -140,11 +141,13 @@ class NeuralNet(object):
                 raise DLException(str(e))
             except AttributeError as e:
                 raise DLException(str(e))
+            except ValueError as e:
+                raise DLException(f'{str(e)}, features: {str(features)}')
             except Exception as e:
                 raise DLException(str(e))
         return total_loss / len(train_loader)
 
-    def __eval(self, epoch: int, test_loader: DataLoader) -> (float, float):
+    def __eval(self, epoch: int, test_loader: DataLoader) -> Dict[AnyStr, float]:
         total_loss = 0
         loss_func = self.hyper_params.loss_function
         self.model.eval()
@@ -156,18 +159,20 @@ class NeuralNet(object):
                     predicted = self.model(features)
                     is_last_epoch = epoch == self.hyper_params.epochs-1
                     self.accuracy.from_tensor(predicted, labels)
+                    labels = labels.unsqueeze(dim=-1)
                     loss = loss_func(predicted, labels)
                     total_loss += loss.data
                 except RuntimeError as e:
                     raise DLException(str(e))
                 except AttributeError as e:
                     raise DLException(str(e))
+                except ValueError as e:
+                    raise DLException(str(e))
                 except Exception as e:
                     raise DLException(str(e))
 
-        average_loss = total_loss / len(test_loader)
-        average_accuracy = self.accuracy()
-        return average_loss, average_accuracy
+        eval_loss = total_loss / len(test_loader)
+        return {EarlyStopLogger.eval_loss_label: eval_loss, EarlyStopLogger.accuracy_label: self.accuracy()}
 
     def __repr__(self) -> str:
         return repr(self.hyper_params)
