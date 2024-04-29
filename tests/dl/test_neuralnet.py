@@ -9,6 +9,7 @@ from python.dl.neuralnet import NeuralNet
 from python.dataset.labeleddataset import LabeledDataset
 from python.dataset.unlabeleddataset import UnlabeledDataset
 from python.dataset.labeledloader import LabeledLoader
+from python.dataset.tdataset import std_scaler
 from torch import nn
 import numpy as np
 
@@ -68,7 +69,7 @@ class NeuralNetTest(unittest.TestCase):
         network = NeuralNet(binary_classifier, hyper_parameters, early_stop_logger, parameters)
         filename = '/users/patricknicolas/dev/geometriclearning/data/wages_cleaned.csv'
         df = LabeledDataset.data_frame(filename)
-        df = df[['Reputation', 'Age', 'Caps', 'Apps', 'Salary']].astype(float)
+        df = df[['Reputation', 'Age', 'Caps', 'Apps', 'Salary']]
         print(df)
         average_salary = df['Salary'].mean()
         df['Top_player'] = np.where(df['Salary'] > average_salary, 1.0, 0.0)
@@ -79,8 +80,8 @@ class NeuralNetTest(unittest.TestCase):
         train_loader, eval_loader = dataset_loader.from_dataframes(
             df[['Reputation', 'Age', 'Caps', 'Apps', 'Salary']],
             df['Top_player'],
-            torchvision.transforms.Normalize(0.0, 1.0))
-
+            std_scaler,
+            'float32')
         network(train_loader, eval_loader)
 
 

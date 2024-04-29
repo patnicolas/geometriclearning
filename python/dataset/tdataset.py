@@ -3,12 +3,17 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 import torch
 from torch.utils.data import Dataset
+from sklearn.preprocessing import StandardScaler
 from typing import Optional, Callable, AnyStr, List
 import pandas as pd
 import numpy as np
 from python.dataset.datasetexception import DatasetException
 import logging
 logger = logging.getLogger('dataset.TDataset')
+
+
+def std_scaler(x: torch.Tensor) -> torch.Tensor:
+    return StandardScaler().fit_transform(x)
 
 
 class TDataset(Dataset):
@@ -21,8 +26,9 @@ class TDataset(Dataset):
             raise DatasetException(f'Data type {dtype} is not supported')
         self.dtype = dtype
 
-    def _torch_type(self) -> torch:
-        match self.dtype:
+    @staticmethod
+    def _torch_type(dtype: AnyStr) -> torch:
+        match dtype:
             case 'float64': return torch.float64
             case 'float32': return torch.float32
             case 'float16': return torch.float16

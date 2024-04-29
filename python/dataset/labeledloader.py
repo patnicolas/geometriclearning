@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 import torch
 import pandas as pd
-import typing
+from typing import Callable, Optional, AnyStr, Tuple
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 from torchvision.datasets import MNIST
@@ -48,7 +48,7 @@ class LabeledLoader(TLoader):
         mnist_dataset = MNIST('../data/', download=True, transform=transform)
         return self._generate_loader(mnist_dataset)
 
-    def from_tensor(self, features: torch.Tensor, labels: torch.Tensor, norm_factors: typing.Tuple[float, float]) -> (
+    def from_tensor(self, features: torch.Tensor, labels: torch.Tensor, norm_factors: Tuple[float, float]) -> (
             DataLoader, DataLoader):
         """
             Generate Training and evaluation data loader from a given input_tensor
@@ -71,7 +71,8 @@ class LabeledLoader(TLoader):
     def from_dataframes(self,
                         features_df: pd.DataFrame,
                         labels_df: pd.DataFrame,
-                        transform: typing.Optional[typing.Callable] = None) -> (DataLoader, DataLoader):
+                        transform: Optional[Callable] = None,
+                        dtype: AnyStr = 'float32') -> (DataLoader, DataLoader):
         """
         Generate data loader from data frames
         @param features_df: Features data frame
@@ -80,16 +81,19 @@ class LabeledLoader(TLoader):
         @type labels_df: pd.DataFrame
         @param transform: Optional pre-processing transform
         @type transform: Callable
+        @param dtype: Type used for computation
+        @type dtype: str
         @return: Pair Training data loader, Evaluation data loader
         @rtype: Tuple[DataLoader, DataLoader]
         """
-        dataset = LabeledDataset.from_df(features_df, labels_df, transform)
+        dataset = LabeledDataset.from_df(features_df, labels_df, transform, dtype)
         return self._generate_loader(dataset)
 
     def from_tensor_transform(self,
                               features: torch.Tensor,
                               labels: torch.Tensor,
-                              transform: typing.Optional[typing.Callable] = None) -> (DataLoader, DataLoader):
+                              transform: Optional[Callable] = None,
+                              dtype: AnyStr = 'float64') -> (DataLoader, DataLoader):
         """
         Generate Training and evaluation data loader from a given input_tensor
         @param features: Features input_tensor
@@ -98,8 +102,10 @@ class LabeledLoader(TLoader):
         @type labels: Torch tensor
         @param transform: Optional pre-processing transform
         @type transform: Callable
+        @param dtype: Type used for computation
+        @type dtype: str
         @return: Pair of Data loader for training data and validation data
         @rtype: Tuple of data loader
         """
-        dataset = LabeledDataset(features, labels, transform)
+        dataset = LabeledDataset(features, labels, transform, dtype)
         return self._generate_loader(dataset)

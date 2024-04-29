@@ -1,6 +1,7 @@
 import torch
 from torch.utils.data import DataLoader, Dataset, random_split
 from typing import AnyStr
+import numpy as np
 
 
 class TLoader(object):
@@ -35,7 +36,6 @@ class TLoader(object):
 
     def __repr__(self) -> AnyStr:
         return f'Batch size: {self.batch_size}, Num samples: {self.num_samples}, Train-eval split: {self.split_ratio}'
-
 
     def _generate_loader(self, dataset: Dataset):
         _dataset = torch.utils.data.Subset(dataset, np.arange(self.num_samples)) if self.num_samples > 0 \

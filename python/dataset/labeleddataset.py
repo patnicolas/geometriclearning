@@ -16,7 +16,7 @@ class LabeledDataset(TDataset):
                  features: torch.Tensor,
                  labels: torch.Tensor,
                  transform: Optional[Callable] = None,
-                 dtype: AnyStr = 'float64'):
+                 dtype: AnyStr = 'float32'):
         """
         Constructor for a Tensor dataset
         @param features: Tensor containing features sets
@@ -29,18 +29,18 @@ class LabeledDataset(TDataset):
         @type dtype: str
         """
         # Make sure that the tensor are using the correct types
-        default_type = super()._torch_type()
-        if features.dtype != default_type:
-            features.to(default_type)
-        if labels.dtype != default_type:
-            labels.to(default_type)
+        features, labels = LabeledDataset.__update_dtype(features, labels, dtype)
 
-        self.features = features
+        # Apply transform to the training and evaluation set if needed.
+        self.features = transform(features) if transform else features
         self.labels = labels
         super(LabeledDataset, self).__init__(transform, dtype)
 
     @classmethod
-    def from_numpy(cls, features: np.array, labels: np.array, transform: Optional[Callable] = None) -> Self:
+    def from_numpy(cls,
+                   features: np.array,
+                   labels: np.array,
+                   transform: Optional[Callable] = None, dtype: AnyStr = 'float64') -> Self:
         """
         Create a Tensor features and labels dataset from a Numpy array
         @param features: Feature data as a Numpy array
@@ -49,13 +49,19 @@ class LabeledDataset(TDataset):
         @type labels: A Numpy array
         @param transform: Pre-processing data transform
         @type transform: Optional Callable
+        @param dtype: Type used for computation
+        @type dtype: str
         @return: Instance of tensor dataset
         @rtype: LabeledDataset
         """
-        return cls(torch.from_numpy(features), torch.from_numpy(labels), transform)
+        return cls(torch.from_numpy(features), torch.from_numpy(labels), transform, dtype)
 
     @classmethod
-    def from_list(cls, features: List[List[float]], labels: List[float], transform: Optional[Callable] = None) -> Self:
+    def from_list(cls,
+                  features: List[List[float]],
+                  labels: List[float],
+                  transform: Optional[Callable] = None,
+                  dtype: AnyStr = 'float64') -> Self:
         """
         Create a Tensor dataset from a Python list
         @param features: Feature values as list of floating point values
@@ -64,15 +70,21 @@ class LabeledDataset(TDataset):
         @type labels: List of Array of floats
         @param transform: Pre-processing data transform
         @type transform:  Instance of Tensor
+        @param dtype: Type used for computation
+        @type dtype: str
         @return: Instance of tensor dataset
         @rtype: LabeledDataset
         """
         assert len(features) > 0, 'Cannot create a features tensor dataset from undefined Python list'
         assert len(labels) > 0, 'Cannot create a label tensor dataset from undefined Python list'
-        return cls(torch.tensor(features), torch.Tensor(labels), transform)
+        return cls(torch.tensor(features), torch.Tensor(labels), transform, dtype)
 
     @classmethod
-    def from_df(cls, df_train: pd.DataFrame, df_eval: pd.DataFrame, transform: Optional[Callable] = None) -> Self:
+    def from_df(cls,
+                df_train: pd.DataFrame,
+                df_eval: pd.DataFrame,
+                transform: Optional[Callable] = None,
+                dtype: AnyStr = 'float64') -> Self:
         """
         Create a Tensor dataset from a Pandas data frame
         @param df_train: Pandas data frame for training data
@@ -81,19 +93,22 @@ class LabeledDataset(TDataset):
         @type df_eval: pd.DataFrame
         @param transform: Optional pre-processing transform
         @type transform: Optional[Callable]
+        @param dtype: Type used for computation
+        @type dtype: str
         @return: Instance of labeled dataset
         @rtype: LabeledDataset
         """
         np_train: np.array = df_train.to_numpy()
         np_eval: np.array = df_eval.to_numpy()
-        return cls(torch.from_numpy(np_train), torch.from_numpy(np_eval), transform)
+        return cls(torch.from_numpy(np_train), torch.from_numpy(np_eval), transform, dtype)
 
     @classmethod
     def from_file(cls,
                   filename: AnyStr,
                   features: List[AnyStr],
                   label: AnyStr,
-                  transform: Optional[Callable] = None) -> Self:
+                  transform: Optional[Callable] = None,
+                  dtype: AnyStr = 'float64') -> Self:
         """
         Generate a Tensor data set from a JSON or CSV file..
         @param filename: Name of the file (relative or absolute)
@@ -104,6 +119,8 @@ class LabeledDataset(TDataset):
         @type label: List[str]
         @param transform: Callable pre-processing data transformation on the column values
         @type transform: Callable
+        @param dtype: Type used for computation
+        @type dtype: str
         @return: Labeled tensor dataset
         @rtype: LabeledDataset
         """
@@ -114,7 +131,7 @@ class LabeledDataset(TDataset):
             if sub_set.intersection(set(df.columns)) != sub_set:
                 raise DatasetException(f'One of the column {str(features)} is not supported!')
 
-            return LabeledDataset.from_df(df[features], df[label], transform)
+            return LabeledDataset.from_df(df[features], df[label], transform, dtype)
         except Exception as e:
             logger.error(f'Unknown error {str(e)}')
             raise DatasetException(f'Unknown error {str(e)}')
@@ -138,11 +155,21 @@ class LabeledDataset(TDataset):
         if idx >= len(self.features):
             raise IndexError(f'getitem index {idx} should be < {len(self.features)}')
 
-        features_pt = self.features[idx]
-        nn_features = self.transform(features_pt) if self.transform else features_pt
-        return nn_features, self.labels[idx]
+        return self.features[idx], self.labels[idx]
 
     def __repr__(self):
         return f'Features:\n{str(self.features.numpy())}\nLabels:\n{str(self.labels.numpy())}' \
                f'\nTransform:{self.transform}\nDtype: {self.dtype}'
 
+    """ -------------------------  Private Helper Methods ------------------------ """
+    @staticmethod
+    def __update_dtype(
+            features: torch.Tensor,
+            labels: torch.Tensor,
+            dtype: AnyStr) -> (torch.Tensor, torch.Tensor):
+        default_type = TDataset._torch_type(dtype)
+        if features.dtype != default_type:
+            features = features.to(default_type)
+        if labels.dtype != default_type:
+            labels = labels.to(default_type)
+        return features, labels
