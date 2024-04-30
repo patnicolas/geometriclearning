@@ -1,8 +1,9 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
-from typing import Optional, AnyStr, Self, List, Dict, Tuple, NoReturn
+from typing import Optional, AnyStr, Self, List, Dict, NoReturn
 from python.util.plotter import Plotter, PlotterParameters
+from python.metric.metric import Metric
 import logging
 logger = logging.getLogger('dl.EarlyStopLogger')
 
@@ -18,17 +19,10 @@ logger = logging.getLogger('dl.EarlyStopLogger')
 
 
 class EarlyStopLogger(object):
-    default_min_loss = -1e-5
-    train_loss_label = 'Training loss'
-    eval_loss_label = "Evaluation loss"
-    accuracy_label = "Accuracy"
-    f1_label = "F1"
-    precision_label = "Precision"
-    recall_label = "Recall"
 
     def __init__(self,
                  patience: int,
-                 min_diff_loss: Optional[float] = default_min_loss,
+                 min_diff_loss: Optional[float] = Metric.default_min_loss,
                  early_stopping_enabled: Optional[bool] = True):
         """
             Constructor
@@ -65,7 +59,7 @@ class EarlyStopLogger(object):
             @rtype: Boolean
         """
         # Step 1. Apply early stopping criteria
-        is_early_stopping = self.__evaluate(eval_metrics[EarlyStopLogger.eval_loss_label])
+        is_early_stopping = self.__evaluate(eval_metrics[Metric.eval_loss_label])
         # Step 2: Record training, evaluation losses and metric
         self.__record(epoch, train_loss, eval_metrics)
         logger.info(f'Is early stopping {is_early_stopping}')
@@ -104,7 +98,6 @@ class EarlyStopLogger(object):
                 self.min_loss = eval_loss
             else:
                 self.patience -= 1
-
             if self.patience < 0:
                 is_early_stopping = True
         return is_early_stopping
@@ -113,7 +106,7 @@ class EarlyStopLogger(object):
         metric_str = ', '.join([f'{k}: {v}' for k, v in metrics.items()])
         status_msg = f'Epoch: {epoch}, Train loss: {train_loss}, Evaluation metric: {metric_str}'
         logger.info(status_msg)
-        self.update_metrics({EarlyStopLogger.train_loss_label: train_loss})
+        self.update_metrics({Metric.train_loss_label: train_loss})
         self.update_metrics(metrics)
 
 

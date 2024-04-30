@@ -29,11 +29,22 @@ class FFNNModel(NeuralModel):
     def invert(self) -> Self:
         """
         Generate the inverted neural layout for this feed forward neural network
-        @return: This feed-forwqrd neural network with an inverted layout
+        @return: This feed-forward neural network with an inverted layout
         @rtype: FFNNModel
         """
         neural_blocks = [block.invert() for block in self.neural_blocks[::-1]]
         return FFNNModel(f'_{self.model_id}', neural_blocks)
+
+    """
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        from torch import nn
+        hidden = nn.Linear(5, 4, False)
+        x: torch.Tensor = torch.relu(hidden(x))
+        _output: torch.Tensor = nn.Linear(4, 1, False)
+        x = _output(x)
+        x = torch.sigmoid(x)
+        return x
+    """
 
     def get_in_features(self) -> int:
         return self.in_features

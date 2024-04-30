@@ -9,6 +9,13 @@ Base class for all metrics
 
 
 class Metric(object):
+    default_min_loss = -1e-5
+    train_loss_label = 'Training loss'
+    eval_loss_label = "Evaluation loss"
+    accuracy_label = "Accuracy"
+    f1_label = "F1"
+    precision_label = "Precision"
+    recall_label = "Recall"
     def __init__(self):
         self._count = 0
 

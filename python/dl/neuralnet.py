@@ -10,7 +10,7 @@ from python.dl.dlexception import DLException
 from python.dl.hyperparams import HyperParams
 from python.dl.earlystoplogger import EarlyStopLogger
 from python.util.plotter import PlotterParameters
-from python.metric.accuracymetric import AccuracyMetric
+from python.metric.metric import Metric
 from tqdm import tqdm
 from typing import List, Optional
 import logging
@@ -33,6 +33,7 @@ class NeuralNet(object):
                  model: NeuralModel,
                  hyper_params: HyperParams,
                  early_stop_logger: EarlyStopLogger,
+                 metrics: Dict[AnyStr, Metric],
                  plot_parameters: Optional[List[PlotterParameters]]):
         """
         Constructor for the training and execution of any neural network.
@@ -47,7 +48,8 @@ class NeuralNet(object):
         self.model = model
         self.early_stop_logger = early_stop_logger
         self.plot_parameters = plot_parameters
-        self.accuracy = AccuracyMetric(0.001)
+        self.metrics: Dict[AnyStr, Metric] = metrics
+        # self.accuracy = AccuracyMetric(0.001)
 
     @abstractmethod
     def model_label(self) -> AnyStr:
@@ -120,12 +122,12 @@ class NeuralNet(object):
                 train_loader: DataLoader,
                 model: torch.nn.Module) -> float:
         total_loss = 0.0
-        model.train()
         # Initialize the gradient for the optimizer
         loss_function = self.hyper_params.loss_function
 
         for features, labels in tqdm(train_loader):
             try:
+                model.train()
                 # Reset the gradient to zero
                 for params in model.parameters():
                     params.grad = None
@@ -150,15 +152,19 @@ class NeuralNet(object):
     def __eval(self, epoch: int, test_loader: DataLoader) -> Dict[AnyStr, float]:
         total_loss = 0
         loss_func = self.hyper_params.loss_function
-        self.model.eval()
+        metric_collector = {}
 
         # No need for computing gradient for evaluation (NO back-propagation)
         with torch.no_grad():
             for features, labels in tqdm(test_loader):
                 try:
+                    self.model.eval()
                     predicted = self.model(features)
                     is_last_epoch = epoch == self.hyper_params.epochs-1
-                    self.accuracy.from_tensor(predicted, labels)
+                    for key, metric in self.metrics.items():
+                        value = metric(predicted, labels)
+                        metric_collector[key] = value
+
                     labels = labels.unsqueeze(dim=-1)
                     loss = loss_func(predicted, labels)
                     total_loss += loss.data
@@ -172,7 +178,8 @@ class NeuralNet(object):
                     raise DLException(str(e))
 
         eval_loss = total_loss / len(test_loader)
-        return {EarlyStopLogger.eval_loss_label: eval_loss, EarlyStopLogger.accuracy_label: self.accuracy()}
+        metric_collector[Metric.eval_loss_label] = eval_loss
+        return metric_collector
 
     def __repr__(self) -> str:
         return repr(self.hyper_params)

@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger('dataset.TDataset')
 
 
-def std_scaler(x: torch.Tensor) -> torch.Tensor:
+def min_max_scaler(x: torch.Tensor) -> torch.Tensor:
     y = MinMaxScaler().fit_transform(x)
     z = torch.tensor(y, dtype=x.dtype)
     return z
