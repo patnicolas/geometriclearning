@@ -16,7 +16,7 @@ class LabeledDataset(TDataset):
                  features: torch.Tensor,
                  labels: torch.Tensor,
                  transform: Optional[Callable] = None,
-                 dtype: AnyStr = 'float32'):
+                 dtype: AnyStr = TDataset.default_float_type):
         """
         Constructor for a Tensor dataset
         @param features: Tensor containing features sets
@@ -40,7 +40,8 @@ class LabeledDataset(TDataset):
     def from_numpy(cls,
                    features: np.array,
                    labels: np.array,
-                   transform: Optional[Callable] = None, dtype: AnyStr = 'float64') -> Self:
+                   transform: Optional[Callable] = None,
+                   dtype: AnyStr = TDataset.default_float_type) -> Self:
         """
         Create a Tensor features and labels dataset from a Numpy array
         @param features: Feature data as a Numpy array
@@ -61,7 +62,7 @@ class LabeledDataset(TDataset):
                   features: List[List[float]],
                   labels: List[float],
                   transform: Optional[Callable] = None,
-                  dtype: AnyStr = 'float64') -> Self:
+                  dtype: AnyStr = TDataset.default_float_type) -> Self:
         """
         Create a Tensor dataset from a Python list
         @param features: Feature values as list of floating point values
@@ -84,7 +85,7 @@ class LabeledDataset(TDataset):
                 df_train: pd.DataFrame,
                 df_eval: pd.DataFrame,
                 transform: Optional[Callable] = None,
-                dtype: AnyStr = 'float64') -> Self:
+                dtype: AnyStr = TDataset.default_float_type) -> Self:
         """
         Create a Tensor dataset from a Pandas data frame
         @param df_train: Pandas data frame for training data

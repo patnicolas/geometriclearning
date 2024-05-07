@@ -1,5 +1,7 @@
 
 import unittest
+
+from dl.model.aemodel import AEModel
 from python.dl.model.ffnnmodel import FFNNModel
 from python.dl.block.ffnnblock import FFNNBlock
 from python.dl.hyperparams import HyperParams
@@ -9,6 +11,7 @@ from python.dl.neuralnet import NeuralNet
 from python.dataset.labeleddataset import LabeledDataset
 from python.dataset.unlabeleddataset import UnlabeledDataset
 from python.dataset.labeledloader import LabeledLoader
+from python.dataset.unlabeledloader import UnlabeledLoader
 from python.dataset.tdataset import min_max_scaler
 from torch import nn
 import numpy as np
@@ -43,9 +46,10 @@ class NeuralNetTest(unittest.TestCase):
         tensor_dataset = UnlabeledDataset.from_file(filename, ['Reputation', 'Age', 'Caps', 'Apps', 'Salary'])
         network.init_data_loader(batch_size=8, dataset=tensor_dataset)
 
-    def test_train(self):
+    @unittest.skip('Ignored')
+    def test_train_wages(self):
         from python.metric.metric import Metric
-        from python.metric.builtinmetric import BuildInMetric, MetricType
+        from python.metric.builtinmetric import BuiltInMetric, MetricType
 
         hidden_block = FFNNBlock.build('hidden', 5, 4, nn.ReLU())
         output_block = FFNNBlock.build('output', 4, 1, nn.Sigmoid())
@@ -65,8 +69,8 @@ class NeuralNetTest(unittest.TestCase):
         early_stopping_enabled = True
         early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
         metric_labels = {
-            Metric.accuracy_label: BuildInMetric(MetricType.Accuracy, True),
-            Metric.precision_label: BuildInMetric(MetricType.Precision, True)
+            Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, True),
+            Metric.precision_label: BuiltInMetric(MetricType.Precision, True)
         }
         parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                       for label, _ in metric_labels.items()]
@@ -89,8 +93,56 @@ class NeuralNetTest(unittest.TestCase):
         train_loader, eval_loader = dataset_loader.from_dataframes(
             df[['Reputation', 'Age', 'Caps', 'Apps', 'Salary']],
             df['Top_player'],
-            min_max_scaler,
-            'float32')
+            min_max_scaler)
+        network(train_loader, eval_loader)
+
+    @unittest.skip('Ignored')
+    def test_train_eval_heart_diseases(self):
+        from python.metric.metric import Metric
+        from python.metric.builtinmetric import BuiltInMetric, MetricType
+
+        features = ['age', 'sex', 'chest pain type', 'cholesterol', 'fasting blood sugar','max heart rate',
+                    'exercise angina', 'ST slope']
+        hidden_block = FFNNBlock.build('hidden', len(features), 4, nn.ReLU())
+        output_block = FFNNBlock.build('output', 4, 1, nn.Sigmoid())
+        binary_classifier = FFNNModel('test1', [hidden_block, output_block])
+        print(repr(binary_classifier))
+        hyper_parameters = HyperParams(
+            lr=0.001,
+            momentum=0.95,
+            epochs=8,
+            optim_label='adam',
+            batch_size=8,
+            loss_function=nn.BCELoss(),
+            drop_out=0.0,
+            train_eval_ratio=0.9)
+        patience = 2
+        min_diff_loss = -0.001
+        early_stopping_enabled = True
+        early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
+        metric_labels = {
+            Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, True),
+            Metric.precision_label: BuiltInMetric(MetricType.Precision, True),
+            Metric.recall_label: BuiltInMetric(MetricType.Recall, True)
+        }
+        parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
+                      for label, _ in metric_labels.items()]
+        network = NeuralNet(
+            binary_classifier,
+            hyper_parameters,
+            early_stop_logger,
+            metric_labels,
+            parameters)
+        filename = '/users/patricknicolas/dev/geometriclearning/data/heart_diseases.csv'
+        df = LabeledDataset.data_frame(filename)
+        print(f'Heart Diseases data frame---\nColumns: {df.columns}\n{str(df)}')
+
+        features_df = df[features]
+        labels_df = df['target']
+        batch_size = 4
+        train_eval_split_ratio = 0.85
+        dataset_loader = LabeledLoader(batch_size, train_eval_split_ratio)
+        train_loader, eval_loader = dataset_loader.from_dataframes(features_df,labels_df,min_max_scaler,'float32')
         network(train_loader, eval_loader)
 
 

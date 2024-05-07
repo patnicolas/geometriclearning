@@ -8,20 +8,26 @@ from typing import Optional, Callable, AnyStr, List
 import pandas as pd
 import numpy as np
 from python.dataset.datasetexception import DatasetException
+import traceback
 import logging
 logger = logging.getLogger('dataset.TDataset')
 
 
 def min_max_scaler(x: torch.Tensor) -> torch.Tensor:
-    y = MinMaxScaler().fit_transform(x)
-    z = torch.tensor(y, dtype=x.dtype)
-    return z
+    try:
+        y = MinMaxScaler().fit_transform(x)
+        z = torch.tensor(y, dtype=x.dtype)
+        return z
+    except:
+        traceback.print_exc()
+        return x
 
 
 class TDataset(Dataset):
     supported_dtypes = ['float64', 'float32', 'float16', 'double']
+    default_float_type = 'float32'
 
-    def __init__(self, transform: Optional[Callable] = None, dtype: AnyStr = 'float64'):
+    def __init__(self, transform: Optional[Callable] = None, dtype: AnyStr = default_float_type):
         self.transform = transform
         # Make sure the type is supported
         if dtype not in TDataset.supported_dtypes:

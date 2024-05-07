@@ -6,7 +6,6 @@ from python.dl.model.aemodel import AEModel
 
 
 class AEModelTest(unittest.TestCase):
-
     def test_init(self):
         input_block = FFNNBlock.build('input', 128, 32, torch.nn.ReLU())
         hidden_block = FFNNBlock.build('hidden', 32, 16, torch.nn.ReLU())

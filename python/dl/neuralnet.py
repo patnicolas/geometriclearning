@@ -12,7 +12,7 @@ from python.dl.earlystoplogger import EarlyStopLogger
 from python.util.plotter import PlotterParameters
 from python.metric.metric import Metric
 from tqdm import tqdm
-from typing import List, Optional
+from typing import List, Optional, NoReturn
 import logging
 logger = logging.getLogger('dl.NeuralNet')
 
@@ -49,13 +49,13 @@ class NeuralNet(object):
         self.early_stop_logger = early_stop_logger
         self.plot_parameters = plot_parameters
         self.metrics: Dict[AnyStr, Metric] = metrics
-        # self.accuracy = AccuracyMetric(0.001)
+
 
     @abstractmethod
     def model_label(self) -> AnyStr:
         raise NotImplementedError('NeuralNet.model_label is an abstract method')
 
-    def __call__(self, train_loader: DataLoader, test_loader: DataLoader):
+    def __call__(self, train_loader: DataLoader, test_loader: DataLoader) -> NoReturn:
         """
         Train and evaluation of a neural network given a data loader for a training set, a
         data loader for the evaluation/test1 set and a encoder_model. The weights of the various linear modules
@@ -69,13 +69,10 @@ class NeuralNet(object):
         torch.manual_seed(42)
         self.hyper_params.initialize_weight(list(self.model.modules()))
 
-        # Create a train loader from this data set
-        optimizer = self.hyper_params.optimizer(self.model)
-
         # Train and evaluation process
         for epoch in range(self.hyper_params.epochs):
             # Set training mode and execute training
-            train_loss = self.__train(optimizer, epoch, train_loader, self.model)
+            train_loss = self.__train(epoch, train_loader)
             # constants.log_info(f'Epoch # {epoch} training loss {train_loss}')
             # Set mode and execute evaluation
             eval_metrics = self.__eval(epoch, test_loader)
@@ -116,23 +113,20 @@ class NeuralNet(object):
 
     """ ------------------------------------   Private methods --------------------------------- """
 
-    def __train(self,
-                optimizer: torch.optim.Optimizer,
-                epoch: int,
-                train_loader: DataLoader,
-                model: torch.nn.Module) -> float:
+    def __train(self,epoch: int,train_loader: DataLoader) -> float:
         total_loss = 0.0
         # Initialize the gradient for the optimizer
         loss_function = self.hyper_params.loss_function
+        optimizer = self.hyper_params.optimizer(self.model)
 
         for features, labels in tqdm(train_loader):
             try:
-                model.train()
+                self.model.train()
                 # Reset the gradient to zero
-                for params in model.parameters():
+                for params in self.model.parameters():
                     params.grad = None
 
-                predicted = model(features)  # Call forward - prediction
+                predicted = self.model(features)  # Call forward - prediction
                 labels = labels.unsqueeze(dim=-1)
                 raw_loss = loss_function(predicted, labels)
                 # Set back propagation

@@ -6,6 +6,11 @@ from python.dl.model.neuralmodel import NeuralModel
 from python.dl.block.ffnnblock import FFNNBlock
 import torch
 
+"""
+Class builder for a feed-forward neural network model using feed-forward neural blocks
+
+"""
+
 
 class FFNNModel(NeuralModel):
 
@@ -19,10 +24,10 @@ class FFNNModel(NeuralModel):
         """
         FFNNModel.__validate(neural_blocks)
         self.neural_blocks = neural_blocks
-
-        # Define the sequence of modules from the layout
+        # Record the number of input and output features from the first and last neural block respectively
         self.in_features = neural_blocks[0].in_features
         self.out_features = neural_blocks[-1].out_features
+        # Define the sequence of modules from the layout
         modules = [module for layer in neural_blocks for module in layer.modules]
         super(FFNNModel, self).__init__(model_id, torch.nn.Sequential(*modules))
 
@@ -35,21 +40,20 @@ class FFNNModel(NeuralModel):
         neural_blocks = [block.invert() for block in self.neural_blocks[::-1]]
         return FFNNModel(f'_{self.model_id}', neural_blocks)
 
-    """
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        from torch import nn
-        hidden = nn.Linear(5, 4, False)
-        x: torch.Tensor = torch.relu(hidden(x))
-        _output: torch.Tensor = nn.Linear(4, 1, False)
-        x = _output(x)
-        x = torch.sigmoid(x)
-        return x
-    """
-
     def get_in_features(self) -> int:
+        """
+        Polymorphic method to retrieve the number of input features
+        @return: Number of input features
+        @rtype: int
+        """
         return self.in_features
 
     def get_out_features(self) -> int:
+        """
+        Polymorphic method to retrieve the number of output features
+        @return: Number of input features
+        @rtype: int
+        """
         return self.out_features
 
     def __repr__(self) -> AnyStr:

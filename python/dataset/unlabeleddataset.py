@@ -18,7 +18,10 @@ All exceptions thrown by the various methods are consolidated into DatasetExcept
 
 
 class UnlabeledDataset(TDataset):
-    def __init__(self, data: torch.Tensor, transform: Optional[Callable] = None, dtype: AnyStr = 'float64'):
+    def __init__(self,
+                 data: torch.Tensor,
+                 transform: Optional[Callable] = None,
+                 dtype: AnyStr = TDataset.default_float_type):
         """
         Constructor for a Tensor dataset
         @param data: Tensor containing data
@@ -29,12 +32,15 @@ class UnlabeledDataset(TDataset):
         @type dtype: str
         """
         # Make sure that the tensor are using the correct types
-        self.data = UnlabeledDataset.__update_dtype(data, dtype)
+        data = UnlabeledDataset.__update_dtype(data, dtype)
+        self.data = transform(data) if transform else data
         super(UnlabeledDataset, self).__init__(transform, dtype)
 
-
     @classmethod
-    def from_numpy(cls, data: np.array, transform: Optional[Callable] = None, dtype: AnyStr = 'float64') -> Self:
+    def from_numpy(cls,
+                   data: np.array,
+                   transform: Optional[Callable] = None,
+                   dtype: AnyStr = TDataset.default_float_type) -> Self:
         """
         Create a Tensor dataset from a Numpy array
         @param data: Data as a Numpy array
@@ -52,7 +58,7 @@ class UnlabeledDataset(TDataset):
     def from_list(cls,
                   data: List[List[float]],
                   transform: Optional[Callable] = None,
-                  dtype: AnyStr = 'float64') -> Self:
+                  dtype: AnyStr = TDataset.default_float_type) -> Self:
         """
         Create a Tensor dataset from a Python list
         @param data: Data as list of floating point values
@@ -68,7 +74,10 @@ class UnlabeledDataset(TDataset):
         return cls(torch.Tensor(data), transform, dtype)
 
     @classmethod
-    def from_df(cls, df: pd.DataFrame, transform: Optional[Callable] = None, dtype: AnyStr = 'float64') -> Self:
+    def from_df(cls,
+                df: pd.DataFrame,
+                transform: Optional[Callable] = None,
+                dtype: AnyStr = TDataset.default_float_type) -> Self:
         """
         Create a Tensor dataset from a Pandas data frame
         @param df: Pandas data frame
@@ -88,7 +97,7 @@ class UnlabeledDataset(TDataset):
                   filename: AnyStr,
                   columns: List[AnyStr],
                   transform: Optional[Callable] = None,
-                  dtype: AnyStr = 'float64') -> Self:
+                  dtype: AnyStr = TDataset.default_float_type) -> Self:
         """
         Generate a Tensor data set from a JSON or CSV file..
         @param filename: Name of the file (relative or absolute)

@@ -8,6 +8,7 @@ from torchvision.datasets import MNIST
 import pandas as pd
 from typing import Tuple, AnyStr, Callable, Optional
 from python.dataset.unlabeleddataset import UnlabeledDataset
+from python.dataset.tdataset import TDataset
 from python.dataset.tloader import TLoader
 
 """
@@ -48,13 +49,18 @@ class UnlabeledLoader(TLoader):
         mnist_dataset = MNIST('../data/', download=True, transform=transform)
         return self._generate_loader(mnist_dataset)
 
-    def from_tensor(self, data: torch.Tensor, norm_factors: Tuple[float, float]) -> (DataLoader, DataLoader):
+    def from_tensor(self,
+                    data: torch.Tensor,
+                    norm_factors: Tuple[float, float],
+                    dtype: AnyStr = TDataset.default_float_type) -> (DataLoader, DataLoader):
         """
             Generate Training and evaluation data loader from a given input_tensor
             @param data: Input input_tensor
             @type data: Torch tensor
             @param norm_factors: Tuple of normalization factors
             @type norm_factors: Tuple (float, float)
+            @param dtype: Data type as a string (i.e. 'float64', ..)
+            @type dtype: str
             @return: Pair of Data loader for training data and validation data
             @rtype: Tuple of data loader
         """
@@ -62,25 +68,31 @@ class UnlabeledLoader(TLoader):
             transforms.ToTensor(),
             transforms.Normalize((norm_factors[0],), (norm_factors[1],)),
         ])
-        dataset = UnlabeledDataset(data, transform)
+        dataset = UnlabeledDataset(data, transform, dtype)
         return self._generate_loader(dataset)
 
-    def from_dataframe(self, df: pd.DataFrame, transform: Optional[Callable] = None) -> (DataLoader, DataLoader):
-        dataset = UnlabeledDataset.from_df(df, transform)
+    def from_dataframe(self,
+                       df: pd.DataFrame,
+                       transform: Optional[Callable] = None,
+                       dtype: AnyStr = TDataset.default_float_type) -> (DataLoader, DataLoader):
+        dataset = UnlabeledDataset.from_df(df, transform, dtype)
         return self._generate_loader(dataset)
 
     def from_tensor_transform(self,
                               data: torch.Tensor,
-                              transform: Optional[Callable] = None) -> (DataLoader, DataLoader):
+                              transform: Optional[Callable] = None,
+                              dtype: AnyStr = TDataset.default_float_type) -> (DataLoader, DataLoader):
         """
         Generate Training and evaluation data loader from a given input_tensor
         @param data: Input input_tensor
         @type data: Torch tensor
         @param transform: Optional pre-processing transform
         @type transform: Callable
+        @param dtype: Data type as a string (i.e. 'float64', ..)
+        @type dtype: str
         @return: Pair of Data loader for training data and validation data
         @rtype: Tuple of data loader
         """
-        dataset = UnlabeledDataset(data, transform)
+        dataset = UnlabeledDataset(data, transform, dtype)
         return self._generate_loader(dataset)
 

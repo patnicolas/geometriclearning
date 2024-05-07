@@ -7,6 +7,7 @@ from torch.autograd import Variable
 from python.dl.block.neuralblock import NeuralBlock
 from typing import Self
 from python.dl.dlexception import DLException
+from python.util import log_size
 
 
 class VariationalBlock(NeuralBlock):
@@ -26,8 +27,6 @@ class VariationalBlock(NeuralBlock):
         self.mu = mu
         self.log_var = log_var
         self.sampler_fc = sampler_fc
-
-
 
     def invert(self) -> Self:
         raise DLException('Cannot invert variational Neural block')
@@ -51,4 +50,20 @@ class VariationalBlock(NeuralBlock):
         std_dev = std.data.new(std.size()).normal_()
         eps = Variable(std_dev)
         return eps.mul_(std).add_(mu)
+
+    def forward(self, x: torch.Tensor) -> (torch.Tensor, torch.Tensor, torch.Tensor):
+        """
+        Process the model as sequence of modules, implicitly called by __call__
+        @param x: Input input_tensor as flattened output input_tensor from the convolutional layers
+        @type x: Torch tensor
+        @return: z, mean and log variance input_tensor
+        @rtype: torch tensor
+        """
+        log_size(x, 'fc variational')
+        mu = self.mu(x)
+        log_size(mu, 'mu variational')
+        log_var = self.log_var(x)
+        z = VariationalBlock.re_parameterize(mu, log_var)
+        log_size(z, 'z variational')
+        return self.sampler_fc(z), mu, log_var
 

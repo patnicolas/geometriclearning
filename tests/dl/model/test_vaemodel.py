@@ -6,7 +6,6 @@ from python.dl.model.vaemodel import VAEModel
 
 
 class VAEModelTest(unittest.TestCase):
-
     def test_init(self):
         input_block = FFNNBlock.build('in', 128, 32, torch.nn.ReLU())
         hidden_block = FFNNBlock.build('hid1', 32, 10, torch.nn.ReLU())

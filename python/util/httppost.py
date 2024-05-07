@@ -3,7 +3,6 @@ __copyright__ = "Copyright 2020, 2022  All rights reserved."
 
 import requests
 import time
-import constants
 import urllib3
 from util.decorators import timeit
 

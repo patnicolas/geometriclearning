@@ -4,10 +4,11 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 import torch
 import pandas as pd
 from typing import Callable, Optional, AnyStr, Tuple
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import MNIST
 from python.dataset.labeleddataset import LabeledDataset
+from python.dataset.tdataset import TDataset
 from python.dataset.tloader import TLoader
 
 """
@@ -48,8 +49,11 @@ class LabeledLoader(TLoader):
         mnist_dataset = MNIST('../data/', download=True, transform=transform)
         return self._generate_loader(mnist_dataset)
 
-    def from_tensor(self, features: torch.Tensor, labels: torch.Tensor, norm_factors: Tuple[float, float]) -> (
-            DataLoader, DataLoader):
+    def from_tensor(self,
+                    features: torch.Tensor,
+                    labels: torch.Tensor,
+                    norm_factors: Tuple[float, float],
+                    dtype: AnyStr = TDataset.default_float_type) -> (DataLoader, DataLoader):
         """
             Generate Training and evaluation data loader from a given input_tensor
             @param features: Features input_tensor
@@ -58,6 +62,8 @@ class LabeledLoader(TLoader):
             @type labels: Torch tensor
             @param norm_factors: Tuple of normalization factors
             @type norm_factors: Tuple (float, float)
+            @param dtype: Type used for computation
+            @type dtype: str
             @return: Pair of Data loader for training data and validation data
             @rtype: Tuple of data loader
         """
@@ -65,14 +71,14 @@ class LabeledLoader(TLoader):
             transforms.ToTensor(),
             transforms.Normalize((norm_factors[0],), (norm_factors[1],)),
         ])
-        dataset = LabeledDataset(features, labels, transform)
+        dataset = LabeledDataset(features, labels, transform, dtype)
         return self._generate_loader(dataset)
 
     def from_dataframes(self,
                         features_df: pd.DataFrame,
                         labels_df: pd.DataFrame,
                         transform: Optional[Callable] = None,
-                        dtype: AnyStr = 'float32') -> (DataLoader, DataLoader):
+                        dtype: AnyStr = TDataset.default_float_type) -> (DataLoader, DataLoader):
         """
         Generate data loader from data frames
         @param features_df: Features data frame
