@@ -1,16 +1,15 @@
-
 import unittest
 
-from python.dl.model.ffnnmodel import FFNNModel
-from python.dl.block.ffnnblock import FFNNBlock
+from dl.model.ffnnmodel import FFNNModel
+from dl.block.ffnnblock import FFNNBlock
 from dl.training.hyperparams import HyperParams
 from dl.training.earlystoplogger import EarlyStopLogger
-from python.util.plotter import PlotterParameters
+from util.plotter import PlotterParameters
 from dl.training.neuralnet import NeuralNet
-from python.dataset.labeleddataset import LabeledDataset
-from python.dataset.unlabeleddataset import UnlabeledDataset
-from python.dataset.labeledloader import LabeledLoader
-from python.dataset.tdataset import min_max_scaler
+from dataset.labeleddataset import LabeledDataset
+from dataset.unlabeleddataset import UnlabeledDataset
+from dataset.labeledloader import LabeledLoader
+from dataset.tdataset import min_max_scaler
 from torch import nn
 import numpy as np
 

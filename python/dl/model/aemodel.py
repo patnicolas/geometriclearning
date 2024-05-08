@@ -1,10 +1,9 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
-from typing import AnyStr, Self
-from python.dl.model.neuralmodel import NeuralModel
+from typing import AnyStr, Self, overload
+from dl.model.neuralmodel import NeuralModel
 import torch
-
 import logging
 logger = logging.getLogger('dl.model.AEModel')
 
@@ -57,6 +56,7 @@ class AEModel(NeuralModel):
     def get_out_features(self) -> int:
         return self.encoder.get_in_features()
 
+    @overload
     def invert(self) -> Self:
         """
         Autoencoder is composed of an encoder and mirror decoder but cannot itself be inverted

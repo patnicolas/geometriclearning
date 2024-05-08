@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from torch import nn
 from typing import Self, List, AnyStr, Optional
-from python.dl.dlexception import DLException
+from dl.dlexception import DLException
 
 
 """

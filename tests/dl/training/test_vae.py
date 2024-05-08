@@ -1,13 +1,13 @@
 import unittest
-from python.dl.block.ffnnblock import FFNNBlock
-from python.dl.model.ffnnmodel import FFNNModel
-from python.dl.model.vaemodel import VAEModel
-from python.dataset.unlabeledloader import UnlabeledLoader
-from python.dataset.unlabeleddataset import UnlabeledDataset
+from dl.block.ffnnblock import FFNNBlock
+from dl.model.ffnnmodel import FFNNModel
+from dl.model.vaemodel import VAEModel
+from dataset.unlabeledloader import UnlabeledLoader
+from dataset.unlabeleddataset import UnlabeledDataset
 from dl.training.vae import VAE
 from dl.training.hyperparams import HyperParams
 from dl.training.earlystoplogger import EarlyStopLogger
-from python.util.plotter import PlotterParameters
+from util.plotter import PlotterParameters
 import torch.nn as nn
 
 

@@ -5,7 +5,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 from abc import ABC
 from dl.block import ConvBlockBuilder
 import torch.nn as nn
-from typing import Tuple
+from typing import Tuple, overload
 
 
 class Conv2DBlockBuilder(ConvBlockBuilder, ABC):
@@ -48,6 +48,7 @@ class Conv2DBlockBuilder(ConvBlockBuilder, ABC):
                                                  activation,
                                                  bias)
 
+    @overload
     def __call__(self) -> Tuple[nn.Module]:
         """
         Generate all torch module for this 2-dimension convolutional neural block

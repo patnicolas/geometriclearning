@@ -5,11 +5,11 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 from dl.training.neuralnet import NeuralNet
 from dl.training.hyperparams import HyperParams
 from dl.training.earlystoplogger import EarlyStopLogger
-from python.util.plotter import PlotterParameters
-from python.metric.metric import Metric
-from python.dl.model.vaemodel import VAEModel
-from python.dl.dlexception import DLException
-from typing import AnyStr, List, Optional, Dict, NoReturn
+from util.plotter import PlotterParameters
+from metric.metric import Metric
+from dl.model.vaemodel import VAEModel
+from dl.dlexception import DLException
+from typing import AnyStr, List, Optional, Dict, NoReturn, overload
 from torch.utils.data import DataLoader
 import torch.nn as nn
 from tqdm import tqdm
@@ -49,6 +49,7 @@ class VAE(NeuralNet):
         """
         super(VAE, self).__init__(vae_model, hyper_params, early_stop_logger, metrics, plot_parameters)
 
+    @overload
     def __call__(self, train_loader: DataLoader, eval_loader: DataLoader) -> NoReturn:
         """
 E       Execute the cycle of training and evaluation for the

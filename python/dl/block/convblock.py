@@ -2,7 +2,7 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from torch import nn
-from typing import Tuple, List
+from typing import Tuple, NoReturn
 from dl.block.conv1dblockbuilder import Conv1DBlockBuilder
 from dl.block.conv2dblockbuilder import Conv2DBlockBuilder
 from dl.dlexception import DLException
@@ -48,7 +48,7 @@ class ConvBlock(nn.Module):
         @param stride: Stride for convolution (st) for 1D, (st, st) for 2D
         @type stride: int
         @param batch_norm: Boolean flag to specify if a batch normalization is required
-        @type batch_norm: int
+        @type batch_norm: bool
         @param max_pooling_kernel: Boolean flag to specify max pooling is needed
         @type max_pooling_kernel: int
         @param activation: Activation function as nn.Module
@@ -58,15 +58,9 @@ class ConvBlock(nn.Module):
         @param is_spectral: Specify if we need to apply the spectral norm to the convolutional layer
         @type is_spectral: bool
         """
+        ConvBlock.__validate_input(conv_dimension, in_channels, out_channels, kernel_size, stride, max_pooling_kernel)
+
         super(ConvBlock, self).__init__()
-
-        assert 0 < conv_dimension < 4, f'Conv neural block conv_dim {conv_dimension} should be {1, 2, 3}'
-        assert in_channels > 0, f'Conv neural block in_channels {in_channels} should be >0'
-        assert out_channels > 0, f'Conv neural block out_channels {out_channels} should be >0'
-        assert kernel_size > 0, f'Conv neural block kernel_size {kernel_size} should be >0'
-        assert stride >= 0, f'Conv neural block stride {stride} should be >= 0'
-        assert 0 <= max_pooling_kernel < 5, f'Conv neural block max_pooling_kernel size {max_pooling_kernel} should be [0, 4]'
-
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.conv_dimension = conv_dimension
@@ -76,6 +70,7 @@ class ConvBlock(nn.Module):
                 self.modules = Conv1DBlockBuilder(
                     in_channels,
                     out_channels,
+                    kernel_size,
                     stride,
                     padding,
                     batch_norm,
@@ -86,6 +81,7 @@ class ConvBlock(nn.Module):
                 self.modules = Conv2DBlockBuilder(
                     in_channels,
                     out_channels,
+                    kernel_size,
                     stride,
                     padding,
                     batch_norm,
@@ -98,10 +94,7 @@ class ConvBlock(nn.Module):
     def __repr__(self) -> str:
         return ' '.join([f'\n{str(module)}' for module in self.modules])
 
-    def get_modules(self):
-        return self.modules
-
-    def get_modules_weights(self) -> Tuple:
+    def get_modules_weights(self) -> Tuple[nn.Module]:
         """
         Get the weights for modules which contains them
         @returns: weight of convolutional neural_blocks
@@ -110,3 +103,19 @@ class ConvBlock(nn.Module):
         return tuple([module for module in self.modules \
                       if type(module) == nn.Linear or type(module) == nn.Conv2d or type(module) == nn.Conv1d])
 
+    """ -----------------------------------   Private helper methods ---------------------------  """
+
+    @staticmethod
+    def __validate_input(
+            conv_dimension: int,
+            in_channels: int,
+            out_channels: int,
+            kernel_size: int,
+            stride: int,
+            max_pooling_kernel: int) -> NoReturn:
+        assert 0 < conv_dimension < 4, f'Conv neural block conv_dim {conv_dimension} should be {1, 2, 3}'
+        assert in_channels > 0, f'Conv neural block in_channels {in_channels} should be >0'
+        assert out_channels > 0, f'Conv neural block out_channels {out_channels} should be >0'
+        assert kernel_size > 0, f'Conv neural block kernel_size {kernel_size} should be >0'
+        assert stride >= 0, f'Conv neural block stride {stride} should be >= 0'
+        assert 0 <= max_pooling_kernel < 5, f'Conv neural block max_pooling_kernel size {max_pooling_kernel} should be [0, 4]'

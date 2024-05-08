@@ -1,6 +1,6 @@
 import unittest
 from torch import nn
-from python.dl.block.ffnnblock import FFNNBlock
+from dl.block.ffnnblock import FFNNBlock
 
 
 class FFNNBlockTest(unittest.TestCase):

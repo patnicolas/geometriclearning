@@ -1,7 +1,6 @@
 import unittest
-from python.dataset.labeledloader import LabeledLoader
-from python.dataset.labeleddataset import LabeledDataset
-from python.dataset.unlabeleddataset import UnlabeledDataset
+from dataset.labeledloader import LabeledLoader
+from dataset.unlabeleddataset import UnlabeledDataset
 import torch
 import numpy as np
 

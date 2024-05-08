@@ -1,9 +1,9 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
-from typing import List, AnyStr, Self
-from python.dl.model.neuralmodel import NeuralModel
-from python.dl.block.ffnnblock import FFNNBlock
+from typing import List, AnyStr, Self, overload
+from dl.model.neuralmodel import NeuralModel
+from dl.block.ffnnblock import FFNNBlock
 import torch
 
 """
@@ -27,10 +27,12 @@ class FFNNModel(NeuralModel):
         # Record the number of input and output features from the first and last neural block respectively
         self.in_features = neural_blocks[0].in_features
         self.out_features = neural_blocks[-1].out_features
+
         # Define the sequence of modules from the layout
-        modules = [module for layer in neural_blocks for module in layer.modules]
+        modules = [module for block in neural_blocks for module in block.modules]
         super(FFNNModel, self).__init__(model_id, torch.nn.Sequential(*modules))
 
+    @overload
     def invert(self) -> Self:
         """
         Generate the inverted neural layout for this feed forward neural network
@@ -40,6 +42,7 @@ class FFNNModel(NeuralModel):
         neural_blocks = [block.invert() for block in self.neural_blocks[::-1]]
         return FFNNModel(f'_{self.model_id}', neural_blocks)
 
+    @overload
     def get_in_features(self) -> int:
         """
         Polymorphic method to retrieve the number of input features
@@ -48,6 +51,7 @@ class FFNNModel(NeuralModel):
         """
         return self.in_features
 
+    @overload
     def get_out_features(self) -> int:
         """
         Polymorphic method to retrieve the number of output features

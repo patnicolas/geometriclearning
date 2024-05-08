@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 import torch
 from abc import abstractmethod
-from typing import AnyStr, Self
+from typing import AnyStr, Self, overload
 
 """
 Abstract base class for Neural network models. The sub-classes have to implement get_model,
@@ -12,7 +12,7 @@ forward and save methods
 
 
 class NeuralModel(torch.nn.Module):
-    def __init__(self, model_id: AnyStr, model: torch.nn.Module) -> None:
+    def __init__(self, model_id: AnyStr, model: torch.nn.Module):
         """
         Constructor
         @param model_id: Identifier for this model
@@ -24,6 +24,7 @@ class NeuralModel(torch.nn.Module):
         self.model_id = model_id
         self.model = model
 
+    @overload
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Execute the default forward method for all neural network models inherited from this class

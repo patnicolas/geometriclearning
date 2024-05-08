@@ -1,8 +1,8 @@
 import unittest
 import torch
-from python.dl.block.ffnnblock import FFNNBlock
-from python.dl.model.ffnnmodel import FFNNModel
-from python.dl.model.vaemodel import VAEModel
+from dl.block.ffnnblock import FFNNBlock
+from dl.model.ffnnmodel import FFNNModel
+from dl.model.vaemodel import VAEModel
 
 
 class VAEModelTest(unittest.TestCase):

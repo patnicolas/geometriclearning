@@ -2,10 +2,11 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from typing import Optional, AnyStr, Self, List, Dict, NoReturn
-from python.util.plotter import Plotter, PlotterParameters
-from python.metric.metric import Metric
+from util.plotter import Plotter, PlotterParameters
+from metric.metric import Metric
 import logging
 logger = logging.getLogger('dl.EarlyStopLogger')
+
 
 """
     Enforce early stopping for any training/evaluation pair of execution and records loss for profiling and 

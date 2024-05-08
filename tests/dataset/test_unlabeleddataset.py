@@ -1,6 +1,6 @@
 import unittest
 import torch
-from python.dataset.unlabeleddataset import UnlabeledDataset
+from dataset.unlabeleddataset import UnlabeledDataset
 import numpy as np
 
 

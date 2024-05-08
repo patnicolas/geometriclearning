@@ -1,6 +1,6 @@
 import unittest
 import torch
-from python.dl.block.variationalblock import VariationalBlock
+from dl.block.variationalblock import VariationalBlock
 
 
 class VariationalBlockTest(unittest.TestCase):

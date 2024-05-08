@@ -1,7 +1,6 @@
 import unittest
 import torch
-from python.dataset.labeleddataset import LabeledDataset
-import numpy as np
+from dataset.labeleddataset import LabeledDataset
 
 
 class LabeledDatasetTest(unittest.TestCase):

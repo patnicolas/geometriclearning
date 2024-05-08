@@ -2,9 +2,8 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from torch import nn
-from typing import Self, AnyStr, Optional
-
-from python.dl.block.neuralblock import NeuralBlock
+from typing import Self, AnyStr, Optional, overload
+from dl.block.neuralblock import NeuralBlock
 
 """
 Feed Forward (fully connected) Neural Network layer with appropriate activation and drop out.
@@ -62,6 +61,7 @@ class FFNNBlock(NeuralBlock):
         """
         return cls(block_id, nn.Linear(in_features, out_features, False), activation, drop_out)
 
+    @overload
     def invert(self) -> Self:
         """
         Invert the layer size (in_feature <-> out_feature) and remove drop_out for decoder

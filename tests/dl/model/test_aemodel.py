@@ -1,8 +1,8 @@
 import unittest
 import torch
-from python.dl.block.ffnnblock import FFNNBlock
-from python.dl.model.ffnnmodel import FFNNModel
-from python.dl.model.aemodel import AEModel
+from dl.block.ffnnblock import FFNNBlock
+from dl.model.ffnnmodel import FFNNModel
+from dl.model.aemodel import AEModel
 
 
 class AEModelTest(unittest.TestCase):

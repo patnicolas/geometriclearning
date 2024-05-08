@@ -5,8 +5,8 @@ import torch
 from torch import optim
 from torch import nn
 from typing import AnyStr, Optional, List, NoReturn
-from python.dl.model.neuralmodel import NeuralModel
-from python.dataset.datasetexception import DatasetException
+from dl.model.neuralmodel import NeuralModel
+from dataset.datasetexception import DatasetException
 import logging
 logger = logging.getLogger('dl.HyperParams')
 

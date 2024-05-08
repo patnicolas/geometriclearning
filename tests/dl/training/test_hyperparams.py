@@ -1,9 +1,8 @@
-
 import unittest
 from torch import nn
 from dl.training.hyperparams import HyperParams
-from python.dl.block.ffnnblock import FFNNBlock
-from python.dl.model.ffnnmodel import FFNNModel
+from dl.block.ffnnblock import FFNNBlock
+from dl.model.ffnnmodel import FFNNModel
 
 
 class HyperParamsTest(unittest.TestCase):

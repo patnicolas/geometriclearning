@@ -4,10 +4,10 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 import torch
 from torch import nn
 from torch.autograd import Variable
-from python.dl.block.neuralblock import NeuralBlock
-from typing import Self
-from python.dl.dlexception import DLException
-from python.util import log_size
+from dl.block.neuralblock import NeuralBlock
+from typing import Self, overload
+from dl.dlexception import DLException
+from util import log_size
 
 
 class VariationalBlock(NeuralBlock):
@@ -28,6 +28,7 @@ class VariationalBlock(NeuralBlock):
         self.log_var = log_var
         self.sampler_fc = sampler_fc
 
+    @overload
     def invert(self) -> Self:
         raise DLException('Cannot invert variational Neural block')
 

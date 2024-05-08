@@ -1,4 +1,3 @@
-
 import unittest
 import random
 from dl.training.earlystoplogger import EarlyStopLogger
