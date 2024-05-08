@@ -2,14 +2,14 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 
-from python.dl.neuralnet import NeuralNet
-from python.dl.hyperparams import HyperParams
-from python.dl.earlystoplogger import EarlyStopLogger
+from dl.training.neuralnet import NeuralNet
+from dl.training.hyperparams import HyperParams
+from dl.training.earlystoplogger import EarlyStopLogger
 from python.util.plotter import PlotterParameters
 from python.metric.metric import Metric
 from python.dl.model.vaemodel import VAEModel
 from python.dl.dlexception import DLException
-from typing import AnyStr, List, Optional, Dict, NoReturn, Callable
+from typing import AnyStr, List, Optional, Dict, NoReturn
 from torch.utils.data import DataLoader
 import torch.nn as nn
 from tqdm import tqdm
@@ -17,6 +17,15 @@ import torch
 import logging
 logger = logging.getLogger('dl.VAE')
 
+"""
+Light weight implementation of the variational auto-encoder using PyTorch and reusable neural block
+The key components are
+- Model (VAEModel) composed of an encoder, decoder as inverted encoder and variational neural block
+- Hyper parameters for training and tuning
+- Early stop logger for early stop and monitoring training and evaluation
+- Dictionary of metrics data
+- Optional set of plotting parameters
+"""
 
 class VAE(NeuralNet):
     def __init__(self,
@@ -41,6 +50,13 @@ class VAE(NeuralNet):
         super(VAE, self).__init__(vae_model, hyper_params, early_stop_logger, metrics, plot_parameters)
 
     def __call__(self, train_loader: DataLoader, eval_loader: DataLoader) -> NoReturn:
+        """
+E       Execute the cycle of training and evaluation for the
+        @param train_loader: Loader for the training data
+        @type train_loader: DataLoader
+        @param eval_loader: Loader for the evaluation data
+        @type eval_loader: DataLoader
+        """
         # Initialization of the weights
         torch.manual_seed(42)
         self.hyper_params.initialize_weight(list(self.model.modules()))

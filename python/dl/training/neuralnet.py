@@ -7,8 +7,8 @@ from abc import abstractmethod
 from typing import AnyStr, Dict
 from python.dl.model.neuralmodel import NeuralModel
 from python.dl.dlexception import DLException
-from python.dl.hyperparams import HyperParams
-from python.dl.earlystoplogger import EarlyStopLogger
+from dl.training.hyperparams import HyperParams
+from dl.training.earlystoplogger import EarlyStopLogger
 from python.util.plotter import PlotterParameters
 from python.metric.metric import Metric
 from tqdm import tqdm

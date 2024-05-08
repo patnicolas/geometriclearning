@@ -1,7 +1,7 @@
 
 import unittest
 import random
-from python.dl.earlystoplogger import EarlyStopLogger
+from dl.training.earlystoplogger import EarlyStopLogger
 from typing import Dict, AnyStr, List
 
 

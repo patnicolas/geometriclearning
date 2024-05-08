@@ -4,9 +4,9 @@ from python.dl.model.ffnnmodel import FFNNModel
 from python.dl.model.vaemodel import VAEModel
 from python.dataset.unlabeledloader import UnlabeledLoader
 from python.dataset.unlabeleddataset import UnlabeledDataset
-from python.dl.vae import VAE
-from python.dl.hyperparams import HyperParams
-from python.dl.earlystoplogger import EarlyStopLogger
+from dl.training.vae import VAE
+from dl.training.hyperparams import HyperParams
+from dl.training.earlystoplogger import EarlyStopLogger
 from python.util.plotter import PlotterParameters
 import torch.nn as nn
 
@@ -26,7 +26,6 @@ class VAETest(unittest.TestCase):
     def test_train(self):
         from python.metric.metric import Metric
         from python.metric.builtinmetric import BuiltInMetric, MetricType
-        from python.dataset.tdataset import min_max_scaler
 
         features = ['age', 'sex', 'chest pain type', 'cholesterol', 'fasting blood sugar', 'max heart rate',
                     'exercise angina', 'ST slope']
@@ -43,7 +42,7 @@ class VAETest(unittest.TestCase):
         batch_size = 4
         train_eval_split_ratio = 0.85
         dataset_loader = UnlabeledLoader(batch_size, train_eval_split_ratio)
-        train_loader, eval_loader = dataset_loader.from_dataframe(features_df, min_max_scaler)
+        train_loader, eval_loader = dataset_loader.from_dataframe(features_df)
 
         hyper_parameters = HyperParams(
             lr=0.001,

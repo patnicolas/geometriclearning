@@ -1,17 +1,15 @@
 
 import unittest
 
-from dl.model.aemodel import AEModel
 from python.dl.model.ffnnmodel import FFNNModel
 from python.dl.block.ffnnblock import FFNNBlock
-from python.dl.hyperparams import HyperParams
-from python.dl.earlystoplogger import EarlyStopLogger
+from dl.training.hyperparams import HyperParams
+from dl.training.earlystoplogger import EarlyStopLogger
 from python.util.plotter import PlotterParameters
-from python.dl.neuralnet import NeuralNet
+from dl.training.neuralnet import NeuralNet
 from python.dataset.labeleddataset import LabeledDataset
 from python.dataset.unlabeleddataset import UnlabeledDataset
 from python.dataset.labeledloader import LabeledLoader
-from python.dataset.unlabeledloader import UnlabeledLoader
 from python.dataset.tdataset import min_max_scaler
 from torch import nn
 import numpy as np
@@ -21,7 +19,7 @@ class NeuralNetTest(unittest.TestCase):
 
     @unittest.skip('Ignored')
     def test_init(self):
-        input_block = FFNNBlock.build('input', 32, 16, nn.ReLU())
+        input_block = FFNNBlock.build('../../../python/input', 32, 16, nn.ReLU())
         hidden_block = FFNNBlock.build('hidden', 16, 4, nn.ReLU())
         output_block = FFNNBlock.build('output', 4, 1)
         binary_classifier = FFNNModel('test1', [input_block, hidden_block, output_block])
