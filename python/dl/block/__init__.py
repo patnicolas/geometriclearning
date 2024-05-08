@@ -50,5 +50,5 @@ class ConvBlockBuilder(object):
         self.bias = bias
 
     @abstractmethod
-    def get_conv_modules(self) -> Tuple[nn.Module]:
+    def __call__(self) -> Tuple[nn.Module]:
         raise DLException('Cannot extract module from abstract class ConvInitBlock')

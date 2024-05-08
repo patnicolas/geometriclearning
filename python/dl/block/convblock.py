@@ -3,6 +3,9 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from torch import nn
 from typing import Tuple, List
+from dl.block.conv1dblockbuilder import Conv1DBlockBuilder
+from dl.block.conv2dblockbuilder import Conv2DBlockBuilder
+from dl.dlexception import DLException
 
 """    
     Generic convolutional neural block for 1 and 2 dimensions
@@ -68,20 +71,29 @@ class ConvBlock(nn.Module):
         self.out_channels = out_channels
         self.conv_dimension = conv_dimension
         self.is_spectral = is_spectral
-        self.modules = self.init1d(kernel_size,
-                                   stride,
-                                   padding,
-                                   batch_norm,
-                                   max_pooling_kernel,
-                                   activation,
-                                   bias) if conv_dimension == 1 \
-            else self.init2d(kernel_size,
-                             stride,
-                             padding,
-                             batch_norm,
-                             max_pooling_kernel,
-                             activation,
-                             bias)
+        match conv_dimension:
+            case 1:
+                self.modules = Conv1DBlockBuilder(
+                    in_channels,
+                    out_channels,
+                    stride,
+                    padding,
+                    batch_norm,
+                    max_pooling_kernel,
+                    activation,
+                    bias)()
+            case 2:
+                self.modules = Conv2DBlockBuilder(
+                    in_channels,
+                    out_channels,
+                    stride,
+                    padding,
+                    batch_norm,
+                    max_pooling_kernel,
+                    activation,
+                    bias)()
+            case _:
+                raise DLException(f'Convolution for dimension {conv_dimension} is not supported')
 
     def __repr__(self) -> str:
         return ' '.join([f'\n{str(module)}' for module in self.modules])
@@ -97,144 +109,4 @@ class ConvBlock(nn.Module):
         """
         return tuple([module for module in self.modules \
                       if type(module) == nn.Linear or type(module) == nn.Conv2d or type(module) == nn.Conv1d])
-
-    def init1d(self,
-               kernel_size: int,
-               stride: int,
-               padding: int,
-               batch_norm: bool,
-               max_pooling_kernel: int,
-               activation: nn.Module,
-               bias: bool) -> List[nn.Module]:
-        """
-            Instantiation of 1D Convolution block
-            :type padding: int
-            :param kernel_size Size of the kernel (num_records) for 1D and (num_records, num_records) for 2D
-            :param stride Stride for convolution (st) for 1D, (st, st) for 2D
-            :param batch_norm Boolean flag to specify if a batch normalization is required
-            :param max_pooling_kernel Boolean flag to specify max pooling is neede
-            :param activation Activation function as nn.Module
-            :param bias Specify if bias is not null
-            :return: List of PyTorch modules related to Convolution
-        """
-        modules = []
-        conv_module = nn.Conv1d(
-            self.in_channels,
-            self.out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=bias)
-
-        # If this is a spectral convolution
-        if self.is_spectral:
-            conv_module = nn.utils.spectral_norm(conv_module)
-        modules.append(conv_module)
-        if batch_norm:
-            modules.append(nn.BatchNorm1d(self.out_channels))
-        if activation is not None:
-            modules.append(activation)
-        if max_pooling_kernel > 0:
-            modules.append(nn.MaxPool1d(max_pooling_kernel))
-        return modules
-
-    def init2d(self,
-               kernel_size: int,
-               stride: int,
-               padding: int,
-               batch_norm: bool,
-               max_pooling_kernel: int,
-               activation: nn.Module,
-               bias: bool) -> Tuple[nn.Module]:
-        """
-            Instantiation of 2D Convolution block
-            :param kernel_size Size of the kernel (num_records) for 1D and (num_records, num_records) for 2D
-            :param stride Stride for convolution (st) for 1D, (st, st) for 2D
-            :param batch_norm Boolean flag to specify if a batch normalization is required
-            :param max_pooling_kernel Boolean flag to specify max pooling is neede
-            :param activation Activation function as nn.Module
-            :param bias Specify if bias is not null
-            :return: List of PyTorch modules related to Convolution
-        """
-        modules = []
-        conv_module = nn.Conv2d(
-            self.in_channels,
-            self.out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=bias)
-
-        # If this is a spectral Neural block
-        if self.is_spectral:
-            conv_module = nn.utils.spectral_norm(conv_module)
-        modules.append(conv_module)
-        if batch_norm:
-            modules.append(nn.BatchNorm2d(self.out_channels))
-        if activation is not None:
-            modules.append(activation)
-        if max_pooling_kernel > 0:
-            modules.append(nn.MaxPool2d(max_pooling_kernel))
-        return tuple(modules)
-
-    # ---------------------------  Supporting methods -----------------------------
-
-    @staticmethod
-    def __init1d(in_channels: int,
-                 out_channels: int,
-                 kernel_size: int,
-                 stride: int,
-                 padding: int,
-                 batch_norm: bool,
-                 max_pooling_kernel: int,
-                 activation: nn.Module,
-                 bias: bool) -> Tuple[nn.Module]:
-        modules = []
-        conv_module = nn.Conv1d(
-            in_channels,
-            out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=bias)
-        modules.append(conv_module)
-        if batch_norm:
-            modules.append(nn.BatchNorm1d(out_channels))
-        if activation is not None:
-            modules.append(activation)
-        if max_pooling_kernel > 0:
-            modules.append(nn.MaxPool1d(max_pooling_kernel))
-        return tuple(modules)
-
-    @staticmethod
-    def __init2d(in_channels: int,
-                 out_channels: int,
-                 kernel_size: int,
-                 stride: int,
-                 padding: int,
-                 batch_norm: bool,
-                 max_pooling_kernel: int,
-                 activation: nn.Module,
-                 bias: bool) -> Tuple[nn.Module]:
-        modules = []
-        # First define the 2D convolution
-        conv_module = nn.Conv2d(
-            in_channels,
-            out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=bias)
-        modules.append(conv_module)
-        # Add the batch normalization
-        if batch_norm:
-            modules.append(nn.BatchNorm2d(out_channels))
-        # Activation to be added if needed
-        if activation is not None:
-            modules.append(activation)
-        # Added max pooling module
-        if max_pooling_kernel > 0:
-            modules.append(nn.MaxPool2d(max_pooling_kernel))
-        return tuple(modules)
-
 

@@ -48,31 +48,33 @@ class Conv2DBlockBuilder(ConvBlockBuilder, ABC):
                                                  activation,
                                                  bias)
 
-        def get_conv_modules(self) -> Tuple[nn.Module]:
-            """
-            Generate all torch module for this 2-dimension convolutional neural block
-            @param self: Reference to this convolutional neural block builder
-            @type self: Conv1DBlockBuilder
-            @return: List of torch module
-            @rtype: Tuple
-            """
-            modules = []
-            # First define the 2D convolution
-            conv_module = nn.Conv2d(
-                in_channels,
-                out_channels,
-                kernel_size=kernel_size,
-                stride=stride,
-                padding=padding,
-                bias=bias)
-            modules.append(conv_module)
-            # Add the batch normalization
-            if batch_norm:
-                modules.append(nn.BatchNorm2d(out_channels))
-            # Activation to be added if needed
-            if activation is not None:
-                modules.append(activation)
-            # Added max pooling module
-            if max_pooling_kernel > 0:
-                modules.append(nn.MaxPool2d(max_pooling_kernel))
-            return tuple(modules)
+    def __call__(self) -> Tuple[nn.Module]:
+        """
+        Generate all torch module for this 2-dimension convolutional neural block
+        @param self: Reference to this convolutional neural block builder
+        @type self: Conv1DBlockBuilder
+        @return: List of torch module
+        @rtype: Tuple
+        """
+        modules = []
+        # First define the 2D convolution
+        conv_module = nn.Conv2d(
+            self.in_channels,
+            self.out_channels,
+            kernel_size=self.kernel_size,
+            stride=self.stride,
+            padding=self.padding,
+            bias=self.bias)
+        modules.append(conv_module)
+
+        # Add the batch normalization
+        if self.batch_norm:
+            modules.append(nn.BatchNorm2d(self.out_channels))
+        # Activation to be added if needed
+        if self.activation is not None:
+            modules.append(self.activation)
+
+        # Added max pooling module
+        if self.max_pooling_kernel > 0:
+            modules.append(nn.MaxPool2d(self.max_pooling_kernel))
+        return tuple(modules)

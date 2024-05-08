@@ -48,27 +48,27 @@ class Conv1DBlockBuilder(ConvBlockBuilder, ABC):
                                                  activation,
                                                  bias)
 
-        def get_conv_modules(self) -> Tuple[nn.Module]:
-            """
-            Generate all torch module for this 1-dimension convolutional neural block
-            @param self: Reference to this convolutional neural block builder
-            @type self: Conv1DBlockBuilder
-            @return: List of torch module
-            @rtype: Tuple
-            """
-            modules = []
-            conv_module = nn.Conv1d(
-                self.in_channels,
-                self.out_channels,
-                kernel_size=self.kernel_size,
-                stride=self.stride,
-                padding=self.padding,
-                bias=self.bias)
-            modules.append(conv_module)
-            if batch_norm:
-                modules.append(nn.BatchNorm1d(out_channels))
-            if activation is not None:
-                modules.append(activation)
-            if max_pooling_kernel > 0:
-                modules.append(nn.MaxPool1d(max_pooling_kernel))
-            return tuple(modules)
+    def __call__(self) -> Tuple[nn.Module]:
+        """
+        Generate all torch module for this 1-dimension convolutional neural block
+        @param self: Reference to this convolutional neural block builder
+        @type self: Conv1DBlockBuilder
+        @return: List of torch module
+        @rtype: Tuple
+        """
+        modules = []
+        conv_module = nn.Conv1d(
+            self.in_channels,
+            self.out_channels,
+            kernel_size=self.kernel_size,
+            stride=self.stride,
+            padding=self.padding,
+            bias=self.bias)
+        modules.append(conv_module)
+        if self.batch_norm:
+            modules.append(nn.BatchNorm1d(self.out_channels))
+        if self.activation is not None:
+            modules.append(self.activation)
+        if self.max_pooling_kernel > 0:
+            modules.append(nn.MaxPool1d(self.max_pooling_kernel))
+        return tuple(modules)
