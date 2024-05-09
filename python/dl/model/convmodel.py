@@ -1,10 +1,7 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
-"""
-    Generic Convolutional neural network which can be used as Gan discriminator or VariationalNeuralBlock Auto-encoder_model
-    decoder_model module. For Gan and LinearVAE, the fully connected linear modules are not defined
-"""
+from abc import ABC
 
 from dl.block.ffnnblock import FFNNBlock
 from dl.block.convblock import ConvBlock
@@ -14,7 +11,13 @@ from util import log_size
 import torch
 import torch.nn as nn
 
-class ConvModel(NeuralModel):
+"""
+    Generic Convolutional neural network which can be used as Gan discriminator or VariationalNeuralBlock Auto-encoder_model
+    decoder_model module. For Gan and LinearVAE, the fully connected linear modules are not defined
+"""
+
+
+class ConvModel(NeuralModel, ABC):
     def __init__(self,
                  model_id: AnyStr,
                  conv_blocks: List[ConvBlock],
@@ -33,12 +36,12 @@ class ConvModel(NeuralModel):
         self.ffnn_blocks = ffnn_blocks
 
         # Record the number of input and output features from the first and last neural block respectively
-        self.in_features = conv_blocks[0].in_features
+        self.in_features = conv_blocks[0].in_channels
         self.out_features = ffnn_blocks[-1].out_features
         # Define the sequence of modules from the layout
         conv_modules = [module for block in conv_blocks for module in block.modules]
         ffnn_modules = [module for block in ffnn_blocks for module in block.modules]
-        modules = conv_modules + ffnn_modules
+        modules = conv_modules + [nn.Flatten()] + ffnn_modules
 
         super(ConvModel, self).__init__(model_id, nn.Sequential(*modules))
 
@@ -63,30 +66,18 @@ class ConvModel(NeuralModel):
         """
         return x.view(resize, -1)
 
-    def _state_params(self) -> Dict[AnyStr, Any]:
-        return {
-            "model_id": self.model_id,
-            "conv_dimension": self.conv_blocks[0].conv_dimension,
-            "input_size": self.conv_blocks[0].in_channels,
-            "output_size": self.ffnn_blocks[-1].out_features ,
-            "dff_model_input_size": self.ffnn_blocks[0].in_features
-        }
-
     def __repr__(self) -> str:
-        modules = [module for module in self.conv_model.modules() if not isinstance(module, nn.Sequential)]
-        conv_repr = ' '.join([f'\n{str(module)}' for module in modules if module is not None])
-        if self.dff_model is not None:
-            modules = [module for module in self.dff_model.modules() if not isinstance(module, nn.Sequential)]
-            dff_repr = ' '.join([f'\n{str(module)}' for module in modules if module is not None])
-            return f'{self._state_params()}{conv_repr}{dff_repr}'
-        else:
-            return f'{self._state_params()}{conv_repr}'
+        modules = [str(module) for module in self.get_modules()]
+        module_repr = '\n'.join(modules)
+        return f'State:{self._state_params()}\nModules:\n{module_repr}'
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
-           Process the model as sequence of modules, implicitly called by __call__
-           :param x: Input input_tensor
-           :return: Tensor output from this network
+        Process the model as sequence of modules, implicitly called by __call__
+        @param x: Input input_tensor
+        @type x: A torch tensor
+        @return: A tensor output from last layer
+        @rtype; Torch tensor
         """
         log_size(x, 'Input Conv model')
         x = self.conv_model(x)
@@ -101,6 +92,11 @@ class ConvModel(NeuralModel):
             log_size(x, 'Output connected Conv')
         return x
 
-
-
-
+    def _state_params(self) -> Dict[AnyStr, Any]:
+        return {
+            "model_id": self.model_id,
+            "conv_dimension": self.conv_blocks[0].conv_dimension,
+            "input_size": self.conv_blocks[0].in_channels,
+            "output_size": self.ffnn_blocks[-1].out_features ,
+            "dff_model_input_size": self.ffnn_blocks[0].in_features
+        }

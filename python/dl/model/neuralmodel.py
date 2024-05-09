@@ -2,8 +2,9 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 import torch
+import torch.nn as nn
 from abc import abstractmethod
-from typing import AnyStr, Self, overload
+from typing import AnyStr, Self, List
 
 """
 Abstract base class for Neural network models. The sub-classes have to implement get_model,
@@ -24,7 +25,9 @@ class NeuralModel(torch.nn.Module):
         self.model_id = model_id
         self.model = model
 
-    @overload
+    def get_modules(self) -> List[nn.Module]:
+        return list(self.model.children())
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Execute the default forward method for all neural network models inherited from this class

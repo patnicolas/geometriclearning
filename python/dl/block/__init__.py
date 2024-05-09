@@ -11,9 +11,9 @@ class ConvBlockBuilder(object):
     def __init__(self,
                  in_channels: int,
                  out_channels: int,
-                 kernel_size: int,
-                 stride: int,
-                 padding: int,
+                 kernel_size: int | Tuple[int],
+                 stride: int | Tuple[int],
+                 padding: int | Tuple[int],
                  batch_norm: bool,
                  max_pooling_kernel: int,
                  activation: nn.Module,
@@ -25,7 +25,7 @@ class ConvBlockBuilder(object):
         @param out_channels: Number of output channels
         @type out_channels: int
         @param kernel_size: Size of the kernel (num_records) for 1D and (num_records, num_records) for 2D
-        @type kernel_size: int
+        @type kernel_size: Union[int, Tuple[Int]]
         @param stride: Stride for convolution (st) for 1D, (st, st) for 2D
         @type stride: int
         @param batch_norm: Boolean flag to specify if a batch normalization is required
@@ -36,8 +36,6 @@ class ConvBlockBuilder(object):
         @type activation: int
         @param bias: Specify if bias is not null
         @type bias: bool
-        @param is_spectral: Specify if we need to apply the spectral norm to the convolutional layer
-        @type is_spectral: bool
         """
         self.in_channels = in_channels
         self.out_channels = out_channels

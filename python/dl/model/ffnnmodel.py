@@ -13,7 +13,6 @@ Class builder for a feed-forward neural network model using feed-forward neural 
 
 
 class FFNNModel(NeuralModel):
-
     def __init__(self, model_id: AnyStr, neural_blocks: List[FFNNBlock]):
         """
         Constructor for the Feed Forward Neural Network model as a set of Neural blocks
@@ -32,7 +31,6 @@ class FFNNModel(NeuralModel):
         modules = [module for block in neural_blocks for module in block.modules]
         super(FFNNModel, self).__init__(model_id, torch.nn.Sequential(*modules))
 
-    @overload
     def invert(self) -> Self:
         """
         Generate the inverted neural layout for this feed forward neural network
@@ -42,7 +40,6 @@ class FFNNModel(NeuralModel):
         neural_blocks = [block.invert() for block in self.neural_blocks[::-1]]
         return FFNNModel(f'_{self.model_id}', neural_blocks)
 
-    @overload
     def get_in_features(self) -> int:
         """
         Polymorphic method to retrieve the number of input features
@@ -51,7 +48,6 @@ class FFNNModel(NeuralModel):
         """
         return self.in_features
 
-    @overload
     def get_out_features(self) -> int:
         """
         Polymorphic method to retrieve the number of output features

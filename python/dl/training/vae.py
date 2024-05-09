@@ -1,6 +1,7 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
+from abc import ABC
 
 from dl.training.neuralnet import NeuralNet
 from dl.training.hyperparams import HyperParams
@@ -27,7 +28,8 @@ The key components are
 - Optional set of plotting parameters
 """
 
-class VAE(NeuralNet):
+
+class VAE(NeuralNet, ABC):
     def __init__(self,
                  vae_model: VAEModel,
                  hyper_params: HyperParams,
@@ -49,7 +51,6 @@ class VAE(NeuralNet):
         """
         super(VAE, self).__init__(vae_model, hyper_params, early_stop_logger, metrics, plot_parameters)
 
-    @overload
     def __call__(self, train_loader: DataLoader, eval_loader: DataLoader) -> NoReturn:
         """
 E       Execute the cycle of training and evaluation for the

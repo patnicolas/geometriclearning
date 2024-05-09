@@ -61,7 +61,6 @@ class FFNNBlock(NeuralBlock):
         """
         return cls(block_id, nn.Linear(in_features, out_features, False), activation, drop_out)
 
-    @overload
     def invert(self) -> Self:
         """
         Invert the layer size (in_feature <-> out_feature) and remove drop_out for decoder

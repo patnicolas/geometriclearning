@@ -28,7 +28,6 @@ class VariationalBlock(NeuralBlock):
         self.log_var = log_var
         self.sampler_fc = sampler_fc
 
-    @overload
     def invert(self) -> Self:
         raise DLException('Cannot invert variational Neural block')
 

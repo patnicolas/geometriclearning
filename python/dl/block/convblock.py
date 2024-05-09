@@ -2,9 +2,9 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from torch import nn
-from typing import Tuple, NoReturn
-from dl.block.conv1dblockbuilder import Conv1DBlockBuilder
-from dl.block.conv2dblockbuilder import Conv2DBlockBuilder
+from typing import Tuple, NoReturn, Self
+from dl.block.builder.conv1dblockbuilder import Conv1DBlockBuilder
+from dl.block.builder.conv2dblockbuilder import Conv2DBlockBuilder
 from dl.dlexception import DLException
 
 """    
@@ -91,6 +91,9 @@ class ConvBlock(nn.Module):
             case _:
                 raise DLException(f'Convolution for dimension {conv_dimension} is not supported')
 
+    def invert(self) -> Self:
+        pass
+
     def __repr__(self) -> str:
         return ' '.join([f'\n{str(module)}' for module in self.modules])
 
@@ -106,7 +109,7 @@ class ConvBlock(nn.Module):
     """ -----------------------------------   Private helper methods ---------------------------  """
 
     @staticmethod
-    def __validate_input(
+    def validate_input(
             conv_dimension: int,
             in_channels: int,
             out_channels: int,
@@ -119,3 +122,10 @@ class ConvBlock(nn.Module):
         assert kernel_size > 0, f'Conv neural block kernel_size {kernel_size} should be >0'
         assert stride >= 0, f'Conv neural block stride {stride} should be >= 0'
         assert 0 <= max_pooling_kernel < 5, f'Conv neural block max_pooling_kernel size {max_pooling_kernel} should be [0, 4]'
+
+    @classmethod
+    def verify(cls, neural_blocks: list):
+        assert len(neural_blocks) > 0, "Convolutional neural network needs one neural block"
+        for index in range(len(neural_blocks) - 1):
+            assert neural_blocks[index + 1].z_dim == neural_blocks[index].output_size, \
+                f'Layer {index} input_tensor != layer {index + 1} output'

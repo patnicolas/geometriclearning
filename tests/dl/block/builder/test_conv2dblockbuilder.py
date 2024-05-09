@@ -1,6 +1,6 @@
 import unittest
 from torch import nn
-from dl.block.conv2dblockbuilder import Conv2DBlockBuilder
+from dl.block.builder.conv2dblockbuilder import Conv2DBlockBuilder
 
 
 class Conv2DBlockBuilderTest(unittest.TestCase):

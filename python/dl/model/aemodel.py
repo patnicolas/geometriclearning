@@ -56,7 +56,6 @@ class AEModel(NeuralModel):
     def get_out_features(self) -> int:
         return self.encoder.get_in_features()
 
-    @overload
     def invert(self) -> Self:
         """
         Autoencoder is composed of an encoder and mirror decoder but cannot itself be inverted

@@ -3,9 +3,10 @@ __copyright__ = "Copyright 2020, 2022  All rights reserved."
 
 import logging
 import torch
-from typing import AnyStr, NoReturn
+from typing import AnyStr, NoReturn, overload
 
 
+@overload
 def log_size(x: torch.Tensor, comment: AnyStr = "") -> NoReturn:
     """
     Utility to display the shape of an input_tensor
@@ -18,8 +19,9 @@ def log_size(x: torch.Tensor, comment: AnyStr = "") -> NoReturn:
     sz = list(x.size())
     logging.info(f'{str(sz)} {comment}')
 
+@overload
 
-def log_sizes(x: torch.Tensor, y: torch.Tensor, comment: AnyStr = '') -> NoReturn:
+def log_size(x: torch.Tensor, y: torch.Tensor, comment: AnyStr = '') -> NoReturn:
     """
     Utility to display the shape of two input_tensor
     @param x: Torch input_tensor which size to be computed

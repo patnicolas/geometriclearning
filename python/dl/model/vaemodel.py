@@ -51,7 +51,6 @@ class VAEModel(NeuralModel):
                f'\n *Variational: {repr(self.variational_block)}' \
                f'\n * Decoder: {repr(self.decoder)}'
 
-    @overload
     def get_in_features(self) -> int:
         """
         Polymorphic method to retrieve the number of input features to the variational autoencoder
@@ -60,11 +59,9 @@ class VAEModel(NeuralModel):
         """
         return self.encoder.get_in_features()
 
-    @overload
     def get_latent_features(self) -> int:
         return self.variational_block.sampler_fc.in_features
 
-    @overload
     def get_out_features(self) -> int:
         """
         Polymorphic method to retrieve the number of output features to the variational autoencoder
@@ -82,7 +79,6 @@ class VAEModel(NeuralModel):
         """
         return self.mu, self.log_var
 
-    @overload
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Process the model as sequence of modules, implicitly called by __call__. The mean and logarithm
@@ -108,7 +104,6 @@ class VAEModel(NeuralModel):
         self.log_var = log_var
         return z
 
-    @overload
     def invert(self) -> Self:
         """
         Variational autoencoder is composed of an encoder and mirror decoder but cannot itself be inverted
