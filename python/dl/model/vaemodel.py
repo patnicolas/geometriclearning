@@ -7,7 +7,6 @@ from dl.block.variationalblock import VariationalBlock
 import torch
 
 import logging
-
 logger = logging.getLogger('dl.model.VAEModel')
 
 """

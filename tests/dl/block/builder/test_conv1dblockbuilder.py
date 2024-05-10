@@ -56,7 +56,6 @@ class Conv1DBlockBuilderTest(unittest.TestCase):
         except DLException as e:
             assert (True)
 
-
     @staticmethod
     def __create_conv_block(kernel_size: int, output_channels: int) -> Conv1DBlockBuilder:
         input_channels = 62

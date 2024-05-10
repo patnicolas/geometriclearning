@@ -12,9 +12,9 @@ class DeConv2DBlockBuilder(ConvBlockBuilder, ABC):
     def __init__(self,
                  in_channels: int,
                  out_channels: int,
-                 kernel_size: int | Tuple[int],
-                 stride: int | Tuple[int],
-                 padding: int | Tuple[int],
+                 kernel_size: Tuple[int, int],
+                 stride: Tuple[int, int],
+                 padding: Tuple[int, int],
                  batch_norm: bool,
                  activation: nn.Module,
                  bias: bool):
@@ -76,5 +76,8 @@ class DeConv2DBlockBuilder(ConvBlockBuilder, ABC):
         @return: output channels if correct, -1 otherwise
         @rtype: int
         """
-        return sum(self.stride)*(self.in_channels -1) - 2 * sum(self.padding) + sum(self.kernel_size)
+        stride = self.stride[0]*self.stride[1]
+        padding = self.padding[0]*self.padding[1]
+        kernel_size = self.kernel_size[0]*self.kernel_size[1]
+        return stride*(self.in_channels-1) -2*padding + kernel_size
 

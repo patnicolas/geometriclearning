@@ -1,10 +1,12 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
-from typing import List, AnyStr, Self, overload
+from typing import List, AnyStr, Self
 from dl.model.neuralmodel import NeuralModel
 from dl.block.ffnnblock import FFNNBlock
 import torch
+import logging
+logger = logging.getLogger('dl.model.FFNNModel')
 
 """
 Class builder for a feed-forward neural network model using feed-forward neural blocks
@@ -63,10 +65,14 @@ class FFNNModel(NeuralModel):
     def save(self, extra_params: dict = None):
         raise NotImplementedError('NeuralModel.save is an abstract method')
 
-
     @staticmethod
-    def is_valid(neural_blocks: List[FFNNBlock]):
-        assert len(neural_blocks) > 0, "Deep Feed Forward network needs at least one layer"
-        for index in range(len(neural_blocks) - 1):
-            assert neural_blocks[index + 1].in_features == neural_blocks[index].out_features, \
-                f'Layer {index} input_tensor != layer {index+1} output'
+    def is_valid(neural_blocks: List[FFNNBlock]) -> bool:
+        try:
+            assert len(neural_blocks) > 0, "Deep Feed Forward network needs at least one layer"
+            for index in range(len(neural_blocks) - 1):
+                assert neural_blocks[index + 1].in_features == neural_blocks[index].out_features, \
+                    f'Layer {index} input_tensor != layer {index+1} output'
+            return True
+        except AssertionError as e:
+            logging.error(str(e))
+            return False

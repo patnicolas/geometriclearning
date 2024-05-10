@@ -12,9 +12,9 @@ class DeConv1DBlockBuilder(ConvBlockBuilder, ABC):
     def __init__(self,
                  in_channels: int,
                  out_channels: int,
-                 kernel_size: int | Tuple[int],
-                 stride: int | Tuple[int],
-                 padding: int | Tuple[int],
+                 kernel_size: int,
+                 stride: int,
+                 padding: int,
                  batch_norm: bool,
                  activation: nn.Module,
                  bias: bool):
