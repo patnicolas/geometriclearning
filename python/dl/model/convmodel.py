@@ -59,6 +59,16 @@ class ConvModel(NeuralModel, ABC):
 
     @classmethod
     def build(cls, model_id: AnyStr, conv_blocks: List[ConvBlock]) -> Self:
+        """
+        Create a pure convolutional neural network as a convolutional encoder for
+        variational auto-encoder or generative adversarial network
+        @param model_id: Identifier for the model
+        @type model_id: AnyStr
+        @param conv_blocks: List of convolutional blocks
+        @type de_conv_blocks: List[ConvBlock]
+        @return: Instance of decoder of type ConvModel
+        @rtype: ConvModel
+        """
         return  cls(model_id, conv_blocks, [])
 
     def has_fully_connected(self) -> bool:
@@ -136,7 +146,6 @@ class ConvModel(NeuralModel, ABC):
         except AssertionError as e:
             logging.error(e)
             return False
-
 
     """ ----------------------------   Private helper methods --------------------------- """
     @staticmethod
