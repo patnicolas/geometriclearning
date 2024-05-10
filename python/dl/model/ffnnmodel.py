@@ -21,7 +21,7 @@ class FFNNModel(NeuralModel):
         @param neural_blocks: List of Neural blocks
         @type neural_blocks:
         """
-        FFNNModel.__validate(neural_blocks)
+        FFNNModel.validate(neural_blocks)
         self.neural_blocks = neural_blocks
         # Record the number of input and output features from the first and last neural block respectively
         self.in_features = neural_blocks[0].in_features
@@ -63,8 +63,9 @@ class FFNNModel(NeuralModel):
     def save(self, extra_params: dict = None):
         raise NotImplementedError('NeuralModel.save is an abstract method')
 
+
     @staticmethod
-    def __validate(neural_blocks: List[FFNNBlock]):
+    def is_valid(neural_blocks: List[FFNNBlock]):
         assert len(neural_blocks) > 0, "Deep Feed Forward network needs at least one layer"
         for index in range(len(neural_blocks) - 1):
             assert neural_blocks[index + 1].in_features == neural_blocks[index].out_features, \

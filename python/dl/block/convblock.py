@@ -27,9 +27,9 @@ class ConvBlock(nn.Module):
                  conv_dimension: int,
                  in_channels: int,
                  out_channels: int,
-                 kernel_size: int,
-                 stride: int,
-                 padding: int,
+                 kernel_size: int | Tuple[int, int],
+                 stride: int | Tuple[int, int],
+                 padding: int | Tuple[int, int],
                  batch_norm: bool,
                  max_pooling_kernel: int,
                  activation: nn.Module,
@@ -58,7 +58,7 @@ class ConvBlock(nn.Module):
         @param is_spectral: Specify if we need to apply the spectral norm to the convolutional layer
         @type is_spectral: bool
         """
-        ConvBlock.__validate_input(conv_dimension, in_channels, out_channels, kernel_size, stride, max_pooling_kernel)
+        # ConvBlock.validate_input(conv_dimension, in_channels, out_channels, kernel_size, stride, max_pooling_kernel)
 
         super(ConvBlock, self).__init__()
         self.in_channels = in_channels
@@ -67,7 +67,7 @@ class ConvBlock(nn.Module):
         self.is_spectral = is_spectral
         match conv_dimension:
             case 1:
-                self.modules = Conv1DBlockBuilder(
+                block_builder = Conv1DBlockBuilder(
                     in_channels,
                     out_channels,
                     kernel_size,
@@ -76,9 +76,9 @@ class ConvBlock(nn.Module):
                     batch_norm,
                     max_pooling_kernel,
                     activation,
-                    bias)()
+                    bias)
             case 2:
-                self.modules = Conv2DBlockBuilder(
+                block_builder = Conv2DBlockBuilder(
                     in_channels,
                     out_channels,
                     kernel_size,
@@ -87,9 +87,11 @@ class ConvBlock(nn.Module):
                     batch_norm,
                     max_pooling_kernel,
                     activation,
-                    bias)()
+                    bias)
             case _:
                 raise DLException(f'Convolution for dimension {conv_dimension} is not supported')
+        block_builder.is_valid()
+        self.modules = block_builder()
 
     def invert(self) -> Self:
         pass

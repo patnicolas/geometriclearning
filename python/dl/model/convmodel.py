@@ -6,6 +6,7 @@ from abc import ABC
 from dl.block.ffnnblock import FFNNBlock
 from dl.block.convblock import ConvBlock
 from dl.model.neuralmodel import NeuralModel
+from dl.model.ffnnmodel import FFNNModel
 from typing import List, AnyStr, Dict, Any
 from util import log_size
 import torch
@@ -31,7 +32,7 @@ class ConvModel(NeuralModel, ABC):
         @param ffnn_blocks: List of Feed-Forward Neural Blocks
         @type ffnn_blocks: List[FFNNBlock]
         """
-        assert len(conv_blocks) > 0, 'This convolutional model has not defined neural blcoks'
+        ConvModel.is_valid(conv_blocks, ffnn_blocks)
         self.conv_blocks = conv_blocks
         self.ffnn_blocks = ffnn_blocks
 
@@ -100,3 +101,17 @@ class ConvModel(NeuralModel, ABC):
             "output_size": self.ffnn_blocks[-1].out_features ,
             "dff_model_input_size": self.ffnn_blocks[0].in_features
         }
+
+    @staticmethod
+    def is_valid(conv_blocks: List[ConvBlock], ffnn_blocks: List[FFNNBlock]):
+        assert conv_blocks, 'This convolutional model has not defined neural blocks'
+        ConvModel.validate(conv_blocks)
+        if not ffnn_blocks:
+            FFNNModel.is_valid(ffnn_blocks)
+
+    @staticmethod
+    def validate(neural_blocks: List[ConvBlock]):
+        assert len(neural_blocks) > 0, "Deep Feed Forward network needs at least one layer"
+        for index in range(len(neural_blocks) - 1):
+            assert neural_blocks[index + 1].in_channels == neural_blocks[index].out_channels, \
+                f'Layer {index} input_tensor != layer {index+1} output'

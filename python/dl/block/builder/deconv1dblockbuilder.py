@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from abc import ABC
 
-from dl.block import ConvBlockBuilder
+from dl.block.builder import ConvBlockBuilder
 import torch.nn as nn
 from typing import Tuple, List
 
@@ -69,4 +69,13 @@ class DeConv1DBlockBuilder(ConvBlockBuilder, ABC):
         if self.activation is not None:
             modules.append(self.activation)
         return tuple(modules)
+
+    def compute_out_channels(self) -> int:
+        """
+        Compute the output channels from the input channels, stride, padding and kernel size
+        @return: output channels if correct, -1 otherwise
+        @rtype: int
+        """
+        return self.stride * (self.in_channels - 1) - 2 * self.padding + self.kernel_size
+
 

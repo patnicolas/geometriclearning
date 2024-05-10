@@ -3,9 +3,9 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from abc import ABC
 
-from dl.block import ConvBlockBuilder
+from dl.block.builder import ConvBlockBuilder
 import torch.nn as nn
-from typing import Tuple, overload
+from typing import Tuple
 
 
 class Conv1DBlockBuilder(ConvBlockBuilder, ABC):
@@ -74,3 +74,12 @@ class Conv1DBlockBuilder(ConvBlockBuilder, ABC):
         if self.max_pooling_kernel > 0:
             modules.append(nn.MaxPool1d(self.max_pooling_kernel))
         return tuple(modules)
+
+    def compute_out_channels(self) -> int:
+        """
+        Compute the output channels from the input channels, stride, padding and kernel size
+        @return: output channels if correct, -1 otherwise
+        @rtype: int
+        """
+        num = self.in_channels + 2*self.padding - self.kernel_size
+        return int(num/self.stride) + 1 if num % self.stride == 0 else -1
