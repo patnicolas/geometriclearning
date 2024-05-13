@@ -10,7 +10,7 @@ from dl.dlexception import DLException
 """    
     Generic convolutional neural block for 1 and 2 dimensions
     Components:
-         Convolution
+         Convolution (kernel, Stride, padding)
          Batch normalization (Optional)
          Activation
          Max pooling (Optional)
@@ -58,7 +58,7 @@ class ConvBlock(nn.Module):
         @param is_spectral: Specify if we need to apply the spectral norm to the convolutional layer
         @type is_spectral: bool
         """
-        # ConvBlock.validate_input(conv_dimension, in_channels, out_channels, kernel_size, stride, max_pooling_kernel)
+        ConvBlock.validate_input(conv_dimension, in_channels, out_channels, kernel_size, stride, max_pooling_kernel)
 
         super(ConvBlock, self).__init__()
         self.in_channels = in_channels
@@ -108,8 +108,6 @@ class ConvBlock(nn.Module):
         return tuple([module for module in self.modules \
                       if type(module) == nn.Linear or type(module) == nn.Conv2d or type(module) == nn.Conv1d])
 
-    """ -----------------------------------   Private helper methods ---------------------------  """
-
     @staticmethod
     def validate_input(
             conv_dimension: int,
@@ -117,17 +115,14 @@ class ConvBlock(nn.Module):
             out_channels: int,
             kernel_size: int,
             stride: int,
-            max_pooling_kernel: int) -> NoReturn:
-        assert 0 < conv_dimension < 4, f'Conv neural block conv_dim {conv_dimension} should be {1, 2, 3}'
-        assert in_channels > 0, f'Conv neural block in_channels {in_channels} should be >0'
-        assert out_channels > 0, f'Conv neural block out_channels {out_channels} should be >0'
-        assert kernel_size > 0, f'Conv neural block kernel_size {kernel_size} should be >0'
-        assert stride >= 0, f'Conv neural block stride {stride} should be >= 0'
-        assert 0 <= max_pooling_kernel < 5, f'Conv neural block max_pooling_kernel size {max_pooling_kernel} should be [0, 4]'
-
-    @classmethod
-    def verify(cls, neural_blocks: list):
-        assert len(neural_blocks) > 0, "Convolutional neural network needs one neural block"
-        for index in range(len(neural_blocks) - 1):
-            assert neural_blocks[index + 1].z_dim == neural_blocks[index].output_size, \
-                f'Layer {index} input_tensor != layer {index + 1} output'
+            max_pooling_kernel: int = -1) -> NoReturn:
+        try:
+            assert 0 < conv_dimension < 4, f'Conv neural block conv_dim {conv_dimension} should be {1, 2, 3}'
+            assert in_channels > 0, f'Conv neural block in_channels {in_channels} should be >0'
+            assert out_channels > 0, f'Conv neural block out_channels {out_channels} should be >0'
+            assert kernel_size > 0, f'Conv neural block kernel_size {kernel_size} should be >0'
+            assert stride >= 0, f'Conv neural block stride {stride} should be >= 0'
+            assert 0 <= max_pooling_kernel < 5 or max_pooling_kernel == -1, \
+                f'Conv neural block max_pooling_kernel size {max_pooling_kernel} should be [0, 4]'
+        except AssertionError as e:
+            raise DLException(str(e))

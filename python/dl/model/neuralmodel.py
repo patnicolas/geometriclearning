@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 from abc import abstractmethod
 from typing import AnyStr, Self, List
+from util import log_size
 
 """
 Abstract base class for Neural network models. The sub-classes have to implement get_model,
@@ -36,7 +37,10 @@ class NeuralModel(torch.nn.Module):
         @return: Prediction for the input
         @rtype: Torch tensor
         """
-        return self.model(x)
+        log_size(x, f'Input {self.model_id}')
+        x = self.model(x)
+        log_size(x, f'Output {self.model_id}')
+        return x
 
     @abstractmethod
     def get_in_features(self) -> int:

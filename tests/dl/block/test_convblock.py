@@ -1,36 +1,81 @@
 import unittest
 from torch import nn
 from dl.block.convblock import ConvBlock
+from dl.dlexception import DLException
+from typing import Tuple
 
 class ConvBlockTest(unittest.TestCase):
 
-    def test_init_conv1(self):
+    def test_init_conv1_succeed(self):
         dimension = 1
-        conv_block = ConvBlockTest.__create_conv_block(dimension)
-        print(repr(conv_block))
+        out_channels = 33
+        try:
+            conv_block = ConvBlockTest.__create_conv_block(dimension, out_channels)
+            self.assertTrue(conv_block.out_channels == out_channels)
+            print(repr(conv_block))
+        except DLException:
+            assert False
 
-    def test_init_conv2(self):
+    def test_init_conv1_failed(self):
+        dimension = 1
+        out_channels = 32
+        try:
+            conv_block = ConvBlockTest.__create_conv_block(dimension, out_channels)
+            self.assertFalse(conv_block.out_channels == out_channels)
+            print(repr(conv_block))
+        except DLException:
+            assert True
+
+    def test_init_conv2_succeed(self):
         dimension = 2
-        conv_block = ConvBlockTest.__create_conv_block(dimension)
-        print(repr(conv_block))
+        out_channels = 19
+        try:
+            conv_block = ConvBlockTest.__create_conv_block(dimension, out_channels)
+            self.assertTrue(conv_block.out_channels == out_channels)
+            print(repr(conv_block))
+        except DLException:
+            assert False
+
+    def test_init_conv2_failed(self):
+        dimension = 2
+        out_channels = 16
+        try:
+            conv_block = ConvBlockTest.__create_conv_block(dimension, out_channels)
+            self.assertFalse(conv_block.out_channels == out_channels)
+            print(repr(conv_block))
+        except DLException:
+            assert True
 
     def test_module_weights(self):
         dimension = 2
-        conv_block = ConvBlockTest.__create_conv_block(dimension)
-        weights = conv_block.get_modules_weights()
-        print(f'Weights: {weights}')
+        out_channels = 19
+        try:
+            conv_block = ConvBlockTest.__create_conv_block(dimension, out_channels)
+            weights = conv_block.get_modules_weights()
+            self.assertTrue(len(weights) > 1)
+            print(f'Weights: {weights}')
+        except DLException:
+            assert False
 
     @staticmethod
-    def __create_conv_block(dimension: int) -> ConvBlock:
-        in_channels = 64
-        out_channels = 32
+    def __create_conv_block(dimension: int, out_channels: int | Tuple[int, int]) -> ConvBlock:
         is_batch_normalization = True
         max_pooling_kernel = 2
         activation = nn.Tanh()
-        kernel_size = 3
+        if dimension == 1:
+            in_channels = 65
+            kernel_size = 3
+            stride = 2
+            padding = 1
+        elif dimension == 2:
+            in_channels = 68
+            kernel_size = (2, 2)
+            stride = (2, 2)
+            padding = (2, 2)
+        else:
+            raise DLException(f'Dimension {dimension} is not supported')
+
         has_bias = False
-        stride = 1
-        padding = 1
         return ConvBlock(
             dimension,
             in_channels,

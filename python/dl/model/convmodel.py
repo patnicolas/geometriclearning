@@ -105,6 +105,7 @@ class ConvModel(NeuralModel, ABC):
         @return: A tensor output from last layer
         @rtype; Torch tensor
         """
+        """
         log_size(x, 'Input Conv model')
         x = self.conv_model(x)
         log_size(x, 'Output Conv model')
@@ -116,6 +117,11 @@ class ConvModel(NeuralModel, ABC):
             log_size(x, 'After width Conv')
             x = self.dff_model(x)
             log_size(x, 'Output connected Conv')
+        return x
+        """
+        log_size(x, 'Input Conv model')
+        x = self.model(x)
+        log_size(x, 'Output Conv model')
         return x
 
     def _state_params(self) -> Dict[AnyStr, Any]:

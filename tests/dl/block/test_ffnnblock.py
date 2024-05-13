@@ -1,6 +1,7 @@
 import unittest
 from torch import nn
 from dl.block.ffnnblock import FFNNBlock
+from dl.dlexception import DLException
 
 
 class FFNNBlockTest(unittest.TestCase):
@@ -8,10 +9,17 @@ class FFNNBlockTest(unittest.TestCase):
     def test_init(self):
         in_features = 24
         out_features = 12
-        linear = nn.Linear(in_features, out_features, False)
-        activation = nn.ReLU()
-        ffnn_block = FFNNBlock('id1', linear, activation)
-        print(repr(ffnn_block))
+        try:
+            linear = nn.Linear(in_features, out_features, False)
+            activation = nn.ReLU()
+            ffnn_block = FFNNBlock('id1', linear, activation)
+            self.assertTrue(ffnn_block.in_features == in_features)
+            self.assertTrue(ffnn_block.out_features == out_features)
+            print(repr(ffnn_block))
+            assert True
+        except DLException as e:
+            assert False
+
 
     def test_init_cls(self):
         in_features = 24

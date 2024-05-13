@@ -8,7 +8,9 @@ from dl.model.ffnnmodel import FFNNModel
 from dl.block.deconvblock import DeConvBlock
 from dl.block.ffnnblock import FFNNBlock
 from typing import AnyStr, List, Optional, Self, Dict, Any
+from util import log_size
 import torch.nn as nn
+import torch
 import logging
 logger = logging.getLogger('dl.model.DeConvModel')
 
@@ -27,7 +29,7 @@ class DeConvModel(NeuralModel, ABC):
         @param ffnn_blocks: Optional list of Feed-Forward Neural Blocks
         @type ffnn_blocks: List[FFNNBlock]
         """
-        self.conv_blocks = de_conv_blocks
+        self.de_conv_blocks = de_conv_blocks
 
         # Record the number of input and output features from the first and last neural block respectively
         self.in_features = de_conv_blocks[0].in_channels
@@ -70,6 +72,27 @@ class DeConvModel(NeuralModel, ABC):
         modules = [str(module) for module in self.get_modules()]
         module_repr = '\n'.join(modules)
         return f'State:{self._state_params()}\nModules:\n{module_repr}'
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Process the model as sequence of modules, implicitly called by __call__
+        @param x: Input input_tensor
+        @type x: A torch tensor
+        @return: A tensor output from last layer
+        @rtype; Torch tensor
+        """
+        log_size(x, 'Input Conv model')
+        x = self.conv_model(x)
+        log_size(x, 'Output Conv model')
+        # If a full connected network is appended to the convolutional layers
+        if self.dff_model is not None:
+            log_size(x, 'Before width Conv')
+            sz = x.shape[0]
+            x = DeConvModel.reshape(x, sz)
+            log_size(x, 'After width Conv')
+            x = self.dff_model(x)
+            log_size(x, 'Output connected Conv')
+        return x
 
     def _state_params(self) -> Dict[AnyStr, Any]:
         return {
