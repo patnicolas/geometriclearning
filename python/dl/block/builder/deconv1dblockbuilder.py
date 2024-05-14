@@ -43,7 +43,6 @@ class DeConv1DBlockBuilder(ConvBlockBuilder, ABC):
                                                     stride,
                                                     padding,
                                                     batch_norm,
-                                                    padding,
                                                     -1,
                                                     activation,
                                                     bias)
@@ -60,6 +59,7 @@ class DeConv1DBlockBuilder(ConvBlockBuilder, ABC):
         conv_module = nn.ConvTranspose1d(
             self.in_channels,
             self.out_channels,
+            kernel_size=self.kernel_size,
             stride=self.stride,
             padding=self.padding,
             bias=self.bias)

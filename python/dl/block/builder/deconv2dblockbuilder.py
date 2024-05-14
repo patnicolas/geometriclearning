@@ -43,7 +43,6 @@ class DeConv2DBlockBuilder(ConvBlockBuilder, ABC):
                                                     stride,
                                                     padding,
                                                     batch_norm,
-                                                    padding,
                                                     -1,
                                                     activation,
                                                     bias)
@@ -60,10 +59,12 @@ class DeConv2DBlockBuilder(ConvBlockBuilder, ABC):
         conv_module = nn.ConvTranspose2d(
             self.in_channels,
             self.out_channels,
+            self.kernel_size,
             stride=self.stride,
             padding=self.padding,
             bias=self.bias)
         modules.append(conv_module)
+
         if self.batch_norm:
             modules.append(nn.BatchNorm2d(self.out_channels))
         if self.activation is not None:

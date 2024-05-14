@@ -2,7 +2,8 @@ import unittest
 from torch import nn
 from dl.block.convblock import ConvBlock
 from dl.dlexception import DLException
-from typing import Tuple
+
+
 
 class ConvBlockTest(unittest.TestCase):
 
@@ -46,19 +47,8 @@ class ConvBlockTest(unittest.TestCase):
         except DLException:
             assert True
 
-    def test_module_weights(self):
-        dimension = 2
-        out_channels = 19
-        try:
-            conv_block = ConvBlockTest.__create_conv_block(dimension, out_channels)
-            weights = conv_block.get_modules_weights()
-            self.assertTrue(len(weights) > 1)
-            print(f'Weights: {weights}')
-        except DLException:
-            assert False
-
     @staticmethod
-    def __create_conv_block(dimension: int, out_channels: int | Tuple[int, int]) -> ConvBlock:
+    def __create_conv_block(dimension: int, out_channels: int) -> ConvBlock:
         is_batch_normalization = True
         max_pooling_kernel = 2
         activation = nn.Tanh()

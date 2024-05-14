@@ -11,7 +11,7 @@ class DeConvBlockTest(unittest.TestCase):
         try:
             conv_block = DeConvBlockTest.__create_de_conv_block(dimension, out_channels)
             print(repr(conv_block))
-            self.assertTrue(conv_block.out_channel == out_channels)
+            self.assertTrue(conv_block.out_channels == out_channels)
         except DLException as e:
             assert False
 
@@ -73,5 +73,6 @@ class DeConvBlockTest(unittest.TestCase):
                 activation,
                 bias=has_bias)
 
-    if __name__ == '__main__':
-        unittest.main()
+
+if __name__ == '__main__':
+    unittest.main()

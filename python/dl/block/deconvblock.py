@@ -50,7 +50,7 @@ class DeConvBlock(nn.Module):
             @param bias: Specify if bias is not null
             @type bias: bool
             """
-        ConvBlock.validate_input(conv_dimension, in_channels, out_channels, kernel_size, stride)
+        ConvBlock.validate_input(conv_dimension, in_channels, out_channels, kernel_size, stride, padding)
 
         super(DeConvBlock, self).__init__()
         self.in_channels = in_channels

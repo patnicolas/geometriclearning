@@ -58,7 +58,14 @@ class ConvBlock(nn.Module):
         @param is_spectral: Specify if we need to apply the spectral norm to the convolutional layer
         @type is_spectral: bool
         """
-        ConvBlock.validate_input(conv_dimension, in_channels, out_channels, kernel_size, stride, max_pooling_kernel)
+        ConvBlock.validate_input(
+            conv_dimension,
+            in_channels,
+            out_channels,
+            kernel_size,
+            stride,
+            padding,
+            max_pooling_kernel)
 
         super(ConvBlock, self).__init__()
         self.in_channels = in_channels
@@ -113,15 +120,22 @@ class ConvBlock(nn.Module):
             conv_dimension: int,
             in_channels: int,
             out_channels: int,
-            kernel_size: int,
-            stride: int,
+            kernel_size: int | Tuple[int, int],
+            stride: int | Tuple[int, int],
+            padding: int | Tuple[int, int],
             max_pooling_kernel: int = -1) -> NoReturn:
         try:
-            assert 0 < conv_dimension < 4, f'Conv neural block conv_dim {conv_dimension} should be {1, 2, 3}'
+            assert 0 < conv_dimension < 3, f'Conv neural block conv_dim {conv_dimension} should be {1, 2, 3}'
             assert in_channels > 0, f'Conv neural block in_channels {in_channels} should be >0'
             assert out_channels > 0, f'Conv neural block out_channels {out_channels} should be >0'
-            assert kernel_size > 0, f'Conv neural block kernel_size {kernel_size} should be >0'
-            assert stride >= 0, f'Conv neural block stride {stride} should be >= 0'
+            if conv_dimension == 1:
+                assert kernel_size > 0, f'Conv neural block kernel_size {kernel_size} should be > 0'
+                assert stride >= 0, f'Conv neural block stride {stride} should be >= 0'
+                assert padding >= 0, f'Conv neural block padding {padding} should be >= 0'
+            else:
+                assert kernel_size[0] > 0 and kernel_size[1], f'Conv neural block kernel_size {kernel_size} should be > 0'
+                assert stride[0] >= 0 and stride[1] >= 0, f'Conv neural block stride {stride} should be >= 0'
+                assert padding[0] >= 0 and padding[1] >= 0, f'Conv neural block padding {padding} should be >= 0'
             assert 0 <= max_pooling_kernel < 5 or max_pooling_kernel == -1, \
                 f'Conv neural block max_pooling_kernel size {max_pooling_kernel} should be [0, 4]'
         except AssertionError as e:
