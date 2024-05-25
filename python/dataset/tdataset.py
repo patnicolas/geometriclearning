@@ -4,7 +4,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 import torch
 from torch.utils.data import Dataset
 from sklearn.preprocessing import MinMaxScaler
-from typing import Optional, Callable, AnyStr, List
+from typing import Optional, Callable, AnyStr, List, Tuple
 import pandas as pd
 import numpy as np
 from python.dataset.datasetexception import DatasetException
@@ -62,6 +62,11 @@ class TDataset(Dataset):
                     df = pd.read_csv(filename, dtype=float)
                 case '.json':
                     df = pd.read_json(filename, dtype=float)
+                case '.pt':
+                    data = torch.load(filename)
+                    if type(data) != torch.Tensor:
+                        raise DatasetException(f'Incorrect data type for {filename}!')
+                    df = pd.DataFrame(data.numpy())
                 case _:
                     raise DatasetException(f'Extension {ext} is not supported!')
             return df
@@ -72,6 +77,40 @@ class TDataset(Dataset):
         except Exception as e:
             logger.error(f'Unknown error {str(e)}')
             raise DatasetException(f'Unknown error {str(e)}')
+
+    @staticmethod
+    def torch_to_df(x: torch.Tensor) -> (pd.DataFrame, Tuple[int]):
+        if len(x.shape) == 0:
+            raise DatasetException(f'Shape of tensor {x.shape} is not supported')
+        elif len(x.shape) > 2:
+            y = x.reshape(x.shape[0], -1)
+        else:
+            y = x
+        return pd.DataFrame(y.numpy()), x.shape
+
+
+    @staticmethod
+    def torch_to_dfs(filename: AnyStr):
+        try:
+            ext = TDataset._extract_extension(filename)
+            assert ext == '.pt'
+            data = torch.load(filename)
+            if type(data) == torch.Tensor:
+                dfs = [TDataset.torch_to_df(data)]
+            elif type(data) == tuple:
+                dfs = [TDataset.torch_to_df(x) for x in data]
+            elif type(data) == list:
+                dfs = [TDataset.torch_to_df(x) for x in data]
+            else:
+                raise DatasetException(f'Incorrect data type for {filename}!')
+            return dfs
+        except FileNotFoundError as e:
+            logger.error(f'Filename {filename} not found')
+            raise DatasetException(f'Filename {filename} not found {str(e)}')
+        except Exception as e:
+            logger.error(f'Unknown error {str(e)}')
+            raise DatasetException(f'Unknown error {str(e)}')
+
 
     """  --------------------  Private Helper Methods -------------------------- """
 
