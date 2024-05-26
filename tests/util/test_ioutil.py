@@ -1,7 +1,8 @@
 import unittest
-import constants
 from unittest import TestCase
 from util.ioutil import IOUtil
+import logging
+logger = logging.Logger('TestIOUtil')
 
 
 class TestIOUtil(TestCase):
@@ -23,7 +24,7 @@ class TestIOUtil(TestCase):
             ioutil = IOUtil(file_name)
             ioutil.to_pickle(lst)
             new_lst = ioutil.from_pickle()
-            constants.log_info(str(new_lst))
+            logger.info(str(new_lst))
         except Exception as e:
             self.fail(str(e))
 

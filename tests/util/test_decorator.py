@@ -5,10 +5,10 @@ from util.decorators import timeit
 
 @timeit
 def procedure() -> float:
-    sum = 0.0
+    _sum = 0.0
     for index in range(10000):
-        sum += math.exp(-index)
-    return sum
+        _sum += math.exp(-index)
+    return _sum
 
 
 class TestDecorator(TestCase):

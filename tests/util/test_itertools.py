@@ -1,5 +1,3 @@
-import unittest
-import constants
 from unittest import TestCase
 import itertools
 

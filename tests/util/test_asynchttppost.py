@@ -1,7 +1,6 @@
 import random
 from unittest import TestCase
 
-from util.asynchttppost import AsyncHttpPost
 import asyncio
 import unittest
 import time

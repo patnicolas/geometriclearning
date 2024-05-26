@@ -30,12 +30,6 @@ class TestImageTensor(TestCase):
             np_im = np_im - 23
             new_im = Image.fromarray(np_im)
             new_im.save("../../output/altered_t.png")
-            """
-            import matplotlib.pyplot as plt
-            fig = plt.figure()
-            plt.imshow(data, cmap='rgb', interpolation='none')
-            fig.show()
-            """
         except Exception as e:
             self.fail(str(e))
 

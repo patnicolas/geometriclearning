@@ -1,7 +1,6 @@
 from unittest import TestCase
-
-import constants
-
+import logging
+logger = logging.Logger('TestLogger')
 
 class Generators(object):
     @staticmethod
@@ -15,4 +14,4 @@ class TestLogger(TestCase):
         [print(j) for j in Generators.even(lst)]
 
     def test_log(self):
-        constants.log_error('hello')
+        logger.error('hello')
