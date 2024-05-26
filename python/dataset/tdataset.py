@@ -23,29 +23,38 @@ def min_max_scaler(x: torch.Tensor) -> torch.Tensor:
         return x
 
 
+"""
+Generic type for any labeled or unlabeled data set 
+"""
+
+
 class TDataset(Dataset):
-    supported_dtypes = ['float64', 'float32', 'float16', 'double']
+    supported_dtypes = ['int16', 'int32', 'int64', 'float64', 'float32', 'float16', 'double']
     default_float_type = 'float32'
 
     def __init__(self, transform: Optional[Callable] = None, dtype: AnyStr = default_float_type):
-        self.transform = transform
+        """
+        Generic constructor for any type (labeled, unlabeled) data set
+        @param transform: Transformation to be optionally applied to input data
+        @type transform: Optional Callable
+        @param dtype: Type of data (float, int,...)
+        @type dtype: Str
+        """
         # Make sure the type is supported
         if dtype not in TDataset.supported_dtypes:
             raise DatasetException(f'Data type {dtype} is not supported')
+        self.transform = transform
         self.dtype = dtype
 
     @staticmethod
-    def _torch_type(dtype: AnyStr) -> torch:
-        match dtype:
-            case 'float64': return torch.float64
-            case 'float32': return torch.float32
-            case 'float16': return torch.float16
-            case 'double': return torch.double
-            case 'long': return torch.long
-            case _: return torch.float32
-
-    @staticmethod
     def numpy_type(dtype: AnyStr) -> np:
+        """
+        Extract the numpy type from a string type
+        @param dtype: String representation of type
+        @type dtype: Str
+        @return: Numpy data type
+        @rtype: np
+        """
         match dtype:
             case 'float64': return np.float64
             case 'float32': return np.float32
@@ -55,6 +64,15 @@ class TDataset(Dataset):
 
     @staticmethod
     def data_frame(filename: AnyStr) -> pd.DataFrame:
+        """
+        Load a Pandas data frame from file. An exception is thrown if the file is not find,
+        the extension is not supported or the Torch tensor extracted from the pt file is not
+        a tensor
+        @param filename: Name of the file
+        @type filename: str
+        @return: Pandas data frame
+        @rtype: DataFrame
+        """
         try:
             ext = TDataset._extract_extension(filename)
             match ext:
@@ -80,6 +98,14 @@ class TDataset(Dataset):
 
     @staticmethod
     def torch_to_df(x: torch.Tensor) -> (pd.DataFrame, Tuple[int]):
+        """
+        Convert a torch tensor into a Pandas data frame. The tensor input is reshaped if
+        the dimension > 2. The first dimension is preserved while all other dimension are squeezed.
+        @param x: Input Torch tensor
+        @type x: torch.Tensor
+        @return: Tuple (Pandas data frame, Original shape of the tensor)
+        @rtype: Tuple[pdDataFrame, Tuple[int])
+        """
         if len(x.shape) == 0:
             raise DatasetException(f'Shape of tensor {x.shape} is not supported')
         elif len(x.shape) > 2:
@@ -88,9 +114,18 @@ class TDataset(Dataset):
             y = x
         return pd.DataFrame(y.numpy()), x.shape
 
-
     @staticmethod
     def torch_to_dfs(filename: AnyStr):
+        """
+        Convert a sequence of torch tensor contained in a foiled a list of pair (Pandas data frame,
+        original shape of the tensor).
+        An exception is thrown if the file is not find or the file is not a pt format or the type is not
+        a tensor, a tuple of tensors or a list of tensors
+        @param filename: Name of the file containing the tensors
+        @type filename: str
+        @return: List of pair (Data Frame, original shape of tensor)
+        @rtype: List
+        """
         try:
             ext = TDataset._extract_extension(filename)
             assert ext == '.pt'
@@ -111,8 +146,17 @@ class TDataset(Dataset):
             logger.error(f'Unknown error {str(e)}')
             raise DatasetException(f'Unknown error {str(e)}')
 
+    """  --------------------  Protected/Private Helper Methods -------------------------- """
 
-    """  --------------------  Private Helper Methods -------------------------- """
+    @staticmethod
+    def _torch_type(dtype: AnyStr) -> torch:
+        match dtype:
+            case 'float64': return torch.float64
+            case 'float32': return torch.float32
+            case 'float16': return torch.float16
+            case 'double': return torch.double
+            case 'long': return torch.long
+            case _: return torch.float32
 
     @staticmethod
     def _extract_extension(filename: AnyStr) -> AnyStr:
