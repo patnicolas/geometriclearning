@@ -14,8 +14,9 @@ class ConvBlockTest(unittest.TestCase):
             conv_block = ConvBlockTest.__create_conv_block(dimension, out_channels)
             self.assertTrue(conv_block.out_channels == out_channels)
             print(repr(conv_block))
-        except DLException:
-            assert False
+        except DLException as e:
+            print(str(e))
+            self.assertTrue(False)
 
     def test_init_conv1_failed(self):
         dimension = 1
@@ -24,8 +25,9 @@ class ConvBlockTest(unittest.TestCase):
             conv_block = ConvBlockTest.__create_conv_block(dimension, out_channels)
             self.assertFalse(conv_block.out_channels == out_channels)
             print(repr(conv_block))
-        except DLException:
-            assert True
+        except DLException as e:
+            print(str(e))
+            self.assertTrue(True)
 
     def test_init_conv2_succeed(self):
         dimension = 2
@@ -34,8 +36,10 @@ class ConvBlockTest(unittest.TestCase):
             conv_block = ConvBlockTest.__create_conv_block(dimension, out_channels)
             self.assertTrue(conv_block.out_channels == out_channels)
             print(repr(conv_block))
-        except DLException:
-            assert False
+            self.assertTrue(True)
+        except DLException as e:
+            print(str(e))
+            self.assertTrue(False)
 
     def test_init_conv2_failed(self):
         dimension = 2
@@ -44,8 +48,9 @@ class ConvBlockTest(unittest.TestCase):
             conv_block = ConvBlockTest.__create_conv_block(dimension, out_channels)
             self.assertFalse(conv_block.out_channels == out_channels)
             print(repr(conv_block))
-        except DLException:
-            assert True
+        except DLException as e:
+            print(str(e))
+            self.assertTrue(True)
 
     @staticmethod
     def __create_conv_block(dimension: int, out_channels: int) -> ConvBlock:

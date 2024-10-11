@@ -16,9 +16,10 @@ class FFNNBlockTest(unittest.TestCase):
             self.assertTrue(ffnn_block.in_features == in_features)
             self.assertTrue(ffnn_block.out_features == out_features)
             print(repr(ffnn_block))
-            assert True
+            self.assertTrue(True)
         except DLException as e:
-            assert False
+            print(str(e))
+            self.assertTrue(False)
 
 
     def test_init_cls(self):

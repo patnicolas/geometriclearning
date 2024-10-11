@@ -41,7 +41,7 @@ class DeConvModel(NeuralModel, ABC):
         if ffnn_blocks:
             self.ffnn_blocks = ffnn_blocks
             ffnn_modules = [module for block in ffnn_blocks for module in block.modules]
-            modules = de_conv_modules + [nn.Unflatten()] + ffnn_modules
+            modules = de_conv_modules + [nn.Unflatten] + ffnn_modules
         else:
             modules = de_conv_modules
         super(DeConvModel, self).__init__(model_id, nn.Sequential(*modules))

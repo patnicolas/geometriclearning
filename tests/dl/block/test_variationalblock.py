@@ -10,6 +10,7 @@ class VariationalBlockTest(unittest.TestCase):
         latent_size = 6
         variational_block = VariationalBlock(hidden_dim, latent_size)
         print(repr(variational_block))
+        self.assertTrue(variational_block.in_features() == hidden_dim)
 
     def test_re_parameterize(self):
         mu = torch.Tensor([1.5, 2.6])
@@ -18,6 +19,7 @@ class VariationalBlockTest(unittest.TestCase):
         latent_size = 2
         variational_block = VariationalBlock(hidden_dim, latent_size)
         new_parameters = variational_block.re_parameterize(mu, log_var)
+        self.assertTrue(variational_block.in_features() == hidden_dim)
         print(str(new_parameters))
 
 

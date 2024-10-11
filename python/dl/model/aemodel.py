@@ -1,7 +1,7 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
-from typing import AnyStr, Self, overload
+from typing import AnyStr, Self
 from dl.model.neuralmodel import NeuralModel
 import torch
 import logging
@@ -16,7 +16,7 @@ through inversion of the neural blocks it contains.
 
 class AEModel(NeuralModel):
 
-    def __init__(self, model_id: AnyStr, encoder: NeuralModel):
+    def __init__(self, model_id: AnyStr, encoder: NeuralModel) -> None:
         """
         Constructor
         @param model_id: Identifier for this Auto-encoder
@@ -50,10 +50,19 @@ class AEModel(NeuralModel):
         logger.info(x, 'after encoder_model')
         return self.decoder_model(x)
 
+    def get_latent_features(self) -> int:
+        return self.encoder.get_out_features()
+
     def get_in_features(self) -> int:
         return self.encoder.get_in_features()
 
     def get_out_features(self) -> int:
+        """
+        Polymorphic method to retrieve the number of output features. It should be the same as
+        the number of input features
+        @return: Number of input features
+        @rtype: int
+        """
         return self.encoder.get_in_features()
 
     def invert(self) -> Self:

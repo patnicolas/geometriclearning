@@ -48,6 +48,11 @@ class NeuralModel(torch.nn.Module):
 
     @abstractmethod
     def get_out_features(self) -> int:
+        """
+        Polymorphic method to retrieve the number of output features
+        @return: Number of input features
+        @rtype: int
+        """
         raise NotImplementedError('NeuralModel.get_out_features undefined for abstract neural model')
 
     @abstractmethod

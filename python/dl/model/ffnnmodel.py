@@ -15,7 +15,7 @@ Class builder for a feed-forward neural network model using feed-forward neural 
 
 
 class FFNNModel(NeuralModel):
-    def __init__(self, model_id: AnyStr, neural_blocks: List[FFNNBlock]):
+    def __init__(self, model_id: AnyStr, neural_blocks: List[FFNNBlock]) -> None:
         """
         Constructor for the Feed Forward Neural Network model as a set of Neural blocks
         @param model_id: Identifier for the model
@@ -23,7 +23,7 @@ class FFNNModel(NeuralModel):
         @param neural_blocks: List of Neural blocks
         @type neural_blocks:
         """
-        FFNNModel.validate(neural_blocks)
+        FFNNModel.is_valid(neural_blocks)
         self.neural_blocks = neural_blocks
         # Record the number of input and output features from the first and last neural block respectively
         self.in_features = neural_blocks[0].in_features
@@ -57,6 +57,9 @@ class FFNNModel(NeuralModel):
         @rtype: int
         """
         return self.out_features
+
+    def get_latent_features(self) -> int:
+        return self.neural_blocks[-1].in_features
 
     def __repr__(self) -> AnyStr:
         blocks_str = '\n'.join([f'   {repr(block)}' for block in self.neural_blocks])

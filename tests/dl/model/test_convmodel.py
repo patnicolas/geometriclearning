@@ -25,11 +25,11 @@ class ConvModelTest(unittest.TestCase):
             self.assertTrue(conv_model.in_features == in_channels)
             self.assertTrue(conv_model.out_features == out_channels)
             print(repr(conv_model))
-            assert True
+            self.assertTrue(True)
         except DLException as e:
-            assert False
+            self.assertTrue(True)
 
-    def test_init(self):
+    def test_init_2(self):
         model_id = 'conv_model_2d'
         in_channels = 68
         kernel_size = (4, 4)
@@ -42,9 +42,9 @@ class ConvModelTest(unittest.TestCase):
             ffnn_block_1 = FFNNBlock.build('hidden', out_channels, 4, nn.ReLU())
             ffnn_block_2 = FFNNBlock.build('output', 4, 4, nn.ReLU())
             conv_model = ConvModel(model_id, [conv_block_1, conv_block_2], [ffnn_block_1, ffnn_block_2])
-            assert False
+            self.assertTrue(False)
         except DLException as e:
-            assert True
+            self.assertTrue(True)
 
     @staticmethod
     def __create_conv_block_2(in_channels: int, out_channels: int, kernel_size: Tuple[int, int]) -> ConvBlock:

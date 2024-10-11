@@ -32,7 +32,7 @@ class FFNNModelTest(unittest.TestCase):
         print(f'Original {repr(ffnn_model)}')
         inverted_ffnn_model = ffnn_model.invert()
         self.assertTrue(inverted_ffnn_model.in_features == out_features)
-        self.assertTrue(inverted_ffnn_model.out_features == int_features)
+        self.assertTrue(inverted_ffnn_model.out_features == in_features)
         print(f'Inverted: {repr(inverted_ffnn_model)}')
 
 

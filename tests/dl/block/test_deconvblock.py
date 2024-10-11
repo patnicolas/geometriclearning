@@ -13,7 +13,8 @@ class DeConvBlockTest(unittest.TestCase):
             print(repr(conv_block))
             self.assertTrue(conv_block.out_channels == out_channels)
         except DLException as e:
-            assert False
+            print(str(e))
+            self.assertTrue(False)
 
     def test_init_de_conv1_failed(self):
         dimension = 1
@@ -23,7 +24,8 @@ class DeConvBlockTest(unittest.TestCase):
             print(repr(conv_block))
             self.assertFalse(conv_block.out_channel == out_channels)
         except DLException as e:
-            assert True
+            print(str(e))
+            self.assertTrue(True)
 
     def test_init_de_conv2_succeed(self):
         dimension = 2
@@ -33,7 +35,8 @@ class DeConvBlockTest(unittest.TestCase):
             self.assertTrue(conv_block.out_channels == 71)
             print(repr(conv_block))
         except DLException as e:
-            assert False
+            print(str(e))
+            self.assertTrue(False)
 
     def test_init_de_conv2_failed(self):
         dimension = 2
@@ -43,7 +46,8 @@ class DeConvBlockTest(unittest.TestCase):
             self.assertFalse(conv_block.out_channels == 71)
             print(repr(conv_block))
         except DLException as e:
-            assert True
+            print(str(e))
+            self.assertTrue(True)
 
     @staticmethod
     def __create_de_conv_block(dimension: int, out_channels: int | Tuple[int, int]) -> DeConvBlock:
