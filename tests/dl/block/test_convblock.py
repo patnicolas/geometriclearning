@@ -4,7 +4,6 @@ from dl.block.convblock import ConvBlock
 from dl.dlexception import DLException
 
 
-
 class ConvBlockTest(unittest.TestCase):
 
     def test_init_conv1_succeed(self):
