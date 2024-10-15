@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 import torch
 import pandas as pd
-from typing import Callable, Optional, AnyStr, Tuple
+from typing import Callable, Optional, AnyStr, Tuple, List
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import MNIST
@@ -33,20 +33,21 @@ class LabeledLoader(TLoader):
         """
         super(LabeledLoader, self).__init__(batch_size, split_ratio, num_samples)
 
-    def load_mnist(self, norm_factors: list) -> (DataLoader, DataLoader):
+    def load_mnist(self, norm_factors: List[float], transform_resize: int = 32) -> (DataLoader, DataLoader):
         """
             Load MNIST library of digits
-            :param norm_factors: List of two normalization factors
+            :param norm_factors: List of two normalization factors [mean, standard deviation]
+            :param transform_resize Specify the size of the output of the pre-processor transform
             :return: Pair Data loader for training data and validation data
         """
         assert len(norm_factors) == 2, f'Number of normalization factors {len(norm_factors)} should be 2'
 
         transform = transforms.Compose([
-            transforms.Resize(32),
+            transforms.Resize(transform_resize),
             transforms.ToTensor(),
             transforms.Normalize((norm_factors[0],), (norm_factors[1],)),
         ])
-        mnist_dataset = MNIST('../data/', download=True, transform=transform)
+        mnist_dataset = MNIST('../../data/', download=True, transform=transform)
         return self._generate_loader(mnist_dataset)
 
     def from_tensor(self,

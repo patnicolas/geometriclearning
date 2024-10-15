@@ -18,7 +18,7 @@ def min_max_scaler(x: torch.Tensor) -> torch.Tensor:
         y = MinMaxScaler().fit_transform(x)
         z = torch.tensor(y, dtype=x.dtype)
         return z
-    except:
+    except Exception as e:
         traceback.print_exc()
         return x
 

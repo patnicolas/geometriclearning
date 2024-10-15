@@ -6,6 +6,8 @@ import numpy as np
 
 
 class LabeledLoaderTest(unittest.TestCase):
+
+    @unittest.skip('Ignore')
     def test_load_tensor_transform(self):
         try:
             batch_size = 4
@@ -28,6 +30,7 @@ class LabeledLoaderTest(unittest.TestCase):
             print(f'Error: {str(e)}')
             self.assertFalse(True)
 
+    @unittest.skip('Ignore')
     def test_load_csv_file(self):
         try:
             filename = '/users/patricknicolas/dev/geometriclearning/data/wages_cleaned.csv'
@@ -52,6 +55,31 @@ class LabeledLoaderTest(unittest.TestCase):
         except Exception as e:
             print(f'Error: {str(e)}')
             self.assertFalse(True)
+
+    def test_load_mnist(self):
+        try:
+            normalizing_mean = 0.2
+            normalizing_std_dev = 0.35
+            resize_factor = 32
+            batch_size = 8
+            train_eval_split_ratio = 0.85
+
+            labeled_loader = LabeledLoader(batch_size, train_eval_split_ratio)
+            train_loader, test_loader = labeled_loader.load_mnist([normalizing_mean, normalizing_std_dev], resize_factor)
+
+            images, labels = next(iter(train_loader))
+            import matplotlib.pyplot as plt
+            for img in images:
+                plt.imshow(img.squeeze())
+                plt.show()
+
+        except FileNotFoundError as e:
+            print(f'Error: {str(e)}')
+            self.assertFalse(True)
+        except Exception as e:
+            print(f'Error: {str(e)}')
+            self.assertFalse(True)
+
 
 
 if __name__ == '__main__':

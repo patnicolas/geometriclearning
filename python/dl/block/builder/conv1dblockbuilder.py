@@ -5,13 +5,15 @@ from abc import ABC
 
 from dl.block.builder import ConvBlockBuilder
 import torch.nn as nn
-from typing import Tuple
+from typing import Tuple, NoReturn
+from dl.block import ConvException
 
 
 class Conv1DBlockBuilder(ConvBlockBuilder, ABC):
     def __init__(self,
                  in_channels: int,
                  out_channels: int,
+                 input_size: int | Tuple[int],
                  kernel_size: int | Tuple[int],
                  stride: int | Tuple[int],
                  padding: int | Tuple[int],
@@ -25,6 +27,8 @@ class Conv1DBlockBuilder(ConvBlockBuilder, ABC):
         @type in_channels: int
         @param out_channels: Number of output channels
         @type out_channels: int
+        @param input_size: Size of the input vector
+        @type input_size: int
         @param kernel_size: Size of the kernel (num_records) for 1D and (num_records, num_records) for 2D
         @type kernel_size: Union[Int, Tuple[int]]
         @param stride: Stride for convolution (st) for 1D, (st, st) for 2D
@@ -42,6 +46,7 @@ class Conv1DBlockBuilder(ConvBlockBuilder, ABC):
         """
         super(Conv1DBlockBuilder, self).__init__(in_channels,
                                                  out_channels,
+                                                 input_size,
                                                  kernel_size,
                                                  stride,
                                                  padding,
@@ -75,7 +80,7 @@ class Conv1DBlockBuilder(ConvBlockBuilder, ABC):
             modules.append(nn.MaxPool1d(self.max_pooling_kernel))
         return tuple(modules)
 
-    def compute_out_channels(self) -> int:
+    def compute_out_shape(self) -> int:
         """
         Compute the output channels from the input channels, stride, padding and kernel size
         @return: output channels if correct, -1 otherwise
@@ -83,3 +88,29 @@ class Conv1DBlockBuilder(ConvBlockBuilder, ABC):
         """
         num = self.in_channels + 2*self.padding - self.kernel_size
         return int(num/self.stride) + 1 if num % self.stride == 0 else -1
+
+    def is_valid(self) -> bool:
+        return self.out_channels == self.compute_out_shape()
+
+    """ -----------------------  Private methods -------------------------- """
+
+    @staticmethod
+    def validate_input(
+            in_channels: int,
+            out_channels: int,
+            input_size: int | Tuple[int, int],
+            kernel_size: int | Tuple[int, int],
+            stride: int | Tuple[int, int],
+            padding: int | Tuple[int, int],
+            max_pooling_kernel: int = -1) -> NoReturn:
+        try:
+            assert in_channels > 0, f'Conv neural block in_channels {in_channels} should be >0'
+            assert out_channels > 0, f'Conv neural block out_channels {out_channels} should be >0'
+            assert input_size > 0, f'Conv neural block input_size should be {input_size} should be >0'
+            assert kernel_size > 0, f'Conv neural block kernel_size {kernel_size} should be > 0'
+            assert stride >= 0, f'Conv neural block stride {stride} should be >= 0'
+            assert padding >= 0, f'Conv neural block padding {padding} should be >= 0'
+            assert 0 <= max_pooling_kernel < 5 or max_pooling_kernel == -1, \
+                f'Conv neural block max_pooling_kernel size {max_pooling_kernel} should be [0, 4]'
+        except AssertionError as e:
+            raise ConvException(str(e))

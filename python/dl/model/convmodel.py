@@ -65,7 +65,7 @@ class ConvModel(NeuralModel, ABC):
         @param model_id: Identifier for the model
         @type model_id: AnyStr
         @param conv_blocks: List of convolutional blocks
-        @type de_conv_blocks: List[ConvBlock]
+        @type conv_blocks: List[ConvBlock]
         @return: Instance of decoder of type ConvModel
         @rtype: ConvModel
         """
@@ -77,7 +77,7 @@ class ConvModel(NeuralModel, ABC):
         @return: True if at least one fully connected layer exists, False otherwise
         @rtype: bool
         """
-        return self.ffnn_blocks
+        return len(self.ffnn_blocks) > 0
 
     @staticmethod
     def reshape(x: torch.Tensor, resize: int) -> torch.Tensor:
@@ -147,7 +147,7 @@ class ConvModel(NeuralModel, ABC):
             assert conv_blocks, 'This convolutional model has not defined neural blocks'
             ConvModel.__validate(conv_blocks)
             if not ffnn_blocks:
-                FFNNModel.is_valid(ffnn_blocks)
+                    FFNNModel.is_valid(ffnn_blocks)
             return True
         except AssertionError as e:
             logging.error(e)
