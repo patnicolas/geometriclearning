@@ -2,11 +2,10 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from torch import nn
-from typing import Tuple, NoReturn, Self
-from dl.block.builder.conv1dblockbuilder import Conv1DBlockBuilder
-from dl.block.builder.conv2dblockbuilder import Conv2DBlockBuilder
+from typing import Tuple, Self
 from dl.block.builder import ConvBlockBuilder
-from dl.dlexception import DLException
+import logging
+logger = logging.getLogger('dl.block.ConvBlock')
 
 """    
     Generic convolutional neural block for 1 and 2 dimensions
@@ -32,9 +31,15 @@ class ConvBlock(nn.Module):
         """
         super(ConvBlock, self).__init__()
         self.conv_block_builder = conv_block_builder
-        self.conv_block_builder .is_valid()
         # Invoke __call__
         self.modules = self.conv_block_builder()
+
+    def compute_out_shapes(self) -> int | Tuple[int, int]:
+        out_shape = self.conv_block_builder.compute_out_shape()
+        logging.info(f'Conv output shape: {str(out_shape)}')
+        out_pooling_shape = self.conv_block_builder.compute_pooling_shape(out_shape)
+        logging.info(f'Max pooling output shape: {str(out_pooling_shape)}')
+        return out_pooling_shape
 
     def invert(self) -> Self:
         pass

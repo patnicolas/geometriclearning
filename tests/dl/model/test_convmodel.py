@@ -3,7 +3,9 @@ import torch.nn as nn
 from dl.block.convblock import ConvBlock
 from dl.block.ffnnblock import FFNNBlock
 from dl.model.convmodel import ConvModel
-from dl.dlexception import DLException
+from dl.block import ConvException
+from dl.block.builder.conv2dblockbuilder import Conv2DBlockBuilder
+import logging
 
 
 class ConvModelTest(unittest.TestCase):
@@ -25,10 +27,10 @@ class ConvModelTest(unittest.TestCase):
             self.assertTrue(conv_model.has_fully_connected())
             self.assertTrue(conv_model.in_features == in_channels)
             self.assertTrue(conv_model.out_features == out_channels)
-            print(repr(conv_model))
+            logging.info(repr(conv_model))
             self.assertTrue(True)
-        except DLException as e:
-            print(str(e))
+        except ConvException as e:
+            logging.error(str(e))
             self.assertTrue(True)
 
     @unittest.skip('Ignore')
@@ -45,13 +47,14 @@ class ConvModelTest(unittest.TestCase):
             ffnn_block_1 = FFNNBlock.build('hidden', out_channels, 4, nn.ReLU())
             ffnn_block_2 = FFNNBlock.build('output', 4, 4, nn.ReLU())
             conv_model = ConvModel(model_id, [conv_block_1, conv_block_2], [ffnn_block_1, ffnn_block_2])
+            logging.info(repr(conv_model))
             self.assertTrue(False)
-        except DLException as e:
-            print(str(e))
+        except ConvException as e:
+            logging.error(str(e))
             self.assertTrue(True)
 
     def test_mnist(self):
-        model_id = 'conv_model_2d'
+        model_id = 'conv_MNIST_model'
         input_size = 28
         in_channels = 1
         kernel_size = 3
@@ -80,10 +83,13 @@ class ConvModelTest(unittest.TestCase):
                 padding_size,
                 nn.ReLU()
             )
-            ffnn_block_1 = FFNNBlock.build('hidden', out_channels*7*7, num_classes, nn.ReLU())
+            conv_output_shape = conv_block_2.compute_out_shapes()
+            ffnn_input_shape = out_channels*conv_output_shape[0]*conv_output_shape[1]
+            ffnn_block_1 = FFNNBlock.build('hidden', ffnn_input_shape, num_classes, nn.ReLU())
             conv_model = ConvModel(model_id, [conv_block_1, conv_block_2], [ffnn_block_1])
+            logging.info(str(conv_model))
             self.assertTrue(True)
-        except DLException as e:
+        except ConvException as e:
             print(str(e))
             self.assertTrue(False)
 
@@ -100,8 +106,7 @@ class ConvModelTest(unittest.TestCase):
         max_pooling_kernel = 2
         activation = activation
         has_bias = False
-        return ConvBlock(
-            2,
+        conv_2d_block_builder = Conv2DBlockBuilder(
             in_channels,
             out_channels,
             (input_size, input_size),
@@ -111,7 +116,8 @@ class ConvModelTest(unittest.TestCase):
             is_batch_normalization,
             max_pooling_kernel,
             activation,
-            bias=has_bias)
+            has_bias)
+        return ConvBlock(conv_2d_block_builder)
 
 
 if __name__ == '__main__':

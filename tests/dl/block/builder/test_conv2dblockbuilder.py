@@ -1,9 +1,9 @@
 import unittest
 from torch import nn
 from dl.block.builder.conv2dblockbuilder import Conv2DBlockBuilder
-from dl.dlexception import DLException
 from dl.block import ConvException
 from typing import Tuple
+import logging
 
 
 class Conv2DBlockBuilderTest(unittest.TestCase):
@@ -21,10 +21,10 @@ class Conv2DBlockBuilderTest(unittest.TestCase):
         try:
             conv_2d_block_builder = Conv2DBlockBuilderTest.__create_conv_block(out_channels, kernel_size)
             inferred_out_channels = conv_2d_block_builder.compute_out_shape()
-            print(f'Inferred Out Channels {inferred_out_channels}')
+            logging.info(f'Inferred Out Channels {inferred_out_channels}')
             self.assertTrue(True)
         except ConvException as e:
-            print(f'Failed: {str(e)}')
+            logging.error(f'Failed: {str(e)}')
             self.assertTrue(False)
 
     def test_compute_out_channels_incorrect(self):
@@ -33,10 +33,10 @@ class Conv2DBlockBuilderTest(unittest.TestCase):
         try:
             conv_2d_block_builder = Conv2DBlockBuilderTest.__create_conv_block(out_channels, kernel_size)
             inferred_out_channels = conv_2d_block_builder.compute_out_shape()
-            print(f'Inferred Out Channels {inferred_out_channels[0]}')
+            logging.info(f'Inferred Out Channels {inferred_out_channels[0]}')
             self.assertTrue(True)
         except ConvException as e:
-            print(f'Failed: {str(e)}')
+            logging.error(f'Failed: {str(e)}')
             self.assertTrue(False)
 
     def test_validate_succeed(self):
@@ -44,10 +44,10 @@ class Conv2DBlockBuilderTest(unittest.TestCase):
         kernel_size = (4, 4)
         try:
             conv_2d_block_builder = Conv2DBlockBuilderTest.__create_conv_block(out_channels, kernel_size)
-            assert (conv_2d_block_builder.is_valid())
-            print(f'Inferred Out Channels {conv_2d_block_builder.is_valid()}')
+            logging.info(f'Succeed: {str(conv_2d_block_builder)}')
+            self.assertTrue(True)
         except ConvException as e:
-            print(f'Failed: {str(e)}')
+            logging.error(f'Failed: {str(e)}')
             self.assertTrue(False)
 
     def test_validate_failed(self):
@@ -55,10 +55,9 @@ class Conv2DBlockBuilderTest(unittest.TestCase):
         kernel_size = (4, 4)
         try:
             conv_2d_block_builder = Conv2DBlockBuilderTest.__create_conv_block(out_channels, kernel_size)
-            assert (not conv_2d_block_builder.is_valid())
-            print(f'Inferred Out Channels {conv_2d_block_builder.is_valid()}')
+            logging.info(f'Succeed: {str(conv_2d_block_builder)}')
         except ConvException as e:
-            print(f'Failed: {str(e)}')
+            logging.error(f'Failed: {str(e)}')
             self.assertTrue(False)
 
     @staticmethod

@@ -44,7 +44,7 @@ class Conv2DBlockBuilder(ConvBlockBuilder, ABC):
         @param bias: Specify if bias is not null
         @type bias: bool
         """
-        Conv2DBlockBuilder.validate_input(
+        Conv2DBlockBuilder.__validate_input(
             in_channels,
             out_channels,
             input_size,
@@ -95,36 +95,40 @@ class Conv2DBlockBuilder(ConvBlockBuilder, ABC):
         modules_list: List[nn.Module] = modules
         return tuple(modules_list)
 
-    def is_valid(self) -> bool:
-        out_width, out_height = self.compute_out_shape()
-        return self.out_channels == out_width or self.out_channels == out_height
-
-
-    def compute_out_shape(self) -> Tuple[int, int]:
+    def compute_out_shape(self) -> int | Tuple[int, int]:
         """
         Compute the output channels from the input channels, stride, padding and kernel size
         @return: output channels if correct, -1 otherwise
         @rtype: Tuple[int, int]
         """
-        return self.__compute_out_channel_dim(0), self.__compute_out_channel_dim(1)
+        return self.__compute_out_dim_shape(0), self.__compute_out_dim_shape(1)
 
-    def compute_pooling_shape(self, out_channels: Tuple[int, int]) ->  Tuple[int, int]:
+    def compute_pooling_shape(self, out_shape: int | Tuple[int, int]) -> int | Tuple[int, int]:
+        """
+        Compute the dimension for the shape of data output from the pooling layer if defined.
+        If undefined the output of the pooling module is the output of the previous
+        convolutional layer
+        @param out_shape: Output shape from the previous convolutional layer
+        @type out_shape: Tuple[int, int]
+        @return: Shape of output from the pooling module
+        @rtype: Tuple[int, int]
+        """
         if self.max_pooling_kernel > 0:
-            if out_channels[0] % self.max_pooling_kernel != 0:
-                raise ConvException(f'Pooling shape: out {out_channels[0]} should be a multiple of '
+            if out_shape[0] % self.max_pooling_kernel != 0:
+                raise ConvException(f'Pooling shape: out {out_shape[0]} should be a multiple of '
                                     f'pooling kernel {self.max_pooling_kernel}')
-            if out_channels[1] % self.max_pooling_kernel != 0:
-                raise ConvException(f'Pooling shape: out {out_channels[1]} should be a multiple of '
+            if out_shape[1] % self.max_pooling_kernel != 0:
+                raise ConvException(f'Pooling shape: out {out_shape[1]} should be a multiple of '
                                     f'pooling kernel {self.max_pooling_kernel}')
-            h_shape = int(out_channels[0]/self.max_pooling_kernel)
-            w_shape = int(out_channels[1]/self.max_pooling_kernel)
+            h_shape = int(out_shape[0] / self.max_pooling_kernel)
+            w_shape = int(out_shape[1] / self.max_pooling_kernel)
             return h_shape, w_shape
         else:
-            return -1, -1
+            return out_shape
 
     """ -------------------------  Private supporting methods --------------------- """
 
-    def __compute_out_channel_dim(self, dim: int) -> int:
+    def __compute_out_dim_shape(self, dim: int) -> int:
         assert 0 <= dim <= 1, f'Dimension {dim} for computing output channel is out of bounds (0, 1)'
 
         stride = self.stride[dim]
@@ -136,7 +140,7 @@ class Conv2DBlockBuilder(ConvBlockBuilder, ABC):
         return int(num / stride) + 1 if num % stride == 0 else -1
 
     @staticmethod
-    def validate_input(
+    def __validate_input(
             in_channels: int,
             out_channels: int,
             input_size: int | Tuple[int, int],
