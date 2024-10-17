@@ -2,7 +2,7 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from torch import nn
-from typing import Tuple, Self
+from typing import Tuple, Self, Any
 from dl.block.builder import ConvBlockBuilder
 import logging
 logger = logging.getLogger('dl.block.ConvBlock')
@@ -47,11 +47,11 @@ class ConvBlock(nn.Module):
     def __repr__(self) -> str:
         return ' '.join([f'\n{str(module)}' for module in self.modules])
 
-    def get_modules_weights(self) -> Tuple[nn.Module]:
+    def get_modules_weights(self) -> Tuple[Any]:
         """
         Get the weights for modules which contains them
         @returns: weight of convolutional neural_blocks
         @rtype: tuple
         """
-        return tuple([module for module in self.modules \
+        return tuple([module.weight.data for module in self.modules \
                       if type(module) == nn.Linear or type(module) == nn.Conv2d or type(module) == nn.Conv1d])

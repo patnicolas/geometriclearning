@@ -6,11 +6,11 @@ from abc import ABC
 from dl.training.neuralnet import NeuralNet
 from dl.training.hyperparams import HyperParams
 from dl.training.earlystoplogger import EarlyStopLogger
-from util.plotter import PlotterParameters
+from plots.plotter import PlotterParameters
 from metric.metric import Metric
 from dl.model.vaemodel import VAEModel
 from dl.dlexception import DLException
-from typing import AnyStr, List, Optional, Dict, NoReturn, overload
+from typing import AnyStr, List, Optional, Dict, NoReturn
 from torch.utils.data import DataLoader
 import torch.nn as nn
 from tqdm import tqdm

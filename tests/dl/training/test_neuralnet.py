@@ -4,8 +4,9 @@ from dl.model.ffnnmodel import FFNNModel
 from dl.block.ffnnblock import FFNNBlock
 from dl.training.hyperparams import HyperParams
 from dl.training.earlystoplogger import EarlyStopLogger
-from util.plotter import PlotterParameters
+from plots.plotter import PlotterParameters
 from dl.training.neuralnet import NeuralNet
+from metric.metric import Metric
 from dataset.labeleddataset import LabeledDataset
 from dataset.unlabeleddataset import UnlabeledDataset
 from dataset.labeledloader import LabeledLoader
@@ -36,7 +37,7 @@ class NeuralNetTest(unittest.TestCase):
         min_diff_loss = -0.001
         early_stopping_enabled = True
         early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
-        labels = [EarlyStopLogger.train_loss_label, EarlyStopLogger.eval_loss_label, EarlyStopLogger.accuracy_label]
+        labels = [Metric.train_loss_label, EarlyStopLogger.eval_loss_label, EarlyStopLogger.accuracy_label]
         parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(12, 8)) for label in labels]
         network = NeuralNet(binary_classifier, hyper_parameters, early_stop_logger, parameters)
         filename = '/users/patricknicolas/dev/geometriclearning/data/wages_cleaned.csv'

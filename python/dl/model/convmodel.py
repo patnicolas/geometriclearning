@@ -46,16 +46,14 @@ class ConvModel(NeuralModel, ABC):
         self.in_features = conv_blocks[0].conv_block_builder.in_channels
         self.out_features = ffnn_blocks[-1].out_features
         # Define the sequence of modules from the layout
-        conv_modules = [module for block in conv_blocks for module in block.modules]
+        conv_modules: List[nn.Module] = [module for block in conv_blocks for module in block.modules]
 
         # If fully connected are provided as CNN
         if ffnn_blocks:
             self.ffnn_blocks = ffnn_blocks
-            ffnn_modules = [module for block in ffnn_blocks for module in block.modules]
-            modules = conv_modules + [nn.Flatten()] + ffnn_modules
-        else:
-            modules = conv_modules
-        super(ConvModel, self).__init__(model_id, nn.Sequential(*modules))
+            conv_modules.append(nn.Flatten())
+            [conv_modules.append(block) for block in ffnn_blocks for module in block.modules]
+        super(ConvModel, self).__init__(model_id, nn.Sequential(*conv_modules))
 
     @classmethod
     def build(cls, model_id: AnyStr, conv_blocks: List[ConvBlock]) -> Self:
@@ -93,7 +91,7 @@ class ConvModel(NeuralModel, ABC):
         return x.view(resize, -1)
 
     def __repr__(self) -> str:
-        modules = [str(module) for module in self.get_modules()]
+        modules = [f'{idx}: {str(module)}' for idx, module in enumerate(self.get_modules())]
         module_repr = '\n'.join(modules)
         return f'State:{self._state_params()}\nModules:\n{module_repr}'
 
@@ -119,7 +117,7 @@ class ConvModel(NeuralModel, ABC):
             log_size(x, 'Output connected Conv')
         return x
         """
-        log_size(x, 'Input Conv model')
+        print(f'Input Conv shape {x.shape}')
         x = self.model(x)
         log_size(x, 'Output Conv model')
         return x
@@ -131,6 +129,8 @@ class ConvModel(NeuralModel, ABC):
             "output_size": self.ffnn_blocks[-1].out_features ,
             "dff_model_input_size": self.ffnn_blocks[0].in_features
         }
+
+
 
     @staticmethod
     def is_valid(conv_blocks: List[ConvBlock], ffnn_blocks: List[FFNNBlock]) -> bool:

@@ -2,7 +2,7 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from typing import Optional, AnyStr, Self, List, Dict, NoReturn
-from util.plotter import Plotter, PlotterParameters
+from plots.plotter import Plotter, PlotterParameters
 from metric.metric import Metric
 import logging
 logger = logging.getLogger('dl.EarlyStopLogger')
@@ -42,7 +42,7 @@ class EarlyStopLogger(object):
 
     @classmethod
     def build(cls, patience: int) -> Self:
-        return cls(patience, EarlyStopLogger.default_min_loss, True)
+        return cls(patience, Metric.default_min_loss, True)
 
     def __call__(self, epoch: int, train_loss: float, eval_metrics: Dict[AnyStr, float] = None) -> bool:
         """

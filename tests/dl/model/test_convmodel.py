@@ -87,7 +87,7 @@ class ConvModelTest(unittest.TestCase):
             ffnn_input_shape = out_channels*conv_output_shape[0]*conv_output_shape[1]
             ffnn_block_1 = FFNNBlock.build('hidden', ffnn_input_shape, num_classes, nn.ReLU())
             conv_model = ConvModel(model_id, [conv_block_1, conv_block_2], [ffnn_block_1])
-            logging.info(str(conv_model))
+            print(repr(conv_model))
             self.assertTrue(True)
         except ConvException as e:
             print(str(e))

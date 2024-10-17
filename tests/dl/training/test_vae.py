@@ -7,7 +7,7 @@ from dataset.unlabeleddataset import UnlabeledDataset
 from dl.training.vae import VAE
 from dl.training.hyperparams import HyperParams
 from dl.training.earlystoplogger import EarlyStopLogger
-from util.plotter import PlotterParameters
+from plots.plotter import PlotterParameters
 import torch.nn as nn
 
 

@@ -9,7 +9,7 @@ from dl.model.neuralmodel import NeuralModel
 from dl.dlexception import DLException
 from dl.training.hyperparams import HyperParams
 from dl.training.earlystoplogger import EarlyStopLogger
-from util.plotter import PlotterParameters
+from plots.plotter import PlotterParameters
 from metric.metric import Metric
 from tqdm import tqdm
 from typing import List, Optional, NoReturn
@@ -49,7 +49,6 @@ class NeuralNet(object):
         self.early_stop_logger = early_stop_logger
         self.plot_parameters = plot_parameters
         self.metrics: Dict[AnyStr, Metric] = metrics
-
 
     @abstractmethod
     def model_label(self) -> AnyStr:

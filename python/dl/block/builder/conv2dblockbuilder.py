@@ -91,7 +91,7 @@ class Conv2DBlockBuilder(ConvBlockBuilder, ABC):
 
         # Added max pooling module
         if self.max_pooling_kernel > 0:
-            modules.append(nn.MaxPool2d(kernel_size=self.max_pooling_kernel, stride=self.max_pooling_kernel))
+            modules.append(nn.MaxPool2d(kernel_size=self.max_pooling_kernel))
         modules_list: List[nn.Module] = modules
         return tuple(modules_list)
 

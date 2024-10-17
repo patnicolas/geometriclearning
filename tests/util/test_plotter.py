@@ -1,5 +1,5 @@
 import unittest
-from python.util.plotter import Plotter, PlotterParameters
+from plots.plotter import Plotter, PlotterParameters
 
 
 class PlotterTest(unittest.TestCase):
