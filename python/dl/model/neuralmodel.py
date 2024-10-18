@@ -7,6 +7,8 @@ from abc import abstractmethod
 from typing import AnyStr, Self, List
 from util import log_size
 
+__all__ = ['NeuralModel']
+
 """
 Abstract base class for Neural network models. The sub-classes have to implement get_model,
 forward and save methods

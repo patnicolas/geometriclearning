@@ -1,7 +1,7 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
-from typing import List, AnyStr, Tuple
+from typing import List, AnyStr, Tuple, NoReturn
 import torch.nn as nn
 from dl.model.convmodel import ConvModel
 from torch.utils.data import DataLoader, TensorDataset
@@ -48,37 +48,24 @@ class ConvMNIST(object):
                 has_bias)
             conv_blocks.append(ConvBlock(conv_2d_block_builder))
 
-        for idx, conv_block in enumerate(conv_blocks):
-            conv_modules_weights: Tuple[torch.Tensor] = conv_block.get_modules_weights()
-            print(f'\nConv. layer #{idx} --------- \n{conv_modules_weights[0].shape}')
-
         num_classes = 10
         conv_output_shape = conv_blocks[len(conv_blocks)-1].compute_out_shapes()
         ffnn_input_shape = out_channels * conv_output_shape[0] * conv_output_shape[1]
+        # ffnn_input_shape = 64*160
         ffnn_block = FFNNBlock.build('hidden', ffnn_input_shape, num_classes, nn.ReLU())
         self.conv_model = ConvModel(ConvMNIST.id, conv_blocks, [ffnn_block])
 
-    def forward(self, x):
+    def show_conv_weights_shape(self) -> NoReturn:
         import torch
-        import torch.nn.functional as F
-        blk = self.conv_model.conv_blocks
 
-        x = blk[0](x)
-        x = F.relu(x)
-        x = blk[1](x)
-        x = F.relu(x)
-        x = F.max_pool2d(x, 2)
-        x = torch.flatten(x, 1)
-        blk = self.conv_model.ffnn_blocks
-        x = blk[0](x)
-        x = F.relu(x)
-        output = F.log_softmax(x, dim=1)
-        return output
+        for idx, conv_block in enumerate(self.conv_model.conv_blocks):
+            conv_modules_weights: Tuple[torch.Tensor] = conv_block.get_modules_weights()
+            print(f'\nConv. layer #{idx} shape: {conv_modules_weights[0].shape}')
 
     def __repr__(self) -> AnyStr:
         return repr(self.conv_model)
 
-    def train_(self, root_path: AnyStr):
+    def train_(self, root_path: AnyStr, is_testing: bool):
         patience = 2
         min_diff_loss = -0.001
         early_stopping_enabled = True
@@ -99,40 +86,39 @@ class ConvMNIST(object):
             drop_out=0.2,
             train_eval_ratio=0.9,
             normal_weight_initialization = True)
+
         network = NeuralNet(
             self.conv_model,
             hyper_parameters,
             early_stop_logger,
             metric_labels,
             parameters)
-        train_data_loader, test_data_loader = ConvMNIST.__load_dataset(root_path)
 
+        train_data_loader, test_data_loader = ConvMNIST.__load_dataset(root_path, is_testing)
         network(train_data_loader, test_data_loader)
 
 
-
     @staticmethod
-    def __load_dataset(root_path: AnyStr) -> (DataLoader, DataLoader):
+    def __load_dataset(root_path: AnyStr, is_testing: bool) -> (DataLoader, DataLoader):
         import torch
 
-        """
-        transform = transforms.Compose([
-            transforms.ToTensor(),  # Convert image to tensor
-            transforms.Normalize((0.1307,), (0.3081,))  # Normalize with mean and std dev
-        ])
-        """
+        if is_testing:
+            train_features = torch.randn(640, 1, 28, 28)
+            train_labels = torch.randn(640)
+            test_features = torch.randn(64, 1, 28, 28)
+            test_labels = torch.randn(64)
+        else:
+            train_data = torch.load(f'{root_path}/processed/training.pt')
+            train_features = train_data[0]
+            train_labels = train_data[1]
+            test_data = torch.load(f'{root_path}/processed/test.pt')
+            test_features = test_data[0]
+            test_labels = test_data[1]
 
-        train_data = torch.load(f'{root_path}/processed/training.pt')
-        train_features = train_data[0]
-        train_labels = train_data[1]
         train_dataset = TensorDataset(train_features, train_labels)
-
-        test_data = torch.load(f'{root_path}/processed/test.pt')
-        test_features = test_data[0]
-        test_labels = test_data[1]
         test_dataset = TensorDataset(test_features, test_labels)
 
-        # Create DataLoaders for batch processin
+        # Create DataLoaders for batch processing
         train_loader = DataLoader(dataset=train_dataset, batch_size=64, shuffle=True)
         test_loader = DataLoader(dataset=test_dataset, batch_size=64, shuffle=False)
 

@@ -13,10 +13,10 @@ class Conv2DBlockBuilder(ConvBlockBuilder, ABC):
     def __init__(self,
                  in_channels: int,
                  out_channels: int,
-                 input_size: Tuple[int, int],
-                 kernel_size: Tuple[int, int],
-                 stride: Tuple[int, int],
-                 padding: Tuple[int, int],
+                 input_size: int | Tuple[int, int],
+                 kernel_size: int | Tuple[int, int],
+                 stride: int | Tuple[int, int],
+                 padding: int | Tuple[int, int],
                  batch_norm: bool,
                  max_pooling_kernel: int,
                  activation: nn.Module,
@@ -91,7 +91,7 @@ class Conv2DBlockBuilder(ConvBlockBuilder, ABC):
 
         # Added max pooling module
         if self.max_pooling_kernel > 0:
-            modules.append(nn.MaxPool2d(kernel_size=self.max_pooling_kernel))
+            modules.append(nn.MaxPool2d(kernel_size=self.max_pooling_kernel, stride=0, padding=0))
         modules_list: List[nn.Module] = modules
         return tuple(modules_list)
 
@@ -151,11 +151,18 @@ class Conv2DBlockBuilder(ConvBlockBuilder, ABC):
         try:
             assert in_channels > 0, f'Conv neural block in_channels {in_channels} should be >0'
             assert out_channels > 0, f'Conv neural block out_channels {out_channels} should be >0'
-            assert input_size[0] > 0 and input_size[1] > 0, \
-                f'Conv neural block input_size should be {input_size} should be >0'
-            assert kernel_size[0] > 0 and kernel_size[1], f'Conv neural block kernel_size {kernel_size} should be > 0'
-            assert stride[0] >= 0 and stride[1] >= 0, f'Conv neural block stride {stride} should be >= 0'
-            assert padding[0] >= 0 and padding[1] >= 0, f'Conv neural block padding {padding} should be >= 0'
+            if type(input_size) is int:
+                assert input_size > 0, \
+                    f'Conv neural block input_size should be {input_size} should be >0'
+                assert kernel_size > 0, f'Conv neural block kernel_size {kernel_size} should be > 0'
+                assert stride >= 0, f'Conv neural block stride {stride} should be >= 0'
+                assert padding >= 0, f'Conv neural block padding {padding} should be >= 0'
+            else:
+                assert input_size[0] > 0 and input_size[1] > 0, \
+                    f'Conv neural block input_size should be {input_size} should be >0'
+                assert kernel_size[0] > 0 and kernel_size[1], f'Conv neural block kernel_size {kernel_size} should be > 0'
+                assert stride[0] >= 0 and stride[1] >= 0, f'Conv neural block stride {stride} should be >= 0'
+                assert padding[0] >= 0 and padding[1] >= 0, f'Conv neural block padding {padding} should be >= 0'
 
             assert 0 <= max_pooling_kernel < 5 or max_pooling_kernel == -1, \
                 f'Conv neural block max_pooling_kernel size {max_pooling_kernel} should be [0, 4]'

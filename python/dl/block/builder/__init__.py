@@ -50,12 +50,6 @@ class ConvBlockBuilder(object):
         self.max_pooling_kernel = max_pooling_kernel
         self.activation = activation
         self.bias = bias
-        """
-        if not self.is_valid():
-            raise DLException(
-                f'Number of output channels {out_channels} should be equal to {self.compute_out_channels()}'
-            )
-        """
 
     @abc.abstractmethod
     def __call__(self) -> Tuple[nn.Module]:

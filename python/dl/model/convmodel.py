@@ -14,6 +14,8 @@ import torch.nn as nn
 import logging
 logger = logging.getLogger('dl.model.ConvModel')
 
+__all__ = ['ConvModel']
+
 """
     Generic Convolutional neural network which can be used as Gan discriminator or 
     VariationalNeuralBlock Auto-encoder_model decoder_model module. For Gan and LinearVAE, 
@@ -52,7 +54,7 @@ class ConvModel(NeuralModel, ABC):
         if ffnn_blocks:
             self.ffnn_blocks = ffnn_blocks
             conv_modules.append(nn.Flatten())
-            [conv_modules.append(block) for block in ffnn_blocks for module in block.modules]
+            [conv_modules.append(module) for block in ffnn_blocks for module in block.modules]
         super(ConvModel, self).__init__(model_id, nn.Sequential(*conv_modules))
 
     @classmethod
@@ -103,21 +105,12 @@ class ConvModel(NeuralModel, ABC):
         @return: A tensor output from last layer
         @rtype; Torch tensor
         """
-        """
-        log_size(x, 'Input Conv model')
-        x = self.conv_model(x)
-        log_size(x, 'Output Conv model')
-        # If a full connected network is appended to the convolutional layers
-        if self.dff_model is not None:
-            log_size(x, 'Before width Conv')
-            sz = x.shape[0]
-            x = ConvModel.reshape(x, sz)
-            log_size(x, 'After width Conv')
-            x = self.dff_model(x)
-            log_size(x, 'Output connected Conv')
-        return x
-        """
         print(f'Input Conv shape {x.shape}')
+        modules = self.get_modules()
+        for module in modules:
+            print(f'\nBefore {str(module)} {x.shape}')
+            x = module(x)
+            print(f'After {x.shape}')
         x = self.model(x)
         log_size(x, 'Output Conv model')
         return x
@@ -129,8 +122,6 @@ class ConvModel(NeuralModel, ABC):
             "output_size": self.ffnn_blocks[-1].out_features ,
             "dff_model_input_size": self.ffnn_blocks[0].in_features
         }
-
-
 
     @staticmethod
     def is_valid(conv_blocks: List[ConvBlock], ffnn_blocks: List[FFNNBlock]) -> bool:

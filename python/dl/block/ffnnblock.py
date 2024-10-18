@@ -2,7 +2,8 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from torch import nn
-from typing import Self, AnyStr, Optional, overload
+import torch
+from typing import Self, AnyStr, Optional
 from dl.block.neuralblock import NeuralBlock
 
 """
@@ -14,7 +15,11 @@ The block is composed of a list of nn.Module instances
 
 
 class FFNNBlock(NeuralBlock):
-    def __init__(self,  block_id: AnyStr, layer: nn.Linear, activation: nn.Module, drop_out: float = 0.0):
+    def __init__(self,
+                 block_id: AnyStr,
+                 layer: nn.Linear,
+                 activation: nn.Module,
+                 drop_out: float = 0.0):
         """
         Default constructor
         @param block_id  Optional identifier for the Neural block
@@ -35,7 +40,10 @@ class FFNNBlock(NeuralBlock):
         # Only if regularization is needed
         if drop_out > 0.0:
             modules.append(nn.Dropout(drop_out))
-        super(FFNNBlock, self).__init__(block_id, modules)
+        super(FFNNBlock, self).__init__(block_id, tuple(modules))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return super().forward(x)
 
     @classmethod
     def build(cls,

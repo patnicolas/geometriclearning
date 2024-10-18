@@ -10,6 +10,8 @@ from python.dataset.tdataset import TDataset
 import logging
 logger = logging.getLogger('dataset.LabeledDataset')
 
+__all__ = ['LabeledDataset']
+
 
 class LabeledDataset(TDataset):
     def __init__(self,

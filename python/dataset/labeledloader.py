@@ -11,6 +11,8 @@ from python.dataset.labeleddataset import LabeledDataset
 from python.dataset.tdataset import TDataset
 from python.dataset.tloader import TLoader
 
+__all__ = ['LabeledLoader']
+
 """
     Wraps static methods to load public data sets. The methods generate two data loader
     - Training 
