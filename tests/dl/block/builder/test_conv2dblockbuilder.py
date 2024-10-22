@@ -20,7 +20,7 @@ class Conv2DBlockBuilderTest(unittest.TestCase):
         kernel_size = (4, 4)
         try:
             conv_2d_block_builder = Conv2DBlockBuilderTest.__create_conv_block(out_channels, kernel_size)
-            inferred_out_channels = conv_2d_block_builder.compute_out_shape()
+            inferred_out_channels = conv_2d_block_builder.get_conv_out_shape()
             logging.info(f'Inferred Out Channels {inferred_out_channels}')
             self.assertTrue(True)
         except ConvException as e:
@@ -32,7 +32,7 @@ class Conv2DBlockBuilderTest(unittest.TestCase):
         kernel_size = (6, 6)
         try:
             conv_2d_block_builder = Conv2DBlockBuilderTest.__create_conv_block(out_channels, kernel_size)
-            inferred_out_channels = conv_2d_block_builder.compute_out_shape()
+            inferred_out_channels = conv_2d_block_builder.get_conv_out_shape()
             logging.info(f'Inferred Out Channels {inferred_out_channels[0]}')
             self.assertTrue(True)
         except ConvException as e:

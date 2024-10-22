@@ -7,7 +7,7 @@ from sklearn.preprocessing import MinMaxScaler
 from typing import Optional, Callable, AnyStr, List, Tuple
 import pandas as pd
 import numpy as np
-from python.dataset.datasetexception import DatasetException
+from dataset.datasetexception import DatasetException
 import traceback
 import logging
 logger = logging.getLogger('dataset.TDataset')

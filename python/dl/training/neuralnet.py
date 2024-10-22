@@ -126,7 +126,7 @@ class NeuralNet(object):
                     params.grad = None
 
                 predicted = self.model(features)  # Call forward - prediction
-                labels = labels.unsqueeze(dim=-1)
+                # labels = labels.unsqueeze(dim=-1)
                 raw_loss = loss_function(predicted, labels)
                 # Set back propagation
                 raw_loss.backward(retain_graph=True)

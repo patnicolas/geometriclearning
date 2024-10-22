@@ -32,26 +32,28 @@ class ConvMNIST(object):
 
         import torch
         conv_blocks = []
+        input_dim = (input_size, input_size)
         for idx in range(len(in_channels)):
             is_batch_normalization = True
             has_bias = False
             conv_2d_block_builder = Conv2DBlockBuilder(
-                in_channels[idx],
-                in_channels[idx+1] if idx < len(in_channels)-1 else out_channels,
-                (input_size, input_size),
-                (kernel_size[idx], kernel_size[idx]),
-                (stride_size[idx], stride_size[idx]),
-                (padding_size[idx], padding_size[idx]),
-                is_batch_normalization,
-                max_pooling_kernel,
-                nn.ReLU(),
-                has_bias)
-            conv_blocks.append(ConvBlock(conv_2d_block_builder))
+                in_channels=in_channels[idx],
+                out_channels=in_channels[idx+1] if idx < len(in_channels)-1 else out_channels,
+                input_size=input_dim,
+                kernel_size=(kernel_size[idx], kernel_size[idx]),
+                stride=(stride_size[idx], stride_size[idx]),
+                padding=(padding_size[idx], padding_size[idx]),
+                batch_norm=is_batch_normalization,
+                max_pooling_kernel=max_pooling_kernel,
+                activation=nn.ReLU(),
+                bias=has_bias)
+            # conv_2d_block_builder.get_pool_out_shape()
+            input_dim = conv_2d_block_builder.get_conv_layer_out_shape()
+            conv_blocks.append(ConvBlock(str(idx+1), conv_2d_block_builder))
 
         num_classes = 10
         conv_output_shape = conv_blocks[len(conv_blocks)-1].compute_out_shapes()
         ffnn_input_shape = out_channels * conv_output_shape[0] * conv_output_shape[1]
-        # ffnn_input_shape = 64*160
         ffnn_block = FFNNBlock.build('hidden', ffnn_input_shape, num_classes, nn.ReLU())
         self.conv_model = ConvModel(ConvMNIST.id, conv_blocks, [ffnn_block])
 

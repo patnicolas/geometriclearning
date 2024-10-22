@@ -56,12 +56,8 @@ class ConvBlockBuilder(object):
         raise ConvException('Cannot extract module from abstract class ConvInitBlockBuilder')
 
     @abc.abstractmethod
-    def compute_out_shape(self) -> int | Tuple[int, int]:
-        raise ConvException('Computation of output shape is undefined')
-
-    @abc.abstractmethod
-    def compute_pooling_shape(self, out_shape: int | Tuple[int, int]) -> int | Tuple[int, int]:
-        raise ConvException('Computation of output pooling module is undefined')
+    def get_conv_layer_out_shape(self) -> int | Tuple[int, int]:
+        raise ConvException('Computation of shape of convolution layer output is undefined')
 
 
 def extract_conv_dimensions(

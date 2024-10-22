@@ -1,8 +1,8 @@
 
 import unittest
-from dl.model.custom.conv_mnist import ConvMNIST
-from dl.block import ConvException
-from dl.dlexception import DLException
+from python.dl.model.custom.conv_mnist import ConvMNIST
+from python.dl.block import ConvException
+from python.dl.dlexception import DLException
 
 
 class ConvMNISTTest(unittest.TestCase):
@@ -34,7 +34,6 @@ class ConvMNISTTest(unittest.TestCase):
             self.assertTrue(False)
 
 
-    @unittest.skip('Ignore')
     def test_train(self):
         input_size = 28
         in_channels = [1, 32]
@@ -64,6 +63,7 @@ class ConvMNISTTest(unittest.TestCase):
             print(str(e))
             self.assertTrue(False)
 
+
     @unittest.skip('Ignore')
     def test_conv_weights(self):
         import torch
@@ -87,6 +87,7 @@ class ConvMNISTTest(unittest.TestCase):
         # Print the shape of the output
         print(output.shape)
 
+    @unittest.skip('Ignore')
     def test_flatten(self):
         import torch
         from torch import nn

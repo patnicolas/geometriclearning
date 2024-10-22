@@ -55,6 +55,7 @@ class ConvModel(NeuralModel, ABC):
             self.ffnn_blocks = ffnn_blocks
             conv_modules.append(nn.Flatten())
             [conv_modules.append(module) for block in ffnn_blocks for module in block.modules]
+        conv_modules.append(nn.Softmax(dim=1))
         super(ConvModel, self).__init__(model_id, nn.Sequential(*conv_modules))
 
     @classmethod
@@ -106,13 +107,8 @@ class ConvModel(NeuralModel, ABC):
         @rtype; Torch tensor
         """
         print(f'Input Conv shape {x.shape}')
-        modules = self.get_modules()
-        for module in modules:
-            print(f'\nBefore {str(module)} {x.shape}')
-            x = module(x)
-            print(f'After {x.shape}')
         x = self.model(x)
-        log_size(x, 'Output Conv model')
+        print(f'Output Conv shape {x.shape}')
         return x
 
     def _state_params(self) -> Dict[AnyStr, Any]:

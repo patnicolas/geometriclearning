@@ -80,7 +80,7 @@ class Conv1DBlockBuilder(ConvBlockBuilder, ABC):
             modules.append(nn.MaxPool1d(self.max_pooling_kernel))
         return tuple(modules)
 
-    def compute_out_shape(self) -> int | Tuple[int, int]:
+    def get_conv_out_shape(self) -> int | Tuple[int, int]:
         """
         Compute the output channels from the input channels, stride, padding and kernel size
         @return: output channels if correct, -1 otherwise

@@ -7,9 +7,9 @@ from typing import Callable, Optional, AnyStr, Tuple, List
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import MNIST
-from python.dataset.labeleddataset import LabeledDataset
-from python.dataset.tdataset import TDataset
-from python.dataset.tloader import TLoader
+from dataset.labeleddataset import LabeledDataset
+from dataset.tdataset import TDataset
+from dataset.tloader import TLoader
 
 __all__ = ['LabeledLoader']
 
