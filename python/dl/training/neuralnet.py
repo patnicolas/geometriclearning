@@ -3,6 +3,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 import torch
 from torch.utils.data import Dataset, DataLoader
+from torch import device
 from abc import abstractmethod
 from typing import AnyStr, Dict
 from dl.model.neuralmodel import NeuralModel
@@ -45,7 +46,8 @@ class NeuralNet(object):
         @type early_stop_logger: EarlyStopLogger
         """
         self.hyper_params = hyper_params
-        self.model = model
+        self.target_device = NeuralNet.__get_device()
+        self.model = model.to(self.target_device)
         self.early_stop_logger = early_stop_logger
         self.plot_parameters = plot_parameters
         self.metrics: Dict[AnyStr, Metric] = metrics
@@ -84,7 +86,7 @@ class NeuralNet(object):
     def forward(self, features: torch.Tensor) -> torch.Tensor:
         with torch.no_grad():
             try:
-                return self.model(features)
+                return self.model(features.to(self.target_device))
             except RuntimeError as e:
                 raise DLException(str(e))
             except AttributeError as e:
@@ -102,17 +104,16 @@ class NeuralNet(object):
         logger.info(f'Extract {len(train_set)} training and {len(test_set)} test data')
 
         # Finally initialize the training and test1 loader
-        train_loader = DataLoader(dataset=train_set,
-                                  batch_size=batch_size,
-                                  shuffle=True)
-        test_loader = DataLoader(dataset=test_set,
-                                 batch_size=batch_size,
-                                 shuffle=True)
+        train_loader = DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True)
+        test_loader = DataLoader(dataset=test_set, batch_size=batch_size, shuffle=True)
         return train_loader, test_loader
+
+    def __repr__(self) -> str:
+        return repr(self.hyper_params)
 
     """ ------------------------------------   Private methods --------------------------------- """
 
-    def __train(self,epoch: int,train_loader: DataLoader) -> float:
+    def __train(self, epoch: int, train_loader: DataLoader) -> float:
         total_loss = 0.0
         # Initialize the gradient for the optimizer
         loss_function = self.hyper_params.loss_function
@@ -126,8 +127,8 @@ class NeuralNet(object):
                     params.grad = None
 
                 predicted = self.model(features)  # Call forward - prediction
-                # labels = labels.unsqueeze(dim=-1)
                 raw_loss = loss_function(predicted, labels)
+                print(f'Epoch: {epoch} Loss: {raw_loss}')
                 # Set back propagation
                 raw_loss.backward(retain_graph=True)
                 total_loss += raw_loss.data
@@ -158,7 +159,7 @@ class NeuralNet(object):
                         value = metric(predicted, labels)
                         metric_collector[key] = value
 
-                    labels = labels.unsqueeze(dim=-1)
+                    # labels = labels.unsqueeze(dim=-1)
                     loss = loss_func(predicted, labels)
                     total_loss += loss.data
                 except RuntimeError as e:
@@ -174,5 +175,14 @@ class NeuralNet(object):
         metric_collector[Metric.eval_loss_label] = eval_loss
         return metric_collector
 
-    def __repr__(self) -> str:
-        return repr(self.hyper_params)
+    @staticmethod
+    def __get_device() -> torch.device:
+        if torch.cuda.is_available():
+            print("Using CUDA GPU")
+            return torch.device("cuda")
+        elif torch.backends.mps.is_available():
+            print("Using MPS GPU")
+            return torch.device("mps")
+        else:
+            print("Using CPU")
+            return  torch.device("cpu")

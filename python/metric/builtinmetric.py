@@ -41,7 +41,8 @@ class BuiltInMetric(Metric):
             case MetricType.Recall:return self.__recall(predicted, labels)
 
     def __call__(self, predicted: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
-        np_metric = self.from_numpy(predicted.numpy(), labels.numpy())
+        # Need transfer prediction and labels to CPU for using numpy
+        np_metric = self.from_numpy(predicted.cpu().numpy(), labels.cpu().numpy())
         return torch.tensor(np_metric)
 
     """ ----------------------------  Private Helper Methods ---------------------- """

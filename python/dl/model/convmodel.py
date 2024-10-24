@@ -55,7 +55,6 @@ class ConvModel(NeuralModel, ABC):
             self.ffnn_blocks = ffnn_blocks
             conv_modules.append(nn.Flatten())
             [conv_modules.append(module) for block in ffnn_blocks for module in block.modules]
-        conv_modules.append(nn.Softmax(dim=1))
         super(ConvModel, self).__init__(model_id, nn.Sequential(*conv_modules))
 
     @classmethod

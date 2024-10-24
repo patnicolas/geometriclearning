@@ -30,7 +30,6 @@ class ConvMNIST(object):
                  max_pooling_kernel: int,
                  out_channels: int) -> None:
 
-        import torch
         conv_blocks = []
         input_dim = (input_size, input_size)
         for idx in range(len(in_channels)):
@@ -54,8 +53,9 @@ class ConvMNIST(object):
         num_classes = 10
         conv_output_shape = conv_blocks[len(conv_blocks)-1].compute_out_shapes()
         ffnn_input_shape = out_channels * conv_output_shape[0] * conv_output_shape[1]
-        ffnn_block = FFNNBlock.build('hidden', ffnn_input_shape, num_classes, nn.ReLU())
-        self.conv_model = ConvModel(ConvMNIST.id, conv_blocks, [ffnn_block])
+        ffnn_block1 = FFNNBlock.build('hidden', ffnn_input_shape, out_features = 128, activation=nn.ReLU())
+        ffnn_block2 = FFNNBlock.build('output', 128, out_features = num_classes, activation=nn.Softmax(dim=1))
+        self.conv_model = ConvModel(ConvMNIST.id, conv_blocks, [ffnn_block1, ffnn_block2])
 
     def show_conv_weights_shape(self) -> NoReturn:
         import torch
@@ -67,21 +67,21 @@ class ConvMNIST(object):
     def __repr__(self) -> AnyStr:
         return repr(self.conv_model)
 
-    def train_(self, root_path: AnyStr, is_testing: bool):
+    def do_train(self, root_path: AnyStr, is_testing: bool= False):
         patience = 2
         min_diff_loss = -0.001
         early_stopping_enabled = True
         early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
         metric_labels = {
-            Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, True),
-            Metric.precision_label: BuiltInMetric(MetricType.Precision, True)
+            Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, is_weighted=True),
+            Metric.precision_label: BuiltInMetric(MetricType.Precision, is_weighted=True)
         }
         parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                       for label, _ in metric_labels.items()]
         hyper_parameters = HyperParams(
-            lr=0.001,
+            lr=0.01,
             momentum=0.95,
-            epochs=8,
+            epochs=16,
             optim_label='adam',
             batch_size=64,
             loss_function=nn.BCELoss(),
@@ -99,23 +99,25 @@ class ConvMNIST(object):
         train_data_loader, test_data_loader = ConvMNIST.__load_dataset(root_path, is_testing)
         network(train_data_loader, test_data_loader)
 
-
     @staticmethod
     def __load_dataset(root_path: AnyStr, is_testing: bool) -> (DataLoader, DataLoader):
         import torch
 
         if is_testing:
+            print('Random data')
             train_features = torch.randn(640, 1, 28, 28)
             train_labels = torch.randn(640)
             test_features = torch.randn(64, 1, 28, 28)
             test_labels = torch.randn(64)
         else:
+            print('Real data')
             train_data = torch.load(f'{root_path}/processed/training.pt')
-            train_features = train_data[0]
-            train_labels = train_data[1]
+            train_features = train_data[0].unsqueeze(dim=1).float().to(torch.device('mps'))
+            train_labels = torch.nn.functional.one_hot(train_data[1], num_classes=10).float().to(torch.device('mps'))
+
             test_data = torch.load(f'{root_path}/processed/test.pt')
-            test_features = test_data[0]
-            test_labels = test_data[1]
+            test_features = test_data[0].unsqueeze(dim=1).float().to(torch.device('mps'))
+            test_labels = torch.nn.functional.one_hot(test_data[1], num_classes=10).float().to(torch.device('mps'))
 
         train_dataset = TensorDataset(train_features, train_labels)
         test_dataset = TensorDataset(test_features, test_labels)

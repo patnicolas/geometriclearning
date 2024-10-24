@@ -33,7 +33,6 @@ class ConvMNISTTest(unittest.TestCase):
             print(str(e))
             self.assertTrue(False)
 
-
     def test_train(self):
         input_size = 28
         in_channels = [1, 32]
@@ -54,7 +53,7 @@ class ConvMNISTTest(unittest.TestCase):
                 max_pooling_kernel,
                 out_channels)
             print(repr(conv_MNIST_instance))
-            conv_MNIST_instance.train_(root_path, True)
+            conv_MNIST_instance.do_train(root_path, is_testing=False)
             self.assertTrue(True)
         except ConvException as e:
             print(str(e))
