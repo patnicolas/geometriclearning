@@ -3,6 +3,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from typing import List, AnyStr, Tuple, NoReturn
 import torch.nn as nn
+import torch
 from dl.model.custom.base_mnist import BaseMNIST
 from dl.model.convmodel import ConvModel
 from dl.block.convblock import ConvBlock
@@ -10,6 +11,8 @@ from dl.block.ffnnblock import FFNNBlock
 from dl.block.builder.conv2dblockbuilder import Conv2DBlockBuilder
 import logging
 logger = logging.getLogger('dl.model.custom.ConvMNIST')
+
+__all__ = ['BaseMNIST', 'ConvMNIST']
 
 
 class ConvMNIST(BaseMNIST):
@@ -58,7 +61,6 @@ class ConvMNIST(BaseMNIST):
         conv_model = ConvModel(ConvMNIST.id, conv_blocks, ffnn_blocks=[ffnn_block1, ffnn_block2])
         super(ConvMNIST, self).__init__(conv_model)
 
-
     def show_conv_weights_shape(self) -> NoReturn:
         import torch
 
@@ -66,73 +68,17 @@ class ConvMNIST(BaseMNIST):
             conv_modules_weights: Tuple[torch.Tensor] = conv_block.get_modules_weights()
             print(f'\nConv. layer #{idx} shape: {conv_modules_weights[0].shape}')
 
-    def __repr__(self) -> AnyStr:
-        return repr(self.model)
+    def _process_data(self, root_path: AnyStr) ->(torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor):
+        from dl.training.neuralnet import NeuralNet
 
-    """
-    def do_train(self, root_path: AnyStr, hyper_parameters: HyperParams) -> NoReturn:
-        BaseMNIST._train(root_path, self.model, hyper_parameters)
+        _, torch_device = NeuralNet.get_device()
 
- 
-    @staticmethod
-    def _train(root_path: AnyStr,
-               neural_model: NeuralModel,
-               hyper_parameters: HyperParams,
-               is_testing: bool=False) -> NoReturn:
-        patience = 2
-        min_diff_loss = -0.001
-        early_stopping_enabled = True
-        early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
-        metric_labels = {
-            Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, is_weighted=True),
-            Metric.precision_label: BuiltInMetric(MetricType.Precision, is_weighted=True)
-        }
-        parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
-                      for label, _ in metric_labels.items()]
+        train_data = torch.load(f'{root_path}/{BaseMNIST.default_training_file}')
+        train_features = train_data[0].unsqueeze(dim=1).float().to(torch_device)
+        train_labels = torch.nn.functional.one_hot(train_data[1], num_classes=10).float().to(torch_device)
 
-        network = NeuralNet(
-            neural_model,
-            hyper_parameters,
-            early_stop_logger,
-            metric_labels,
-            parameters)
+        test_data = torch.load(f'{root_path}/{BaseMNIST.default_test_file}')
+        test_features = test_data[0].unsqueeze(dim=1).float().to(torch_device)
+        test_labels = torch.nn.functional.one_hot(test_data[1], num_classes=10).float().to(torch_device)
 
-        train_data_loader, test_data_loader = ConvMNIST.__load_dataset(root_path, is_testing)
-        network(train_data_loader, test_data_loader)
-
-    @staticmethod
-    def __load_dataset(root_path: AnyStr, is_testing: bool) -> (DataLoader, DataLoader):
-        import torch
-
-        if is_testing:
-            print('Random data')
-            train_features = torch.randn(640, 1, 28, 28)
-            train_labels = torch.randn(640)
-            test_features = torch.randn(64, 1, 28, 28)
-            test_labels = torch.randn(64)
-        else:
-            print('Real data')
-            train_data = torch.load(f'{root_path}/processed/training.pt')
-            train_features = train_data[0].unsqueeze(dim=1).float().to(torch.device('mps'))
-            train_labels = torch.nn.functional.one_hot(train_data[1], num_classes=10).float().to(torch.device('mps'))
-
-            test_data = torch.load(f'{root_path}/processed/test.pt')
-            test_features = test_data[0].unsqueeze(dim=1).float().to(torch.device('mps'))
-            test_labels = torch.nn.functional.one_hot(test_data[1], num_classes=10).float().to(torch.device('mps'))
-
-        train_dataset = TensorDataset(train_features, train_labels)
-        test_dataset = TensorDataset(test_features, test_labels)
-
-        # Create DataLoaders for batch processing
-        train_loader = DataLoader(dataset=train_dataset, batch_size=64, shuffle=True)
-        test_loader = DataLoader(dataset=test_dataset, batch_size=64, shuffle=False)
-
-        # Check the first batch of data
-        for images, labels in train_loader:
-            print(f'Image batch shape: {images.shape}')
-            print(f'Label batch shape: {labels.shape}')
-            break
-
-        return train_loader, test_loader
-        
-        """
+        return train_features, train_labels, test_features, test_labels

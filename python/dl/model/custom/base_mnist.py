@@ -2,6 +2,8 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from typing import AnyStr, NoReturn
+from abc import ABC, abstractmethod
+import torch
 from torch.utils.data import DataLoader, TensorDataset
 from dl.training.neuralnet import NeuralNet
 from dl.training.earlystoplogger import EarlyStopLogger
@@ -13,10 +15,11 @@ from metric.builtinmetric import BuiltInMetric, MetricType
 import logging
 logger = logging.getLogger('dl.model.custom.BaseMNIST')
 
+__all__ = ['BaseMNIST']
 
 
 
-class BaseMNIST(object):
+class BaseMNIST(ABC):
     default_training_file = 'processed/training.pt'
     default_test_file = 'processed/test.pt'
     num_classes = 10
@@ -24,12 +27,15 @@ class BaseMNIST(object):
     def __init__(self, model: NeuralModel) -> None:
         self.model = model
 
+    def __repr__(self) -> AnyStr:
+        return repr(self.model)
+
     def do_train(self, root_path: AnyStr, hyper_parameters: HyperParams) -> NoReturn:
         """
         Execute the training, evaluation and metrics for any model for MNIST data set
         @param root_path: Path for the root of the MNIST data
         @type root_path: str
-        @param hyper_parameters: Hyper-parameteres for the execution of the
+        @param hyper_parameters: Hyper-parameters for the execution of the
         @type hyper_parameters: HyperParams
         """
         patience = 2
@@ -43,7 +49,7 @@ class BaseMNIST(object):
         parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                       for label, _ in metric_labels.items()]
 
-        # Define the neural network as model, hyper-parameters, early stopping criteria and metrics
+        # Define the neural network as model, hyperparameters, early stopping criteria and metrics
         network = NeuralNet(
             self.model,
             hyper_parameters,
@@ -51,13 +57,16 @@ class BaseMNIST(object):
             metric_labels,
             parameters)
 
-        train_data_loader, test_data_loader = BaseMNIST.__load_dataset(root_path)
+        train_data_loader, test_data_loader = self.__load_dataset(root_path)
         network(train_data_loader, test_data_loader)
+
+    @abstractmethod
+    def _process_data(self, root_path: AnyStr) ->(torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor):
+        raise NotImplementedError('NeuralNet.model_label is an abstract method')
 
     """ ---------------------  Private Helper Methods -------------------------- """
 
-    @staticmethod
-    def __load_dataset(root_path: AnyStr) -> (DataLoader, DataLoader):
+    def __load_dataset(self, root_path: AnyStr) -> (DataLoader, DataLoader):
         import torch
         is_testing = False
 
@@ -68,16 +77,7 @@ class BaseMNIST(object):
             test_features = torch.randn(64, 1, 28, 28)
             test_labels = torch.randn(64)
         else:
-            target_device, torch_device = NeuralNet.get_device()
-            print(f'Real data for device {target_device}')
-
-            train_data = torch.load(f'{root_path}/{BaseMNIST.default_training_file}')
-            train_features = train_data[0].unsqueeze(dim=1).float().to(torch_device)
-            train_labels = torch.nn.functional.one_hot(train_data[1], num_classes=10).float().to(torch_device)
-
-            test_data = torch.load(f'{root_path}/{BaseMNIST.default_test_file}')
-            test_features = test_data[0].unsqueeze(dim=1).float().to(torch_device)
-            test_labels = torch.nn.functional.one_hot(test_data[1], num_classes=10).float().to(torch_device)
+            train_features, train_labels, test_features, test_labels =  self._process_data(root_path)
 
         # Build the data set as PyTorch tensors
         train_dataset = TensorDataset(train_features, train_labels)

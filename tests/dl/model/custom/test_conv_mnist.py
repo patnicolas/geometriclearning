@@ -67,11 +67,13 @@ class ConvMNISTTest(unittest.TestCase):
                 out_channels)
             print(repr(conv_MNIST_instance))
             conv_MNIST_instance.do_train(root_path, hyper_parameters)
-            self.assertTrue(True)
         except ConvException as e:
             print(str(e))
             self.assertTrue(False)
         except DLException as e:
+            print(str(e))
+            self.assertTrue(False)
+        except AssertionError as e:
             print(str(e))
             self.assertTrue(False)
 

@@ -5,7 +5,6 @@ import torch
 import torch.nn as nn
 from abc import abstractmethod
 from typing import AnyStr, Self, List
-from util import log_size
 
 __all__ = ['NeuralModel']
 
@@ -39,9 +38,9 @@ class NeuralModel(torch.nn.Module):
         @return: Prediction for the input
         @rtype: Torch tensor
         """
-        log_size(x, f'Input {self.model_id}')
+        print(f'Input {self.model_id}\n{x.shape}')
         x = self.model(x)
-        log_size(x, f'Output {self.model_id}')
+        print(f'Output {self.model_id}\n{x.shape}')
         return x
 
     @abstractmethod
