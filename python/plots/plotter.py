@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 from datetime import datetime
 from typing import List, AnyStr, NoReturn, Tuple, Optional, Dict
 from dataclasses import dataclass
+import torch
 
 """
     Wraps the parameters for plots. The static methods generated a '.png' file which name is time stamped.
@@ -145,9 +146,10 @@ class Plotter(object):
     def __axis_plot(
             x: np.array,
             plotter_param: PlotterParameters,
-            values: List[float],
+            torch_values: List[torch.Tensor],
             axes: List,
             idx: int) -> NoReturn:
+        values = [value.cpu().float() for value in torch_values]
         y = np.asarray(values)
         axes[idx].plot(x, y)
         axes[idx].set(xlabel=plotter_param.x_label, ylabel=plotter_param.y_label, title=plotter_param.title)

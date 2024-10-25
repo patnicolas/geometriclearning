@@ -8,7 +8,6 @@ from dl.block.convblock import ConvBlock
 from dl.model.neuralmodel import NeuralModel
 from dl.model.ffnnmodel import FFNNModel
 from typing import List, AnyStr, Dict, Any, Self, Optional
-from util import log_size
 import torch
 import torch.nn as nn
 import logging

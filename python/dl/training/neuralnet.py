@@ -46,7 +46,7 @@ class NeuralNet(object):
         @type early_stop_logger: EarlyStopLogger
         """
         self.hyper_params = hyper_params
-        self.target_device = NeuralNet.__get_device()
+        _, self.target_device = NeuralNet.get_device()
         self.model = model.to(self.target_device)
         self.early_stop_logger = early_stop_logger
         self.plot_parameters = plot_parameters
@@ -111,6 +111,23 @@ class NeuralNet(object):
     def __repr__(self) -> str:
         return repr(self.hyper_params)
 
+    @staticmethod
+    def get_device() -> (AnyStr, torch.device):
+        """
+        Retrieve the device (CPU, GPU) used for the execution, training and evaluation of this Neural network
+        @return: Pair (device name, torch device)
+        @rtype: Tuple[AnyStr, torch.device]
+        """
+        if torch.cuda.is_available():
+            print("Using CUDA GPU")
+            return 'cuda', torch.device("cuda")
+        elif torch.backends.mps.is_available():
+            print("Using MPS GPU")
+            return 'mps', torch.device("mps")
+        else:
+            print("Using CPU")
+            return 'cpu', torch.device("cpu")
+
     """ ------------------------------------   Private methods --------------------------------- """
 
     def __train(self, epoch: int, train_loader: DataLoader) -> float:
@@ -154,12 +171,12 @@ class NeuralNet(object):
                 try:
                     self.model.eval()
                     predicted = self.model(features)
-                    is_last_epoch = epoch == self.hyper_params.epochs-1
+                    p = predicted.cpu().numpy()
+                    l = labels.cpu().numpy()
                     for key, metric in self.metrics.items():
-                        value = metric(predicted, labels)
+                        value = metric(p, l)
                         metric_collector[key] = value
 
-                    # labels = labels.unsqueeze(dim=-1)
                     loss = loss_func(predicted, labels)
                     total_loss += loss.data
                 except RuntimeError as e:
@@ -175,14 +192,3 @@ class NeuralNet(object):
         metric_collector[Metric.eval_loss_label] = eval_loss
         return metric_collector
 
-    @staticmethod
-    def __get_device() -> torch.device:
-        if torch.cuda.is_available():
-            print("Using CUDA GPU")
-            return torch.device("cuda")
-        elif torch.backends.mps.is_available():
-            print("Using MPS GPU")
-            return torch.device("mps")
-        else:
-            print("Using CPU")
-            return  torch.device("cpu")

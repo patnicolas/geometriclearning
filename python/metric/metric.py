@@ -16,6 +16,7 @@ class Metric(object):
     f1_label = "F1"
     precision_label = "Precision"
     recall_label = "Recall"
+
     def __init__(self):
         self._count = 0
 

@@ -52,10 +52,8 @@ class EarlyStopLogger(object):
             @type epoch: int
             @param train_loss: Current training loss
             @type train_loss: float
-            @param eval_loss: Current evaluation loss
-            @type eval_loss: float
-            @param metrics: List of pair metrics to be recorded (i.e. accuracy, precision,....)
-            @type metrics: Dictionary
+            @param eval_metrics: List of pair metrics to be recorded (i.e. accuracy, precision,....)
+            @type eval_metrics: Dictionary
             @return: True if early stopping, False otherwise
             @rtype: Boolean
         """
@@ -72,6 +70,8 @@ class EarlyStopLogger(object):
         @param metrics: Set of metrics
         @type metrics: Dictionary
         """
+        import torch
+
         for key, value in metrics.items():
             if key in self.metrics:
                 values = self.metrics[key]

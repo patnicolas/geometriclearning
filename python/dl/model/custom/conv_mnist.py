@@ -3,22 +3,16 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from typing import List, AnyStr, Tuple, NoReturn
 import torch.nn as nn
+from dl.model.custom.base_mnist import BaseMNIST
 from dl.model.convmodel import ConvModel
-from torch.utils.data import DataLoader, TensorDataset
 from dl.block.convblock import ConvBlock
 from dl.block.ffnnblock import FFNNBlock
-from dl.training.neuralnet import NeuralNet
-from dl.training.earlystoplogger import EarlyStopLogger
 from dl.block.builder.conv2dblockbuilder import Conv2DBlockBuilder
-from metric.metric import Metric
-from plots.plotter import PlotterParameters
-from dl.training.hyperparams import HyperParams
-from metric.builtinmetric import BuiltInMetric, MetricType
 import logging
 logger = logging.getLogger('dl.model.custom.ConvMNIST')
 
 
-class ConvMNIST(object):
+class ConvMNIST(BaseMNIST):
     id = 'Convolutional MNIST'
 
     def __init__(self,
@@ -32,6 +26,7 @@ class ConvMNIST(object):
 
         conv_blocks = []
         input_dim = (input_size, input_size)
+
         for idx in range(len(in_channels)):
             is_batch_normalization = True
             has_bias = False
@@ -50,24 +45,40 @@ class ConvMNIST(object):
             input_dim = conv_2d_block_builder.get_conv_layer_out_shape()
             conv_blocks.append(ConvBlock(str(idx+1), conv_2d_block_builder))
 
-        num_classes = 10
         conv_output_shape = conv_blocks[len(conv_blocks)-1].compute_out_shapes()
         ffnn_input_shape = out_channels * conv_output_shape[0] * conv_output_shape[1]
-        ffnn_block1 = FFNNBlock.build('hidden', ffnn_input_shape, out_features = 128, activation=nn.ReLU())
-        ffnn_block2 = FFNNBlock.build('output', 128, out_features = num_classes, activation=nn.Softmax(dim=1))
-        self.conv_model = ConvModel(ConvMNIST.id, conv_blocks, [ffnn_block1, ffnn_block2])
+        ffnn_block1 = FFNNBlock.build(block_id='hidden',
+                                      in_features=ffnn_input_shape,
+                                      out_features = 128,
+                                      activation=nn.ReLU())
+        ffnn_block2 = FFNNBlock.build(block_id='output',
+                                      in_features=128,
+                                      out_features = BaseMNIST.num_classes,
+                                      activation=nn.Softmax(dim=1))
+        conv_model = ConvModel(ConvMNIST.id, conv_blocks, ffnn_blocks=[ffnn_block1, ffnn_block2])
+        super(ConvMNIST, self).__init__(conv_model)
+
 
     def show_conv_weights_shape(self) -> NoReturn:
         import torch
 
-        for idx, conv_block in enumerate(self.conv_model.conv_blocks):
+        for idx, conv_block in enumerate(self.model.conv_blocks):
             conv_modules_weights: Tuple[torch.Tensor] = conv_block.get_modules_weights()
             print(f'\nConv. layer #{idx} shape: {conv_modules_weights[0].shape}')
 
     def __repr__(self) -> AnyStr:
-        return repr(self.conv_model)
+        return repr(self.model)
 
-    def do_train(self, root_path: AnyStr, is_testing: bool= False):
+    """
+    def do_train(self, root_path: AnyStr, hyper_parameters: HyperParams) -> NoReturn:
+        BaseMNIST._train(root_path, self.model, hyper_parameters)
+
+ 
+    @staticmethod
+    def _train(root_path: AnyStr,
+               neural_model: NeuralModel,
+               hyper_parameters: HyperParams,
+               is_testing: bool=False) -> NoReturn:
         patience = 2
         min_diff_loss = -0.001
         early_stopping_enabled = True
@@ -78,19 +89,9 @@ class ConvMNIST(object):
         }
         parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                       for label, _ in metric_labels.items()]
-        hyper_parameters = HyperParams(
-            lr=0.01,
-            momentum=0.95,
-            epochs=16,
-            optim_label='adam',
-            batch_size=64,
-            loss_function=nn.BCELoss(),
-            drop_out=0.2,
-            train_eval_ratio=0.9,
-            normal_weight_initialization = True)
 
         network = NeuralNet(
-            self.conv_model,
+            neural_model,
             hyper_parameters,
             early_stop_logger,
             metric_labels,
@@ -133,3 +134,5 @@ class ConvMNIST(object):
             break
 
         return train_loader, test_loader
+        
+        """

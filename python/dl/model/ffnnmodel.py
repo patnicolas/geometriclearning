@@ -62,7 +62,7 @@ class FFNNModel(NeuralModel):
         return self.neural_blocks[-1].in_features
 
     def __repr__(self) -> AnyStr:
-        blocks_str = '\n'.join([f'   {repr(block)}' for block in self.neural_blocks])
+        blocks_str = '\n'.join([f'{idx+1}:   {repr(block)}' for idx, block in enumerate(self.neural_blocks)])
         return f'\n      Id: {self.model_id}\n{blocks_str}'
 
     def save(self, extra_params: dict = None):

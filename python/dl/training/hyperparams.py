@@ -136,7 +136,7 @@ class HyperParams(object):
                             train_eval_ratio: float,
                             drop_out: float) -> None:
         assert 1e-6 <= lr <= 0.1, f'Learning rate {lr} should be [1e-6, 0.1]'
-        assert 3 <= epochs <= 500, f'Number of epochs {epochs} should be [3, 50]'
+        assert 2 <= epochs <= 500, f'Number of epochs {epochs} should be [3, 50]'
         assert 0.4 <= momentum <= 0.999, f'Context stride {momentum} should be [0.5, 0.999]'
         assert 1 <= batch_size <= 256, f'Size of batch {batch_size} should be [2, 256]'
         assert 0.5 < train_eval_ratio < 0.98, f'Train eval ratio {train_eval_ratio} is out of range ]0.5, 9.98['

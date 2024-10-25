@@ -6,6 +6,7 @@ from python.metric.metric import Metric
 import torch
 import numpy as np
 from enum import Enum
+from typing import List
 
 
 class MetricType(Enum):
@@ -40,9 +41,9 @@ class BuiltInMetric(Metric):
             case MetricType.Precision: return self.__precision(predicted, labels)
             case MetricType.Recall:return self.__recall(predicted, labels)
 
-    def __call__(self, predicted: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+    def __call__(self, predicted: List[float], labels: List[float]) -> torch.Tensor:
         # Need transfer prediction and labels to CPU for using numpy
-        np_metric = self.from_numpy(predicted.cpu().numpy(), labels.cpu().numpy())
+        np_metric = self.from_numpy(predicted, labels)
         return torch.tensor(np_metric)
 
     """ ----------------------------  Private Helper Methods ---------------------- """

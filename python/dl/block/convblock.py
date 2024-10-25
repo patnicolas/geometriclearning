@@ -23,14 +23,14 @@ logger = logging.getLogger('dl.block.ConvBlock')
 
 class ConvBlock(nn.Module):
 
-    def __init__(self, id: AnyStr, conv_block_builder: ConvBlockBuilder) -> None:
+    def __init__(self, _id: AnyStr, conv_block_builder: ConvBlockBuilder) -> None:
         """
         Constructor for the convolutional neural block
         @param conv_block_builder: Convolutional block (dimension 1 or 2)
         @type conv_block_builder: ConvBlockBuilder
         """
         super(ConvBlock, self).__init__()
-        self.id = id
+        self.id = _id
         self.conv_block_builder = conv_block_builder
         # Invoke __call__
         self.modules = self.conv_block_builder()

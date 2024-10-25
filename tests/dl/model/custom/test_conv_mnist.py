@@ -1,4 +1,3 @@
-
 import unittest
 from python.dl.model.custom.conv_mnist import ConvMNIST
 from python.dl.block import ConvException
@@ -34,6 +33,9 @@ class ConvMNISTTest(unittest.TestCase):
             self.assertTrue(False)
 
     def test_train(self):
+        from dl.training.hyperparams import HyperParams
+        import torch.nn as nn
+
         input_size = 28
         in_channels = [1, 32]
         kernel_size = [3, 3]
@@ -42,6 +44,17 @@ class ConvMNISTTest(unittest.TestCase):
         max_pooling_kernel = 2
         out_channels = 64
         root_path = '../../../../data/MNIST'
+
+        hyper_parameters = HyperParams(
+            lr=0.0001,
+            momentum=0.95,
+            epochs=36,
+            optim_label='adam',
+            batch_size=32,
+            loss_function=nn.CrossEntropyLoss(),
+            drop_out=0.2,
+            train_eval_ratio=0.9,
+            normal_weight_initialization=True)
 
         try:
             conv_MNIST_instance = ConvMNIST(
@@ -53,7 +66,7 @@ class ConvMNISTTest(unittest.TestCase):
                 max_pooling_kernel,
                 out_channels)
             print(repr(conv_MNIST_instance))
-            conv_MNIST_instance.do_train(root_path, is_testing=False)
+            conv_MNIST_instance.do_train(root_path, hyper_parameters)
             self.assertTrue(True)
         except ConvException as e:
             print(str(e))
