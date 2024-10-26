@@ -30,3 +30,8 @@ class FFNNMISTTest(unittest.TestCase):
 
         ffnn_mnist = FFNNMNIST(input_size, features)
         ffnn_mnist.do_train(root_path, hyper_parameters)
+        self.assertTrue(True)
+
+
+if __name__ == '__main__':
+    unittest.main()

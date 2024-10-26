@@ -5,12 +5,15 @@ from typing import AnyStr, NoReturn
 from abc import ABC, abstractmethod
 import torch
 from torch.utils.data import DataLoader, TensorDataset
+
+from dl.block import ConvException
 from dl.training.neuralnet import NeuralNet
 from dl.training.earlystoplogger import EarlyStopLogger
 from dl.model.neuralmodel import NeuralModel
 from metric.metric import Metric
 from plots.plotter import PlotterParameters
 from dl.training.hyperparams import HyperParams
+from dl.dlexception import DLException
 from metric.builtinmetric import BuiltInMetric, MetricType
 import logging
 logger = logging.getLogger('dl.model.custom.BaseMNIST')
@@ -38,35 +41,47 @@ class BaseMNIST(ABC):
         @param hyper_parameters: Hyper-parameters for the execution of the
         @type hyper_parameters: HyperParams
         """
-        patience = 2
-        min_diff_loss = -0.001
-        early_stopping_enabled = True
-        early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
-        metric_labels = {
-            Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, is_weighted=True),
-            Metric.precision_label: BuiltInMetric(MetricType.Precision, is_weighted=True)
-        }
-        parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
-                      for label, _ in metric_labels.items()]
+        try:
+            patience = 2
+            min_diff_loss = -0.001
+            early_stopping_enabled = True
+            early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
+            metric_labels = {
+                Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, is_weighted=True),
+                Metric.precision_label: BuiltInMetric(MetricType.Precision, is_weighted=True)
+            }
+            parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
+                          for label, _ in metric_labels.items()]
 
-        # Define the neural network as model, hyperparameters, early stopping criteria and metrics
-        network = NeuralNet(
-            self.model,
-            hyper_parameters,
-            early_stop_logger,
-            metric_labels,
-            parameters)
+            # Define the neural network as model, hyperparameters, early stopping criteria and metrics
+            network = NeuralNet(
+                self.model,
+                hyper_parameters,
+                early_stop_logger,
+                metric_labels,
+                parameters)
 
-        train_data_loader, test_data_loader = self.__load_dataset(root_path)
-        network(train_data_loader, test_data_loader)
+            train_data_loader, test_data_loader = self.load_dataset(root_path, use_labels=True)
+            network(train_data_loader, test_data_loader)
+        except ConvException as e:
+            print(str(e))
+        except DLException as e:
+            print(str(e))
 
     @abstractmethod
-    def _process_data(self, root_path: AnyStr) ->(torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor):
+    def _extract_datasets(self, root_path: AnyStr) ->(torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor):
+        """
+        Extract the training data and labels and test data and labels
+        @param root_path: Root path to MNIST dataset
+        @type root_path: AnyStr
+        @return Tuple (train data, labels, test data, labels)
+        @rtype Tuple[torch.Tensor]
+        """
         raise NotImplementedError('NeuralNet.model_label is an abstract method')
 
     """ ---------------------  Private Helper Methods -------------------------- """
 
-    def __load_dataset(self, root_path: AnyStr) -> (DataLoader, DataLoader):
+    def load_dataset(self, root_path: AnyStr, use_labels: bool) -> (DataLoader, DataLoader):
         import torch
         is_testing = False
 
@@ -77,11 +92,15 @@ class BaseMNIST(ABC):
             test_features = torch.randn(64, 1, 28, 28)
             test_labels = torch.randn(64)
         else:
-            train_features, train_labels, test_features, test_labels =  self._process_data(root_path)
+            train_features, train_labels, test_features, test_labels = self._extract_datasets(root_path)
 
         # Build the data set as PyTorch tensors
-        train_dataset = TensorDataset(train_features, train_labels)
-        test_dataset = TensorDataset(test_features, test_labels)
+        if use_labels:
+            train_dataset = TensorDataset(train_features, train_labels)
+            test_dataset = TensorDataset(test_features, test_labels)
+        else:
+            train_dataset = TensorDataset(train_features)[0]
+            test_dataset = TensorDataset(test_features)[0]
 
         # Create DataLoaders for batch processing
         train_loader = DataLoader(dataset=train_dataset, batch_size=64, shuffle=True)

@@ -19,10 +19,11 @@ class VariationalBlock(NeuralBlock):
         @param latent_size:  Number of hidden unit for the latent space the variational block
         @type latent_size:  int
         """
-        mu = nn.Linear(hidden_dim, latent_size)
-        log_var = nn.Linear(hidden_dim, latent_size)
-        sampler_fc = nn.Linear(latent_size, hidden_dim)
-        super(VariationalBlock, self).__init__('Gaussian', [mu, log_var, sampler_fc])
+        mu: nn.Module = nn.Linear(hidden_dim, latent_size)
+        log_var: nn.Module = nn.Linear(hidden_dim, latent_size)
+        sampler_fc: nn.Module = nn.Linear(latent_size, hidden_dim)
+        modules = tuple([mu, log_var, sampler_fc])
+        super(VariationalBlock, self).__init__(block_id='Gaussian', modules=modules)
 
         self.mu = mu
         self.log_var = log_var
@@ -59,11 +60,11 @@ class VariationalBlock(NeuralBlock):
         @return: z, mean and log variance input_tensor
         @rtype: torch tensor
         """
-        log_size(x, 'fc variational')
+        print(f'fc variational input shape {x.shape}')
         mu = self.mu(x)
-        log_size(mu, 'mu variational')
+        print(f'mu variational shape {mu.shape}')
         log_var = self.log_var(x)
         z = VariationalBlock.re_parameterize(mu, log_var)
-        log_size(z, 'z variational')
+        print(f'z variational shape {z.shape}')
         return self.sampler_fc(z), mu, log_var
 

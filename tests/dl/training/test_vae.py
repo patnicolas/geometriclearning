@@ -23,6 +23,7 @@ class VAETest(unittest.TestCase):
         vae_model = VAEModel('Autoencoder', encoder, latent_size)
         print(vae_model)
 
+
     def test_train(self):
         from python.metric.metric import Metric
         from python.metric.builtinmetric import BuiltInMetric, MetricType

@@ -50,7 +50,14 @@ class FFNNMNIST(BaseMNIST):
         # Invoke base class
         super(FFNNMNIST, self).__init__(ffnn_model)
 
-    def _process_data(self, root_path: AnyStr) ->(torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor):
+    def _extract_datasets(self, root_path: AnyStr) ->(torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor):
+        """
+        Extract the training data and labels and test data and labels for this feed forward neural network
+        @param root_path: Root path to MNIST dataset
+        @type root_path: AnyStr
+        @return Tuple (train data, labels, test data, labels)
+        @rtype Tuple[torch.Tensor]
+        """
         from dl.training.neuralnet import NeuralNet
 
         _, torch_device = NeuralNet.get_device()

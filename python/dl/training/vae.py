@@ -10,9 +10,8 @@ from plots.plotter import PlotterParameters
 from metric.metric import Metric
 from dl.model.vaemodel import VAEModel
 from dl.dlexception import DLException
-from typing import AnyStr, List, Optional, Dict, NoReturn
+from typing import AnyStr, List, Optional, Dict, NoReturn, Self
 from torch.utils.data import DataLoader
-import torch.nn as nn
 from tqdm import tqdm
 import torch
 import logging
@@ -37,7 +36,7 @@ class VAE(NeuralNet, ABC):
                  metrics: Dict[AnyStr, Metric],
                  plot_parameters: Optional[List[PlotterParameters]]):
         """
-        Constructor for this variational auto-encoder
+        Default constructor for this variational auto-encoder
         @param vae_model: Model for the variational auto-encoder
         @type vae_model: VAEModel
         @param hyper_params:  Hyper-parameters for training and optimizatoin
@@ -51,6 +50,21 @@ class VAE(NeuralNet, ABC):
         """
         super(VAE, self).__init__(vae_model, hyper_params, early_stop_logger, metrics, plot_parameters)
 
+    @classmethod
+    def build(cls, vae_model: VAEModel, hyper_params: HyperParams, early_stop_logger: EarlyStopLogger) -> Self:
+        """
+        Alternative, simplified constructor for this variational auto-encoder for which only the training
+        and evaluation losses are created
+        @param vae_model: Model for the variational auto-encoder
+        @type vae_model: VAEModel
+        @param hyper_params:  Hyper-parameters for training and optimizatoin
+        @type hyper_params: HyperParams
+        @param early_stop_logger: Training monitoring
+        @type early_stop_logger: EarlyStopLogger
+        @return Instance of VAE
+        """
+        return cls(vae_model, hyper_params, early_stop_logger, metrics={}, plot_parameters=[])
+        
     def __call__(self, train_loader: DataLoader, eval_loader: DataLoader) -> NoReturn:
         """
 E       Execute the cycle of training and evaluation for the
@@ -90,7 +104,7 @@ E       Execute the cycle of training and evaluation for the
             x: torch.Tensor,
             mu: torch.Tensor,
             log_var: torch.Tensor,
-            num_records: int) -> float:
+            num_records: int) -> torch.Tensor:
         """
             Aggregate the loss of reconstruction and KL divergence between proposed and current Normal distribution
             @param predicted: Predicted values
@@ -104,33 +118,23 @@ E       Execute the cycle of training and evaluation for the
             @param num_records: Number of records used to compute the reconstruction loss and KL divergence
             @type int
             @return: Aggregate auto-encoder loss
-            @rtype: float
+            @rtype: torch.Tensor
         """
         reconstruction_loss = self.__reconstruction_loss(predicted, x)
         kl_divergence = (-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp())) / num_records
         logger.info(f"Reconstruction loss {reconstruction_loss} KL divergence {kl_divergence}")
         return reconstruction_loss + kl_divergence
 
-    def __reconstruction_loss(
-            self,
-            predicted: torch.Tensor,
-            x: torch.Tensor) -> float:
-        from python.util import log_size
+    def __reconstruction_loss(self,
+                              predicted: torch.Tensor,
+                              x: torch.Tensor) -> float:
         from python.dl.dlexception import DLException
 
         try:
-            z_dim = self.model.get_latent_features()
-
             # Cross-entropy for reconstruction loss for binary values
             # and MSE for continuous (TF-IDF) variable
-            log_size(x, 'actual before loss')
-            log_size(predicted, 'predict_x')
-            x_value = x.view(-1, z_dim).squeeze(1)
-            x_predict = predicted.view(-1, z_dim).squeeze(1)
-
-            log_size(x_value, 'x_value')
-            log_size(x_predict, 'x_predict')
-            return self.hyper_params.loss_function(x_predict, x_value)
+            print(f'Input loss {x.shape}, Prediction shape {predicted.shape}')
+            return self.hyper_params.loss_function(predicted, x)
         except RuntimeError as e:
             logging.error(f'Runtime error {str(e)}')
             raise DLException(f'Runtime error {str(e)}')
@@ -187,41 +191,3 @@ E       Execute the cycle of training and evaluation for the
         eval_loss = total_loss / len(eval_loader)
         metric_collector[Metric.eval_loss_label] = eval_loss
         return metric_collector
-
-    @staticmethod
-    def ffnn_loss_func(
-            criterion: nn.Module,
-            z_dim: int,
-            predicted: torch.Tensor,
-            x: torch.Tensor,
-            mu: torch.Tensor,
-            log_var: torch.Tensor) -> float:
-        from python.util import log_size
-        from python.dl.dlexception import DLException
-
-        try:
-            # Cross-entropy for reconstruction loss for binary values
-            # and MSE for continuous (TF-IDF) variable
-            log_size(x, 'actual before loss')
-            log_size(predicted, 'predict_x')
-            x_value = x.view(-1, z_dim).squeeze(1)
-            x_predict = predicted.view(-1, z_dim).squeeze(1)
-
-            log_size(x_value, 'x_value')
-            log_size(x_predict, 'x_predict')
-            reconstruction_loss = criterion(x_predict, x_value)
-
-            # Kullback-Leibler divergence for Normal distribution
-            return VAE.compute_loss(reconstruction_loss, mu, log_var, z_dim)
-        except RuntimeError as e:
-            logging.error(f'Runtime error {str(e)}')
-            raise DLException(f'Runtime error {str(e)}')
-        except ValueError as e:
-            logging.error(f'Value error {str(e)}')
-            raise DLException(f'Value error {str(e)}')
-        except KeyError as e:
-            logging.error(f'Key error {str(e)}')
-            raise DLException(f'Key error {str(e)}')
-
-
-

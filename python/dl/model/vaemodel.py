@@ -34,7 +34,7 @@ class VAEModel(NeuralModel):
         # construct the variational layer
         variational_block = VariationalBlock(encoder.get_out_features(), latent_size)
         # Build the Torch sequential module
-        all_modules = modules + variational_block.modules + inverted_modules
+        all_modules = modules + list(variational_block.modules) + inverted_modules
         seq_module: torch.nn.Module = torch.nn.Sequential(*all_modules)
         # Call base class
         super(VAEModel, self).__init__(model_id, seq_module)
