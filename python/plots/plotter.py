@@ -4,7 +4,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 import numpy as np
 from matplotlib import pyplot as plt
 from datetime import datetime
-from typing import List, AnyStr, NoReturn, Tuple, Optional, Dict
+from typing import List, AnyStr, NoReturn, Tuple, Optional, Dict, Any
 from dataclasses import dataclass
 import torch
 
@@ -34,7 +34,7 @@ class PlotterParameters:
 
 
 class Plotter(object):
-    images_folder = '/Users/patricknicolas/dev/geometriclearning/tests/images/'
+    images_folder = '../../../../tests/images/'
     markers = ['-', '--', '-.', '+', 'bD--', '^']
     colors = ['blue', 'green', 'red', 'black', 'orange', 'grey']
 
@@ -60,22 +60,22 @@ class Plotter(object):
 
     @staticmethod
     def multi_plot(
-            dict_values: Dict[AnyStr, List[float]],
+            dict_values: Dict[AnyStr, List[torch.Tensor]],
             plotter_params_list: List[PlotterParameters]) -> NoReturn:
         """
          Generic 1, 2, or 3 sub-plots with one variable value
          @param dict_values: Dictionary of array of floating values
-         @type dict_values:  Dict[AnyStr, List[float]]
+         @type dict_values:  Dict[AnyStr, List[tensor]]
          @param plotter_params_list: List of plotting parameters
          @type plotter_params_list: List[PlotterParameters]
          """
         num_points = Plotter.__validate_params(dict_values, plotter_params_list)
-        fig, axes = plt.subplots(len(dict_values))
+        fig, axes = plt.subplots(ncols=1, nrows=len(dict_values), figsize=plotter_params_list[0].fig_size)
         x = np.arange(0, num_points, 1)
-        for i in range(len(dict_values)):
-            title = plotter_params_list[i].title
+        for plot_index in range(len(dict_values)):
+            title = plotter_params_list[plot_index].title
             y = dict_values[title]
-            Plotter.__axis_plot(x, plotter_params_list[i], y, axes, i)
+            Plotter.__axis_plot(x, plotter_params_list[plot_index], y, axes, plot_index)
 
         fig.savefig(f"{Plotter.images_folder}/plot-{Plotter.time_str()}.png")
         plt.show()
@@ -96,11 +96,11 @@ class Plotter(object):
         len_x = len(values[0])
         x = np.arange(0, len_x, 1)
         y = [np.array(vals) for vals in values]
-        fig_size = plotter_parameters.fig_size if plotter_parameters.fig_size is not None else (12, 8)
+        fig_size = plotter_parameters.fig_size if plotter_parameters.fig_size is not None else (12, 12)
         plt.figure(figsize=fig_size)
 
         for i in range(len(y)):
-            plt.plot(x, y[i], label=labels[i],color=Plotter.colors[i],linestyle=Plotter.markers[i])
+            plt.plot(x, y[i], label=labels[i], color=Plotter.colors[i], linestyle=Plotter.markers[i])
         plt.title(plotter_parameters.title)
         plt.xlabel(plotter_parameters.x_label)
         plt.ylabel(plotter_parameters.y_label)
@@ -138,7 +138,7 @@ class Plotter(object):
         fig, axes = plt.subplots(3)
         x = np.arange(0, len(values1), 1)
         for i in range(3):
-            Plotter.__axis_plot(x, plotter_parameters_list[i], values1, axes, i)
+            Plotter.__axis_plot(x, plotter_parameters_list[i], torch.Tensor(values1), axes, i)
         fig.savefig(f"{Plotter.images_folder}/plot-{Plotter.time_str()}.png")
         plt.show()
 
@@ -147,17 +147,18 @@ class Plotter(object):
             x: np.array,
             plotter_param: PlotterParameters,
             torch_values: List[torch.Tensor],
-            axes: List,
-            idx: int) -> NoReturn:
+            axes: np.array,
+            index: int) -> NoReturn:
         values = [value.cpu().float() for value in torch_values]
         y = np.asarray(values)
-        axes[idx].plot(x, y)
-        axes[idx].set(xlabel=plotter_param.x_label, ylabel=plotter_param.y_label, title=plotter_param.title)
-        axes[idx].grid()
+        axes[index].plot(x, y)
+        axes[index].set(xlabel=plotter_param.x_label, ylabel=plotter_param.y_label, title=plotter_param.title)
+        axes[index].grid()
+
 
     @staticmethod
     def __validate_params(
-            dict_values: Dict[AnyStr, List[float]],
+            dict_values: Dict[AnyStr, List[torch.Tensor]],
             plotter_params_list: List[PlotterParameters]) -> int:
         num_plots = len(dict_values)
         assert len(plotter_params_list) == num_plots, f'Number of plots {len(plotter_params_list)} should be {num_plots}'

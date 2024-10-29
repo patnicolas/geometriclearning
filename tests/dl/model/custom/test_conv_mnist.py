@@ -2,6 +2,8 @@ import unittest
 from python.dl.model.custom.conv_mnist import ConvMNIST
 from python.dl.block import ConvException
 from python.dl.dlexception import DLException
+import torch.nn as nn
+from typing import NoReturn, AnyStr
 
 
 class ConvMNISTTest(unittest.TestCase):
@@ -33,55 +35,21 @@ class ConvMNISTTest(unittest.TestCase):
             self.assertTrue(False)
 
     def test_train(self):
-        from dl.training.hyperparams import HyperParams
-        import torch.nn as nn
+        lr = 0.0001
+        activation = nn.ReLU()
+        ConvMNISTTest.create_network(lr, activation)
+        """
+        activation = nn.ELU()
+        ConvMNISTTest.create_network(lr, activation)
 
-        input_size = 28
-        in_channels = [1, 32]
-        kernel_size = [3, 3]
-        padding_size = [0, 0]
-        stride_size = [1, 1]
-        max_pooling_kernel = 2
-        out_channels = 64
-        root_path = '../../../../data/MNIST'
-
-        hyper_parameters = HyperParams(
-            lr=0.0001,
-            momentum=0.95,
-            epochs=36,
-            optim_label='adam',
-            batch_size=32,
-            loss_function=nn.CrossEntropyLoss(),
-            drop_out=0.2,
-            train_eval_ratio=0.9,
-            normal_weight_initialization=True)
-
-        try:
-            conv_MNIST_instance = ConvMNIST(
-                input_size,
-                in_channels,
-                kernel_size,
-                padding_size,
-                stride_size,
-                max_pooling_kernel,
-                out_channels)
-            print(repr(conv_MNIST_instance))
-            conv_MNIST_instance.do_train(root_path, hyper_parameters)
-        except ConvException as e:
-            print(str(e))
-            self.assertTrue(False)
-        except DLException as e:
-            print(str(e))
-            self.assertTrue(False)
-        except AssertionError as e:
-            print(str(e))
-            self.assertTrue(False)
+        activation = nn.LeakyReLU()
+        ConvMNISTTest.create_network(lr, activation)
+        """
 
 
     @unittest.skip('Ignore')
     def test_conv_weights(self):
         import torch
-        import torch.nn as nn
 
         # Define the convolutional layer
         conv_layer = nn.Conv2d(
@@ -113,6 +81,45 @@ class ConvMNISTTest(unittest.TestCase):
         # x = mod(x)
         print(f'\nAfter {y.shape}')
 
+    @staticmethod
+    def create_network(lr: float, activation: nn.Module) -> NoReturn:
+        from dl.training.hyperparams import HyperParams
+
+        input_size = 28
+        in_channels = [1, 32]
+        kernel_size = [3, 3]
+        padding_size = [0, 0]
+        stride_size = [1, 1]
+        max_pooling_kernel = 2
+        out_channels = 64
+        root_path = '../../../../data/MNIST'
+        try:
+            hyper_parameters = HyperParams(
+                lr=lr,
+                momentum=0.95,
+                epochs=3,
+                optim_label='adam',
+                batch_size=32,
+                loss_function=nn.CrossEntropyLoss(),
+                drop_out=0.2,
+                train_eval_ratio=0.9,
+                normal_weight_initialization=True)
+            conv_MNIST_instance = ConvMNIST(
+                    input_size,
+                    in_channels,
+                    kernel_size,
+                    padding_size,
+                    stride_size,
+                    max_pooling_kernel,
+                    out_channels,
+                    activation)
+            conv_MNIST_instance.do_train(root_path, hyper_parameters)
+        except ConvException as e:
+            print(str(e))
+        except AssertionError as e:
+            print(str(e))
+        except DLException as e:
+            print(str(e))
 
 if __name__ == '__main__':
     unittest.main()

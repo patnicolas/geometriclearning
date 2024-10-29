@@ -4,17 +4,16 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 from typing import List, AnyStr
 import torch
 import torch.nn as nn
-from dl.model.custom.base_mnist import BaseMNIST
+from dl.model.custom.base_mnist import BaseMnist
 from dl.block.ffnnblock import FFNNBlock
 from dl.model.ffnnmodel import FFNNModel
 import logging
 logger = logging.getLogger('dl.model.custom.FFNNMNIST')
 
-__all__ = ['BaseMNIST', 'FFNNMNIST']
+__all__ = ['BaseMnist', 'FfnnMnist']
 
 
-
-class FFNNMNIST(BaseMNIST):
+class FfnnMnist(BaseMnist):
     id = 'Feed Forward Neural Network MNIST'
 
     def __init__(self, input_size: int, features: List[int]) -> None:
@@ -42,15 +41,15 @@ class FFNNMNIST(BaseMNIST):
         # Output layer
         ffnn_output_block = FFNNBlock.build(block_id='output',
                                             in_features=features[-1],
-                                            out_features = BaseMNIST.num_classes,
+                                            out_features = BaseMnist.num_classes,
                                             activation=nn.Softmax(dim=1))
 
         # Define the model and layout for the Feed Forward Neural Network
-        ffnn_model = FFNNModel(FFNNMNIST.id, [ffnn_input_block] + ffnn_hidden_blocks + [ffnn_output_block])
+        ffnn_model = FFNNModel(FfnnMnist.id, [ffnn_input_block] + ffnn_hidden_blocks + [ffnn_output_block])
         # Invoke base class
-        super(FFNNMNIST, self).__init__(ffnn_model)
+        super(FfnnMnist, self).__init__(ffnn_model)
 
-    def _extract_datasets(self, root_path: AnyStr) ->(torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor):
+    def _extract_datasets(self, root_path: AnyStr) -> (torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor):
         """
         Extract the training data and labels and test data and labels for this feed forward neural network
         @param root_path: Root path to MNIST dataset
@@ -62,15 +61,19 @@ class FFNNMNIST(BaseMNIST):
 
         _, torch_device = NeuralNet.get_device()
 
-        train_data = torch.load(f'{root_path}/{BaseMNIST.default_training_file}')
+        train_data = torch.load(f'{root_path}/{BaseMnist.default_training_file}')
         num_samples = len(train_data[0])
         train_features = train_data[0].reshape(num_samples, -1).float().to(torch_device)
-        train_labels = torch.nn.functional.one_hot(train_data[1], num_classes=10).float().to(torch_device)
+        train_labels = torch.nn.functional.one_hot(
+            train_data[1],
+            num_classes=BaseMnist.num_classes).float().to(torch_device)
 
-        test_data = torch.load(f'{root_path}/{BaseMNIST.default_test_file}')
+        test_data = torch.load(f'{root_path}/{BaseMnist.default_test_file}')
         num_samples = len(test_data[0])
         test_features = test_data[0].reshape(num_samples, -1).float().to(torch_device)
-        test_labels = torch.nn.functional.one_hot(test_data[1], num_classes=10).float().to(torch_device)
+        test_labels = torch.nn.functional.one_hot(
+            test_data[1],
+            num_classes=BaseMnist.num_classes).float().to(torch_device)
 
         return train_features, train_labels, test_features, test_labels
 

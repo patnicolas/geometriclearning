@@ -1,6 +1,6 @@
 import unittest
 
-from dl.model.custom.ffnn_mnist import FFNNMNIST
+from dl.model.custom.ffnn_mnist import FfnnMnist
 from dl.model.custom.vae_mnist import VAEMNIST
 from dl.training.hyperparams import HyperParams
 import torch.nn as nn
@@ -24,7 +24,7 @@ class VAEMNISTTest(unittest.TestCase):
             train_eval_ratio=0.9,
             normal_weight_initialization=False)
         try:
-            ffnn_mnist = FFNNMNIST(input_size, features)
+            ffnn_mnist = FfnnMnist(input_size, features)
             vae_mnist = VAEMNIST(ffnn_mnist, latent_size=12)
             print(repr(vae_mnist))
             vae_mnist.do_train(root_path, hyper_parameters)

@@ -2,7 +2,7 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from typing import AnyStr, NoReturn
-from dl.model.custom.base_mnist import BaseMNIST
+from dl.model.custom.base_mnist import BaseMnist
 from dl.model.vaemodel import VAEModel
 from dl.block import ConvException
 from dl.training.earlystoplogger import EarlyStopLogger
@@ -16,7 +16,7 @@ from metric.builtinmetric import BuiltInMetric, MetricType
 
 class VAEMNIST(object):
 
-    def __init__(self, base_mnist: BaseMNIST, latent_size: int) -> None:
+    def __init__(self, base_mnist: BaseMnist, latent_size: int) -> None:
         self.base_mnist = base_mnist
         self.vae_model = VAEModel('VAE MNIST', base_mnist.model, latent_size)
 

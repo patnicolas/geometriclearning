@@ -64,7 +64,7 @@ class VAE(NeuralNet, ABC):
         @return Instance of VAE
         """
         return cls(vae_model, hyper_params, early_stop_logger, metrics={}, plot_parameters=[])
-        
+
     def __call__(self, train_loader: DataLoader, eval_loader: DataLoader) -> NoReturn:
         """
 E       Execute the cycle of training and evaluation for the

@@ -56,7 +56,10 @@ class NeuralNet(object):
     def model_label(self) -> AnyStr:
         raise NotImplementedError('NeuralNet.model_label is an abstract method')
 
-    def __call__(self, train_loader: DataLoader, test_loader: DataLoader) -> NoReturn:
+    def __call__(self,
+                 train_loader: DataLoader,
+                 test_loader: DataLoader,
+                 output_file_name: Optional[AnyStr] = None) -> NoReturn:
         """
         Train and evaluation of a neural network given a data loader for a training set, a
         data loader for the evaluation/test1 set and a encoder_model. The weights of the various linear modules
@@ -66,6 +69,8 @@ class NeuralNet(object):
         @type train_loader: DataLoader
         @param test_loader:  Data loader for the valuation set
         @type test_loader: DataLoader
+        @param output_file_name Optional file name for the output of metrics
+        @type Optional str
         """
         torch.manual_seed(42)
         self.hyper_params.initialize_weight(list(self.model.modules()))
@@ -81,7 +86,7 @@ class NeuralNet(object):
             self.early_stop_logger(epoch, train_loss, eval_metrics)
         # Generate summary
         if self.plot_parameters is not None:
-            self.early_stop_logger.summary()
+            self.early_stop_logger.summary(output_file_name)
 
     def forward(self, features: torch.Tensor) -> torch.Tensor:
         with torch.no_grad():

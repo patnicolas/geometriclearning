@@ -18,11 +18,11 @@ from metric.builtinmetric import BuiltInMetric, MetricType
 import logging
 logger = logging.getLogger('dl.model.custom.BaseMNIST')
 
-__all__ = ['BaseMNIST']
+__all__ = ['BaseMnist']
 
 
 
-class BaseMNIST(ABC):
+class BaseMnist(ABC):
     default_training_file = 'processed/training.pt'
     default_test_file = 'processed/test.pt'
     num_classes = 10
@@ -62,7 +62,7 @@ class BaseMNIST(ABC):
                 parameters)
 
             train_data_loader, test_data_loader = self.load_dataset(root_path, use_labels=True)
-            network(train_data_loader, test_data_loader)
+            network(train_data_loader, test_data_loader, f'stats_{self.model.model_id}')
         except ConvException as e:
             print(str(e))
         except DLException as e:

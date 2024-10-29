@@ -4,6 +4,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 from typing import Optional, AnyStr, Self, List, Dict, NoReturn
 from plots.plotter import Plotter, PlotterParameters
 from metric.metric import Metric
+import torch
 import logging
 logger = logging.getLogger('dl.EarlyStopLogger')
 
@@ -20,6 +21,7 @@ logger = logging.getLogger('dl.EarlyStopLogger')
 
 
 class EarlyStopLogger(object):
+    output_folder = '../../../../tests/output'
 
     def __init__(self,
                  patience: int,
@@ -35,7 +37,7 @@ class EarlyStopLogger(object):
             @type early_stopping_enabled: bool
         """
         self.patience = patience
-        self.metrics: Dict[AnyStr, List[float]] = {}
+        self.metrics: Dict[AnyStr, List[torch.Tensor]] = {}
         self.min_loss = -1.0
         self.min_diff_loss = min_diff_loss
         self.early_stopping_enabled = early_stopping_enabled
@@ -44,7 +46,7 @@ class EarlyStopLogger(object):
     def build(cls, patience: int) -> Self:
         return cls(patience, Metric.default_min_loss, True)
 
-    def __call__(self, epoch: int, train_loss: float, eval_metrics: Dict[AnyStr, float] = None) -> bool:
+    def __call__(self, epoch: int, train_loss: torch.Tensor, eval_metrics: Dict[AnyStr, torch.Tensor] = None) -> bool:
         """
             Implement the early stop and logging of training, evaluation loss. It is assumed that at least one
             metric is provided
@@ -64,14 +66,12 @@ class EarlyStopLogger(object):
         logger.info(f'Is early stopping {is_early_stopping}')
         return is_early_stopping
 
-    def update_metrics(self, metrics: Dict[AnyStr, float]) -> NoReturn:
+    def update_metrics(self, metrics: Dict[AnyStr, torch.Tensor]) -> bool:
         """
         Update the quality metrics with new pair key-values.
         @param metrics: Set of metrics
         @type metrics: Dictionary
         """
-        import torch
-
         for key, value in metrics.items():
             if key in self.metrics:
                 values = self.metrics[key]
@@ -79,18 +79,49 @@ class EarlyStopLogger(object):
                 self.metrics[key] = values
             else:
                 self.metrics[key] = [value]
+        return len(self.metrics.items()) > 0
 
-    def summary(self) -> NoReturn:
+    def summary(self, output_filename: Optional[AnyStr] = None) -> NoReturn:
         """
         Plots for the various metrics
         """
+        import numpy as np
         parameters = [PlotterParameters(0, x_label='x', y_label='y', title=k, fig_size=(12, 8))
-                      for k, v in self.metrics.items()]
+                      for k in self.metrics.keys()]
+
+        # Save the statistics in PyTorch format
+        if output_filename is not None:
+
+            summary_dict = {}
+            for k, lst in self.metrics.items():
+                stacked_tensor = torch.stack(lst)
+                summary_dict[k] = stacked_tensor
+            torch.save(summary_dict, f"{EarlyStopLogger.output_folder}/{output_filename}.pth")
+
         Plotter.multi_plot(self.metrics, parameters)
+
+    @staticmethod
+    def load(path_name: AnyStr, summary_filename: AnyStr) -> Dict[AnyStr, List[torch.Tensor]]:
+        """
+        Load the content of a dictionary of list of torch tensor from a given output file
+        @param path_name: Relative path of the file containing the summary performance stats
+        @type path_name: str
+        @param summary_filename: Name of the file containing the summary performance stats
+        @type summary_filename: str
+        @return: Return the summary of performance statistics as a dictionary of metrics, list of tensors
+        @rtype: Dict[AnyStr, List[torch.Tensor]]
+        """
+        stacked_tensor_dict = torch.load(f"{path_name}/{summary_filename}.pth")
+        tensor_dict = {}
+        for k, stacked_tensor in stacked_tensor_dict.items():
+            tensor_dict[k]= list(torch.unbind(stacked_tensor, dim=0))
+        return tensor_dict
+
+
 
     """ -----------------------  Private helper methods ----------------------  """
 
-    def __evaluate(self, eval_loss: float) -> bool:
+    def __evaluate(self, eval_loss: torch.Tensor) -> bool:
         is_early_stopping = False
         if self.early_stopping_enabled:
             return is_early_stopping
@@ -103,11 +134,11 @@ class EarlyStopLogger(object):
                 is_early_stopping = True
         return is_early_stopping
 
-    def __record(self, epoch: int, train_loss: float, metrics: Dict[AnyStr, float]):
+    def __record(self, epoch: int, train_loss: torch.Tensor, metrics: Dict[AnyStr, torch.Tensor]):
         metric_str = ', '.join([f'{k}: {v}' for k, v in metrics.items()])
         status_msg = f'Epoch: {epoch}, Train loss: {train_loss}, Evaluation metric: {metric_str}'
         logger.info(status_msg)
-        self.update_metrics({Metric.train_loss_label: train_loss})
+        metrics[Metric.train_loss_label] = train_loss
         self.update_metrics(metrics)
 
 

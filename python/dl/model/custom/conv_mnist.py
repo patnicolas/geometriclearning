@@ -4,7 +4,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 from typing import List, AnyStr, Tuple, NoReturn
 import torch.nn as nn
 import torch
-from dl.model.custom.base_mnist import BaseMNIST
+from dl.model.custom.base_mnist import BaseMnist
 from dl.model.convmodel import ConvModel
 from dl.block.convblock import ConvBlock
 from dl.block.ffnnblock import FFNNBlock
@@ -12,11 +12,11 @@ from dl.block.builder.conv2dblockbuilder import Conv2DBlockBuilder
 import logging
 logger = logging.getLogger('dl.model.custom.ConvMNIST')
 
-__all__ = ['BaseMNIST', 'ConvMNIST']
+__all__ = ['BaseMnist', 'ConvMNIST']
 
 
-class ConvMNIST(BaseMNIST):
-    id = 'Convolutional MNIST'
+class ConvMNIST(BaseMnist):
+    id = 'Convolutional_MNIST'
 
     def __init__(self,
                  input_size: int,
@@ -25,7 +25,8 @@ class ConvMNIST(BaseMNIST):
                  padding_size: List[int],
                  stride_size: List[int],
                  max_pooling_kernel: int,
-                 out_channels: int) -> None:
+                 out_channels: int,
+                 activation: nn.Module) -> None:
 
         conv_blocks = []
         input_dim = (input_size, input_size)
@@ -42,7 +43,7 @@ class ConvMNIST(BaseMNIST):
                 padding=(padding_size[idx], padding_size[idx]),
                 batch_norm=is_batch_normalization,
                 max_pooling_kernel=max_pooling_kernel,
-                activation=nn.ReLU(),
+                activation=activation,
                 bias=has_bias)
             # conv_2d_block_builder.get_pool_out_shape()
             input_dim = conv_2d_block_builder.get_conv_layer_out_shape()
@@ -56,7 +57,7 @@ class ConvMNIST(BaseMNIST):
                                       activation=nn.ReLU())
         ffnn_block2 = FFNNBlock.build(block_id='output',
                                       in_features=128,
-                                      out_features = BaseMNIST.num_classes,
+                                      out_features = BaseMnist.num_classes,
                                       activation=nn.Softmax(dim=1))
         conv_model = ConvModel(ConvMNIST.id, conv_blocks, ffnn_blocks=[ffnn_block1, ffnn_block2])
         super(ConvMNIST, self).__init__(conv_model)
@@ -80,11 +81,11 @@ class ConvMNIST(BaseMNIST):
 
         _, torch_device = NeuralNet.get_device()
 
-        train_data = torch.load(f'{root_path}/{BaseMNIST.default_training_file}')
+        train_data = torch.load(f'{root_path}/{BaseMnist.default_training_file}')
         train_features = train_data[0].unsqueeze(dim=1).float().to(torch_device)
         train_labels = torch.nn.functional.one_hot(train_data[1], num_classes=10).float().to(torch_device)
 
-        test_data = torch.load(f'{root_path}/{BaseMNIST.default_test_file}')
+        test_data = torch.load(f'{root_path}/{BaseMnist.default_test_file}')
         test_features = test_data[0].unsqueeze(dim=1).float().to(torch_device)
         test_labels = torch.nn.functional.one_hot(test_data[1], num_classes=10).float().to(torch_device)
 
