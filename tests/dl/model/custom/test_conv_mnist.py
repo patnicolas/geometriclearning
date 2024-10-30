@@ -34,19 +34,6 @@ class ConvMNISTTest(unittest.TestCase):
             print(str(e))
             self.assertTrue(False)
 
-    def test_train(self):
-        lr = 0.0001
-        activation = nn.ReLU()
-        ConvMNISTTest.create_network(lr, activation)
-        """
-        activation = nn.ELU()
-        ConvMNISTTest.create_network(lr, activation)
-
-        activation = nn.LeakyReLU()
-        ConvMNISTTest.create_network(lr, activation)
-        """
-
-
     @unittest.skip('Ignore')
     def test_conv_weights(self):
         import torch
@@ -72,7 +59,6 @@ class ConvMNISTTest(unittest.TestCase):
     @unittest.skip('Ignore')
     def test_flatten(self):
         import torch
-        from torch import nn
 
         x = torch.randn(64, 64, 5, 5)
         print(f'\nBefore {x.shape}')
@@ -81,29 +67,34 @@ class ConvMNISTTest(unittest.TestCase):
         # x = mod(x)
         print(f'\nAfter {y.shape}')
 
+    def test_train(self):
+        lr = 0.0002
+        activation = nn.LeakyReLU(negative_slope=0.02)
+        ConvMNISTTest.create_network(lr, activation)
+
     @staticmethod
     def create_network(lr: float, activation: nn.Module) -> NoReturn:
         from dl.training.hyperparams import HyperParams
 
         input_size = 28
-        in_channels = [1, 32]
-        kernel_size = [3, 3]
-        padding_size = [0, 0]
-        stride_size = [1, 1]
+        in_channels = [1, 32, 64]
+        kernel_size = [3, 3, 3]
+        padding_size = [0, 0, 0]
+        stride_size = [1, 1, 1]
         max_pooling_kernel = 2
-        out_channels = 64
+        out_channels = 128
         root_path = '../../../../data/MNIST'
         try:
             hyper_parameters = HyperParams(
                 lr=lr,
-                momentum=0.95,
-                epochs=3,
+                momentum=0.86,
+                epochs=16,
                 optim_label='adam',
-                batch_size=32,
+                batch_size=16,
                 loss_function=nn.CrossEntropyLoss(),
-                drop_out=0.2,
+                drop_out=0.25,
                 train_eval_ratio=0.9,
-                normal_weight_initialization=True)
+                normal_weight_initialization=False)
             conv_MNIST_instance = ConvMNIST(
                     input_size,
                     in_channels,
@@ -113,13 +104,15 @@ class ConvMNISTTest(unittest.TestCase):
                     max_pooling_kernel,
                     out_channels,
                     activation)
-            conv_MNIST_instance.do_train(root_path, hyper_parameters)
+            activation_label = str(activation).strip('()')
+            conv_MNIST_instance.do_train(root_path, hyper_parameters, activation_label)
         except ConvException as e:
             print(str(e))
         except AssertionError as e:
             print(str(e))
         except DLException as e:
             print(str(e))
+
 
 if __name__ == '__main__':
     unittest.main()

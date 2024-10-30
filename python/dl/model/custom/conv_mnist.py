@@ -45,7 +45,7 @@ class ConvMNIST(BaseMnist):
                 max_pooling_kernel=max_pooling_kernel,
                 activation=activation,
                 bias=has_bias)
-            # conv_2d_block_builder.get_pool_out_shape()
+
             input_dim = conv_2d_block_builder.get_conv_layer_out_shape()
             conv_blocks.append(ConvBlock(str(idx+1), conv_2d_block_builder))
 

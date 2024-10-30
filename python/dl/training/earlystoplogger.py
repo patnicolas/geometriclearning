@@ -44,7 +44,15 @@ class EarlyStopLogger(object):
 
     @classmethod
     def build(cls, patience: int) -> Self:
-        return cls(patience, Metric.default_min_loss, True)
+        """
+        Alternative, simplified constructor with early stopping enabled and default minimum
+        loss for convergence during training
+        @param patience: Frequency/number of times the loss is below the minimum loss
+        @type patience: int
+        @return: New instance of EarlyStopLogger
+        @rtype: EarlyStopLogger
+        """
+        return cls(patience, Metric.default_min_loss, early_stopping_enabled=True)
 
     def __call__(self, epoch: int, train_loss: torch.Tensor, eval_metrics: Dict[AnyStr, torch.Tensor] = None) -> bool:
         """
@@ -83,7 +91,7 @@ class EarlyStopLogger(object):
 
     def summary(self, output_filename: Optional[AnyStr] = None) -> NoReturn:
         """
-        Plots for the various metrics
+        Plots for the various metrics and stored metrics into torch local file
         """
         import numpy as np
         parameters = [PlotterParameters(0, x_label='x', y_label='y', title=k, fig_size=(12, 8))
@@ -91,17 +99,12 @@ class EarlyStopLogger(object):
 
         # Save the statistics in PyTorch format
         if output_filename is not None:
-
-            summary_dict = {}
-            for k, lst in self.metrics.items():
-                stacked_tensor = torch.stack(lst)
-                summary_dict[k] = stacked_tensor
-            torch.save(summary_dict, f"{EarlyStopLogger.output_folder}/{output_filename}.pth")
-
-        Plotter.multi_plot(self.metrics, parameters)
+            self.__save_summary(output_filename)
+        # Plot statistics
+        Plotter.multi_plot(self.metrics, parameters, output_filename)
 
     @staticmethod
-    def load(path_name: AnyStr, summary_filename: AnyStr) -> Dict[AnyStr, List[torch.Tensor]]:
+    def load_summary(path_name: AnyStr, summary_filename: AnyStr) -> Dict[AnyStr, List[torch.Tensor]]:
         """
         Load the content of a dictionary of list of torch tensor from a given output file
         @param path_name: Relative path of the file containing the summary performance stats
@@ -114,10 +117,8 @@ class EarlyStopLogger(object):
         stacked_tensor_dict = torch.load(f"{path_name}/{summary_filename}.pth")
         tensor_dict = {}
         for k, stacked_tensor in stacked_tensor_dict.items():
-            tensor_dict[k]= list(torch.unbind(stacked_tensor, dim=0))
+            tensor_dict[k] = list(torch.unbind(stacked_tensor, dim=0))
         return tensor_dict
-
-
 
     """ -----------------------  Private helper methods ----------------------  """
 
@@ -140,6 +141,14 @@ class EarlyStopLogger(object):
         logger.info(status_msg)
         metrics[Metric.train_loss_label] = train_loss
         self.update_metrics(metrics)
+
+    def __save_summary(self, output_filename) -> NoReturn:
+        summary_dict = {}
+        for k, lst in self.metrics.items():
+            stacked_tensor = torch.stack(lst)
+            summary_dict[k] = stacked_tensor
+        torch.save(summary_dict, f"{EarlyStopLogger.output_folder}/{output_filename}.pth")
+
 
 
 

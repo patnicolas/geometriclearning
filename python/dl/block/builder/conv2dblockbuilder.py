@@ -142,9 +142,12 @@ class Conv2DBlockBuilder(ConvBlockBuilder, ABC):
         padding = self.padding[dim]
         kernel_size = self.kernel_size[dim]
         num = (self.input_size[dim] + 2 * padding - kernel_size)
+        """
         if num % stride != 0:
             raise ConvException(f'Output channel cannot be computed {self.__str__()}')
         return int(num / stride) + 1 if num % stride == 0 else -1
+        """
+        return int(num / stride) + 1
 
     @staticmethod
     def __validate_input(

@@ -70,7 +70,7 @@ class NeuralNet(object):
         @param test_loader:  Data loader for the valuation set
         @type test_loader: DataLoader
         @param output_file_name Optional file name for the output of metrics
-        @type Optional str
+        @type AnyStr
         """
         torch.manual_seed(42)
         self.hyper_params.initialize_weight(list(self.model.modules()))
@@ -79,10 +79,9 @@ class NeuralNet(object):
         for epoch in range(self.hyper_params.epochs):
             # Set training mode and execute training
             train_loss = self.__train(epoch, train_loader)
-            # constants.log_info(f'Epoch # {epoch} training loss {train_loss}')
+
             # Set mode and execute evaluation
             eval_metrics = self.__eval(epoch, test_loader)
-            # constants.log_info(f'Epoch # {epoch} eval loss {eval_loss}')
             self.early_stop_logger(epoch, train_loss, eval_metrics)
         # Generate summary
         if self.plot_parameters is not None:

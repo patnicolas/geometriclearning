@@ -33,13 +33,18 @@ class BaseMnist(ABC):
     def __repr__(self) -> AnyStr:
         return repr(self.model)
 
-    def do_train(self, root_path: AnyStr, hyper_parameters: HyperParams) -> NoReturn:
+    def do_train(self,
+                 root_path: AnyStr,
+                 hyper_parameters: HyperParams,
+                 metric_label: AnyStr) -> NoReturn:
         """
         Execute the training, evaluation and metrics for any model for MNIST data set
         @param root_path: Path for the root of the MNIST data
         @type root_path: str
         @param hyper_parameters: Hyper-parameters for the execution of the
         @type hyper_parameters: HyperParams
+        @param metric_label: Labeling metric for output to file and plots
+        @type metric_label: str
         """
         try:
             patience = 2
@@ -62,7 +67,7 @@ class BaseMnist(ABC):
                 parameters)
 
             train_data_loader, test_data_loader = self.load_dataset(root_path, use_labels=True)
-            network(train_data_loader, test_data_loader, f'stats_{self.model.model_id}')
+            network(train_data_loader, test_data_loader, output_file_name=f'{self.model.model_id}_metrics_{metric_label}')
         except ConvException as e:
             print(str(e))
         except DLException as e:
