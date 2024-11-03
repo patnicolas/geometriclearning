@@ -54,7 +54,7 @@ class ConvMNIST(BaseMnist):
         ffnn_block1 = FFNNBlock.build(block_id='hidden',
                                       in_features=ffnn_input_shape,
                                       out_features = 128,
-                                      activation=nn.ReLU())
+                                      activation=activation)
         ffnn_block2 = FFNNBlock.build(block_id='output',
                                       in_features=128,
                                       out_features = BaseMnist.num_classes,

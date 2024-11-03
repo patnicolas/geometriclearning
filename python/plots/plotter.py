@@ -35,8 +35,8 @@ class PlotterParameters:
 
 class Plotter(object):
     images_folder = '../../../../tests/images/'
-    markers = ['-', '--', '-.', '+', 'bD--', '^']
-    colors = ['blue', 'green', 'red', 'black', 'orange', 'grey']
+    markers = ['-', '--', '-.', '--', '^', '-']
+    colors = ['blue', 'green', 'red', 'orange', 'black', 'grey']
 
     @staticmethod
     def single_plot_np_array(np_array1: np.array, np_array2: np.array, plotter_parameters: PlotterParameters):
@@ -62,14 +62,16 @@ class Plotter(object):
     def multi_plot(
             dict_values: Dict[AnyStr, List[torch.Tensor]],
             plotter_params_list: List[PlotterParameters],
-            plot_title: AnyStr) -> NoReturn:
+            plot_title: Optional[AnyStr]) -> NoReturn:
         """
-         Generic 1, 2, or 3 sub-plots with one variable value
-         @param dict_values: Dictionary of array of floating values
-         @type dict_values:  Dict[AnyStr, List[tensor]]
-         @param plotter_params_list: List of plotting parameters
-         @type plotter_params_list: List[PlotterParameters]
-         """
+        Generic 1, 2, or 3 sub-plots with one variable value
+        @param dict_values: Dictionary of array of floating values
+        @type dict_values:  Dict[AnyStr, List[tensor]]
+        @param plotter_params_list: List of plotting parameters
+        @type plotter_params_list: List[PlotterParameters]
+        @param plot_title: Title for plot
+        @type plot_title: str
+        """
         num_points = Plotter.__validate_params(dict_values, plotter_params_list)
         fig, axes = plt.subplots(ncols=1, nrows=len(dict_values), figsize=plotter_params_list[0].fig_size)
         x = np.arange(0, num_points, 1)
@@ -102,10 +104,20 @@ class Plotter(object):
 
         for i in range(len(y)):
             plt.plot(x, y[i], label=labels[i], color=Plotter.colors[i], linestyle=Plotter.markers[i])
-        plt.title(plotter_parameters.title)
-        plt.xlabel(plotter_parameters.x_label)
-        plt.ylabel(plotter_parameters.y_label)
-        plt.legend()
+
+        plt.title(
+            plotter_parameters.title,
+            fontdict = {'family': 'serif', 'size': 20, 'weight': 'bold'}
+        )
+        plt.xlabel(
+            plotter_parameters.x_label,
+            fontdict={'family': 'serif', 'size': 16, 'style': 'italic'}
+        )
+        plt.ylabel(
+            plotter_parameters.y_label,
+            fontdict={'family': 'serif', 'size': 16, 'style': 'italic'}
+        )
+        plt.legend(prop={'family': 'serif', 'size': 14})
         plt.show()
 
     @staticmethod
@@ -153,7 +165,10 @@ class Plotter(object):
         values = [value.cpu().float() for value in torch_values]
         y = np.asarray(values)
         axes[index].plot(x, y)
-        axes[index].set(xlabel=plotter_param.x_label, ylabel=plotter_param.y_label, title=plotter_param.title)
+        axes[index].set(
+            xlabel=plotter_param.x_label,
+            ylabel=plotter_param.y_label,
+            title='')
         axes[index].grid()
 
 

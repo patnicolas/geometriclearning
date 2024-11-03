@@ -149,7 +149,7 @@ class NeuralNet(object):
 
                 predicted = self.model(features)  # Call forward - prediction
                 raw_loss = loss_function(predicted, labels)
-                print(f'Epoch: {epoch} Loss: {raw_loss}')
+                logging.info(f'Epoch: {epoch} Loss: {raw_loss}')
                 # Set back propagation
                 raw_loss.backward(retain_graph=True)
                 total_loss += raw_loss.data

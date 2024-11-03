@@ -108,9 +108,9 @@ class HyperParams(object):
         """
             Generate multiple Hyper-parameter using a list of learning rate and batch-size
             @param lr_rates:  List of learning rates
-            @type list of float
+            @type lr_rates: list of float
             @param batch_sizes: List of batch sizes
-            @type list of batch size
+            @type batch_sizes: list of batch size
             @return: Iterator for Hyper-params
             @rtype: iter
         """

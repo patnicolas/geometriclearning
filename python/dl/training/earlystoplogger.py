@@ -92,10 +92,12 @@ class EarlyStopLogger(object):
     def summary(self, output_filename: Optional[AnyStr] = None) -> NoReturn:
         """
         Plots for the various metrics and stored metrics into torch local file
+        @param output_filename: Relative name of file containing the summary of metrics and losses
+        @type output_filename: str
         """
-        import numpy as np
-        parameters = [PlotterParameters(0, x_label='x', y_label='y', title=k, fig_size=(12, 8))
-                      for k in self.metrics.keys()]
+        y_labels = ['Accuracy', 'Precision', 'Training Loss', 'Evaluation Loss']
+        parameters = [PlotterParameters(0, x_label='Iteration', y_label=y_labels[idx], title=k, fig_size=(12, 8))
+                      for idx, k in enumerate(self.metrics.keys())]
 
         # Save the statistics in PyTorch format
         if output_filename is not None:

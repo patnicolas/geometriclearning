@@ -104,10 +104,7 @@ class ConvModel(NeuralModel, ABC):
         @return: A tensor output from last layer
         @rtype; Torch tensor
         """
-        print(f'Input Conv shape {x.shape}')
-        x = self.model(x)
-        print(f'Output Conv shape {x.shape}')
-        return x
+        return self.model(x)
 
     def _state_params(self) -> Dict[AnyStr, Any]:
         return {
