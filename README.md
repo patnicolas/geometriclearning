@@ -51,6 +51,13 @@ The directory __dl__ implements a framework of __reusable neural blocks__ as key
 
 ![ReusableNeuralBlocks](images/Convolution_Mirror.png)
 
+# Information Geometry
+nformation geometry applies the principles and methods of differential geometry to problems in probability theory and statistics [ref 3]. It studies the manifold of probability distributions and provides a natural framework for understanding and analyzing statistical models.     
+The directory 'informationgeometry' focuses on the __Fisher Information Metric__ (FIM).    
+    
+The Fisher Information Matrix plays a crucial role in various aspects of machine learning and statistics. Its primary significance lies in providing a measure of the amount of information that an observable random variable carries about an unknown parameter upon which the probability depends on.   
+The Fisher information matrix is a type of __Riemannian metric__ that can be applied to a __smooth statistical manifold__. It serves to quantify the informational difference between measurements. The points on this manifold represent probability measures defined within a Euclidean probability space, such as the Normal distribution. Mathematically, it is represented by the Hessian of the __Kullback-Leibler__ divergence.
+
 
 # Markov Chain Monte Carlo
 Sampling sits at the core of data science and analysis. The directory __mcmc__ explores a category of numerical sampling techniques, known as Markov Chain Monte Carlo, and how they can be implemented via reusable design patterns, using the __Metropolis-Hastings__ model as an example.     
