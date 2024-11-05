@@ -25,8 +25,10 @@ The directory __geometry__ contains the defintion and implementation the various
 - Euclidean, __hypersphere__ and __Kendal__ spaces
 - Logistic regression and K-Means on hypersphere
 - __Frechet mean__
-- __Push-forward__ and __pull-back__
+- __Push-forward__ and __pull-back__     
+
 ![Paralleltransport](images/ParallelTransport.png)
+    
 
 # Lie groups and Algebras
 Lie groups play a crucial role in Geometric Deep Learning by modeling symmetries such as rotation, translation, and scaling. This enables non-linear models to generalize effectively for tasks like object detection and transformations in generative models.    
@@ -35,7 +37,8 @@ Lie groups have numerous practical applications in various fields:
 - __Robotics__: Lie groups model the motion of robots, particularly in the context of rotation and translation (using groups like SO(3) and SE(3)).
 - __Control Theory__: Lie groups are used in the analysis and design of control systems, especially in systems with rotational or symmetrical behavior.
 - __Computer Vision__: They help in image processing and 3D vision, especially in tasks involving rotations and transformations.
-- __Differential Equations__: Lie groups are instrumental in solving differential equations by leveraging symmetry properties.
+- __Differential Equations__: Lie groups are instrumental in solving differential equations by leveraging symmetry properties.     
+
 ![LieGroups](images/Lie_Manifold.png)
 
     
