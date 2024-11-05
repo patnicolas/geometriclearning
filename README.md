@@ -52,12 +52,26 @@ The directory __dl__ implements a framework of __reusable neural blocks__ as key
 ![ReusableNeuralBlocks](images/Convolution_Mirror.png)
 
 # Information Geometry
-nformation geometry applies the principles and methods of differential geometry to problems in probability theory and statistics [ref 3]. It studies the manifold of probability distributions and provides a natural framework for understanding and analyzing statistical models.     
+__Information geometry__ applies the principles and methods of differential geometry to problems in probability theory and statistics [ref 3]. It studies the manifold of probability distributions and provides a natural framework for understanding and analyzing statistical models.     
 The directory 'informationgeometry' focuses on the __Fisher Information Metric__ (FIM).    
     
 The Fisher Information Matrix plays a crucial role in various aspects of machine learning and statistics. Its primary significance lies in providing a measure of the amount of information that an observable random variable carries about an unknown parameter upon which the probability depends on.   
 The Fisher information matrix is a type of __Riemannian metric__ that can be applied to a __smooth statistical manifold__. It serves to quantify the informational difference between measurements. The points on this manifold represent probability measures defined within a Euclidean probability space, such as the Normal distribution. Mathematically, it is represented by the Hessian of the __Kullback-Leibler__ divergence.
 
+# Fractals
+Configuring the parameters of a 2D convolutional neural network, such as kernel size and padding, can be challenging because it largely depends on the complexity of an image or its specific sections. __Fractals__ help quantify the complexity of important features and boundaries within an image and ultimately guide the data scientist in optimizing his/her model.    
+
+A __fractal dimension__ is a measure used to describe the complexity of fractal patterns or sets by quantifying the ratio of change in detail relative to the change in scale.    
+For ordinary geometric shapes, the fractal dimension theoretically matches the familiar Euclidean or __topological dimension__.    
+
+There are many approaches to compute the fractal dimension of an image, among them:
+- Variation method
+- Structure function method
+- Root-mean-square method
+- R/S analysis method
+- Box counting method
+
+The directory 'fractal' contains the implementation of the __box counting method__ for images and 3D objects.
 
 # Markov Chain Monte Carlo
 Sampling sits at the core of data science and analysis. The directory __mcmc__ explores a category of numerical sampling techniques, known as Markov Chain Monte Carlo, and how they can be implemented via reusable design patterns, using the __Metropolis-Hastings__ model as an example.     
