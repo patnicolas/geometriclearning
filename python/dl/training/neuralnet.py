@@ -70,7 +70,7 @@ class NeuralNet(object):
         @param test_loader:  Data loader for the valuation set
         @type test_loader: DataLoader
         @param output_file_name Optional file name for the output of metrics
-        @type AnyStr
+        @type output_file_name: AnyStr
         """
         torch.manual_seed(42)
         self.hyper_params.initialize_weight(list(self.model.modules()))

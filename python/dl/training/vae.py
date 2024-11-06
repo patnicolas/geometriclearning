@@ -65,13 +65,18 @@ class VAE(NeuralNet, ABC):
         """
         return cls(vae_model, hyper_params, early_stop_logger, metrics={}, plot_parameters=[])
 
-    def __call__(self, train_loader: DataLoader, eval_loader: DataLoader) -> NoReturn:
+    def __call__(self,
+                 train_loader: DataLoader,
+                 eval_loader: DataLoader,
+                 output_file_name: Optional[AnyStr] = None) -> NoReturn:
         """
 E       Execute the cycle of training and evaluation for the
         @param train_loader: Loader for the training data
         @type train_loader: DataLoader
         @param eval_loader: Loader for the evaluation data
         @type eval_loader: DataLoader
+        @param output_file_name Optional file name for the output of metrics
+        @type output_file_name: AnyStr
         """
         # Initialization of the weights
         torch.manual_seed(42)
@@ -85,7 +90,8 @@ E       Execute the cycle of training and evaluation for the
             eval_metrics = self.__eval(epoch, eval_loader)
             # constants.log_info(f'Epoch # {epoch} eval loss {eval_loss}')
             self.early_stop_logger(epoch, train_loss, eval_metrics)
-            # Generate summary
+
+        # Generate summary
         if self.plot_parameters is not None:
             self.early_stop_logger.summary()
 
@@ -157,13 +163,15 @@ E       Execute the cycle of training and evaluation for the
 
         encoder_optimizer = self.hyper_params.optimizer(self.model)
         decoder_optimizer = self.hyper_params.optimizer(self.model)
+        vae_kl_loss = VAEKLLoss(self.model.mu, self.model.log_var, len(data_loader))
 
         for data in tqdm(data_loader):
             try:
                 for params in self.model.parameters():
                     params.grad = None
                 z = self.model(data)
-                loss = self.__compute_loss(z, data, self.model.mu, self.model.log_var, len(data_loader))
+                loss = vae_kl_loss(z, data)
+                # loss = self.__compute_loss(z, data, self.model.mu, self.model.log_var, len(data_loader))
 
                 loss.backward(retain_graph=True)
                 total_loss += loss.data
@@ -191,3 +199,32 @@ E       Execute the cycle of training and evaluation for the
         eval_loss = total_loss / len(eval_loader)
         metric_collector[Metric.eval_loss_label] = eval_loss
         return metric_collector
+
+
+from torch.nn.modules.loss import _Loss
+
+"""
+class _Loss(Module):
+    reduction: str
+
+    def __init__(self, size_average=None, reduce=None, reduction: str = 'mean') -> None:
+        super().__init__()
+        if size_average is not None or reduce is not None:
+            self.reduction: str = _Reduction.legacy_get_string(size_average, reduce)
+        else:
+            self.reduction = reduction
+
+
+"""
+
+class VAEKLLoss(_Loss):
+    def __init__(self, mu: torch.Tensor, log_var: torch.Tensor, num_records: int):
+        super(VAEKLLoss, self).__init__(size_average=None, reduce=None, reduction='mean')
+        self.mu = mu
+        self.log_var = log_var
+        self.num_records = num_records
+
+    def forward(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        reconstruction_loss = self.hyper_params.loss_function(input, target)
+        kl_loss = (-0.5 * torch.sum(1 + self.log_var - self.mu ** 2 - self.log_var.exp())) / self.num_records
+        return reconstruction_loss + kl_loss

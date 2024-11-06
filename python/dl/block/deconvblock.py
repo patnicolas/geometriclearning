@@ -20,6 +20,7 @@ from dl.dlexception import DLException
         output_dim = stride*(in_channels -1) - 2*padding + kernel_size
 """
 
+
 class DeConvBlock(nn.Module):
     def __init__(self,
                  conv_dimension: int,

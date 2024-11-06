@@ -4,6 +4,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 from torch import nn
 from typing import Tuple, Self, Any, AnyStr
 from dl.block.builder import ConvBlockBuilder
+from dl.block.neuralblock import NeuralBlock
 import logging
 logger = logging.getLogger('dl.block.ConvBlock')
 
@@ -21,19 +22,21 @@ logger = logging.getLogger('dl.block.ConvBlock')
 """
 
 
-class ConvBlock(nn.Module):
+class ConvBlock(NeuralBlock):
 
     def __init__(self, _id: AnyStr, conv_block_builder: ConvBlockBuilder) -> None:
         """
         Constructor for the convolutional neural block
+        @param _id: Identifier this convolutional neural block
+        @type _id: str
         @param conv_block_builder: Convolutional block (dimension 1 or 2)
         @type conv_block_builder: ConvBlockBuilder
         """
-        super(ConvBlock, self).__init__()
         self.id = _id
         self.conv_block_builder = conv_block_builder
         # Invoke __call__
-        self.modules = self.conv_block_builder()
+        modules = self.conv_block_builder()
+        super(ConvBlock, self).__init__(_id, tuple(modules))
 
     def compute_out_shapes(self) -> int | Tuple[int, int]:
         return self.conv_block_builder.get_conv_layer_out_shape()

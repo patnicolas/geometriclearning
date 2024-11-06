@@ -102,6 +102,8 @@ class Conv2DBlockBuilder(ConvBlockBuilder, ABC):
         print(f'Conv layer output shape: {str(conv_out_shape)}')
         return conv_layer_out_shape
 
+    """ ------------------ Private Helper Methods ------------------------------------- """
+
     def __get_conv_out_shape(self) -> int | Tuple[int, int]:
         """
         Compute the output channels from the input channels, stride, padding and kernel size
@@ -121,12 +123,12 @@ class Conv2DBlockBuilder(ConvBlockBuilder, ABC):
         @rtype: Tuple[int, int]
         """
         if self.max_pooling_kernel > 0:
-          #  if out_shape[0] % self.max_pooling_kernel != 0:
-          #      raise ConvException(f'Pooling shape: out {out_shape[0]} should be a multiple of '
-          #                          f'pooling kernel {self.max_pooling_kernel}')
-          #  if out_shape[1] % self.max_pooling_kernel != 0:
-          #      raise ConvException(f'Pooling shape: out {out_shape[1]} should be a multiple of '
-           #                         f'pooling kernel {self.max_pooling_kernel}')
+            #  if out_shape[0] % self.max_pooling_kernel != 0:
+            #      raise ConvException(f'Pooling shape: out {out_shape[0]} should be a multiple of '
+            #                          f'pooling kernel {self.max_pooling_kernel}')
+            #  if out_shape[1] % self.max_pooling_kernel != 0:
+            #      raise ConvException(f'Pooling shape: out {out_shape[1]} should be a multiple of '
+            #                         f'pooling kernel {self.max_pooling_kernel}')
             h_shape = out_shape[0] - self.max_pooling_kernel + 1
             w_shape = out_shape[1] - self.max_pooling_kernel + 1
             return h_shape, w_shape
