@@ -203,20 +203,6 @@ E       Execute the cycle of training and evaluation for the
 
 from torch.nn.modules.loss import _Loss
 
-"""
-class _Loss(Module):
-    reduction: str
-
-    def __init__(self, size_average=None, reduce=None, reduction: str = 'mean') -> None:
-        super().__init__()
-        if size_average is not None or reduce is not None:
-            self.reduction: str = _Reduction.legacy_get_string(size_average, reduce)
-        else:
-            self.reduction = reduction
-
-
-"""
-
 class VAEKLLoss(_Loss):
     def __init__(self, mu: torch.Tensor, log_var: torch.Tensor, num_records: int):
         super(VAEKLLoss, self).__init__(size_average=None, reduce=None, reduction='mean')
