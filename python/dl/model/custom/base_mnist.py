@@ -21,7 +21,6 @@ logger = logging.getLogger('dl.model.custom.BaseMNIST')
 __all__ = ['BaseMnist']
 
 
-
 class BaseMnist(ABC):
     default_training_file = 'processed/training.pt'
     default_test_file = 'processed/test.pt'
@@ -67,11 +66,12 @@ class BaseMnist(ABC):
                 parameters)
 
             train_data_loader, test_data_loader = self.load_dataset(root_path, use_labels=True)
-            network(train_data_loader, test_data_loader, output_file_name=f'{self.model.model_id}_metrics_{metric_label}')
+            output_file = f'{self.model.model_id}_metrics_{metric_label}'
+            network(train_data_loader, test_data_loader, output_file)
         except ConvException as e:
-            print(str(e))
+            logging.error(str(e))
         except DLException as e:
-            print(str(e))
+            logging.error(str(e))
 
     @abstractmethod
     def _extract_datasets(self, root_path: AnyStr) ->(torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor):

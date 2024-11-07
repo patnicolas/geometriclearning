@@ -1,37 +1,42 @@
-import unittest
+from dl.model.custom.conv_2D_config import Conv2DConfig, ConvLayer2DConfig
 
+import unittest
 from dl.training.early_stop_logger import EarlyStopLogger
 from python.dl.model.custom.conv_mnist import ConvMNIST
 from python.dl.block import ConvException
 from python.dl.dl_exception import DLException
 import torch.nn as nn
-import torch
 from typing import NoReturn, AnyStr, List
+import logging
+logger = logging.getLogger('dl.model.custom.ConvMNISTTest')
 
 
 class ConvMNISTTest(unittest.TestCase):
 
     @unittest.skip('Ignore')
     def test_init(self):
+        _id = 'test'
         input_size = 28
-        in_channels = [1, 32]
-        kernel_size = [3, 3]
-        padding_size = [0, 0]
-        stride_size = [1, 1]
         max_pooling_kernel = 2
         out_channels = 64
+        activation = nn.ReLU()
+        ffnn_out_features = [64, 64]
+        num_classes = 10
+        conv_layer1_config = ConvLayer2DConfig(1, 3, 0, 1)
+        conv_layer2_config = ConvLayer2DConfig(32, 3, 0, 1)
+        conv_layer_2D_config = [conv_layer1_config, conv_layer2_config]
 
         try :
-            conv_MNIST_instance = ConvMNIST(
-                input_size,
-                in_channels,
-                kernel_size,
-                padding_size,
-                stride_size,
-                max_pooling_kernel,
-                out_channels)
+            conv_2D_config = Conv2DConfig(_id,
+                                          input_size,
+                                          conv_layer_2D_config,
+                                          max_pooling_kernel,
+                                          out_channels,
+                                          activation,
+                                          ffnn_out_features,
+                                          num_classes)
+            conv_MNIST_instance = ConvMNIST(conv_2D_config)
             print(repr(conv_MNIST_instance))
-            print(conv_MNIST_instance.show_conv_weights_shape())
             self.assertTrue(True)
         except ConvException as e:
             print(str(e))
@@ -112,7 +117,6 @@ class ConvMNISTTest(unittest.TestCase):
                 fig_size=(11, 7))
         )
 
-
     def test_train(self):
         lr = 0.0006
         # activation = nn.LeakyReLU(negative_slope=0.03)
@@ -144,14 +148,27 @@ class ConvMNISTTest(unittest.TestCase):
     def create_and_train_network(lr: float, activation: nn.Module) -> NoReturn:
         from dl.training.hyper_params import HyperParams
 
+        _id = 'test'
         input_size = 28
-        in_channels = [1, 32, 64]
-        kernel_size = [3, 3, 3]
-        padding_size = [0, 0, 0]
-        stride_size = [1, 1, 1]
         max_pooling_kernel = 2
         out_channels = 128
+        activation = nn.ReLU()
+        ffnn_out_features = [128, 128]
+        num_classes = 10
+        conv_layer1_config = ConvLayer2DConfig(1, 3, 0, 1)
+        conv_layer2_config = ConvLayer2DConfig(32, 3, 0, 1)
+        conv_layer3_config = ConvLayer2DConfig(64, 3, 0, 1)
+        conv_layer_2D_config = [conv_layer1_config, conv_layer2_config, conv_layer3_config]
+        conv_2D_config = Conv2DConfig(_id,
+                                      input_size,
+                                      conv_layer_2D_config,
+                                      max_pooling_kernel,
+                                      out_channels,
+                                      activation,
+                                      ffnn_out_features,
+                                      num_classes)
         root_path = '../../../../data/MNIST'
+
         try:
             hyper_parameters = HyperParams(
                 lr=lr,
@@ -163,24 +180,17 @@ class ConvMNISTTest(unittest.TestCase):
                 drop_out=0.15,
                 train_eval_ratio=0.9,
                 normal_weight_initialization=False)
-            conv_MNIST_instance = ConvMNIST(
-                    input_size,
-                    in_channels,
-                    kernel_size,
-                    padding_size,
-                    stride_size,
-                    max_pooling_kernel,
-                    out_channels,
-                    activation)
+
+            conv_MNIST_instance = ConvMNIST(conv_2D_config)
             print(repr(conv_MNIST_instance))
             activation_label = str(activation).strip('()')
             conv_MNIST_instance.do_train(root_path, hyper_parameters, activation_label)
         except ConvException as e:
-            print(str(e))
+            logging.error(str(e))
         except AssertionError as e:
-            print(str(e))
+            logging.error(str(e))
         except DLException as e:
-            print(str(e))
+            logging.error(str(e))
 
 
 if __name__ == '__main__':

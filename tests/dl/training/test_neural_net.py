@@ -37,14 +37,13 @@ class NeuralNetTest(unittest.TestCase):
         min_diff_loss = -0.001
         early_stopping_enabled = True
         early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
-        labels = [Metric.train_loss_label, EarlyStopLogger.eval_loss_label, EarlyStopLogger.accuracy_label]
+        labels = [Metric.train_loss_label, Metric.eval_loss_label, Metric.accuracy_label]
         parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(12, 8)) for label in labels]
         network = NeuralNet(binary_classifier, hyper_parameters, early_stop_logger, parameters)
-        filename = '/users/patricknicolas/dev/geometriclearning/data/wages_cleaned.csv'
+        filename = '../../data/wages_cleaned.csv'
         tensor_dataset = UnlabeledDataset.from_file(filename, ['Reputation', 'Age', 'Caps', 'Apps', 'Salary'])
         network.init_data_loader(batch_size=8, dataset=tensor_dataset)
 
-    @unittest.skip('Ignored')
     def test_train_wages(self):
         from python.metric.metric import Metric
         from python.metric.built_in_metric import BuiltInMetric, MetricType
@@ -67,8 +66,8 @@ class NeuralNetTest(unittest.TestCase):
         early_stopping_enabled = True
         early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
         metric_labels = {
-            Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, True),
-            Metric.precision_label: BuiltInMetric(MetricType.Precision, True)
+            Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, is_weighted=True),
+            Metric.precision_label: BuiltInMetric(MetricType.Precision, is_weighted=True)
         }
         parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                       for label, _ in metric_labels.items()]
@@ -78,7 +77,7 @@ class NeuralNetTest(unittest.TestCase):
             early_stop_logger,
             metric_labels,
             parameters)
-        filename = '/users/patricknicolas/dev/geometriclearning/data/wages_cleaned.csv'
+        filename = '../../../data/misc/wages_cleaned.csv'
         df = LabeledDataset.data_frame(filename)
         df = df[['Reputation', 'Age', 'Caps', 'Apps', 'Salary']]
         print(df)

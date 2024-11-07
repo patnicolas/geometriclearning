@@ -3,6 +3,7 @@ from dl.model.custom.ffnn_mnist import FfnnMnist
 from dl.training.hyper_params import HyperParams
 import torch.nn as nn
 
+
 class FFNNMISTTest(unittest.TestCase):
 
     def test_init(self):
@@ -14,22 +15,22 @@ class FFNNMISTTest(unittest.TestCase):
 
     def test_train(self):
         input_size = 784
-        features = [256, 128]
+        features = [256, 128, 64]
         root_path = '../../../../data/MNIST'
-
+        metric_label = 'FFNN - MNIST'
         hyper_parameters = HyperParams(
-            lr=0.00008,
+            lr=0.0005,
             momentum=0.95,
-            epochs=42,
+            epochs=24,
             optim_label='adam',
-            batch_size=32,
+            batch_size=16,
             loss_function=nn.CrossEntropyLoss(),
-            drop_out=0.2,
+            drop_out=0.20,
             train_eval_ratio=0.9,
-            normal_weight_initialization=True)
+            normal_weight_initialization=False)
 
         ffnn_mnist = FfnnMnist(input_size, features)
-        ffnn_mnist.do_train(root_path, hyper_parameters)
+        ffnn_mnist.do_train(root_path, hyper_parameters, metric_label)
         self.assertTrue(True)
 
 

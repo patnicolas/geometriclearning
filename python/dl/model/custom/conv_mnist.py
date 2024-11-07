@@ -1,81 +1,41 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
-from typing import List, AnyStr, Tuple, NoReturn
-import torch.nn as nn
+from typing import AnyStr, Tuple, NoReturn
 import torch
 from dl.model.custom.base_mnist import BaseMnist
-from dl.model.conv_model import ConvModel
-from dl.block.conv_block import ConvBlock
-from dl.block.ffnn_block import FFNNBlock
-from dl.block.builder.conv2d_block_builder import Conv2DBlockBuilder
+from dl.model.custom.conv_2D_config import Conv2DConfig
 import logging
 logger = logging.getLogger('dl.model.custom.ConvMNIST')
 
-__all__ = ['BaseMnist', 'ConvMNIST']
+__all__ = ['ConvMNIST']
 
 
 class ConvMNIST(BaseMnist):
     id = 'Convolutional_MNIST'
 
-    def __init__(self,
-                 input_size: int,
-                 in_channels: List[int],
-                 kernel_size: List[int],
-                 padding_size: List[int],
-                 stride_size: List[int],
-                 max_pooling_kernel: int,
-                 out_channels: int,
-                 activation: nn.Module) -> None:
-
-        conv_blocks = []
-        input_dim = (input_size, input_size)
-
-        for idx in range(len(in_channels)):
-            is_batch_normalization = True
-            has_bias = False
-            conv_2d_block_builder = Conv2DBlockBuilder(
-                in_channels=in_channels[idx],
-                out_channels=in_channels[idx+1] if idx < len(in_channels)-1 else out_channels,
-                input_size=input_dim,
-                kernel_size=(kernel_size[idx], kernel_size[idx]),
-                stride=(stride_size[idx], stride_size[idx]),
-                padding=(padding_size[idx], padding_size[idx]),
-                batch_norm=is_batch_normalization,
-                max_pooling_kernel=max_pooling_kernel,
-                activation=activation,
-                bias=has_bias)
-
-            input_dim = conv_2d_block_builder.get_conv_layer_out_shape()
-            conv_blocks.append(ConvBlock(str(idx+1), conv_2d_block_builder))
-
-        conv_output_shape = conv_blocks[len(conv_blocks)-1].compute_out_shapes()
-        ffnn_input_shape = out_channels * conv_output_shape[0] * conv_output_shape[1]
-        ffnn_block1 = FFNNBlock.build(block_id='hidden',
-                                      in_features=ffnn_input_shape,
-                                      out_features = 128,
-                                      activation=activation)
-        ffnn_block2 = FFNNBlock.build(block_id='output',
-                                      in_features=128,
-                                      out_features = BaseMnist.num_classes,
-                                      activation=nn.Softmax(dim=1))
-        conv_model = ConvModel(ConvMNIST.id, conv_blocks, ffnn_blocks=[ffnn_block1, ffnn_block2])
-        super(ConvMNIST, self).__init__(conv_model)
+    def __init__(self, conv_2D_config: Conv2DConfig) -> None:
+        """
+        Constructor for the Convolutional network for MNIST Dataset
+        @param conv_2D_config: 2D Convolutional network
+        @type conv_2D_config: Conv2DConfig
+        """
+        super(ConvMNIST, self).__init__(conv_2D_config.conv_model)
 
     def show_conv_weights_shape(self) -> NoReturn:
         import torch
 
         for idx, conv_block in enumerate(self.model.conv_blocks):
             conv_modules_weights: Tuple[torch.Tensor] = conv_block.get_modules_weights()
-            print(f'\nConv. layer #{idx} shape: {conv_modules_weights[0].shape}')
+            logging.info(f'\nConv. layer #{idx} shape: {conv_modules_weights[0].shape}')
 
     def _extract_datasets(self, root_path: AnyStr) ->(torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor):
         """
-             Extract the training data and labels and test data and labels for this convolutional network.
-             @param root_path: Root path to MNIST dataset
-             @type root_path: AnyStr
-             @return Tuple (train data, labels, test data, labels)
-             @rtype Tuple[torch.Tensor]
+        Extract the training data and labels and test data and labels for this convolutional network.
+        @param root_path: Root path to MNIST dataset
+        @type root_path: AnyStr
+        @return Tuple (train data, labels, test data, labels)
+        @rtype Tuple[torch.Tensor]
         """
         from dl.training.neural_net import NeuralNet
 
