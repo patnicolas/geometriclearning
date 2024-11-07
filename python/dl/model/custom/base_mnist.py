@@ -7,14 +7,14 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 
 from dl.block import ConvException
-from dl.training.neuralnet import NeuralNet
-from dl.training.earlystoplogger import EarlyStopLogger
-from dl.model.neuralmodel import NeuralModel
+from dl.training.neural_net import NeuralNet
+from dl.training.early_stop_logger import EarlyStopLogger
+from dl.model.neural_model import NeuralModel
 from metric.metric import Metric
 from plots.plotter import PlotterParameters
-from dl.training.hyperparams import HyperParams
-from dl.dlexception import DLException
-from metric.builtinmetric import BuiltInMetric, MetricType
+from dl.training.hyper_params import HyperParams
+from dl.dl_exception import DLException
+from metric.built_in_metric import BuiltInMetric, MetricType
 import logging
 logger = logging.getLogger('dl.model.custom.BaseMNIST')
 

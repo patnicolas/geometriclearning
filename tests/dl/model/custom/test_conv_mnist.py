@@ -1,9 +1,9 @@
 import unittest
 
-from dl.training.earlystoplogger import EarlyStopLogger
+from dl.training.early_stop_logger import EarlyStopLogger
 from python.dl.model.custom.conv_mnist import ConvMNIST
 from python.dl.block import ConvException
-from python.dl.dlexception import DLException
+from python.dl.dl_exception import DLException
 import torch.nn as nn
 import torch
 from typing import NoReturn, AnyStr, List
@@ -142,7 +142,7 @@ class ConvMNISTTest(unittest.TestCase):
 
     @staticmethod
     def create_and_train_network(lr: float, activation: nn.Module) -> NoReturn:
-        from dl.training.hyperparams import HyperParams
+        from dl.training.hyper_params import HyperParams
 
         input_size = 28
         in_channels = [1, 32, 64]

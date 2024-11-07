@@ -1,7 +1,7 @@
 import unittest
 import torch
 from dataset.tdataset import TDataset
-from dataset.datasetexception import DatasetException
+from dataset.dataset_exception import DatasetException
 
 
 class TDatasetTest(unittest.TestCase):

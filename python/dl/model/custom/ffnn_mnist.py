@@ -5,8 +5,8 @@ from typing import List, AnyStr
 import torch
 import torch.nn as nn
 from dl.model.custom.base_mnist import BaseMnist
-from dl.block.ffnnblock import FFNNBlock
-from dl.model.ffnnmodel import FFNNModel
+from dl.block.ffnn_block import FFNNBlock
+from dl.model.ffnn_model import FFNNModel
 import logging
 logger = logging.getLogger('dl.model.custom.FFNNMNIST')
 
@@ -57,7 +57,7 @@ class FfnnMnist(BaseMnist):
         @return Tuple (train data, labels, test data, labels)
         @rtype Tuple[torch.Tensor]
         """
-        from dl.training.neuralnet import NeuralNet
+        from dl.training.neural_net import NeuralNet
 
         _, torch_device = NeuralNet.get_device()
 

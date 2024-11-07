@@ -3,13 +3,13 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from abc import ABC
 
-from dl.training.neuralnet import NeuralNet
-from dl.training.hyperparams import HyperParams
-from dl.training.earlystoplogger import EarlyStopLogger
+from dl.training.neural_net import NeuralNet
+from dl.training.hyper_params import HyperParams
+from dl.training.early_stop_logger import EarlyStopLogger
 from plots.plotter import PlotterParameters
 from metric.metric import Metric
-from dl.model.vaemodel import VAEModel
-from dl.dlexception import DLException
+from dl.model.vae_model import VAEModel
+from dl.dl_exception import DLException
 from typing import AnyStr, List, Optional, Dict, NoReturn, Self
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -134,7 +134,7 @@ E       Execute the cycle of training and evaluation for the
     def __reconstruction_loss(self,
                               predicted: torch.Tensor,
                               x: torch.Tensor) -> float:
-        from python.dl.dlexception import DLException
+        from python.dl.dl_exception import DLException
 
         try:
             # Cross-entropy for reconstruction loss for binary values

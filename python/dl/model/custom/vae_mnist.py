@@ -3,15 +3,15 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from typing import AnyStr, NoReturn
 from dl.model.custom.base_mnist import BaseMnist
-from dl.model.vaemodel import VAEModel
+from dl.model.vae_model import VAEModel
 from dl.block import ConvException
-from dl.training.earlystoplogger import EarlyStopLogger
+from dl.training.early_stop_logger import EarlyStopLogger
 from dl.training.vae import VAE
 from metric.metric import Metric
 from plots.plotter import PlotterParameters
-from dl.training.hyperparams import HyperParams
-from dl.dlexception import DLException
-from metric.builtinmetric import BuiltInMetric, MetricType
+from dl.training.hyper_params import HyperParams
+from dl.dl_exception import DLException
+from metric.built_in_metric import BuiltInMetric, MetricType
 
 
 class VAEMNIST(object):

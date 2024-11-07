@@ -1,12 +1,12 @@
 import unittest
-from dl.block.ffnnblock import FFNNBlock
-from dl.model.ffnnmodel import FFNNModel
-from dl.model.vaemodel import VAEModel
-from dataset.unlabeledloader import UnlabeledLoader
-from dataset.unlabeleddataset import UnlabeledDataset
+from dl.block.ffnn_block import FFNNBlock
+from dl.model.ffnn_model import FFNNModel
+from dl.model.vae_model import VAEModel
+from dataset.unlabeled_loader import UnlabeledLoader
+from dataset.unlabeled_dataset import UnlabeledDataset
 from dl.training.vae import VAE
-from dl.training.hyperparams import HyperParams
-from dl.training.earlystoplogger import EarlyStopLogger
+from dl.training.hyper_params import HyperParams
+from dl.training.early_stop_logger import EarlyStopLogger
 from plots.plotter import PlotterParameters
 import torch.nn as nn
 
@@ -26,7 +26,7 @@ class VAETest(unittest.TestCase):
 
     def test_train(self):
         from python.metric.metric import Metric
-        from python.metric.builtinmetric import BuiltInMetric, MetricType
+        from python.metric.built_in_metric import BuiltInMetric, MetricType
 
         features = ['age', 'sex', 'chest pain type', 'cholesterol', 'fasting blood sugar', 'max heart rate',
                     'exercise angina', 'ST slope']

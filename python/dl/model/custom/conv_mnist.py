@@ -5,10 +5,10 @@ from typing import List, AnyStr, Tuple, NoReturn
 import torch.nn as nn
 import torch
 from dl.model.custom.base_mnist import BaseMnist
-from dl.model.convmodel import ConvModel
-from dl.block.convblock import ConvBlock
-from dl.block.ffnnblock import FFNNBlock
-from dl.block.builder.conv2dblockbuilder import Conv2DBlockBuilder
+from dl.model.conv_model import ConvModel
+from dl.block.conv_block import ConvBlock
+from dl.block.ffnn_block import FFNNBlock
+from dl.block.builder.conv2d_block_builder import Conv2DBlockBuilder
 import logging
 logger = logging.getLogger('dl.model.custom.ConvMNIST')
 
@@ -77,7 +77,7 @@ class ConvMNIST(BaseMnist):
              @return Tuple (train data, labels, test data, labels)
              @rtype Tuple[torch.Tensor]
         """
-        from dl.training.neuralnet import NeuralNet
+        from dl.training.neural_net import NeuralNet
 
         _, torch_device = NeuralNet.get_device()
 
