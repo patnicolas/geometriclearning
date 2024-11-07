@@ -14,13 +14,13 @@ __all__ = ['ConvMNIST']
 class ConvMNIST(BaseMnist):
     id = 'Convolutional_MNIST'
 
-    def __init__(self, conv_2D_config: Conv2DConfig) -> None:
+    def __init__(self, conv_2D_config: Conv2DConfig, data_batch_size: int = 64) -> None:
         """
         Constructor for the Convolutional network for MNIST Dataset
         @param conv_2D_config: 2D Convolutional network
         @type conv_2D_config: Conv2DConfig
         """
-        super(ConvMNIST, self).__init__(conv_2D_config.conv_model)
+        super(ConvMNIST, self).__init__(conv_2D_config.conv_model, data_batch_size)
 
     def show_conv_weights_shape(self) -> NoReturn:
         import torch
@@ -38,15 +38,16 @@ class ConvMNIST(BaseMnist):
         @rtype Tuple[torch.Tensor]
         """
         from dl.training.neural_net import NeuralNet
+        from torch.nn.functional import one_hot
 
         _, torch_device = NeuralNet.get_device()
 
         train_data = torch.load(f'{root_path}/{BaseMnist.default_training_file}')
         train_features = train_data[0].unsqueeze(dim=1).float().to(torch_device)
-        train_labels = torch.nn.functional.one_hot(train_data[1], num_classes=10).float().to(torch_device)
+        train_labels = one_hot(train_data[1], num_classes=BaseMnist.num_classes).float().to(torch_device)
 
         test_data = torch.load(f'{root_path}/{BaseMnist.default_test_file}')
         test_features = test_data[0].unsqueeze(dim=1).float().to(torch_device)
-        test_labels = torch.nn.functional.one_hot(test_data[1], num_classes=10).float().to(torch_device)
+        test_labels = one_hot(test_data[1], num_classes=BaseMnist.num_classes).float().to(torch_device)
 
         return train_features, train_labels, test_features, test_labels

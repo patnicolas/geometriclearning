@@ -15,19 +15,26 @@ logger = logging.getLogger('dl.model.custom.ConvCifar10')
 class ConvCifar10(object):
     id = 'Convolutional_CIFAR10'
 
-    def __init__(self, conv_2D_config: Conv2DConfig) -> None:
+    def __init__(self, conv_2D_config: Conv2DConfig, data_batch_size: int = 64) -> None:
         self.model = conv_2D_config.conv_model
+        self.data_batch_size = data_batch_size
 
     def load_dataset(self, root_path: AnyStr) -> (DataLoader, DataLoader):
-        train_dataset, test_dataset = self.__extract_datasets(root_path)
+        # Create the training and evaluation data sets
+        train_dataset, test_dataset = ConvCifar10.__extract_datasets(root_path)
 
         # Create DataLoaders for batch processing
-        train_loader = DataLoader(dataset=train_dataset, batch_size=64, shuffle=True)
-        test_loader = DataLoader(dataset=test_dataset, batch_size=64, shuffle=False)
+        train_loader = DataLoader(dataset=train_dataset, batch_size=self.data_batch_size, shuffle=True)
+        test_loader = DataLoader(dataset=test_dataset, batch_size=self.data_batch_size, shuffle=False)
         return train_loader, test_loader
 
+    def __repr__(self) -> AnyStr:
+        return repr(self.model)
+
     """ ---------------------------  Private helper methods ---------------------------- """
-    def __extract_datasets(self, root_path: AnyStr) -> (CIFAR10, CIFAR10):
+
+    @staticmethod
+    def __extract_datasets(root_path: AnyStr) -> (CIFAR10, CIFAR10):
         """
         Extract the training data and labels and test data and labels for this convolutional network.
         @param root_path: Root path to CIFAR10 data
@@ -37,11 +44,13 @@ class ConvCifar10(object):
         """
         from dl.training.neural_net import NeuralNet
 
+        # Extract the processing device (CPU, Cuda,...)
         _, torch_device = NeuralNet.get_device()
 
         transform = transforms.Compose([
             transforms.ToTensor(),  # Convert images to PyTorch tensors
-            transforms.Normalize((0.0, 0.0, 0.0), (0.5, 0.5, 0.5))  # Normalize with mean and std for RGB channels
+            # Normalize with mean and std for RGB channels
+            transforms.Normalize(mean =(0.0, 0.0, 0.0), std=(0.5, 0.5, 0.5))
         ])
 
         train_dataset = CIFAR10(
@@ -57,7 +66,6 @@ class ConvCifar10(object):
             download=True,  # Download if not already present
             transform=transform  # Apply transformations
         )
-
         return train_dataset, test_dataset
 
 

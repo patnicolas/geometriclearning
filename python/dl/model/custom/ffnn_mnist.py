@@ -58,22 +58,19 @@ class FfnnMnist(BaseMnist):
         @rtype Tuple[torch.Tensor]
         """
         from dl.training.neural_net import NeuralNet
+        from torch.nn.functional import one_hot
 
         _, torch_device = NeuralNet.get_device()
 
         train_data = torch.load(f'{root_path}/{BaseMnist.default_training_file}')
         num_samples = len(train_data[0])
         train_features = train_data[0].reshape(num_samples, -1).float().to(torch_device)
-        train_labels = torch.nn.functional.one_hot(
-            train_data[1],
-            num_classes=BaseMnist.num_classes).float().to(torch_device)
+        train_labels = one_hot(train_data[1],num_classes=BaseMnist.num_classes).float().to(torch_device)
 
         test_data = torch.load(f'{root_path}/{BaseMnist.default_test_file}')
         num_samples = len(test_data[0])
         test_features = test_data[0].reshape(num_samples, -1).float().to(torch_device)
-        test_labels = torch.nn.functional.one_hot(
-            test_data[1],
-            num_classes=BaseMnist.num_classes).float().to(torch_device)
+        test_labels = one_hot(test_data[1],num_classes=BaseMnist.num_classes).float().to(torch_device)
 
         return train_features, train_labels, test_features, test_labels
 

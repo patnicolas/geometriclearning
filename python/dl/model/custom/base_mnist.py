@@ -26,8 +26,9 @@ class BaseMnist(ABC):
     default_test_file = 'processed/test.pt'
     num_classes = 10
 
-    def __init__(self, model: NeuralModel) -> None:
+    def __init__(self, model: NeuralModel, data_batch_size: int = 64) -> None:
         self.model = model
+        self.data_batch_size = data_batch_size
 
     def __repr__(self) -> AnyStr:
         return repr(self.model)
@@ -65,7 +66,7 @@ class BaseMnist(ABC):
                 metric_labels,
                 parameters)
 
-            train_data_loader, test_data_loader = self.load_dataset(root_path, use_labels=True)
+            train_data_loader, test_data_loader = self.load_dataset(root_path)
             output_file = f'{self.model.model_id}_metrics_{metric_label}'
             network(train_data_loader, test_data_loader, output_file)
         except ConvException as e:
@@ -86,30 +87,16 @@ class BaseMnist(ABC):
 
     """ ---------------------  Private Helper Methods -------------------------- """
 
-    def load_dataset(self, root_path: AnyStr, use_labels: bool) -> (DataLoader, DataLoader):
-        import torch
-        is_testing = False
-
-        if is_testing:
-            print('Random data')
-            train_features = torch.randn(640, 1, 28, 28)
-            train_labels = torch.randn(640)
-            test_features = torch.randn(64, 1, 28, 28)
-            test_labels = torch.randn(64)
-        else:
-            train_features, train_labels, test_features, test_labels = self._extract_datasets(root_path)
+    def load_dataset(self, root_path: AnyStr) -> (DataLoader, DataLoader):
+        train_features, train_labels, test_features, test_labels = self._extract_datasets(root_path)
 
         # Build the data set as PyTorch tensors
-        if use_labels:
-            train_dataset = TensorDataset(train_features, train_labels)
-            test_dataset = TensorDataset(test_features, test_labels)
-        else:
-            train_dataset = TensorDataset(train_features)[0]
-            test_dataset = TensorDataset(test_features)[0]
+        train_dataset = TensorDataset(train_features, train_labels)
+        test_dataset = TensorDataset(test_features, test_labels)
 
         # Create DataLoaders for batch processing
-        train_loader = DataLoader(dataset=train_dataset, batch_size=64, shuffle=True)
-        test_loader = DataLoader(dataset=test_dataset, batch_size=64, shuffle=False)
+        train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
+        test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
         return train_loader, test_loader
 
 
