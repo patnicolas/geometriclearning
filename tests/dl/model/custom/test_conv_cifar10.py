@@ -27,5 +27,5 @@ class ConvCifar10Test(unittest.TestCase):
                                       activation,
                                       ffnn_out_features,
                                       num_classes)
-        conv_cifar10 = ConvCifar10(conv_2D_config)
-        print(repr(conv_cifar10))
+        conv_cifar_10 = ConvCifar10(conv_2D_config)
+        print(repr(conv_cifar_10))

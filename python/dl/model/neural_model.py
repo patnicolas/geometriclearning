@@ -74,3 +74,5 @@ class NeuralModel(torch.nn.Module):
     def save(self, extra_params: dict = None):
         raise NotImplementedError('NeuralModel.save is an abstract method')
 
+
+

@@ -2,6 +2,11 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from abc import abstractmethod
+from typing import AnyStr, List, Dict
+from metric.metric_type import MetricType
+import torch
+import logging
+logger = logging.getLogger('metric.Metric')
 
 """
 Base class for all metrics
@@ -24,5 +29,5 @@ class Metric(object):
         return f'Count: {self._count}'
 
     @abstractmethod
-    def __call__(self) -> float:
+    def __call__(self, predicted: List[float], labels: List[float]) -> torch.Tensor:
         raise NotImplementedError('Cannot compute an abstract metric')

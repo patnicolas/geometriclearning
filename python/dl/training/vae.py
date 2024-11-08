@@ -142,13 +142,13 @@ E       Execute the cycle of training and evaluation for the
             print(f'Input loss {x.shape}, Prediction shape {predicted.shape}')
             return self.hyper_params.loss_function(predicted, x)
         except RuntimeError as e:
-            logging.error(f'Runtime error {str(e)}')
+            logger.error(f'Runtime error {str(e)}')
             raise DLException(f'Runtime error {str(e)}')
         except ValueError as e:
-            logging.error(f'Value error {str(e)}')
+            logger.error(f'Value error {str(e)}')
             raise DLException(f'Value error {str(e)}')
         except KeyError as e:
-            logging.error(f'Key error {str(e)}')
+            logger.error(f'Key error {str(e)}')
             raise DLException(f'Key error {str(e)}')
 
     @staticmethod
@@ -199,18 +199,3 @@ E       Execute the cycle of training and evaluation for the
         eval_loss = total_loss / len(eval_loader)
         metric_collector[Metric.eval_loss_label] = eval_loss
         return metric_collector
-
-
-from torch.nn.modules.loss import _Loss
-
-class VAEKLLoss(_Loss):
-    def __init__(self, mu: torch.Tensor, log_var: torch.Tensor, num_records: int):
-        super(VAEKLLoss, self).__init__(size_average=None, reduce=None, reduction='mean')
-        self.mu = mu
-        self.log_var = log_var
-        self.num_records = num_records
-
-    def forward(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-        reconstruction_loss = self.hyper_params.loss_function(input, target)
-        kl_loss = (-0.5 * torch.sum(1 + self.log_var - self.mu ** 2 - self.log_var.exp())) / self.num_records
-        return reconstruction_loss + kl_loss

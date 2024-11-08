@@ -1,7 +1,7 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
-from typing import AnyStr, NoReturn
+from typing import AnyStr, NoReturn, List, Dict
 from abc import ABC, abstractmethod
 import torch
 from torch.utils.data import DataLoader, TensorDataset
@@ -14,7 +14,7 @@ from metric.metric import Metric
 from plots.plotter import PlotterParameters
 from dl.training.hyper_params import HyperParams
 from dl.dl_exception import DLException
-from metric.built_in_metric import BuiltInMetric, MetricType
+from metric.built_in_metric import BuiltInMetric, MetricType, create_metric_dict
 import logging
 logger = logging.getLogger('dl.model.custom.BaseMNIST')
 
@@ -36,6 +36,46 @@ class BaseMnist(ABC):
     def do_train(self,
                  root_path: AnyStr,
                  hyper_parameters: HyperParams,
+                 metric_labels: List[AnyStr],
+                 metric_label: AnyStr) -> NoReturn:
+        """
+        Execute the training, evaluation and metrics for any model for MNIST data set
+        @param root_path: Path for the root of the MNIST data
+        @type root_path: str
+        @param hyper_parameters: Hyper-parameters for the execution of the
+        @type hyper_parameters: HyperParams
+        @param metric_label: Labeling metric for output to file and plots
+        @type metric_label: str
+        """
+        try:
+            patience = 2
+            min_diff_loss = -0.001
+            early_stopping_enabled = True
+            early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
+            metric_labels = create_metric_dict(metric_labels)
+            parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
+                          for label, _ in metric_labels.items()]
+
+            # Define the neural network as model, hyperparameters, early stopping criteria and metrics
+            network = NeuralNet(
+                self.model,
+                hyper_parameters,
+                early_stop_logger,
+                metric_labels,
+                parameters)
+
+            train_data_loader, test_data_loader = self.load_dataset(root_path)
+            output_file = f'{self.model.model_id}_metrics_{metric_label}'
+            network(train_data_loader, test_data_loader, output_file)
+        except ConvException as e:
+            logging.error(str(e))
+        except DLException as e:
+            logging.error(str(e))
+
+    def do_train2(self,
+                 root_path: AnyStr,
+                 hyper_parameters: HyperParams,
+                 metric_labels: List[AnyStr],
                  metric_label: AnyStr) -> NoReturn:
         """
         Execute the training, evaluation and metrics for any model for MNIST data set
