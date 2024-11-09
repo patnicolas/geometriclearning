@@ -3,7 +3,6 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 import torch
 from torch.utils.data import Dataset, DataLoader
-from torch import device
 from abc import abstractmethod
 from typing import AnyStr, Dict
 from dl.model.neural_model import NeuralModel
@@ -12,6 +11,8 @@ from dl.training.hyper_params import HyperParams
 from dl.training.early_stop_logger import EarlyStopLogger
 from plots.plotter import PlotterParameters
 from metric.metric import Metric
+from dl.block import ConvException
+from metric.built_in_metric import create_metric_dict
 from tqdm import tqdm
 from typing import List, Optional, NoReturn
 import logging
@@ -35,7 +36,7 @@ class NeuralNet(object):
                  hyper_params: HyperParams,
                  early_stop_logger: EarlyStopLogger,
                  metrics: Dict[AnyStr, Metric],
-                 plot_parameters: Optional[List[PlotterParameters]]):
+                 plot_parameters: Optional[List[PlotterParameters]]) -> None:
         """
         Constructor for the training and execution of any neural network.
         @param model: Neural network model (CNN, FeedForward,...)
@@ -44,6 +45,10 @@ class NeuralNet(object):
         @type hyper_params: HyperParams
         @param early_stop_logger: Dynamic condition for early stop in training
         @type early_stop_logger: EarlyStopLogger
+        @param metrics: Dictionary of metric {metric_name: build_in_metric instance}
+        @type metrics: Dict[AnyStr, Metric]
+        @param plot_parameters: Parameters for plotting metrics, training and test losses
+        @type plot_parameters: Optional List[PlotterParameters]
         """
         self.hyper_params = hyper_params
         _, self.target_device = NeuralNet.get_device()
@@ -52,14 +57,29 @@ class NeuralNet(object):
         self.plot_parameters = plot_parameters
         self.metrics: Dict[AnyStr, Metric] = metrics
 
+    @classmethod
+    def build(cls, model: NeuralModel, hyper_parameters: HyperParams, metric_labels: List[AnyStr]):
+        # Initialize the Early stop mechanism
+        patience = 2
+        min_diff_loss = -0.001
+        early_stopping_enabled = True
+        early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
+
+        # Create metrics
+        metrics_dict = create_metric_dict(metric_labels)
+        # Initialize the plotting parameters
+        plot_parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
+                           for label, _ in metrics_dict.items()]
+        return cls(model, hyper_parameters, early_stop_logger, metrics_dict, plot_parameters)
+
     @abstractmethod
     def model_label(self) -> AnyStr:
         raise NotImplementedError('NeuralNet.model_label is an abstract method')
 
-    def __call__(self,
-                 train_loader: DataLoader,
-                 test_loader: DataLoader,
-                 output_file_name: Optional[AnyStr] = None) -> NoReturn:
+    def train(self,
+              train_loader: DataLoader,
+              test_loader: DataLoader,
+              output_file_name: Optional[AnyStr] = None) -> NoReturn:
         """
         Train and evaluation of a neural network given a data loader for a training set, a
         data loader for the evaluation/test1 set and a encoder_model. The weights of the various linear modules
@@ -86,6 +106,25 @@ class NeuralNet(object):
         # Generate summary
         if self.plot_parameters is not None:
             self.early_stop_logger.summary(output_file_name)
+
+    def execute(self, plot_title: AnyStr, loaders: (DataLoader, DataLoader)) -> NoReturn:
+        """
+        Execute the training, evaluation and metrics for any model for MNIST data set
+        @param plot_title: Labeling metric for output to file and plots
+        @type plot_title: str
+        @param loaders: Pair of loader for training data and test data
+        @type loaders: Tuple[DataLoader]
+        """
+        try:
+            train_data_loader, test_data_loader = loaders # self.load_dataset(root_path)
+            output_file = f'{self.model.model_id}_metrics_{plot_title}'
+            self.train(train_data_loader, test_data_loader, output_file)
+        except ConvException as e:
+            logger.error(str(e))
+            raise DLException(e)
+        except AssertionError as e:
+            logger.error(str(e))
+            raise DLException(e)
 
     def forward(self, features: torch.Tensor) -> torch.Tensor:
         with torch.no_grad():
@@ -133,6 +172,20 @@ class NeuralNet(object):
             return 'cpu', torch.device("cpu")
 
     """ ------------------------------------   Private methods --------------------------------- """
+
+
+    def __load_dataset(self, root_path: AnyStr) -> (DataLoader, DataLoader):
+        train_features, train_labels, test_features, test_labels = self._extract_datasets(root_path)
+
+        # Build the data set as PyTorch tensors
+        train_dataset = TensorDataset(train_features, train_labels)
+        test_dataset = TensorDataset(test_features, test_labels)
+
+        # Create DataLoaders for batch processing
+        train_loader = DataLoader(dataset=train_dataset, batch_size=self.data_batch_size, shuffle=True)
+        test_loader = DataLoader(dataset=test_dataset, batch_size=self.data_batch_size, shuffle=False)
+        return train_loader, test_loader
+
 
     def __train(self, epoch: int, train_loader: DataLoader) -> float:
         total_loss = 0.0

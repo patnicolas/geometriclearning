@@ -184,7 +184,8 @@ class ConvMNISTTest(unittest.TestCase):
             conv_MNIST_instance = ConvMNIST(conv_2D_config)
             print(repr(conv_MNIST_instance))
             activation_label = str(activation).strip('()')
-            conv_MNIST_instance.do_train(root_path, hyper_parameters, activation_label)
+            metric_labels = ['Precision', 'Recall']
+            conv_MNIST_instance.do_train(root_path, hyper_parameters, metric_labels, activation_label)
         except ConvException as e:
             logging.error(str(e))
         except AssertionError as e:

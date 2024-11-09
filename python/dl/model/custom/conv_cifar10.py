@@ -2,12 +2,14 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from dl.model.custom.conv_2D_config import Conv2DConfig
-from typing import AnyStr
-import torch
-import torchvision
+from typing import AnyStr, NoReturn, List
 import torchvision.transforms as transforms
 from torchvision.datasets import CIFAR10
 from torch.utils.data import DataLoader
+from dl.training.neural_net import NeuralNet
+from dl.dl_exception import DLException
+from dl.block import ConvException
+from dl.training.hyper_params import HyperParams
 import logging
 logger = logging.getLogger('dl.model.custom.ConvCifar10')
 
@@ -15,9 +17,36 @@ logger = logging.getLogger('dl.model.custom.ConvCifar10')
 class ConvCifar10(object):
     id = 'Convolutional_CIFAR10'
 
-    def __init__(self, conv_2D_config: Conv2DConfig, data_batch_size: int = 64) -> None:
+    def __init__(self, conv_2D_config: Conv2DConfig, data_batch_size: int = 32) -> None:
         self.model = conv_2D_config.conv_model
         self.data_batch_size = data_batch_size
+
+    def do_train(self,
+                 root_path: AnyStr,
+                 hyper_parameters: HyperParams,
+                 metric_labels: List[AnyStr],
+                 plot_title: AnyStr) -> NoReturn:
+        """
+        Execute the training, evaluation and metrics for any model for MNIST data set
+        @param root_path: Path for the root of the MNIST data
+        @type root_path: str
+        @param hyper_parameters: Hyper-parameters for the execution of the
+        @type hyper_parameters: HyperParams
+        @param metric_labels: List of metrics to be used
+        @type metric_labels: List
+        @param plot_title: Labeling metric for output to file and plots
+        @type plot_title: str
+        """
+        try:
+            network = NeuralNet.build(self.model, hyper_parameters, metric_labels)
+            plot_title = f'{self.model.model_id}_metrics_{plot_title}'
+            network.execute(plot_title=plot_title, loaders=self.load_dataset(root_path))
+        except ConvException as e:
+            logger.error(str(e))
+            raise DLException(e)
+        except AssertionError as e:
+            logger.error(str(e))
+            raise DLException(e)
 
     def load_dataset(self, root_path: AnyStr) -> (DataLoader, DataLoader):
         # Create the training and evaluation data sets
