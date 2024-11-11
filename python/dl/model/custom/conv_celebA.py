@@ -4,7 +4,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 from dl.model.custom.conv_2D_config import Conv2DConfig
 from typing import AnyStr, NoReturn, List
 import torchvision.transforms as transforms
-from torchvision.datasets import CIFAR10
+from torchvision.datasets import CIFAR10, CelebA
 from torch.utils.data import DataLoader
 from dl.training.neural_net import NeuralNet
 from dl.dl_exception import DLException
@@ -14,8 +14,8 @@ import logging
 logger = logging.getLogger('dl.model.custom.ConvCifar10')
 
 
-class ConvCifar10(object):
-    id = 'Convolutional_CIFAR10'
+class ConvCelebA(object):
+    id = 'Convolutional_CelebA'
 
     def __init__(self, conv_2D_config: Conv2DConfig, data_batch_size: int = 32) -> None:
         self.model = conv_2D_config.conv_model
@@ -50,7 +50,7 @@ class ConvCifar10(object):
 
     def load_dataset(self, root_path: AnyStr) -> (DataLoader, DataLoader):
         # Create the training and evaluation data sets
-        train_dataset, test_dataset = ConvCifar10.__extract_datasets(root_path)
+        train_dataset, test_dataset = ConvCelebA.__extract_datasets(root_path)
 
         # Create DataLoaders for batch processing
         train_loader = DataLoader(dataset=train_dataset, batch_size=self.data_batch_size, shuffle=True)
@@ -79,19 +79,19 @@ class ConvCifar10(object):
         transform = transforms.Compose([
             transforms.ToTensor(),  # Convert images to PyTorch tensors
             # Normalize with mean and std for RGB channels
-            transforms.Normalize(mean =(0.0, 0.0, 0.0), std=(0.5, 0.5, 0.5))
+            transforms.Normalize(mean =(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
         ])
 
-        train_dataset = CIFAR10(
+        train_dataset = CelebA(
             root=root_path,  # Directory to store the dataset
-            train=True,  # Load training data
+            split='train',  # Load training data
             download=True,  # Download if not already present
             transform=transform  # Apply transformations
         )
 
-        test_dataset = CIFAR10(
+        test_dataset = CelebA(
             root=root_path,  # Directory to store the dataset
-            train=False,  # Load test data
+            split='test',  # Load test data
             download=True,  # Download if not already present
             transform=transform  # Apply transformations
         )
