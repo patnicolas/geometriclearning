@@ -145,16 +145,16 @@ class ConvMNISTTest(unittest.TestCase):
         return [t.item() for t in metrics_dict['Evaluation loss']]
 
     @staticmethod
-    def create_and_train_network(lr: float, activation: nn.Module) -> NoReturn:
+    def create_and_train_network(lr: float, _activation: nn.Module) -> NoReturn:
         from dl.training.hyper_params import HyperParams
 
-        _id = 'test'
+        _id = 'MNIST_1'
         input_size = 28
         max_pooling_kernel = 2
         out_channels = 128
-        activation = nn.ReLU()
         ffnn_out_features = [128, 128]
         num_classes = 10
+        batch_size = 32
         conv_layer1_config = ConvLayer2DConfig(1, 3, 0, 1)
         conv_layer2_config = ConvLayer2DConfig(32, 3, 0, 1)
         conv_layer3_config = ConvLayer2DConfig(64, 3, 0, 1)
@@ -164,7 +164,7 @@ class ConvMNISTTest(unittest.TestCase):
                                       conv_layer_2D_config,
                                       max_pooling_kernel,
                                       out_channels,
-                                      activation,
+                                      _activation,
                                       ffnn_out_features,
                                       num_classes)
         root_path = '../../../../data/MNIST'
@@ -173,17 +173,22 @@ class ConvMNISTTest(unittest.TestCase):
             hyper_parameters = HyperParams(
                 lr=lr,
                 momentum=0.89,
-                epochs=10,
+                epochs=3,
                 optim_label='adam',
-                batch_size=16,
+                batch_size=batch_size,
                 loss_function=nn.CrossEntropyLoss(),
-                drop_out=0.15,
+                drop_out=0.25,
                 train_eval_ratio=0.9,
                 normal_weight_initialization=False)
 
-            conv_MNIST_instance = ConvMNIST(conv_2D_config)
+            conv_MNIST_instance = ConvMNIST(
+                conv_2D_config=conv_2D_config,
+                data_batch_size=batch_size ,
+                resize_image=-1,
+                subset_size= -1)
+
             print(repr(conv_MNIST_instance))
-            activation_label = str(activation).strip('()')
+            activation_label = str(_activation).strip('()')
             metric_labels = ['Precision', 'Recall']
             conv_MNIST_instance.do_train(root_path, hyper_parameters, metric_labels, activation_label)
         except ConvException as e:

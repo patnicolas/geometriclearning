@@ -2,24 +2,41 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from dl.model.custom.conv_2D_config import Conv2DConfig
+from dl.model.custom.base_model import BaseModel
 from typing import AnyStr, NoReturn, List
 import torchvision.transforms as transforms
-from torchvision.datasets import CIFAR10, CelebA
+from torchvision.transforms import InterpolationMode
+from torchvision.datasets import CelebA
 from torch.utils.data import DataLoader
 from dl.training.neural_net import NeuralNet
 from dl.dl_exception import DLException
 from dl.block import ConvException
 from dl.training.hyper_params import HyperParams
 import logging
-logger = logging.getLogger('dl.model.custom.ConvCifar10')
+logger = logging.getLogger('dl.model.custom.ConvCelebA')
+logging.basicConfig(level=logging.INFO)
 
 
-class ConvCelebA(object):
+class ConvCelebA(BaseModel):
     id = 'Convolutional_CelebA'
 
-    def __init__(self, conv_2D_config: Conv2DConfig, data_batch_size: int = 32) -> None:
-        self.model = conv_2D_config.conv_model
-        self.data_batch_size = data_batch_size
+    def __init__(self,
+                 conv_2D_config: Conv2DConfig,
+                 data_batch_size: int,
+                 resize_image: int,
+                 subset_size: int =-1) -> None:
+        """
+        Constructor for any image custom dataset (MNIST, CelebA, ...)
+        @param data_batch_size: Size of batch for training
+        @type data_batch_size: int
+        @param resize_image: Height and width of resized image if > 0, no resize if -1
+        @type resize_image: int
+        @param subset_size: Subset of data set for training if > 0 the original data set if -1
+        @type subset_size: int
+        @param conv_2D_config: 2D Convolutional network configuration
+        @type conv_2D_config: Conv2DConfig
+        """
+        super(ConvCelebA, self).__init__(conv_2D_config, data_batch_size, resize_image, subset_size)
 
     def do_train(self,
                  root_path: AnyStr,
@@ -48,22 +65,41 @@ class ConvCelebA(object):
             logger.error(str(e))
             raise DLException(e)
 
+    """
     def load_dataset(self, root_path: AnyStr) -> (DataLoader, DataLoader):
         # Create the training and evaluation data sets
-        train_dataset, test_dataset = ConvCelebA.__extract_datasets(root_path)
+        train_dataset, test_dataset = self._extract_datasets(root_path)
+
+        # If we are experimenting with a subset of the data set for memory usage
+        if self.subset_size > 0:
+            from torch.utils.data import Subset
+
+            test_subset_size = int(float(self.subset_size * len(test_dataset)) / len(train_dataset))
+            train_dataset = Subset(train_dataset, indices=range(self.subset_size))
+            test_dataset = Subset(test_dataset, indices=range(test_subset_size))
+        logger.info(f'{len(train_dataset)} training images and {len(test_dataset)} test images')
 
         # Create DataLoaders for batch processing
-        train_loader = DataLoader(dataset=train_dataset, batch_size=self.data_batch_size, shuffle=True)
-        test_loader = DataLoader(dataset=test_dataset, batch_size=self.data_batch_size, shuffle=False)
+        train_loader = DataLoader(
+            dataset=train_dataset,
+            batch_size=self.data_batch_size,
+            pin_memory=True,
+            shuffle=True)
+        test_loader = DataLoader(
+            dataset=test_dataset,
+            batch_size=self.data_batch_size,
+            pin_memory=True,
+            shuffle=False)
+
         return train_loader, test_loader
+    """
 
     def __repr__(self) -> AnyStr:
         return repr(self.model)
 
     """ ---------------------------  Private helper methods ---------------------------- """
 
-    @staticmethod
-    def __extract_datasets(root_path: AnyStr) -> (CIFAR10, CIFAR10):
+    def _extract_datasets(self, root_path: AnyStr) -> (CelebA, CelebA):
         """
         Extract the training data and labels and test data and labels for this convolutional network.
         @param root_path: Root path to CIFAR10 data
@@ -77,22 +113,23 @@ class ConvCelebA(object):
         _, torch_device = NeuralNet.get_device()
 
         transform = transforms.Compose([
+            transforms.Resize(size =(self.resize_image, self.resize_image), interpolation=InterpolationMode.BILINEAR),
             transforms.ToTensor(),  # Convert images to PyTorch tensors
             # Normalize with mean and std for RGB channels
-            transforms.Normalize(mean =(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
+            transforms.Normalize(mean =(0.0, 0.0, 0.0), std=(0.5, 0.5, 0.5))
         ])
 
         train_dataset = CelebA(
             root=root_path,  # Directory to store the dataset
             split='train',  # Load training data
-            download=True,  # Download if not already present
+            download=False,  # Download if not already present
             transform=transform  # Apply transformations
         )
 
         test_dataset = CelebA(
             root=root_path,  # Directory to store the dataset
             split='test',  # Load test data
-            download=True,  # Download if not already present
+            download=False,  # Download if not already present
             transform=transform  # Apply transformations
         )
         return train_dataset, test_dataset

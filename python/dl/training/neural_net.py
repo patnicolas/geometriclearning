@@ -2,7 +2,7 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, TensorDataset
 from abc import abstractmethod
 from typing import AnyStr, Dict
 from dl.model.neural_model import NeuralModel
@@ -173,7 +173,6 @@ class NeuralNet(object):
 
     """ ------------------------------------   Private methods --------------------------------- """
 
-
     def __load_dataset(self, root_path: AnyStr) -> (DataLoader, DataLoader):
         train_features, train_labels, test_features, test_labels = self._extract_datasets(root_path)
 
@@ -186,23 +185,25 @@ class NeuralNet(object):
         test_loader = DataLoader(dataset=test_dataset, batch_size=self.data_batch_size, shuffle=False)
         return train_loader, test_loader
 
-
     def __train(self, epoch: int, train_loader: DataLoader) -> float:
         total_loss = 0.0
         # Initialize the gradient for the optimizer
         loss_function = self.hyper_params.loss_function
         optimizer = self.hyper_params.optimizer(self.model)
+        _, torch_device = NeuralNet.get_device()
 
-        for features, labels in tqdm(train_loader):
+        for features, labels in train_loader:
             try:
                 self.model.train()
                 # Reset the gradient to zero
                 for params in self.model.parameters():
                     params.grad = None
 
+                features = features.to(torch_device)
+                labels = labels.float().to(torch_device)
                 predicted = self.model(features)  # Call forward - prediction
                 raw_loss = loss_function(predicted, labels)
-                logging.info(f'Epoch: {epoch} Loss: {raw_loss}')
+                logger.info(f'Epoch: {epoch} Loss: {raw_loss}')
                 # Set back propagation
                 raw_loss.backward(retain_graph=True)
                 total_loss += raw_loss.data
@@ -222,16 +223,21 @@ class NeuralNet(object):
         loss_func = self.hyper_params.loss_function
         metric_collector = {}
 
+        _, torch_device = NeuralNet.get_device()
+
         # No need for computing gradient for evaluation (NO back-propagation)
         with torch.no_grad():
             for features, labels in tqdm(test_loader):
                 try:
                     self.model.eval()
+                    features = features.to(torch_device)
+                    labels = labels.to(torch_device)
+
                     predicted = self.model(features)
-                    p = predicted.cpu().numpy()
-                    l = labels.cpu().numpy()
+                    np_predicted = predicted.cpu().numpy()
+                    np_labels = labels.cpu().numpy()
                     for key, metric in self.metrics.items():
-                        value = metric(p, l)
+                        value = metric(np_predicted, np_labels)
                         metric_collector[key] = value
 
                     loss = loss_func(predicted, labels)

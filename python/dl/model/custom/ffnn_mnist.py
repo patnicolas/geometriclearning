@@ -4,17 +4,20 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 from typing import List, AnyStr
 import torch
 import torch.nn as nn
-from dl.model.custom.base_mnist import BaseMnist
+from dl.model.custom.base_model import BaseModel
 from dl.block.ffnn_block import FFNNBlock
 from dl.model.ffnn_model import FFNNModel
 import logging
 logger = logging.getLogger('dl.model.custom.FFNNMNIST')
 
-__all__ = ['BaseMnist', 'FfnnMnist']
+__all__ = ['BaseModel', 'FfnnMnist']
 
 
-class FfnnMnist(BaseMnist):
-    id = 'Feed Forward Neural Network MNIST'
+class FfnnMnist(BaseModel):
+    id = 'FFNN-MNIST'
+    default_training_file = 'processed/training.pt'
+    default_test_file = 'processed/test.pt'
+    num_classes = 10
 
     def __init__(self, input_size: int, features: List[int]) -> None:
         """
@@ -41,7 +44,7 @@ class FfnnMnist(BaseMnist):
         # Output layer
         ffnn_output_block = FFNNBlock.build(block_id='output',
                                             in_features=features[-1],
-                                            out_features = BaseMnist.num_classes,
+                                            out_features = BaseModel.num_classes,
                                             activation=nn.Softmax(dim=1))
 
         # Define the model and layout for the Feed Forward Neural Network
@@ -62,15 +65,15 @@ class FfnnMnist(BaseMnist):
 
         _, torch_device = NeuralNet.get_device()
 
-        train_data = torch.load(f'{root_path}/{BaseMnist.default_training_file}')
+        train_data = torch.load(f'{root_path}/{BaseModel.default_training_file}')
         num_samples = len(train_data[0])
         train_features = train_data[0].reshape(num_samples, -1).float().to(torch_device)
-        train_labels = one_hot(train_data[1],num_classes=BaseMnist.num_classes).float().to(torch_device)
+        train_labels = one_hot(train_data[1], num_classes=BaseModel.num_classes).float().to(torch_device)
 
-        test_data = torch.load(f'{root_path}/{BaseMnist.default_test_file}')
+        test_data = torch.load(f'{root_path}/{BaseModel.default_test_file}')
         num_samples = len(test_data[0])
         test_features = test_data[0].reshape(num_samples, -1).float().to(torch_device)
-        test_labels = one_hot(test_data[1],num_classes=BaseMnist.num_classes).float().to(torch_device)
+        test_labels = one_hot(test_data[1], num_classes=BaseModel.num_classes).float().to(torch_device)
 
         return train_features, train_labels, test_features, test_labels
 

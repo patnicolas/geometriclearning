@@ -34,7 +34,7 @@ class Conv2DConfig(object):
         @param _id: Identifier for the convolutional network
         @type _id: str
         @param input_size: Width and height of the image
-        @type input_size: int
+        @type input_size: (int, int)
         @param conv_layers_2D_config: List of configuration layers
         @type conv_layers_2D_config: List[ConvLayer2DConfig]
         @param max_pooling_kernel: Size of the kernel and stride for the max pooling block
