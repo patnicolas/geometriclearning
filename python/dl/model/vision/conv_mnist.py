@@ -3,11 +3,11 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from typing import AnyStr, Tuple, NoReturn
 import torch
-from dl.model.custom.base_model import BaseModel
-from dl.model.custom.conv_2D_config import Conv2DConfig
-from torch.utils.data import DataLoader, TensorDataset, Dataset
+from dl.model.vision.base_model import BaseModel
+from dl.model.vision.conv_2D_config import Conv2DConfig
+from torch.utils.data import  TensorDataset, Dataset
 import logging
-logger = logging.getLogger('dl.model.custom.ConvMNIST')
+logger = logging.getLogger('dl.model.vision.ConvMNIST')
 
 __all__ = ['ConvMNIST']
 

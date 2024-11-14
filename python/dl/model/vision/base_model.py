@@ -1,17 +1,17 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
-from typing import AnyStr, NoReturn, List, Dict
+from typing import AnyStr, NoReturn, List
 from abc import ABC, abstractmethod
-import torch
-from torch.utils.data import DataLoader, TensorDataset, Dataset
+from torch.utils.data import DataLoader, Dataset
 from dl.block import ConvException
 from dl.training.neural_net import NeuralNet
-from dl.model.custom.conv_2D_config import Conv2DConfig
+from dl.model.vision.conv_2D_config import Conv2DConfig
 from dl.training.hyper_params import HyperParams
 from dl.dl_exception import DLException
+from dl.training.exec_config import ExecConfig
 import logging
-logger = logging.getLogger('dl.model.custom.BaseModel')
+logger = logging.getLogger('dl.model.vision.BaseModel')
 
 __all__ = ['BaseModel']
 
@@ -24,7 +24,7 @@ class BaseModel(ABC):
                  resize_image: int,
                  subset_size: int = -1) -> None:
         """
-          Constructor for any image custom dataset (MNIST, CelebA, ...)
+          Constructor for any image vision dataset (MNIST, CelebA, ...)
           @param data_batch_size: Size of batch for training
           @type data_batch_size: int
           @param resize_image: Height and width of resized image if > 0, no resize if -1
@@ -47,6 +47,7 @@ class BaseModel(ABC):
                  root_path: AnyStr,
                  hyper_parameters: HyperParams,
                  metric_labels: List[AnyStr],
+                 training_exec_config: ExecConfig,
                  plot_title: AnyStr) -> NoReturn:
         """
         Execute the training, evaluation and metrics for any model for MNIST data set
@@ -56,13 +57,15 @@ class BaseModel(ABC):
         @type hyper_parameters: HyperParams
         @param metric_labels: List of metrics to be used
         @type metric_labels: List
+        @param training_exec_config: Configuration for the execution of training set
+        @type training_exec_config: ExecConfig
         @param plot_title: Labeling metric for output to file and plots
         @type plot_title: str
         """
         try:
             network = NeuralNet.build(self.model, hyper_parameters, metric_labels)
             plot_title = f'{self.model.model_id}_metrics_{plot_title}'
-            network.execute(plot_title=plot_title, loaders=self.load_dataset(root_path))
+            network.execute(plot_title=plot_title, loaders=self.load_dataset(root_path, training_exec_config))
         except ConvException as e:
             logger.error(str(e))
             raise DLException(e)
@@ -70,20 +73,30 @@ class BaseModel(ABC):
             logger.error(str(e))
             raise DLException(e)
 
-    def load_dataset(self, root_path: AnyStr) -> (DataLoader, DataLoader):
+    def load_dataset(self, root_path: AnyStr, exec_config: ExecConfig) -> (DataLoader, DataLoader):
         train_dataset, test_dataset = self._extract_datasets(root_path)
 
         # If we are experimenting with a subset of the data set for memory usage
-        if self.subset_size > 0:
+        if exec_config.subset_size > 0:
             from torch.utils.data import Subset
-
+            # Rescale the size of training and test data
             test_subset_size = int(float(self.subset_size * len(test_dataset)) / len(train_dataset))
-            train_dataset = Subset(train_dataset, indices=range(self.subset_size))
+            train_subset_size = self.subset_size - test_subset_size
+
+            train_dataset = Subset(train_dataset, indices=range(train_subset_size))
             test_dataset = Subset(test_dataset, indices=range(test_subset_size))
 
         # Create DataLoaders for batch processing
-        train_loader = DataLoader(dataset=train_dataset, batch_size=self.data_batch_size, pin_memory=True, shuffle=True)
-        test_loader = DataLoader(dataset=test_dataset, batch_size=self.data_batch_size, pin_memory=True,shuffle=False)
+        train_loader = DataLoader(
+            dataset=train_dataset,
+            batch_size=self.data_batch_size,
+            pin_memory=exec_config.pin_memory,
+            shuffle=True)
+        test_loader = DataLoader(
+            dataset=test_dataset,
+            batch_size=self.data_batch_size,
+            pin_memory=exec_config.pin_memory,
+            shuffle=False)
         return train_loader, test_loader
 
     """ ---------------------  Private Helper Methods -------------------------- """

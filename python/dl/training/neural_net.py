@@ -2,10 +2,11 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 import torch
-from torch.utils.data import Dataset, DataLoader, TensorDataset
+from torch.utils.data import Dataset, DataLoader
 from abc import abstractmethod
 from typing import AnyStr, Dict
 from dl.model.neural_model import NeuralModel
+from dl.training.exec_config import ExecConfig
 from dl.dl_exception import DLException
 from dl.training.hyper_params import HyperParams
 from dl.training.early_stop_logger import EarlyStopLogger
@@ -36,6 +37,7 @@ class NeuralNet(object):
                  hyper_params: HyperParams,
                  early_stop_logger: EarlyStopLogger,
                  metrics: Dict[AnyStr, Metric],
+                 train_exec_config: ExecConfig,
                  plot_parameters: Optional[List[PlotterParameters]]) -> None:
         """
         Constructor for the training and execution of any neural network.
@@ -55,6 +57,7 @@ class NeuralNet(object):
         self.model = model.to(self.target_device)
         self.early_stop_logger = early_stop_logger
         self.plot_parameters = plot_parameters
+        self.train_exec_config = train_exec_config
         self.metrics: Dict[AnyStr, Metric] = metrics
 
     @classmethod
@@ -154,60 +157,37 @@ class NeuralNet(object):
     def __repr__(self) -> str:
         return repr(self.hyper_params)
 
-    @staticmethod
-    def get_device() -> (AnyStr, torch.device):
-        """
-        Retrieve the device (CPU, GPU) used for the execution, training and evaluation of this Neural network
-        @return: Pair (device name, torch device)
-        @rtype: Tuple[AnyStr, torch.device]
-        """
-        if torch.cuda.is_available():
-            print("Using CUDA GPU")
-            return 'cuda', torch.device("cuda")
-        elif torch.backends.mps.is_available():
-            print("Using MPS GPU")
-            return 'mps', torch.device("mps")
-        else:
-            print("Using CPU")
-            return 'cpu', torch.device("cpu")
-
     """ ------------------------------------   Private methods --------------------------------- """
-
-    def __load_dataset(self, root_path: AnyStr) -> (DataLoader, DataLoader):
-        train_features, train_labels, test_features, test_labels = self._extract_datasets(root_path)
-
-        # Build the data set as PyTorch tensors
-        train_dataset = TensorDataset(train_features, train_labels)
-        test_dataset = TensorDataset(test_features, test_labels)
-
-        # Create DataLoaders for batch processing
-        train_loader = DataLoader(dataset=train_dataset, batch_size=self.data_batch_size, shuffle=True)
-        test_loader = DataLoader(dataset=test_dataset, batch_size=self.data_batch_size, shuffle=False)
-        return train_loader, test_loader
 
     def __train(self, epoch: int, train_loader: DataLoader) -> float:
         total_loss = 0.0
         # Initialize the gradient for the optimizer
         loss_function = self.hyper_params.loss_function
         optimizer = self.hyper_params.optimizer(self.model)
-        _, torch_device = NeuralNet.get_device()
 
-        for features, labels in train_loader:
+        _, torch_device = self.train_exec_config.get_device()
+        model = self.model.to(torch_device)
+
+        for features, labels in tqdm(train_loader):
             try:
-                self.model.train()
+                model.train()
                 # Reset the gradient to zero
                 for params in self.model.parameters():
                     params.grad = None
 
                 features = features.to(torch_device)
                 labels = labels.float().to(torch_device)
-                predicted = self.model(features)  # Call forward - prediction
+
+                # features = self.train_exec_config(features)
+                predicted = model(features)  # Call forward - prediction
                 raw_loss = loss_function(predicted, labels)
                 logger.info(f'Epoch: {epoch} Loss: {raw_loss}')
+
                 # Set back propagation
                 raw_loss.backward(retain_graph=True)
                 total_loss += raw_loss.data
                 optimizer.step()
+                self.train_exec_config.empty_cache()
             except RuntimeError as e:
                 raise DLException(str(e))
             except AttributeError as e:

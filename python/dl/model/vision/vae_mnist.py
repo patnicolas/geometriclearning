@@ -2,7 +2,7 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from typing import AnyStr, NoReturn
-from dl.model.custom.base_model import BaseModel
+from dl.model.vision.base_model import BaseModel
 from dl.model.vae_model import VAEModel
 from dl.block import ConvException
 from dl.training.early_stop_logger import EarlyStopLogger

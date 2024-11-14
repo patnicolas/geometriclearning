@@ -1,5 +1,5 @@
 import unittest
-from dl.model.custom.ffnn_mnist import FfnnMnist
+from dl.model.vision.ffnn_mnist import FfnnMnist
 from dl.training.hyper_params import HyperParams
 import torch.nn as nn
 

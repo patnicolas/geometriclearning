@@ -62,7 +62,7 @@ class EarlyStopLoggerTest(unittest.TestCase):
 
 
     def test_load_torch_tensor(self):
-        from dl.model.custom.conv_mnist import ConvMNIST
+        from dl.model.vision.conv_mnist import ConvMNIST
         output_filename = f'stats_{ConvMNIST.id}'
         summary_metrics = EarlyStopLogger.load('../../../tests/output', output_filename)
         print(str(summary_metrics))

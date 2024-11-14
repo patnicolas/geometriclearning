@@ -4,11 +4,11 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 from typing import List, AnyStr
 import torch
 import torch.nn as nn
-from dl.model.custom.base_model import BaseModel
+from dl.model.vision.base_model import BaseModel
 from dl.block.ffnn_block import FFNNBlock
 from dl.model.ffnn_model import FFNNModel
 import logging
-logger = logging.getLogger('dl.model.custom.FFNNMNIST')
+logger = logging.getLogger('dl.model.vision.FFNNMNIST')
 
 __all__ = ['BaseModel', 'FfnnMnist']
 

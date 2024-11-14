@@ -18,7 +18,7 @@ from util.decorators import timeit
 	
 	@param target: URL (if is_predefined_target == True) or a pre-defined
 	@param headers: Header of the HTTP Post
-	@param is_predefined_target: Specify if this is a predefined target (True) or a custom URL (False)
+	@param is_predefined_target: Specify if this is a predefined target (True) or a vision URL (False)
 	:exception KeyError: Predefined URL is not found
 """
 
