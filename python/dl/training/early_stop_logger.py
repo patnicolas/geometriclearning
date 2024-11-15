@@ -54,7 +54,7 @@ class EarlyStopLogger(object):
         """
         return cls(patience, Metric.default_min_loss, early_stopping_enabled=True)
 
-    def __call__(self, epoch: int, train_loss: torch.Tensor, eval_metrics: Dict[AnyStr, torch.Tensor] = None) -> bool:
+    def __call__(self, epoch: int, train_loss: float, eval_metrics: Dict[AnyStr, float] = None) -> bool:
         """
             Implement the early stop and logging of training, evaluation loss. It is assumed that at least one
             metric is provided
@@ -68,13 +68,13 @@ class EarlyStopLogger(object):
             @rtype: Boolean
         """
         # Step 1. Apply early stopping criteria
-        is_early_stopping = self.__evaluate(eval_metrics[Metric.eval_loss_label])
+        is_early_stopping = self.__evaluate(torch.Tensor(eval_metrics[Metric.eval_loss_label]))
         # Step 2: Record training, evaluation losses and metric
         self.__record(epoch, train_loss, eval_metrics)
         logger.info(f'Is early stopping {is_early_stopping}')
         return is_early_stopping
 
-    def update_metrics(self, metrics: Dict[AnyStr, torch.Tensor]) -> bool:
+    def update_metrics(self, metrics: Dict[AnyStr, float]) -> bool:
         """
         Update the quality metrics with new pair key-values.
         @param metrics: Set of metrics
@@ -83,10 +83,10 @@ class EarlyStopLogger(object):
         for key, value in metrics.items():
             if key in self.metrics:
                 values = self.metrics[key]
-                values.append(value)
+                values.append(torch.Tensor(value))
                 self.metrics[key] = values
             else:
-                self.metrics[key] = [value]
+                self.metrics[key] = [torch.Tensor(value)]
         return len(self.metrics.items()) > 0
 
     def summary(self, output_filename: Optional[AnyStr] = None) -> NoReturn:
@@ -137,7 +137,7 @@ class EarlyStopLogger(object):
                 is_early_stopping = True
         return is_early_stopping
 
-    def __record(self, epoch: int, train_loss: torch.Tensor, metrics: Dict[AnyStr, torch.Tensor]):
+    def __record(self, epoch: int, train_loss: float, metrics: Dict[AnyStr, float]):
         metric_str = ', '.join([f'{k}: {v}' for k, v in metrics.items()])
         status_msg = f'Epoch: {epoch}, Train loss: {train_loss}, Evaluation metric: {metric_str}'
         logger.info(status_msg)

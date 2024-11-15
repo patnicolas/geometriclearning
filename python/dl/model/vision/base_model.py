@@ -18,36 +18,28 @@ __all__ = ['BaseModel']
 
 class BaseModel(ABC):
 
-    def __init__(self,
-                 conv_2D_config: Conv2DConfig,
-                 data_batch_size: int,
-                 resize_image: int,
-                 subset_size: int = -1) -> None:
+    def __init__(self, conv_2D_config: Conv2DConfig, data_batch_size: int, resize_image: int) -> None:
         """
           Constructor for any image vision dataset (MNIST, CelebA, ...)
           @param data_batch_size: Size of batch for training
           @type data_batch_size: int
           @param resize_image: Height and width of resized image if > 0, no resize if -1
           @type resize_image: int
-          @param subset_size: Subset of data set for training if > 0 the original data set if -1
-          @type subset_size: int
           @param conv_2D_config: 2D Convolutional network configuration
           @type conv_2D_config: Conv2DConfig
         """
         self.model = conv_2D_config.conv_model
         self.data_batch_size = data_batch_size
         self.resize_image = resize_image
-        self.subset_size = subset_size
 
     def __repr__(self) -> AnyStr:
-        return f'\n{repr(self.model)}\ndata_batch_size {self.data_batch_size }\nResize image: {self.resize_image}' \
-                f'\nSubset size: {self.subset_size}'
+        return f'\n{repr(self.model)}\ndata_batch_size {self.data_batch_size }\nResize image: {self.resize_image}'
 
     def do_train(self,
                  root_path: AnyStr,
                  hyper_parameters: HyperParams,
                  metric_labels: List[AnyStr],
-                 training_exec_config: ExecConfig,
+                 exec_config: ExecConfig,
                  plot_title: AnyStr) -> NoReturn:
         """
         Execute the training, evaluation and metrics for any model for MNIST data set
@@ -57,15 +49,15 @@ class BaseModel(ABC):
         @type hyper_parameters: HyperParams
         @param metric_labels: List of metrics to be used
         @type metric_labels: List
-        @param training_exec_config: Configuration for the execution of training set
-        @type training_exec_config: ExecConfig
+        @param exec_config: Configuration for the execution of training set
+        @type exec_config: ExecConfig
         @param plot_title: Labeling metric for output to file and plots
         @type plot_title: str
         """
         try:
-            network = NeuralNet.build(self.model, hyper_parameters, metric_labels)
+            network = NeuralNet.build(self.model, hyper_parameters, metric_labels, exec_config)
             plot_title = f'{self.model.model_id}_metrics_{plot_title}'
-            network.execute(plot_title=plot_title, loaders=self.load_dataset(root_path, training_exec_config))
+            network.execute(plot_title=plot_title, loaders=self.load_dataset(root_path, exec_config))
         except ConvException as e:
             logger.error(str(e))
             raise DLException(e)
@@ -80,8 +72,8 @@ class BaseModel(ABC):
         if exec_config.subset_size > 0:
             from torch.utils.data import Subset
             # Rescale the size of training and test data
-            test_subset_size = int(float(self.subset_size * len(test_dataset)) / len(train_dataset))
-            train_subset_size = self.subset_size - test_subset_size
+            test_subset_size = int(float(exec_config.subset_size * len(test_dataset)) / len(train_dataset))
+            train_subset_size = exec_config.subset_size - test_subset_size
 
             train_dataset = Subset(train_dataset, indices=range(train_subset_size))
             test_dataset = Subset(test_dataset, indices=range(test_subset_size))
@@ -90,12 +82,12 @@ class BaseModel(ABC):
         train_loader = DataLoader(
             dataset=train_dataset,
             batch_size=self.data_batch_size,
-            pin_memory=exec_config.pin_memory,
+            pin_memory=exec_config.pin_mem,
             shuffle=True)
         test_loader = DataLoader(
             dataset=test_dataset,
             batch_size=self.data_batch_size,
-            pin_memory=exec_config.pin_memory,
+            pin_memory=exec_config.pin_mem,
             shuffle=False)
         return train_loader, test_loader
 

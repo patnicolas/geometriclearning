@@ -3,15 +3,11 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from dl.model.vision.conv_2D_config import Conv2DConfig
 from dl.model.vision.base_model import BaseModel
-from typing import AnyStr, NoReturn, List
+from typing import AnyStr
 import torchvision.transforms as transforms
 from torchvision.transforms import InterpolationMode
 from torchvision.datasets import CelebA
-from dl.training.neural_net import NeuralNet
-from dl.dl_exception import DLException
-from dl.block import ConvException
 from torch.utils.data import Dataset
-from dl.training.hyper_params import HyperParams
 import logging
 logger = logging.getLogger('dl.model.vision.ConvCelebA')
 logging.basicConfig(level=logging.INFO)
@@ -20,40 +16,24 @@ logging.basicConfig(level=logging.INFO)
 class ConvCelebA(BaseModel):
     id = 'Convolutional_CelebA'
 
-    def __init__(self,
-                 conv_2D_config: Conv2DConfig,
-                 data_batch_size: int,
-                 resize_image: int,
-                 subset_size: int =-1) -> None:
+    def __init__(self, conv_2D_config: Conv2DConfig, data_batch_size: int, resize_image: int) -> None:
         """
         Constructor for any image vision dataset (MNIST, CelebA, ...)
         @param data_batch_size: Size of batch for training
         @type data_batch_size: int
         @param resize_image: Height and width of resized image if > 0, no resize if -1
         @type resize_image: int
-        @param subset_size: Subset of data set for training if > 0 the original data set if -1
-        @type subset_size: int
         @param conv_2D_config: 2D Convolutional network configuration
         @type conv_2D_config: Conv2DConfig
         """
-        super(ConvCelebA, self).__init__(conv_2D_config, data_batch_size, resize_image, subset_size)
+        super(ConvCelebA, self).__init__(conv_2D_config, data_batch_size, resize_image)
 
+    """
     def do_train(self,
                  root_path: AnyStr,
                  hyper_parameters: HyperParams,
                  metric_labels: List[AnyStr],
                  plot_title: AnyStr) -> NoReturn:
-        """
-        Execute the training, evaluation and metrics for any model for MNIST data set
-        @param root_path: Path for the root of the MNIST data
-        @type root_path: str
-        @param hyper_parameters: Hyper-parameters for the execution of the
-        @type hyper_parameters: HyperParams
-        @param metric_labels: List of metrics to be used
-        @type metric_labels: List
-        @param plot_title: Labeling metric for output to file and plots
-        @type plot_title: str
-        """
         try:
             network = NeuralNet.build(self.model, hyper_parameters, metric_labels)
             plot_title = f'{self.model.model_id}_metrics_{plot_title}'
@@ -64,6 +44,7 @@ class ConvCelebA(BaseModel):
         except AssertionError as e:
             logger.error(str(e))
             raise DLException(e)
+        """
 
     """ ---------------------------  Private helper methods ---------------------------- """
 

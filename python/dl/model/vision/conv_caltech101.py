@@ -6,16 +6,18 @@ from typing import AnyStr
 from torch.utils.data import Dataset
 from torchvision.transforms import InterpolationMode
 from dl.model.vision.base_model import BaseModel
+from dl.model.vision import GrayscaleToRGB
 import logging
 logger = logging.getLogger('dl.model.vision.ConvCaltech101')
 logging.basicConfig(level=logging.INFO)
 
-
+""""
 class GrayscaleToRGB(object):
     def __call__(self, img):
         if img.mode == 'L':
             img = img.convert("RGB")
         return img
+"""
 
 
 class ConvCaltech101(BaseModel):
@@ -25,7 +27,6 @@ class ConvCaltech101(BaseModel):
                  conv_2D_config: Conv2DConfig,
                  data_batch_size: int,
                  resize_image: int,
-                 subset_size: int = -1,
                  train_test_split: float = 0.85) -> None:
         """
             Constructor for any image vision dataset (MNIST, CelebA, ...)
@@ -33,12 +34,15 @@ class ConvCaltech101(BaseModel):
             @type data_batch_size: int
             @param resize_image: Height and width of resized image if > 0, no resize if -1
             @type resize_image: int
-            @param subset_size: Subset of data set for training if > 0 the original data set if -1
-            @type subset_size: int
+            @param train_test_split: Specify the ratio size training set / size testing ste
+            @type train_test_split: float
             @param conv_2D_config: 2D Convolutional network configuration
             @type conv_2D_config: Conv2DConfig
         """
-        super(ConvCaltech101, self).__init__(conv_2D_config, data_batch_size, resize_image, subset_size)
+        assert 0.5 < train_test_split < 0.98, \
+            f'Ratio training set / test set {train_test_split} is out of bounds ]0.5, 0.98['
+
+        super(ConvCaltech101, self).__init__(conv_2D_config, data_batch_size, resize_image)
         self.train_test_split = train_test_split
 
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):

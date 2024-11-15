@@ -4,6 +4,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 from dataclasses import dataclass
 import torch
 from typing import AnyStr, NoReturn
+from torch.optim import Optimizer
 
 
 class ExecConfig(object):
@@ -11,6 +12,8 @@ class ExecConfig(object):
                  empty_cache: bool,
                  mix_precision: bool,
                  subset_size: int,
+                 monitor_memory: bool,
+                 grad_accu_steps: int = 1,
                  device_config: AnyStr = None,
                  pin_mem: bool = True):
         """
@@ -21,6 +24,8 @@ class ExecConfig(object):
         @type mix_precision: bool
         @param subset_size: Select a subset of the training data is >0, or entire data set if -1
         @type subset_size: int
+        @param grad_accu_steps: Accumulate the computation of the gradient if > 0
+        @type grad_accu_steps: in
         @param device_config: Device {'cpu', 'cuda' ..}
         @type device_config: str
         @param pin_mem: Flag to enable pin memory for data set loader
@@ -29,23 +34,50 @@ class ExecConfig(object):
         self.empty_cache = empty_cache
         self.mix_precision = mix_precision
         self.subset_size = subset_size
+        self.grad_accu_steps = grad_accu_steps
         self.device_config = device_config
         self.pin_mem = pin_mem
+        self.monitor_memory = monitor_memory
+        self.accumulator = []
 
     def __str__(self) -> AnyStr:
         return (f'\nEmpty cache: {self.empty_cache}\nMix precision {self.mix_precision}\nSubset size: {self.subset_size}'
-                f'\nDevice: {self.device_config}\nPin memory: {self.pin_mem}')
+                f'\ngrad_accu_steps: {self.grad_accu_steps}\nDevice: {self.device_config}\nPin memory: {self.pin_mem}')
+
+    def apply_monitor_memory(self) -> None:
+        if self.monitor_memory and (self.device_config == 'mps' or self.device_config is None):
+            allocated_mem = torch.mps.current_allocated_memory()
+            total_mem = torch.mps.driver_allocated_memory()
+            usage = 100.0*allocated_mem/total_mem
+
+            self.accumulator.append(usage)
+            print(f'\nAllocated MPS: {format(allocated_mem, ",")}'
+                  f'\nTotal MPS:     {format(total_mem, ",")}'
+                  f'\nUsage MPS:     {usage:.2f}'
+            )
+
+    def apply_grad_accu_steps(self, idx: int, optimizer: Optimizer) -> None:
+        if self.grad_accu_steps == 1 or (idx+1) % self.grad_accu_steps == 0:
+            optimizer.step()
+            optimizer.zero_grad()
 
     def apply_mix_precision(self, x: torch.Tensor) -> torch.Tensor:
         return x.half() if self.mix_precision else x
 
-    def apply_empty_cache(self) -> NoReturn:
+    def apply_empty_cache(self) -> None:
         if self.empty_cache:
             torch.mps.empty_cache()
 
-    def get_device(self) -> (AnyStr, torch.device):
+    def apply_labels_dtype(self, x: torch.Tensor, convert_to_float: bool = True) -> torch.Tensor:
+        if convert_to_float:
+            return x.float() if self.device_config == 'mps' else x
+        else:
+            return x
+
+    def apply_device(self) -> (AnyStr, torch.device):
         """
-        Retrieve the device (CPU, GPU) used for the execution, training and evaluation of this Neural network
+        Either pre-select or retrieve the device (CPU, GPU) used for the execution, training and evaluation
+        of this Deep Learning model.
         @return: Pair (device name, torch device)
         @rtype: Tuple[AnyStr, torch.device]
         """

@@ -118,11 +118,11 @@ class ConvMNISTTest(unittest.TestCase):
         )
 
     def test_train(self):
-        lr = 0.0006
+        lr = 0.0004
         # activation = nn.LeakyReLU(negative_slope=0.03)
         # activation = nn.ReLU()
-        # activation = nn.ELU()
-        activation = nn.GELU()
+        activation = nn.ELU()
+        # activation = nn.GELU()
         ConvMNISTTest.create_and_train_network(lr, activation)
 
     @staticmethod
@@ -147,6 +147,7 @@ class ConvMNISTTest(unittest.TestCase):
     @staticmethod
     def create_and_train_network(lr: float, _activation: nn.Module) -> NoReturn:
         from dl.training.hyper_params import HyperParams
+        from dl.training.exec_config import ExecConfig
 
         _id = 'MNIST_1'
         input_size = 28
@@ -154,8 +155,8 @@ class ConvMNISTTest(unittest.TestCase):
         out_channels = 128
         ffnn_out_features = [128, 128]
         num_classes = 10
-        batch_size = 32
-        conv_layer1_config = ConvLayer2DConfig(1, 3, 0, 1)
+        batch_size = 128
+        conv_layer1_config = ConvLayer2DConfig(3, 3, 0, 1)
         conv_layer2_config = ConvLayer2DConfig(32, 3, 0, 1)
         conv_layer3_config = ConvLayer2DConfig(64, 3, 0, 1)
         conv_layer_2D_config = [conv_layer1_config, conv_layer2_config, conv_layer3_config]
@@ -176,21 +177,27 @@ class ConvMNISTTest(unittest.TestCase):
                 epochs=3,
                 optim_label='adam',
                 batch_size=batch_size,
+                # loss_function=nn.NLLLoss(),
                 loss_function=nn.CrossEntropyLoss(),
-                drop_out=0.25,
+                drop_out=0.15,
                 train_eval_ratio=0.9,
+                encoding_len=10,
                 normal_weight_initialization=False)
-
-            conv_MNIST_instance = ConvMNIST(
-                conv_2D_config=conv_2D_config,
-                data_batch_size=batch_size ,
-                resize_image=-1,
-                subset_size= -1)
-
+            conv_MNIST_instance = ConvMNIST(conv_2D_config=conv_2D_config, data_batch_size=batch_size,resize_image=-1)
             print(repr(conv_MNIST_instance))
+
+            exec_config = ExecConfig(
+                empty_cache=False,
+                mix_precision=False,
+                pin_mem=True,
+                subset_size=-1,
+                monitor_memory=True,
+                grad_accu_steps=1,
+                device_config='mps')
+
             activation_label = str(_activation).strip('()')
             metric_labels = ['Precision', 'Recall']
-            conv_MNIST_instance.do_train(root_path, hyper_parameters, metric_labels, activation_label)
+            conv_MNIST_instance.do_train(root_path, hyper_parameters, metric_labels,  exec_config, activation_label)
         except ConvException as e:
             logging.error(str(e))
         except AssertionError as e:

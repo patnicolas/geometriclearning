@@ -37,7 +37,7 @@ class NeuralNet(object):
                  hyper_params: HyperParams,
                  early_stop_logger: EarlyStopLogger,
                  metrics: Dict[AnyStr, Metric],
-                 train_exec_config: ExecConfig,
+                 exec_config: ExecConfig,
                  plot_parameters: Optional[List[PlotterParameters]]) -> None:
         """
         Constructor for the training and execution of any neural network.
@@ -53,15 +53,20 @@ class NeuralNet(object):
         @type plot_parameters: Optional List[PlotterParameters]
         """
         self.hyper_params = hyper_params
-        _, self.target_device = NeuralNet.get_device()
+        _, self.target_device = exec_config.apply_device()
+
         self.model = model.to(self.target_device)
         self.early_stop_logger = early_stop_logger
         self.plot_parameters = plot_parameters
-        self.train_exec_config = train_exec_config
+        self.exec_config = exec_config
         self.metrics: Dict[AnyStr, Metric] = metrics
 
     @classmethod
-    def build(cls, model: NeuralModel, hyper_parameters: HyperParams, metric_labels: List[AnyStr]):
+    def build(cls,
+              model: NeuralModel,
+              hyper_parameters: HyperParams,
+              metric_labels: List[AnyStr],
+              exec_config: ExecConfig):
         # Initialize the Early stop mechanism
         patience = 2
         min_diff_loss = -0.001
@@ -69,11 +74,11 @@ class NeuralNet(object):
         early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
 
         # Create metrics
-        metrics_dict = create_metric_dict(metric_labels)
+        metrics_dict = create_metric_dict(metric_labels, hyper_parameters.encoding_len)
         # Initialize the plotting parameters
         plot_parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                            for label, _ in metrics_dict.items()]
-        return cls(model, hyper_parameters, early_stop_logger, metrics_dict, plot_parameters)
+        return cls(model, hyper_parameters, early_stop_logger, metrics_dict, exec_config, plot_parameters)
 
     @abstractmethod
     def model_label(self) -> AnyStr:
@@ -82,7 +87,7 @@ class NeuralNet(object):
     def train(self,
               train_loader: DataLoader,
               test_loader: DataLoader,
-              output_file_name: Optional[AnyStr] = None) -> NoReturn:
+              output_file_name: Optional[AnyStr] = None) -> None:
         """
         Train and evaluation of a neural network given a data loader for a training set, a
         data loader for the evaluation/test1 set and a encoder_model. The weights of the various linear modules
@@ -105,12 +110,13 @@ class NeuralNet(object):
 
             # Set mode and execute evaluation
             eval_metrics = self.__eval(epoch, test_loader)
-            self.early_stop_logger(epoch, train_loss, eval_metrics)
+            is_early_stopping = self.early_stop_logger(epoch, train_loss, eval_metrics)
+            self.exec_config.apply_monitor_memory()
         # Generate summary
         if self.plot_parameters is not None:
             self.early_stop_logger.summary(output_file_name)
 
-    def execute(self, plot_title: AnyStr, loaders: (DataLoader, DataLoader)) -> NoReturn:
+    def execute(self, plot_title: AnyStr, loaders: (DataLoader, DataLoader)) -> None:
         """
         Execute the training, evaluation and metrics for any model for MNIST data set
         @param plot_title: Labeling metric for output to file and plots
@@ -122,6 +128,8 @@ class NeuralNet(object):
             train_data_loader, test_data_loader = loaders # self.load_dataset(root_path)
             output_file = f'{self.model.model_id}_metrics_{plot_title}'
             self.train(train_data_loader, test_data_loader, output_file)
+            # sage_profile = '\n'.join(self.exec_config.accumulator)
+            print(f"\nMPS usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
         except ConvException as e:
             logger.error(str(e))
             raise DLException(e)
@@ -165,29 +173,28 @@ class NeuralNet(object):
         loss_function = self.hyper_params.loss_function
         optimizer = self.hyper_params.optimizer(self.model)
 
-        _, torch_device = self.train_exec_config.get_device()
+        _, torch_device = self.exec_config.apply_device()
         model = self.model.to(torch_device)
 
-        for features, labels in tqdm(train_loader):
+        for idx, (features, labels) in enumerate(train_loader):
             try:
                 model.train()
-                # Reset the gradient to zero
-                for params in self.model.parameters():
-                    params.grad = None
 
                 features = features.to(torch_device)
-                labels = labels.float().to(torch_device)
+                # labels = self.exec_config.apply_labels_dtype(labels)
+                labels = labels.to(torch_device)
 
                 # features = self.train_exec_config(features)
                 predicted = model(features)  # Call forward - prediction
                 raw_loss = loss_function(predicted, labels)
-                logger.info(f'Epoch: {epoch} Loss: {raw_loss}')
+                # print(f'Epoch #{epoch+1}, Batch #{idx+1} Loss: {raw_loss}')
 
                 # Set back propagation
                 raw_loss.backward(retain_graph=True)
                 total_loss += raw_loss.data
-                optimizer.step()
-                self.train_exec_config.empty_cache()
+                # Monitoring and caching
+                self.exec_config.apply_empty_cache()
+                self.exec_config.apply_grad_accu_steps(idx, optimizer)
             except RuntimeError as e:
                 raise DLException(str(e))
             except AttributeError as e:
@@ -203,23 +210,29 @@ class NeuralNet(object):
         loss_func = self.hyper_params.loss_function
         metric_collector = {}
 
-        _, torch_device = NeuralNet.get_device()
+        _, torch_device = self.exec_config.apply_device()
 
         # No need for computing gradient for evaluation (NO back-propagation)
         with torch.no_grad():
             for features, labels in tqdm(test_loader):
                 try:
                     self.model.eval()
+                    # Transfer the input data to GPU
                     features = features.to(torch_device)
                     labels = labels.to(torch_device)
-
+                    # Execute inference/Prediction
                     predicted = self.model(features)
+
+                    # Transfer prediction and labels to CPU for metrics
                     np_predicted = predicted.cpu().numpy()
                     np_labels = labels.cpu().numpy()
+
+                    # Update the metrics
                     for key, metric in self.metrics.items():
                         value = metric(np_predicted, np_labels)
                         metric_collector[key] = value
 
+                    # Compute and accumulate the loss
                     loss = loss_func(predicted, labels)
                     total_loss += loss.data
                 except RuntimeError as e:

@@ -4,7 +4,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 import torch
 from torch import optim
 from torch import nn
-from typing import AnyStr, Optional, List, NoReturn
+from typing import AnyStr, Optional, List
 from dl.model.neural_model import NeuralModel
 from dataset.dataset_exception import DatasetException
 import logging
@@ -31,6 +31,7 @@ class HyperParams(object):
                  loss_function: nn.Module,
                  drop_out: float,
                  train_eval_ratio: float = default_train_eval_ratio,
+                 encoding_len: int = -1,
                  normal_weight_initialization: Optional[bool] = False):
         """
             Constructor
@@ -53,6 +54,7 @@ class HyperParams(object):
         self.batch_size = batch_size
         self.loss_function = loss_function
         self.momentum = momentum
+        self.encoding_len = encoding_len
         self.train_eval_ratio = train_eval_ratio
         self.normal_weight_initialization = normal_weight_initialization
         self.optim_label = optim_label
@@ -64,7 +66,7 @@ class HyperParams(object):
         x = torch.rand(20)
         return label_conversion_func(x)
 
-    def initialize_weight(self, modules: List[nn.Module]) -> NoReturn:
+    def initialize_weight(self, modules: List[nn.Module]) -> None:
         """
         In-place initialization weight of a list of linear module given an encoder model
         @param modules: torch module to be initializes

@@ -11,7 +11,7 @@ logger = logging.getLogger('metric.BuiltInMetric')
 
 
 class BuiltInMetric(Metric):
-    def __init__(self, metric_type: MetricType, is_weighted: bool = False):
+    def __init__(self, metric_type: MetricType, encoding_len: int, is_weighted: bool = False):
         """
         Constructor for the accuracy metrics
         @param metric_type: Metric type (Accuracy,....)
@@ -22,9 +22,10 @@ class BuiltInMetric(Metric):
         super(BuiltInMetric, self).__init__()
         self.is_weighted = is_weighted
         self.metric_type = metric_type
+        self.encoding_len = encoding_len
 
     def __repr__(self) -> AnyStr:
-        return f'Metric: {self.metric_type} weighted: {self.is_weighted}'
+        return f'Metric: {self.metric_type} weighted: {self.is_weighted} Encoded: {self.encoding_len}'
 
     def from_numpy(self, predicted: np.array, labels: np.array) -> np.array:
         """
@@ -36,6 +37,9 @@ class BuiltInMetric(Metric):
         @return metric Numpy array
         @rtype Numpy array
         """
+        if self.encoding_len > 0:
+            labels = np.eye(self.encoding_len)[labels]
+
         match self.metric_type:
             case MetricType.Accuracy: return self.__accuracy(predicted, labels)
             case MetricType.Precision: return self.__precision(predicted, labels)
@@ -115,20 +119,28 @@ class BuiltInMetric(Metric):
             else f1_score(labels, _predicted)
 
 
-def create_metric_dict(metric_labels: List[AnyStr]) -> Dict[AnyStr, BuiltInMetric]:
+def create_metric_dict(metric_labels: List[AnyStr], encoding_len: int) -> Dict[AnyStr, BuiltInMetric]:
     metrics = {}
     assert metric_labels is not None and len(metric_labels) > 0
 
     for metric_label in metric_labels:
         match metric_label:
             case Metric.accuracy_label:
-                metrics[Metric.accuracy_label] = BuiltInMetric(MetricType.Accuracy, is_weighted=True)
+                metrics[Metric.accuracy_label] = BuiltInMetric(MetricType.Accuracy,
+                                                               encoding_len=encoding_len,
+                                                               is_weighted=True)
             case Metric.precision_label:
-                metrics[Metric.precision_label] = BuiltInMetric(MetricType.Precision, is_weighted=True)
+                metrics[Metric.precision_label] = BuiltInMetric(MetricType.Precision,
+                                                                encoding_len=encoding_len,
+                                                                is_weighted=True)
             case Metric.recall_label:
-                metrics[Metric.recall_label] = BuiltInMetric(MetricType.Recall, is_weighted=True)
+                metrics[Metric.recall_label] = BuiltInMetric(MetricType.Recall,
+                                                             encoding_len=encoding_len,
+                                                             is_weighted=True)
             case Metric.f1_label:
-                metrics[Metric.f1_label] = BuiltInMetric(MetricType.F1,  is_weighted=True)
+                metrics[Metric.f1_label] = BuiltInMetric(MetricType.F1,
+                                                         encoding_len=encoding_len,
+                                                         is_weighted=True)
             case _:
                 logger.warning(f'Metric {metric_label} is not supported')
     return metrics

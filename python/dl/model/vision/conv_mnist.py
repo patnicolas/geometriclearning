@@ -5,7 +5,11 @@ from typing import AnyStr, Tuple, NoReturn
 import torch
 from dl.model.vision.base_model import BaseModel
 from dl.model.vision.conv_2D_config import Conv2DConfig
-from torch.utils.data import  TensorDataset, Dataset
+from torch.utils.data import TensorDataset, Dataset
+from torchvision.transforms import InterpolationMode
+from torchvision.datasets import MNIST
+import torchvision.transforms as transforms
+from dl.model.vision import GrayscaleToRGB, OneHotEncoder
 import logging
 logger = logging.getLogger('dl.model.vision.ConvMNIST')
 
@@ -19,23 +23,17 @@ class ConvMNIST(BaseModel):
     default_test_file = 'processed/test.pt'
     num_classes = 10
 
-    def __init__(self,
-                 conv_2D_config: Conv2DConfig,
-                 data_batch_size: int,
-                 resize_image: int,
-                 subset_size: int = -1) -> None:
+    def __init__(self, conv_2D_config: Conv2DConfig, data_batch_size: int, resize_image: int) -> None:
         """
         Constructor for the Convolutional network for MNIST Dataset
         @param data_batch_size: Size of batch for training
         @type data_batch_size: int
         @param resize_image: Height and width of resized image if > 0, no resize if -1
         @type resize_image: int
-        @param subset_size: Subset of data set for training if > 0 the original data set if -1
-        @type subset_size: int
         @param conv_2D_config: 2D Convolutional network configuration
         @type conv_2D_config: Conv2DConfig
         """
-        super(ConvMNIST, self).__init__(conv_2D_config, data_batch_size, resize_image, subset_size)
+        super(ConvMNIST, self).__init__(conv_2D_config, data_batch_size, resize_image)
 
     def show_conv_weights_shape(self) -> NoReturn:
         import torch
@@ -44,7 +42,7 @@ class ConvMNIST(BaseModel):
             conv_modules_weights: Tuple[torch.Tensor] = conv_block.get_modules_weights()
             logging.info(f'\nConv. layer #{idx} shape: {conv_modules_weights[0].shape}')
 
-    def _extract_datasets(self, root_path: AnyStr) ->(Dataset, Dataset):
+    def _extract_datasetsX(self, root_path: AnyStr) -> (Dataset, Dataset):
         """
         Extract the training data and labels and test data and labels for this convolutional network.
         @param root_path: Root path to MNIST dataset
@@ -65,3 +63,45 @@ class ConvMNIST(BaseModel):
         train_dataset: Dataset = TensorDataset(train_features, train_labels)
         test_dataset = TensorDataset(test_features, test_labels)
         return train_dataset, test_dataset
+
+    def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):
+        """
+        Extract the training data and labels and test data and labels for this convolutional network.
+        @param root_path: Root path to CIFAR10 data
+        @type root_path: AnyStr
+        @return Tuple (train data, labels, test data, labels)
+        @rtype Tuple[torch.Tensor]
+        """
+        transform = transforms.Compose([
+            transforms.Resize(size =(self.resize_image, self.resize_image), interpolation=InterpolationMode.BILINEAR),
+            GrayscaleToRGB(),
+            transforms.ToTensor(),  # Convert images to PyTorch tensors
+            # Normalize with mean and std for RGB channels
+            transforms.Normalize(mean=(0.0, 0.0, 0.0), std=(0.5, 0.5, 0.5))
+        ]) if self.resize_image > 0 else transforms.Compose([
+            GrayscaleToRGB(),
+            transforms.ToTensor(),  # Convert images to PyTorch tensors
+            # Normalize with mean and std for RGB channels
+            transforms.Normalize(mean=(0.0, 0.0, 0.0), std=(0.5, 0.5, 0.5))
+        ])
+
+        train_dataset = MNIST(
+            root=root_path,  # Directory to store the dataset
+            train=True,  # Load training data
+            download=True,  # Download if not already present
+            transform=transform  # Apply transformations
+        )
+
+        test_dataset = MNIST(
+            root=root_path,  # Directory to store the dataset
+            train=False,  # Load test data
+            download=True,  # Download if not already present
+            transform=transform  # Apply transformations
+        )
+        return train_dataset, test_dataset
+
+
+
+
+
+
