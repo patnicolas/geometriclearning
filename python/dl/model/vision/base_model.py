@@ -67,28 +67,10 @@ class BaseModel(ABC):
 
     def load_dataset(self, root_path: AnyStr, exec_config: ExecConfig) -> (DataLoader, DataLoader):
         train_dataset, test_dataset = self._extract_datasets(root_path)
-
         # If we are experimenting with a subset of the data set for memory usage
-        if exec_config.subset_size > 0:
-            from torch.utils.data import Subset
-            # Rescale the size of training and test data
-            test_subset_size = int(float(exec_config.subset_size * len(test_dataset)) / len(train_dataset))
-            train_subset_size = exec_config.subset_size - test_subset_size
-
-            train_dataset = Subset(train_dataset, indices=range(train_subset_size))
-            test_dataset = Subset(test_dataset, indices=range(test_subset_size))
-
+        train_dataset, test_dataset = exec_config.apply_sampling( train_dataset,  test_dataset)
         # Create DataLoaders for batch processing
-        train_loader = DataLoader(
-            dataset=train_dataset,
-            batch_size=self.data_batch_size,
-            pin_memory=exec_config.pin_mem,
-            shuffle=True)
-        test_loader = DataLoader(
-            dataset=test_dataset,
-            batch_size=self.data_batch_size,
-            pin_memory=exec_config.pin_mem,
-            shuffle=False)
+        train_loader, test_loader = exec_config.apply_optimize_loaders(train_dataset, test_dataset)
         return train_loader, test_loader
 
     """ ---------------------  Private Helper Methods -------------------------- """

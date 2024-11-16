@@ -11,14 +11,6 @@ import logging
 logger = logging.getLogger('dl.model.vision.ConvCaltech101')
 logging.basicConfig(level=logging.INFO)
 
-""""
-class GrayscaleToRGB(object):
-    def __call__(self, img):
-        if img.mode == 'L':
-            img = img.convert("RGB")
-        return img
-"""
-
 
 class ConvCaltech101(BaseModel):
     id = 'Convolutional_Caltech101'

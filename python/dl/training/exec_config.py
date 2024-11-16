@@ -1,10 +1,10 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
-from dataclasses import dataclass
 import torch
-from typing import AnyStr, NoReturn
+from typing import AnyStr
 from torch.optim import Optimizer
+from torch.utils.data import Dataset, DataLoader
 
 
 class ExecConfig(object):
@@ -67,6 +67,35 @@ class ExecConfig(object):
     def apply_empty_cache(self) -> None:
         if self.empty_cache:
             torch.mps.empty_cache()
+
+    def apply_optimize_loaders(self,
+                               batch_size: int,
+                               train_dataset: Dataset,
+                               test_dataset: Dataset) -> (DataLoader, DataLoader):
+        train_loader = DataLoader(
+            dataset=train_dataset,
+            batch_size=batch_size,
+            pin_memory=self.pin_mem,
+            shuffle=True)
+        test_loader = DataLoader(
+            dataset=test_dataset,
+            batch_size=batch_size,
+            pin_memory=self.pin_mem,
+            shuffle=False)
+        return train_loader, test_loader
+
+    def apply_sampling(self,
+                       train_dataset: Dataset,
+                       test_dataset: Dataset) -> (Dataset, Dataset):
+        if self.subset_size > 0:
+            from torch.utils.data import Subset
+            # Rescale the size of training and test data
+            test_subset_size = int(float(self.subset_size * len(test_dataset)) / len(train_dataset))
+            train_subset_size = self.subset_size - test_subset_size
+
+            train_dataset = Subset(train_dataset, indices=range(train_subset_size))
+            test_dataset = Subset(test_dataset, indices=range(test_subset_size))
+            return train_dataset, test_dataset
 
     def apply_labels_dtype(self, x: torch.Tensor, convert_to_float: bool = True) -> torch.Tensor:
         if convert_to_float:

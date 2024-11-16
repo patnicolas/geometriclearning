@@ -125,10 +125,9 @@ class NeuralNet(object):
         @type loaders: Tuple[DataLoader]
         """
         try:
-            train_data_loader, test_data_loader = loaders # self.load_dataset(root_path)
+            train_data_loader, test_data_loader = loaders
             output_file = f'{self.model.model_id}_metrics_{plot_title}'
             self.train(train_data_loader, test_data_loader, output_file)
-            # sage_profile = '\n'.join(self.exec_config.accumulator)
             print(f"\nMPS usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
         except ConvException as e:
             logger.error(str(e))

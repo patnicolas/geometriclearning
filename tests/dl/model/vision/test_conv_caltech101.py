@@ -33,18 +33,19 @@ class ConvCaltech101Test(unittest.TestCase):
         hyper_parameters = HyperParams(
             lr=lr,
             momentum=0.89,
-            epochs=2,
+            epochs=8,
             optim_label='adam',
             batch_size=4,
             loss_function=nn.CrossEntropyLoss(),
-            drop_out=0.25,
+            drop_out=0.2,
             train_eval_ratio=0.9,
+            encoding_len=101,  # No one-hot encoding
             normal_weight_initialization=False)
 
-        empty_cache: bool = True
+        empty_cache: bool = False
         mix_precision: bool = False
-        pin_memory: bool = True
-        subset_size: int = 500
+        pin_memory: bool = False
+        subset_size: int = 1000
 
         exec_config = ExecConfig(
             empty_cache=empty_cache,
@@ -66,7 +67,7 @@ class ConvCaltech101Test(unittest.TestCase):
     @staticmethod
     def create_conv_net() -> ConvCaltech101:
         _id = 'Caltech101'
-        input_size = 128
+        input_size = 96
         max_pooling_kernel = 2
         out_channels = 512
         activation = nn.ReLU()
