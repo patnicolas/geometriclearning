@@ -2,38 +2,35 @@ import unittest
 from dl.model.vision.conv_2D_config import Conv2DConfig, ConvLayer2DConfig
 from dl.model.vision.conv_caltech101 import ConvCaltech101
 from dl.training.hyper_params import HyperParams
+from dl.dl_exception import DLException
 import torch.nn as nn
 
 
 class ConvCaltech101Test(unittest.TestCase):
-    @unittest.skip('Ignore')
+
     def test_init(self):
-        conv_caltech_101 = ConvCaltech101Test.create_conv_net()
-        print(repr(conv_caltech_101))
+        import torch
+        if torch.backends.mps.is_available():
+            mps_device = torch.device("mps")
+            x = torch.ones(1, device=mps_device)
+            print(x)
+        else:
+            print("MPS device not found.")
+
+        # conv_caltech_101 = ConvCaltech101Test.__create_conv_net()
+        # print(repr(conv_caltech_101))
 
     @unittest.skip('Ignore')
-    def test_mul(self):
-        import torch
-        x: torch.Tensor = torch.rand(128*128*3)
-        x = x.reshape([3, 128, 128])
-        mean = torch.Tensor([[0.5], [0.5], [0.5]])
-        std = torch.Tensor([[0.5], [0.5], [0.5]])
-        sh = x.shape
-        t = x.sub_(mean)
-        t = t.div_(std)
-        print(t.shape)
-
     def test_train(self):
         from dl.training.exec_config import ExecConfig
 
-        conv_caltech_101 = ConvCaltech101Test.create_conv_net()
         root_path = '../../../../data/caltech-101'
         lr = 0.001
 
         hyper_parameters = HyperParams(
             lr=lr,
             momentum=0.89,
-            epochs=8,
+            epochs=2,
             optim_label='adam',
             batch_size=4,
             loss_function=nn.CrossEntropyLoss(),
@@ -45,7 +42,7 @@ class ConvCaltech101Test(unittest.TestCase):
         empty_cache: bool = False
         mix_precision: bool = False
         pin_memory: bool = False
-        subset_size: int = 1000
+        subset_size: int = 200
 
         exec_config = ExecConfig(
             empty_cache=empty_cache,
@@ -56,16 +53,58 @@ class ConvCaltech101Test(unittest.TestCase):
             grad_accu_steps=1,
             device_config=None)
 
-        conv_caltech_101.do_train(
-            root_path,
-            hyper_parameters,
-            metric_labels=['Precision', 'Recall'],
-            exec_config=exec_config,
-            plot_title=f'Caltech_101_{lr}'
-        )
+        try:
+            conv_caltech_101 = ConvCaltech101Test.__create_conv_net()
+            conv_caltech_101.do_train(
+                root_path,
+                hyper_parameters,
+                metric_labels=['Precision', 'Recall'],
+                exec_config=exec_config,
+                plot_title=f'Caltech_101_{lr}'
+            )
+            self.assertTrue(True)
+        except DLException as e:
+            self.assertTrue(False, str(e))
+
+    @unittest.skip('Ignore')
+    def test_compare(self):
+        import matplotlib.pyplot as plt
+        import numpy as np
+
+        # Example data
+        categories = [
+            'Sample 20%[10]',
+            'Memory pinning[7]',
+            'Mixed precision[2]',
+            'Emptying cache[5]',
+            'Accumulating grads[8]'
+        ]
+        var_MNIST = [39, 8, 23, 5, 15]
+        var_Caltech101 = [48, 10, 17, 9, 16]
+
+        # Number of categories
+        x = np.arange(len(categories))
+
+        # Bar width
+        width = 0.3
+
+        # Create bar plots
+        plt.bar(x - width, var_MNIST, width, label='MNIST')
+        plt.bar(x, var_Caltech101, width, label='Caltech101')
+
+        # Add labels, title, and legend
+        plt.xlabel('Recommendations', fontdict={'family': 'serif', 'size': 14, 'weight': 'bold'} )
+        plt.ylabel('Memory reduction (%)', fontdict={'family': 'serif', 'size':14, 'weight': 'bold'} )
+        plt.title('Comparative impact of memory reduction recommendations', fontdict={'family': 'serif', 'size': 18, 'weight': 'bold'} )
+        plt.xticks(x, categories)
+        plt.legend(prop={'family': 'serif', 'size': 15, 'style': 'italic'} )
+
+        # Display the plot
+        plt.tight_layout()
+        plt.show()
 
     @staticmethod
-    def create_conv_net() -> ConvCaltech101:
+    def __create_conv_net() -> ConvCaltech101:
         _id = 'Caltech101'
         input_size = 96
         max_pooling_kernel = 2

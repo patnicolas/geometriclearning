@@ -34,7 +34,7 @@ class ConvBlock(NeuralBlock):
         """
         self.id = _id
         self.conv_block_builder = conv_block_builder
-        # Invoke __call__
+
         modules = self.conv_block_builder()
         super(ConvBlock, self).__init__(_id, tuple(modules))
 

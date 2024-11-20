@@ -66,5 +66,3 @@ class ConvCaltech101(BaseModel):
         train_size = int(self.train_test_split * len(caltech_101_dataset))
         test_size = len(caltech_101_dataset) - train_size
         return torch.utils.data.random_split(caltech_101_dataset, lengths=[train_size, test_size])
-
-

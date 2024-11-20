@@ -89,6 +89,7 @@ class ExecConfig(object):
                        test_dataset: Dataset) -> (Dataset, Dataset):
         if self.subset_size > 0:
             from torch.utils.data import Subset
+
             # Rescale the size of training and test data
             test_subset_size = int(float(self.subset_size * len(test_dataset)) / len(train_dataset))
             train_subset_size = self.subset_size - test_subset_size

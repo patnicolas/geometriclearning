@@ -71,7 +71,7 @@ class EarlyStopLogger(object):
         is_early_stopping = self.__evaluate(torch.Tensor(eval_metrics[Metric.eval_loss_label]))
         # Step 2: Record training, evaluation losses and metric
         self.__record(epoch, train_loss, eval_metrics)
-        logger.info(f'Is early stopping {is_early_stopping}')
+        print(f'Is early stopping {is_early_stopping}',flush=True)
         return is_early_stopping
 
     def update_metrics(self, metrics: Dict[AnyStr, float]) -> bool:
@@ -140,7 +140,7 @@ class EarlyStopLogger(object):
     def __record(self, epoch: int, train_loss: float, metrics: Dict[AnyStr, float]):
         metric_str = ', '.join([f'{k}: {v}' for k, v in metrics.items()])
         status_msg = f'Epoch: {epoch}, Train loss: {train_loss}, Evaluation metric: {metric_str}'
-        logger.info(status_msg)
+        print(status_msg, flush=True)
         metrics[Metric.train_loss_label] = train_loss
         self.update_metrics(metrics)
 
