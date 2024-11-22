@@ -89,7 +89,7 @@ The directory __control__ contains the implementation of __Kalman__ filters.
 
 # Software Design
 ## Neural Blocks
-![NeuralBlock](images/Neural_block_Hierarchy.png)
+![NeuralBlock](images/Neural_Block_Hierarchy.png)
 
 ## Neural Models
 ![NeuralModel](images/Neural_Model_Hierarchy.png)
