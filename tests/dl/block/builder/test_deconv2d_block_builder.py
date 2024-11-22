@@ -1,7 +1,7 @@
 import unittest
 from torch import nn
 from dl.block.builder.deconv2d_block_builder import DeConv2DBlockBuilder
-from dl.dl_exception import DLException
+from dl.exception.dl_exception import DLException
 from typing import Tuple
 
 class DeConv2DBlockBuilderTest(unittest.TestCase):

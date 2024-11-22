@@ -2,8 +2,8 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from torch import nn
-from typing import Self, List, AnyStr, Optional, Tuple
-from dl.dl_exception import DLException
+from typing import Self, AnyStr, Optional, Tuple
+from dl import DLException
 
 
 """

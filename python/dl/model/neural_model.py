@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 import torch
 import torch.nn as nn
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from typing import AnyStr, Self, List
 
 __all__ = ['NeuralModel']
@@ -14,7 +14,7 @@ forward and save methods
 """
 
 
-class NeuralModel(torch.nn.Module):
+class NeuralModel(torch.nn.Module, ABC):
     def __init__(self, model_id: AnyStr, model: torch.nn.Module):
         """
         Constructor
@@ -60,7 +60,6 @@ class NeuralModel(torch.nn.Module):
     def get_latent_features(self) -> int:
         raise NotImplementedError('NeuralModel.get_latent_features undefined for abstract neural model')
 
-    @abstractmethod
     def invert(self) -> Self:
         raise NotImplementedError('NeuralModel.invert is an abstract method')
 

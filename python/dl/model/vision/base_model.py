@@ -1,14 +1,14 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
-from typing import AnyStr, NoReturn, List
+from typing import AnyStr, List
 from abc import ABC, abstractmethod
 from torch.utils.data import DataLoader, Dataset
 from dl.block import ConvException
 from dl.training.neural_net import NeuralNet
 from dl.model.vision.conv_2D_config import Conv2DConfig
 from dl.training.hyper_params import HyperParams
-from dl.dl_exception import DLException
+from dl.exception.dl_exception import DLException
 from dl.training.exec_config import ExecConfig
 import logging
 logger = logging.getLogger('dl.model.vision.BaseModel')

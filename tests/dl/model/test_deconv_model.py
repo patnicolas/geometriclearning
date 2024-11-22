@@ -2,7 +2,7 @@ import unittest
 import torch.nn as nn
 from dl.block.deconv_block import DeConvBlock
 from dl.model.deconv_model import DeConvModel
-from dl.dl_exception import DLException
+from dl.exception.dl_exception import DLException
 from typing import Tuple
 
 

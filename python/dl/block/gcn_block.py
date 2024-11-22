@@ -48,7 +48,6 @@ class GCNBlock(NeuralBlock):
 
         super(GCNBlock, self).__init__(_id, tuple(modules))
 
-
     def __repr__(self) -> AnyStr:
         modules_str = '\n'.join([str(module) for module in self.modules])
         return f'\nGCN Modules:\n{modules_str}'

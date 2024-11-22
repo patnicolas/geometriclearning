@@ -30,7 +30,7 @@ class ConvModel(NeuralModel, ABC):
     def __init__(self,
                  model_id: AnyStr,
                  conv_blocks: List[ConvBlock],
-                 ffnn_blocks: Optional[List[FFNNBlock]]):
+                 ffnn_blocks: Optional[List[FFNNBlock]] = None):
         """
         Constructor for this convolutional neural network
         @param model_id: Identifier for this model
@@ -47,14 +47,14 @@ class ConvModel(NeuralModel, ABC):
         self.in_features = conv_blocks[0].conv_block_builder.in_channels
         self.out_features = ffnn_blocks[-1].out_features
         # Define the sequence of modules from the layout
-        conv_modules: List[nn.Module] = [module for block in conv_blocks for module in block.modules]
+        modules: List[nn.Module] = [module for block in conv_blocks for module in block.modules]
 
         # If fully connected are provided as CNN
-        if ffnn_blocks:
+        if ffnn_blocks is not None:
             self.ffnn_blocks = ffnn_blocks
-            conv_modules.append(nn.Flatten())
-            [conv_modules.append(module) for block in ffnn_blocks for module in block.modules]
-        super(ConvModel, self).__init__(model_id, nn.Sequential(*conv_modules))
+            modules.append(nn.Flatten())
+            [modules.append(module) for block in ffnn_blocks for module in block.modules]
+        super(ConvModel, self).__init__(model_id, nn.Sequential(*modules))
 
     @classmethod
     def build(cls, model_id: AnyStr, conv_blocks: List[ConvBlock]) -> Self:
@@ -68,7 +68,7 @@ class ConvModel(NeuralModel, ABC):
         @return: Instance of decoder of type ConvModel
         @rtype: ConvModel
         """
-        return  cls(model_id, conv_blocks, [])
+        return  cls(model_id, conv_blocks = conv_blocks, ffnn_blocks = None)
 
     def has_fully_connected(self) -> bool:
         """

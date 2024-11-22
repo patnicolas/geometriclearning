@@ -3,6 +3,7 @@ from torch_geometric.nn import GCNConv
 from dl.block.gcn_block import GCNBlock
 import torch.nn as nn
 
+
 class GCNBlockTest(unittest.TestCase):
 
     def test_init(self):

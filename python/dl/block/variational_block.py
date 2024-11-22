@@ -5,9 +5,8 @@ import torch
 from torch import nn
 from torch.autograd import Variable
 from dl.block.neural_block import NeuralBlock
-from typing import Self, overload
-from dl.dl_exception import DLException
-from util import log_size
+from typing import Self
+from dl.exception.dl_exception import DLException
 
 
 class VariationalBlock(NeuralBlock):

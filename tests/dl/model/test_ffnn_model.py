@@ -2,7 +2,7 @@ import unittest
 import torch
 from dl.block.ffnn_block import FFNNBlock
 from dl.model.ffnn_model import FFNNModel
-from dl.dl_exception import DLException
+from dl.exception.dl_exception import DLException
 
 
 class FFNNModelTest(unittest.TestCase):

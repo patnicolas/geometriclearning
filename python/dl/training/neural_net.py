@@ -7,15 +7,14 @@ from abc import abstractmethod
 from typing import AnyStr, Dict
 from dl.model.neural_model import NeuralModel
 from dl.training.exec_config import ExecConfig
-from dl.dl_exception import DLException
+from dl import DLException, ConvException
 from dl.training.hyper_params import HyperParams
 from dl.training.early_stop_logger import EarlyStopLogger
 from plots.plotter import PlotterParameters
 from metric.metric import Metric
-from dl.block import ConvException
 from metric.built_in_metric import create_metric_dict
 from tqdm import tqdm
-from typing import List, Optional, NoReturn
+from typing import List, Optional
 import logging
 logger = logging.getLogger('dl.NeuralNet')
 

@@ -9,7 +9,7 @@ from dl.training.early_stop_logger import EarlyStopLogger
 from plots.plotter import PlotterParameters
 from metric.metric import Metric
 from dl.model.vae_model import VAEModel
-from dl.dl_exception import DLException
+from dl.exception.dl_exception import DLException
 from typing import AnyStr, List, Optional, Dict, NoReturn, Self
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -134,7 +134,7 @@ E       Execute the cycle of training and evaluation for the
     def __reconstruction_loss(self,
                               predicted: torch.Tensor,
                               x: torch.Tensor) -> float:
-        from python.dl.dl_exception import DLException
+        from dl.exception.dl_exception import DLException
 
         try:
             # Cross-entropy for reconstruction loss for binary values

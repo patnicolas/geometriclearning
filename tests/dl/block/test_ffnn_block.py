@@ -1,7 +1,7 @@
 import unittest
 from torch import nn
 from dl.block.ffnn_block import FFNNBlock
-from dl.dl_exception import DLException
+from dl import DLException
 
 
 class FFNNBlockTest(unittest.TestCase):

@@ -1,7 +1,7 @@
 import unittest
 from torch import nn
 from dl.block.conv_block import ConvBlock
-from dl.block import ConvException
+from dl import ConvException
 from dl.block.builder.conv1d_block_builder import Conv1DBlockBuilder
 from dl.block.builder.conv2d_block_builder import Conv2DBlockBuilder
 

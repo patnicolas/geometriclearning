@@ -4,7 +4,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 import torch.nn as nn
 from typing import List, Tuple, AnyStr
 from dl.block.conv_block import ConvBlock
-from dl.dl_exception import DLException
+from dl.exception.dl_exception import DLException
 from dataclasses import dataclass
 
 

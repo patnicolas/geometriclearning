@@ -7,11 +7,8 @@ from dl.model.vae_model import VAEModel
 from dl.block import ConvException
 from dl.training.early_stop_logger import EarlyStopLogger
 from dl.training.vae import VAE
-from metric.metric import Metric
-from plots.plotter import PlotterParameters
 from dl.training.hyper_params import HyperParams
-from dl.dl_exception import DLException
-from metric.built_in_metric import BuiltInMetric, MetricType
+from dl.exception.dl_exception import DLException
 
 
 class VAEMNIST(object):

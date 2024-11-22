@@ -50,7 +50,7 @@ class ConvCaltech101(BaseModel):
         from torch.utils.data import DataLoader
         from torchvision.datasets.caltech import Caltech101
 
-        # Define image transformations
+        # Define image transformations with or without resizing
         transform = transforms.Compose([
             transforms.Resize(size=(self.resize_image, self.resize_image), interpolation=InterpolationMode.BILINEAR),
             GrayscaleToRGB(),
@@ -62,7 +62,10 @@ class ConvCaltech101(BaseModel):
             transforms.Normalize(mean=(0.0, 0.0, 0.0), std=(0.5, 0.5, 0.5))
         ])
 
+        # Instantiate the data set
         caltech_101_dataset = Caltech101(root=root_path, transform=transform, download=False)
+
+        # Split training / validation data sets.
         train_size = int(self.train_test_split * len(caltech_101_dataset))
         test_size = len(caltech_101_dataset) - train_size
         return torch.utils.data.random_split(caltech_101_dataset, lengths=[train_size, test_size])
