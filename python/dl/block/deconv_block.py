@@ -6,7 +6,7 @@ from typing import Tuple, Self
 from dl.block.builder.deconv1d_block_builder import DeConv1DBlockBuilder
 from dl.block.builder.deconv2d_block_builder import DeConv2DBlockBuilder
 from dl.block.conv_block import ConvBlock
-from dl.exception.dl_exception import DLException
+from dl import DLException
 
 
 """    

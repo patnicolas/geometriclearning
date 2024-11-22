@@ -5,7 +5,8 @@ Classes and methods for Geometric Learning and related topics.
 
 ![Banner](images/GeometricLearning.png)
 
-# Differential Geometry
+# Theory 
+## Differential Geometry
 __Differential geometry__ offers a solution by enabling data scientists to grasp the true shape and distribution of data.   
      
 Differential geometry is a branch of mathematics that uses techniques from calculus, algebra and topology to study the properties of curves, surfaces, and higher-dimensional objects in space. It focuses on concepts such as curvature, angles, and distances, examining how these properties vary as one moves along different paths on a geometric object.  
@@ -30,7 +31,7 @@ The directory __geometry__ contains the defintion and implementation the various
 ![Paralleltransport](images/ParallelTransport.png)
     
 
-# Lie groups and Algebras
+## Lie Groups and Algebras
 Lie groups play a crucial role in Geometric Deep Learning by modeling symmetries such as rotation, translation, and scaling. This enables non-linear models to generalize effectively for tasks like object detection and transformations in generative models.    
 Lie groups have numerous practical applications in various fields:     
 - __Physics__: They describe symmetries in classical mechanics, quantum mechanics, and relativity. 
@@ -44,7 +45,7 @@ Lie groups have numerous practical applications in various fields:
     
 The directory __Lie__ illustrates the various element of __Special Orthogonal Group__ of 3 dimension (__SO3__) and __Special Euclidean Group__ in 3 dimension (__SE3__) using __Geomstats__ library. 
 
-# Deep learning
+## Deep Learning Models
 The directory __dl__ implements a framework of __reusable neural blocks__ as key components of any deep learning models such as:
 - Feed forward neural network
 - Convolutional network
@@ -54,14 +55,14 @@ The directory __dl__ implements a framework of __reusable neural blocks__ as key
 
 ![ReusableNeuralBlocks](images/Convolution_Mirror.png)
 
-# Information Geometry
+## Information Geometry
 __Information geometry__ applies the principles and methods of differential geometry to problems in probability theory and statistics [ref 3]. It studies the manifold of probability distributions and provides a natural framework for understanding and analyzing statistical models.     
 The directory 'informationgeometry' focuses on the __Fisher Information Metric__ (FIM).    
     
 The Fisher Information Matrix plays a crucial role in various aspects of machine learning and statistics. Its primary significance lies in providing a measure of the amount of information that an observable random variable carries about an unknown parameter upon which the probability depends on.   
 The Fisher information matrix is a type of __Riemannian metric__ that can be applied to a __smooth statistical manifold__. It serves to quantify the informational difference between measurements. The points on this manifold represent probability measures defined within a Euclidean probability space, such as the Normal distribution. Mathematically, it is represented by the Hessian of the __Kullback-Leibler__ divergence.
 
-# Fractals
+## Fractal Dimension
 Configuring the parameters of a 2D convolutional neural network, such as kernel size and padding, can be challenging because it largely depends on the complexity of an image or its specific sections. __Fractals__ help quantify the complexity of important features and boundaries within an image and ultimately guide the data scientist in optimizing his/her model.    
 
 A __fractal dimension__ is a measure used to describe the complexity of fractal patterns or sets by quantifying the ratio of change in detail relative to the change in scale.    
@@ -76,16 +77,22 @@ There are many approaches to compute the fractal dimension of an image, among th
 
 The directory 'fractal' contains the implementation of the __box counting method__ for images and 3D objects.
 
-# Markov Chain Monte Carlo
+## Markov Chain Monte Carlo
 Sampling sits at the core of data science and analysis. The directory __mcmc__ explores a category of numerical sampling techniques, known as Markov Chain Monte Carlo, and how they can be implemented via reusable design patterns, using the __Metropolis-Hastings__ model as an example.     
 
-# Signal processing
+## Signal Processing
 A Kalman filter serves as an ideal estimator, determining parameters from imprecise and indirect measurements. Its goal is to reduce the mean square error associated with the model's parameters. Being recursive in nature, this algorithm is suited for real-time signal processing.    
    
 The directory __control__ contains the implementation of __Kalman__ filters.
     
 ![KalmanFilter](images/Kalman_Filter.png)
 
+# Software Design
+## Neural Blocks
+![NeuralBlock](images/Neural_block_Hierarchy.png)
+
+## Neural Models
+![NeuralModel](images/Neural_Model_Hierarchy.png)
 
 # References
 -[Deep learning with reusable neural blocks](http://patricknicolas.blogspot.com/2023/03/building-bert-with-reusable-neural.html)    
