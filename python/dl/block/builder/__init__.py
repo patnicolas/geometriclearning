@@ -4,7 +4,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 import abc
 import torch.nn as nn
 from typing import Tuple
-from dl.block import ConvException
+from dl import ConvException
 
 
 class ConvBlockBuilder(object):

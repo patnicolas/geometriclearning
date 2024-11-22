@@ -24,6 +24,7 @@ class FFNNModel(NeuralModel):
         @type neural_blocks:
         """
         FFNNModel.is_valid(neural_blocks)
+
         self.neural_blocks = neural_blocks
         # Record the number of input and output features from the first and last neural block respectively
         self.in_features = neural_blocks[0].in_features

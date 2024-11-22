@@ -53,8 +53,6 @@ The directory __dl__ implements a framework of __reusable neural blocks__ as key
 - Generative adversarial network
 - Automatic generation (mirror) of encoder/de-convolutional blocks.   
 
-![ReusableNeuralBlocks](images/Convolution_Mirror.png)
-
 ## Information Geometry
 __Information geometry__ applies the principles and methods of differential geometry to problems in probability theory and statistics [ref 3]. It studies the manifold of probability distributions and provides a natural framework for understanding and analyzing statistical models.     
 The directory 'informationgeometry' focuses on the __Fisher Information Metric__ (FIM).    
@@ -87,12 +85,145 @@ The directory __control__ contains the implementation of __Kalman__ filters.
     
 ![KalmanFilter](images/Kalman_Filter.png)
 
-# Software Design
+# Reusable Neural Components Design
 ## Neural Blocks
+Block is defined as a logical grouping of neural components, implemented as Pytorch __Module__. All these components are assembled into a sequential set of torch modules.   
+```
+class NeuralBlock(nn.Module):
+    def __init__(self, block_id: Optional[AnyStr], modules: Tuple[nn.Module]):
+        super(NeuralBlock, self).__init__()
+        self.modules = modules
+        self.block_id = block_id
+```
+    
+For instance, a Convolutional block may include a convolutional layer, kernel, batch normalization and possibly a drop-out components of type __Module__.
+```
+class ConvBlock(NeuralBlock):
+    def __init__(self, _id: AnyStr, conv_block_builder: ConvBlockBuilder) -> None:
+        self.id = _id
+        self.conv_block_builder = conv_block_builder
+        modules = self.conv_block_builder()
+        super(ConvBlock, self).__init__(_id, tuple(modules))
+```
+Convolutional neural block are assembled through a __builder__.
+```
+class ConvBlockBuilder(object):
+    def __init__(self,
+                 in_channels: int,
+                 out_channels: int,
+                 input_size: int | Tuple[int, int],
+                 kernel_size: int | Tuple[int, int],
+                 stride: int | Tuple[int, int],
+                 padding: int | Tuple[int, int],
+                 batch_norm: bool,
+                 max_pooling_kernel: int,
+                 activation: nn.Module,
+                 bias: bool):
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.input_size = input_size
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+        self.batch_norm = batch_norm
+        self.max_pooling_kernel = max_pooling_kernel
+        self.activation = activation
+        self.bias = bias
+        
+     def __call__(self) -> Tuple[nn.Module]:
+        modules = []
+        # First define the 2D convolution
+        conv_module = nn.Conv2d(
+            self.in_channels,
+            self.out_channels,
+            kernel_size=self.kernel_size,
+            stride=self.stride,
+            padding=self.padding,
+            bias=self.bias)
+        modules.append(conv_module)
+
+        # Add the batch normalization
+        if self.batch_norm:
+            modules.append(nn.BatchNorm2d(self.out_channels))
+        # Activation to be added if needed
+        if self.activation is not None:
+            modules.append(self.activation)
+
+        # Added max pooling module
+        if self.max_pooling_kernel > 0:
+            modules.append(nn.MaxPool2d(kernel_size=self.max_pooling_kernel, stride=1, padding=0))
+        modules_list: List[nn.Module] = modules
+        return tuple(modules_list)
+```
+A Neural block can be __inverted__. A convolutional block can be automatically converted into a de-convolutional block.      
+![ReusableNeuralBlocks](images/Convolution_Mirror.png)
+    
+The current hierarchy of neural blocks is defined as:
 ![NeuralBlock](images/Neural_Block_Hierarchy.png)
 
 ## Neural Models
+Neural models are dynamic sequence of neural blocks that are assembled and converted into a sequence of torch __Module__ instances.   
+The Base class for Neural model is defined as     
+```
+class NeuralModel(torch.nn.Module, ABC):
+    def __init__(self, model_id: AnyStr, model: torch.nn.Module):
+        super(NeuralModel, self).__init__()
+        self.model_id = model_id
+        self.model = model
+        
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.model(x)
+```
+Each model inherits from __NeuralModel__ (i.e. Convolutional neural network type : __ConvModel__)
+
+```
+class ConvModel(NeuralModel, ABC):
+    def __init__(self,
+                 model_id: AnyStr,
+                 conv_blocks: List[ConvBlock],
+                 ffnn_blocks: Optional[List[FFNNBlock]] = None):
+        ConvModel.is_valid(conv_blocks, ffnn_blocks)
+        
+        self.conv_blocks = conv_blocks
+        self.in_features = conv_blocks[0].conv_block_builder.in_channels
+        self.out_features = ffnn_blocks[-1].out_features
+ 
+        # 1. Assemble the convolutional modules
+        modules: List[nn.Module] = [module for block in conv_blocks for module in block.modules]
+        
+        # 2. Assemble the fully connected modules if necessary
+        if ffnn_blocks is not None:
+            self.ffnn_blocks = ffnn_blocks
+            modules.append(nn.Flatten())
+            [modules.append(module) for block in ffnn_blocks for module in block.modules]
+        super(ConvModel, self).__init__(model_id, nn.Sequential(*modules))
+```
+The current class hierarchy for Neural models is defined as:   
+
 ![NeuralModel](images/Neural_Model_Hierarchy.png)
+
+## Environment
+
+| Library         | Version |
+|:----------------|:--------|
+| Python          | 3.12.3  |
+| SymPy           | 1.12    |
+| Numpy           | 2.1.3   |
+| Pydantic        | 2.4.1   |
+| Shap            | 0.43.0  |
+| torch           | 2.5.1   |
+| torchVision     | 0.20.1  |
+| torch-geometric | 2.6.1   |
+| torch_sparse    | 0.6.18  |
+| torch_scatter   | 2.12    |
+| torch_cluster | 1.6.3   |
+| Scikit-learn    | 1.5.2   |
+| Geomstats       | 2.8.0   |
+| Jax | 0.4.34  |
+| PyTest | 8.3.3   |
+| matplotlib | 3.9.2   |
+
+
 
 # References
 -[Deep learning with reusable neural blocks](http://patricknicolas.blogspot.com/2023/03/building-bert-with-reusable-neural.html)    
