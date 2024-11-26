@@ -6,7 +6,7 @@ from abc import ABC
 from dl.block.builder import ConvBlockBuilder
 import torch.nn as nn
 from typing import Tuple, List, NoReturn
-from dl.block import ConvException
+from dl import ConvException
 
 
 class Conv2DBlockBuilder(ConvBlockBuilder, ABC):

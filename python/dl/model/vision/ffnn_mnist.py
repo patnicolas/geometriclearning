@@ -60,10 +60,10 @@ class FfnnMnist(BaseModel):
         @return Tuple (train data, labels, test data, labels)
         @rtype Tuple[torch.Tensor]
         """
-        from dl.training.neural_net import NeuralNet
+        from dl.training.neural_net_train import NeuralNetTraining
         from torch.nn.functional import one_hot
 
-        _, torch_device = NeuralNet.get_device()
+        _, torch_device = NeuralNetTraining.get_device()
 
         train_data = torch.load(f'{root_path}/{BaseModel.default_training_file}')
         num_samples = len(train_data[0])

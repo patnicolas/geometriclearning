@@ -5,7 +5,7 @@ import torch
 from torch import nn
 from torch.autograd import Variable
 from dl.block.neural_block import NeuralBlock
-from typing import Self
+from typing import Self, Tuple
 from dl import DLException
 
 
@@ -21,8 +21,8 @@ class VariationalBlock(NeuralBlock):
         mu: nn.Module = nn.Linear(hidden_dim, latent_size)
         log_var: nn.Module = nn.Linear(hidden_dim, latent_size)
         sampler_fc: nn.Module = nn.Linear(latent_size, hidden_dim)
-        modules = tuple([mu, log_var, sampler_fc])
-        super(VariationalBlock, self).__init__(block_id='Gaussian', modules=modules)
+        modules: Tuple[nn.Module] = tuple([mu, log_var, sampler_fc])
+        super(VariationalBlock, self).__init__(block_id='Gaussian', modules=tuple(modules))
 
         self.mu = mu
         self.log_var = log_var
@@ -43,13 +43,14 @@ class VariationalBlock(NeuralBlock):
         """
         random sample the z-space using the mean and log variance
         @param mu: Mean of the distribution in the z-space (latent)
+        @type mu: torch.Tensor
         @param log_var: Logarithm of the variance of the distribution in the z-space
+        @type log_var: torch.Tensor
         @return: Sampled data point from z-space
         """
         std = log_var.mul(0.5).exp_()
         std_dev = std.data.new(std.size()).normal_()
-        eps = Variable(std_dev)
-        return eps.mul_(std).add_(mu)
+        return std_dev.mul_(std).add_(mu)
 
     def forward(self, x: torch.Tensor) -> (torch.Tensor, torch.Tensor, torch.Tensor):
         """

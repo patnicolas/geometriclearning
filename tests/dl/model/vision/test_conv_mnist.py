@@ -2,9 +2,8 @@ from dl.model.vision.conv_2D_config import Conv2DConfig, ConvLayer2DConfig
 
 import unittest
 from dl.training.early_stop_logger import EarlyStopLogger
-from python.dl.model.vision.conv_mnist import ConvMNIST
-from python.dl.block import ConvException
-from dl.exception.dl_exception import DLException
+from dl.model.vision.conv_mnist import ConvMNIST
+from dl import ConvException, DLException
 import torch.nn as nn
 from typing import NoReturn, AnyStr, List
 import logging

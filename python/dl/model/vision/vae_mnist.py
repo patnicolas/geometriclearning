@@ -4,11 +4,10 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 from typing import AnyStr, NoReturn
 from dl.model.vision.base_model import BaseModel
 from dl.model.vae_model import VAEModel
-from dl.block import ConvException
+from dl import ConvException, DLException
 from dl.training.early_stop_logger import EarlyStopLogger
-from dl.training.vae import VAE
+from dl.training.vae_training import VAETraining
 from dl.training.hyper_params import HyperParams
-from dl.exception.dl_exception import DLException
 
 
 class VAEMNIST(object):
@@ -36,11 +35,11 @@ class VAEMNIST(object):
             early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
 
             # Define the neural network as model, hyperparameters, early stopping criteria and metrics
-            vae = VAE(vae_model=self.vae_model,
-                      hyper_params=hyper_parameters,
-                      early_stop_logger=early_stop_logger,
-                      metrics={},
-                      plot_parameters=[])
+            vae = VAETraining(vae_model=self.vae_model,
+                              hyper_params=hyper_parameters,
+                              early_stop_logger=early_stop_logger,
+                              metrics={},
+                              plot_parameters=[])
 
             # No need for labels as it is unsupervised
             train_data_loader, test_data_loader = self.base_mnist.load_dataset(root_path, use_labels=False)

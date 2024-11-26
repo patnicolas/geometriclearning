@@ -4,11 +4,11 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 from typing import AnyStr, List
 from abc import ABC, abstractmethod
 from torch.utils.data import DataLoader, Dataset
-from dl.block import ConvException
-from dl.training.neural_net import NeuralNet
+from dl import ConvException
+from dl.training.neural_net_train import NeuralNetTraining
 from dl.model.vision.conv_2D_config import Conv2DConfig
 from dl.training.hyper_params import HyperParams
-from dl.exception.dl_exception import DLException
+from dl import DLException
 from dl.training.exec_config import ExecConfig
 import logging
 logger = logging.getLogger('dl.model.vision.BaseModel')
@@ -55,9 +55,9 @@ class BaseModel(ABC):
         @type plot_title: str
         """
         try:
-            network = NeuralNet.build(self.model, hyper_parameters, metric_labels, exec_config)
+            network = NeuralNetTraining.build(self.model, hyper_parameters, metric_labels, exec_config)
             plot_title = f'{self.model.model_id}_metrics_{plot_title}'
-            network.execute(plot_title=plot_title, loaders=self.load_dataset(root_path, exec_config))
+            network(plot_title=plot_title, loaders=self.load_dataset(root_path, exec_config))
         except ConvException as e:
             logger.error(str(e))
             raise DLException(e)
@@ -69,7 +69,7 @@ class BaseModel(ABC):
         train_dataset, test_dataset = self._extract_datasets(root_path)
 
         # If we are experimenting with a subset of the data set for memory usage
-        train_dataset, test_dataset = exec_config.apply_sampling( train_dataset,  test_dataset)
+        train_dataset, test_dataset = exec_config.apply_sampling(train_dataset,  test_dataset)
 
         # Create DataLoaders for batch processing
         train_loader, test_loader = exec_config.apply_optimize_loaders(self.data_batch_size, train_dataset, test_dataset)

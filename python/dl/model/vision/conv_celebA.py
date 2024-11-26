@@ -28,24 +28,6 @@ class ConvCelebA(BaseModel):
         """
         super(ConvCelebA, self).__init__(conv_2D_config, data_batch_size, resize_image)
 
-    """
-    def do_train(self,
-                 root_path: AnyStr,
-                 hyper_parameters: HyperParams,
-                 metric_labels: List[AnyStr],
-                 plot_title: AnyStr) -> NoReturn:
-        try:
-            network = NeuralNet.build(self.model, hyper_parameters, metric_labels)
-            plot_title = f'{self.model.model_id}_metrics_{plot_title}'
-            network.execute(plot_title=plot_title, loaders=self.load_dataset(root_path))
-        except ConvException as e:
-            logger.error(str(e))
-            raise DLException(e)
-        except AssertionError as e:
-            logger.error(str(e))
-            raise DLException(e)
-        """
-
     """ ---------------------------  Private helper methods ---------------------------- """
 
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):

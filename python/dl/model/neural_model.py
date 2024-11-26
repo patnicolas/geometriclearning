@@ -4,7 +4,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 import torch
 import torch.nn as nn
 from abc import abstractmethod, ABC
-from typing import AnyStr, Self, List
+from typing import AnyStr, Self, List, Callable
 
 __all__ = ['NeuralModel']
 
@@ -15,17 +15,33 @@ forward and save methods
 
 
 class NeuralModel(torch.nn.Module, ABC):
-    def __init__(self, model_id: AnyStr, model: torch.nn.Module):
+    def __init__(self,
+                 model_id: AnyStr,
+                 model: torch.nn.Module,
+                 noise_func: Callable[[torch.Tensor], torch.Tensor] = None) -> None:
         """
         Constructor
         @param model_id: Identifier for this model
         @type model_id: str
         @param model: Model as a Torch neural module
         @type model: nn.Module
+        @param noise_func: Function to add noise to input data (features)
+        @param noise_func: Callable (noise_factor, input)
         """
         super(NeuralModel, self).__init__()
         self.model_id = model_id
         self.model = model
+        self.noise_func = noise_func
+
+    def add_noise(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Add noise to the input data if defined in the constructor
+        @param x: input training data as tensor
+        @type x: torch.Tensor
+        @return: Noisy tensor if noise_func has been defined, the argument tensor otherwise
+        @rtype: torch.Tensor
+        """
+        return self.noise_func(x) if self.noise_func is not None else x
 
     def get_modules(self) -> List[nn.Module]:
         return list(self.model.children())
@@ -43,11 +59,9 @@ class NeuralModel(torch.nn.Module, ABC):
         print(f'Output {self.model_id}\n{x.shape}')
         return x
 
-    @abstractmethod
     def get_in_features(self) -> int:
         raise NotImplementedError('NeuralModel.get_in_features undefined for abstract neural model')
 
-    @abstractmethod
     def get_out_features(self) -> int:
         """
         Polymorphic method to retrieve the number of output features
@@ -56,7 +70,7 @@ class NeuralModel(torch.nn.Module, ABC):
         """
         raise NotImplementedError('NeuralModel.get_out_features undefined for abstract neural model')
 
-    @abstractmethod
+
     def get_latent_features(self) -> int:
         raise NotImplementedError('NeuralModel.get_latent_features undefined for abstract neural model')
 
@@ -69,7 +83,6 @@ class NeuralModel(torch.nn.Module, ABC):
     def get_model(self) -> torch.nn.Module:
         return self.model
 
-    @abstractmethod
     def save(self, extra_params: dict = None):
         raise NotImplementedError('NeuralModel.save is an abstract method')
 

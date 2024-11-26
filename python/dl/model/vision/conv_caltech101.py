@@ -47,7 +47,6 @@ class ConvCaltech101(BaseModel):
         """
         import torch
         from torchvision import transforms
-        from torch.utils.data import DataLoader
         from torchvision.datasets.caltech import Caltech101
 
         # Define image transformations with or without resizing

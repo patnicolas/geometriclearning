@@ -96,13 +96,10 @@ class ExecConfig(object):
 
             train_dataset = Subset(train_dataset, indices=range(train_subset_size))
             test_dataset = Subset(test_dataset, indices=range(test_subset_size))
-            return train_dataset, test_dataset
+        return train_dataset, test_dataset
 
     def apply_labels_dtype(self, x: torch.Tensor, convert_to_float: bool = True) -> torch.Tensor:
-        if convert_to_float:
-            return x.float() if self.device_config == 'mps' else x
-        else:
-            return x
+        return (x.float() if self.device_config == 'mps' else x) if convert_to_float else x
 
     def apply_device(self) -> (AnyStr, torch.device):
         """

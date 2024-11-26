@@ -1,7 +1,7 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
-from typing import AnyStr, Self, overload
+from typing import AnyStr, Self, Callable
 from dl.model.neural_model import NeuralModel
 from dl.block.variational_block import VariationalBlock
 import torch
@@ -16,7 +16,11 @@ The Neural model can be a feedforward neural network, convolutional neural netwo
 
 
 class VAEModel(NeuralModel):
-    def __init__(self, model_id: AnyStr, encoder: NeuralModel, latent_size: int):
+    def __init__(self,
+                 model_id: AnyStr,
+                 encoder: NeuralModel,
+                 latent_size: int,
+                 noise_func: Callable[[torch.Tensor], torch.Tensor] = None) -> None:
         """
         Constructor for the variational neural network
         @param model_id: Identifier for this model
@@ -25,9 +29,12 @@ class VAEModel(NeuralModel):
         @type encoder: NeuralModel
         @param latent_size: Size of the latent space
         @type latent_size: int
+        @param noise_func: Optional function to add noise to input data (features)
+        @param noise_func: Callable (noise_factor, input)
         """
         # Create a decoder as inverted from the encoder
         decoder = encoder.invert()
+
         # extract the Torch modules
         modules = list(encoder.get_model().modules())
         inverted_modules = list(decoder.get_model().modules())
@@ -37,7 +44,7 @@ class VAEModel(NeuralModel):
         all_modules = modules + list(variational_block.modules) + inverted_modules
         seq_module: torch.nn.Module = torch.nn.Sequential(*all_modules)
         # Call base class
-        super(VAEModel, self).__init__(model_id, seq_module)
+        super(VAEModel, self).__init__(model_id, seq_module, noise_func)
         # Initialize the internal model parameters
         self.encoder = encoder
         self.decoder = decoder

@@ -4,7 +4,7 @@ from dl.model.ffnn_model import FFNNModel
 from dl.model.vae_model import VAEModel
 from dataset.unlabeled_loader import UnlabeledLoader
 from dataset.unlabeled_dataset import UnlabeledDataset
-from dl.training.vae import VAE
+from dl.training.vae_training import VAETraining
 from dl.training.hyper_params import HyperParams
 from dl.training.early_stop_logger import EarlyStopLogger
 from plots.plotter import PlotterParameters
@@ -65,7 +65,7 @@ class VAETest(unittest.TestCase):
         plot_parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                            for label, _ in metric_labels.items()]
 
-        network = VAE(
+        network = VAETraining(
             vae_model,
             hyper_parameters,
             early_stop_logger,

@@ -4,7 +4,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 import torch
 from torch.utils.data import Dataset, DataLoader
 from abc import abstractmethod
-from typing import AnyStr, Dict
+from typing import AnyStr, Dict, Self
 from dl.model.neural_model import NeuralModel
 from dl.training.exec_config import ExecConfig
 from dl import DLException, ConvException
@@ -30,7 +30,7 @@ logger = logging.getLogger('dl.NeuralNet')
 """
 
 
-class NeuralNet(object):
+class NeuralNetTraining(object):
     def __init__(self,
                  model: NeuralModel,
                  hyper_params: HyperParams,
@@ -48,6 +48,8 @@ class NeuralNet(object):
         @type early_stop_logger: EarlyStopLogger
         @param metrics: Dictionary of metric {metric_name: build_in_metric instance}
         @type metrics: Dict[AnyStr, Metric]
+        @param exec_config: Configuration for optimization of execution of training
+        @type exec_config: ExecConfig
         @param plot_parameters: Parameters for plotting metrics, training and test losses
         @type plot_parameters: Optional List[PlotterParameters]
         """
@@ -63,9 +65,20 @@ class NeuralNet(object):
     @classmethod
     def build(cls,
               model: NeuralModel,
-              hyper_parameters: HyperParams,
+              hyper_params: HyperParams,
               metric_labels: List[AnyStr],
-              exec_config: ExecConfig):
+              exec_config: ExecConfig) -> Self:
+        """
+        Simplified constructor for the training and execution of any neural network.
+        @param model: Neural network model (CNN, FeedForward,...)
+        @type model: NeuralModel or derived types
+        @param hyper_params: Hyper parameters associated with the training of th emodel
+        @type hyper_params: HyperParams
+        @param metric_labels: Labels for metric to be used
+        @type metric_labels: List[str]
+        @param exec_config: Configuration for optimization of execution of training
+        @type exec_config: ExecConfig
+        """
         # Initialize the Early stop mechanism
         patience = 2
         min_diff_loss = -0.001
@@ -73,11 +86,11 @@ class NeuralNet(object):
         early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
 
         # Create metrics
-        metrics_dict = create_metric_dict(metric_labels, hyper_parameters.encoding_len)
+        metrics_dict = create_metric_dict(metric_labels, hyper_params.encoding_len)
         # Initialize the plotting parameters
         plot_parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                            for label, _ in metrics_dict.items()]
-        return cls(model, hyper_parameters, early_stop_logger, metrics_dict, exec_config, plot_parameters)
+        return cls(model, hyper_params, early_stop_logger, metrics_dict, exec_config, plot_parameters)
 
     @abstractmethod
     def model_label(self) -> AnyStr:
@@ -112,10 +125,9 @@ class NeuralNet(object):
             is_early_stopping = self.early_stop_logger(epoch, train_loss, eval_metrics)
             self.exec_config.apply_monitor_memory()
         # Generate summary
-        if self.plot_parameters is not None:
-            self.early_stop_logger.summary(output_file_name)
+        self.early_stop_logger.summary(output_file_name)
 
-    def execute(self, plot_title: AnyStr, loaders: (DataLoader, DataLoader)) -> None:
+    def __call__(self, plot_title: AnyStr, loaders: (DataLoader, DataLoader)) -> None:
         """
         Execute the training, evaluation and metrics for any model for MNIST data set
         @param plot_title: Labeling metric for output to file and plots
@@ -146,6 +158,7 @@ class NeuralNet(object):
             except Exception as e:
                 raise DLException(str(e))
 
+    """
     def init_data_loader(self, batch_size: int, dataset: Dataset) -> (DataLoader, DataLoader):
         torch.manual_seed(42)
 
@@ -159,6 +172,7 @@ class NeuralNet(object):
         train_loader = DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True)
         test_loader = DataLoader(dataset=test_set, batch_size=batch_size, shuffle=True)
         return train_loader, test_loader
+    """
 
     def __repr__(self) -> str:
         return repr(self.hyper_params)
@@ -173,26 +187,28 @@ class NeuralNet(object):
 
         _, torch_device = self.exec_config.apply_device()
         model = self.model.to(torch_device)
-
-        for idx, (features, labels) in enumerate(train_loader):
+        idx = 0
+        for features, labels in train_loader:
             try:
                 model.train()
 
+                # Add noise if the mode is defined
+                features = model.add_noise(features)
+
+                # Transfer the input data and labels to the target device
                 features = features.to(torch_device)
-                # labels = self.exec_config.apply_labels_dtype(labels)
                 labels = labels.to(torch_device)
 
-                # features = self.train_exec_config(features)
                 predicted = model(features)  # Call forward - prediction
                 raw_loss = loss_function(predicted, labels)
-                # print(f'Epoch #{epoch+1}, Batch #{idx+1} Loss: {raw_loss}')
 
                 # Set back propagation
                 raw_loss.backward(retain_graph=True)
                 total_loss += raw_loss.data
-                # Monitoring and caching
+                # Monitoring and caching for performance imp
                 self.exec_config.apply_empty_cache()
                 self.exec_config.apply_grad_accu_steps(idx, optimizer)
+                idx += 1
             except RuntimeError as e:
                 raise DLException(str(e))
             except AttributeError as e:
@@ -215,6 +231,9 @@ class NeuralNet(object):
             for features, labels in tqdm(test_loader):
                 try:
                     self.model.eval()
+                    # Add noise if the mode is defined
+                    features = self.model.add_noise(features)
+
                     # Transfer the input data to GPU
                     features = features.to(torch_device)
                     labels = labels.to(torch_device)

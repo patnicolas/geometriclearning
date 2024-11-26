@@ -3,13 +3,15 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from abc import ABC
 
-from dl.training.neural_net import NeuralNet
+from dl.training.neural_net_train import NeuralNetTraining
 from dl.training.hyper_params import HyperParams
 from dl.training.early_stop_logger import EarlyStopLogger
 from plots.plotter import PlotterParameters
 from metric.metric import Metric
 from dl.model.vae_model import VAEModel
-from dl.exception.dl_exception import DLException
+from dl.training.exec_config import ExecConfig
+from dl import DLException
+from dl.loss.vae_kl_loss import VAEKLLoss
 from typing import AnyStr, List, Optional, Dict, NoReturn, Self
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -28,12 +30,13 @@ The key components are
 """
 
 
-class VAE(NeuralNet, ABC):
+class VAETraining(NeuralNetTraining, ABC):
     def __init__(self,
                  vae_model: VAEModel,
                  hyper_params: HyperParams,
                  early_stop_logger: EarlyStopLogger,
                  metrics: Dict[AnyStr, Metric],
+                 exec_config: ExecConfig,
                  plot_parameters: Optional[List[PlotterParameters]]):
         """
         Default constructor for this variational auto-encoder
@@ -45,13 +48,24 @@ class VAE(NeuralNet, ABC):
         @type early_stop_logger: EarlyStopLogger
         @param metrics: Dictionary of metrics and values
         @type metrics: Dictionary
+        @param exec_config: Configuration for optimization of execution of training
+        @type exec_config: ExecConfig
         @param plot_parameters: Optional plotting parameters
         @type plot_parameters: List[PlotterParameters]
         """
-        super(VAE, self).__init__(vae_model, hyper_params, early_stop_logger, metrics, plot_parameters)
+        super(VAETraining, self).__init__(vae_model,
+                                          hyper_params,
+                                          early_stop_logger,
+                                          metrics,
+                                          exec_config,
+                                          plot_parameters)
 
     @classmethod
-    def build(cls, vae_model: VAEModel, hyper_params: HyperParams, early_stop_logger: EarlyStopLogger) -> Self:
+    def build(cls,
+              vae_model: VAEModel,
+              hyper_params: HyperParams,
+              early_stop_logger: EarlyStopLogger,
+              exec_config: ExecConfig) -> Self:
         """
         Alternative, simplified constructor for this variational auto-encoder for which only the training
         and evaluation losses are created
@@ -61,39 +75,35 @@ class VAE(NeuralNet, ABC):
         @type hyper_params: HyperParams
         @param early_stop_logger: Training monitoring
         @type early_stop_logger: EarlyStopLogger
+        @param exec_config: Configuration for optimization of execution of training
+        @type exec_config: ExecConfig
         @return Instance of VAE
         """
-        return cls(vae_model, hyper_params, early_stop_logger, metrics={}, plot_parameters=[])
+        return cls(vae_model, hyper_params, early_stop_logger, metrics={}, exec_config=exec_config, plot_parameters=[])
 
-    def __call__(self,
-                 train_loader: DataLoader,
-                 eval_loader: DataLoader,
-                 output_file_name: Optional[AnyStr] = None) -> NoReturn:
+    def __call__(self, plot_title: AnyStr, loaders: (DataLoader, DataLoader)) -> NoReturn:
         """
-E       Execute the cycle of training and evaluation for the
-        @param train_loader: Loader for the training data
-        @type train_loader: DataLoader
-        @param eval_loader: Loader for the evaluation data
-        @type eval_loader: DataLoader
-        @param output_file_name Optional file name for the output of metrics
-        @type output_file_name: AnyStr
+        Polymorphic execution of the cycle of training and evaluation for the variational auto-encoder
+        @param plot_title: Labeling metric for output to file and plots
+        @type plot_title: str
+        @param loaders: Pair of loader for training data and test data
+        @type loaders: Tuple[DataLoader]
         """
         # Initialization of the weights
         torch.manual_seed(42)
         self.hyper_params.initialize_weight(list(self.model.modules()))
 
+        train_loader, eval_loader = loaders
         for epoch in tqdm(range(self.hyper_params.epochs)):
             # Set training mode and execute training
             train_loss = self.__train(epoch, train_loader)
-            # constants.log_info(f'Epoch # {epoch} training loss {train_loss}')
+
             # Set mode and execute evaluation
             eval_metrics = self.__eval(epoch, eval_loader)
-            # constants.log_info(f'Epoch # {epoch} eval loss {eval_loss}')
             self.early_stop_logger(epoch, train_loss, eval_metrics)
 
         # Generate summary
-        if self.plot_parameters is not None:
-            self.early_stop_logger.summary()
+        self.early_stop_logger.summary()
 
     def _enc_dec_params(self) -> (dict, dict):
         """
@@ -134,7 +144,7 @@ E       Execute the cycle of training and evaluation for the
     def __reconstruction_loss(self,
                               predicted: torch.Tensor,
                               x: torch.Tensor) -> float:
-        from dl.exception.dl_exception import DLException
+        from dl import DLException
 
         try:
             # Cross-entropy for reconstruction loss for binary values
@@ -157,18 +167,19 @@ E       Execute the cycle of training and evaluation for the
         return z.view(shapes[0], shapes[1], shapes[2], shapes[3]) if len(shapes) == 4 \
             else z.view(shapes[0], shapes[1], shapes[2])
 
-    def __train(self, epoch: int, data_loader: DataLoader) -> float:
+    def __train(self, epoch: int, train_loader: DataLoader) -> float:
         self.model.train()
         total_loss = 0
 
         encoder_optimizer = self.hyper_params.optimizer(self.model)
         decoder_optimizer = self.hyper_params.optimizer(self.model)
-        vae_kl_loss = VAEKLLoss(self.model.mu, self.model.log_var, len(data_loader))
+        vae_kl_loss = VAEKLLoss(self.model.mu, self.model.log_var, len(train_loader))
 
-        for data in tqdm(data_loader):
+        for data in tqdm(train_loader):
             try:
                 for params in self.model.parameters():
                     params.grad = None
+                self.model.add_noise(data)
                 z = self.model(data)
                 loss = vae_kl_loss(z, data)
                 # loss = self.__compute_loss(z, data, self.model.mu, self.model.log_var, len(data_loader))
@@ -183,17 +194,21 @@ E       Execute the cycle of training and evaluation for the
                 raise DLException(str(e))
             except Exception as e:
                 raise DLException(str(e))
-        return total_loss / len(data_loader)
+        return total_loss / len(train_loader)
 
     def __eval(self, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
         self.model.eval()
         total_loss = 0
+        vae_kl_loss = VAEKLLoss(self.model.mu, self.model.log_var, len(eval_loader))
         metric_collector = {}
 
         with torch.no_grad():
             for data in tqdm(eval_loader):
                 z = self.model(data)
-                loss = self.__compute_loss(z, data, self.model.mu, self.model.log_var, len(eval_loader))
+                if self.model.noise_func is not None:
+                    data = self.model.noise_func(0.5, data)
+                loss = vae_kl_loss(z, data)
+                # loss = self.__compute_loss(z, data, self.model.mu, self.model.log_var, len(eval_loader))
                 total_loss += loss.data
 
         eval_loss = total_loss / len(eval_loader)
