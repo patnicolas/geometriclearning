@@ -3,10 +3,12 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from abc import ABC
 
+from dl.block.deconv_block import DeConvBlock
 from dl.block.ffnn_block import FFNNBlock
 from dl.block.conv_block import ConvBlock
 from dl.model.neural_model import NeuralModel
 from dl.model.ffnn_model import FFNNModel
+from dl.model.deconv_model import DeConvModel
 from typing import List, AnyStr, Dict, Any, Self, Optional
 import torch
 import torch.nn as nn
@@ -45,7 +47,8 @@ class ConvModel(NeuralModel, ABC):
 
         # Record the number of input and output features from the first and last neural block respectively
         self.in_features = conv_blocks[0].conv_block_builder.in_channels
-        self.out_features = ffnn_blocks[-1].out_features
+        self.out_features = ffnn_blocks[-1].out_features if ffnn_blocks is not None \
+            else conv_blocks[-1].conv_block_builder.out_channels
         # Define the sequence of modules from the layout
         modules: List[nn.Module] = [module for block in conv_blocks for module in block.modules]
 
@@ -54,6 +57,8 @@ class ConvModel(NeuralModel, ABC):
             self.ffnn_blocks = ffnn_blocks
             modules.append(nn.Flatten())
             [modules.append(module) for block in ffnn_blocks for module in block.modules]
+        else:
+            self.ffnn_blocks = None
         super(ConvModel, self).__init__(model_id, nn.Sequential(*modules))
 
     @classmethod
@@ -69,6 +74,27 @@ class ConvModel(NeuralModel, ABC):
         @rtype: ConvModel
         """
         return  cls(model_id, conv_blocks = conv_blocks, ffnn_blocks = None)
+
+    def invert(self) -> DeConvModel:
+        """
+         Build a de-convolutional neural model from an existing convolutional nodel
+         @return: Instance of de convolutional model
+         @rtype: DeConvModel
+         """
+        de_conv_blocks = [conv_block.invert() for conv_block in self.conv_blocks]
+        return DeConvModel(model_id=f'de_{self.model_id}', de_conv_blocks=de_conv_blocks, ffnn_blocks=None)
+
+    def invert_with_last_activation(self, activation: nn.Module) -> DeConvModel:
+        """
+         Build a de-convolutional neural model from an existing convolutional nodel
+         @return: Instance of de convolutional model
+         @rtype: DeConvModel
+         """
+        de_conv_blocks = [conv_block.invert() if idx < len(self.conv_blocks)
+                          else conv_block.invert_with_activation(activation)
+                          for idx, conv_block in enumerate(self.conv_blocks)]
+
+        return DeConvModel(model_id=f'de_{self.model_id}', de_conv_blocks=de_conv_blocks)
 
     def has_fully_connected(self) -> bool:
         """
@@ -107,11 +133,12 @@ class ConvModel(NeuralModel, ABC):
         return self.model(x)
 
     def _state_params(self) -> Dict[AnyStr, Any]:
+        dff_model_input_size = self.ffnn_blocks[0].in_features if self.ffnn_blocks is not None else -1
         return {
             "model_id": self.model_id,
             "input_size": self.conv_blocks[0].conv_block_builder.in_channels,
-            "output_size": self.ffnn_blocks[-1].out_features ,
-            "dff_model_input_size": self.ffnn_blocks[0].in_features
+            "output_size": self.out_features,
+            "dff_model_input_size": dff_model_input_size
         }
 
     @staticmethod

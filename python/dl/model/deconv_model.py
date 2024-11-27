@@ -19,7 +19,7 @@ class DeConvModel(NeuralModel, ABC):
     def __init__(self,
                  model_id: AnyStr,
                  de_conv_blocks: List[DeConvBlock],
-                 ffnn_blocks: Optional[List[FFNNBlock]]):
+                 ffnn_blocks: Optional[List[FFNNBlock]] = None) -> None:
         """
         Constructor for this de-convolutional neural network
         @param model_id: Identifier for this model
@@ -33,17 +33,17 @@ class DeConvModel(NeuralModel, ABC):
 
         # Record the number of input and output features from the first and last neural block respectively
         self.in_features = de_conv_blocks[0].in_channels
-        self.out_features = ffnn_blocks[-1].out_features
+        self.out_features = ffnn_blocks[-1].out_features if ffnn_blocks is not None else de_conv_blocks[-1].out_channels
         # Define the sequence of modules from the layout
         de_conv_modules = [module for block in de_conv_blocks for module in block.modules]
 
         # If fully connected are provided as CNN
-        if ffnn_blocks:
-            self.ffnn_blocks = ffnn_blocks
+        if ffnn_blocks is not None:
             ffnn_modules = [module for block in ffnn_blocks for module in block.modules]
             modules = de_conv_modules + [nn.Unflatten] + ffnn_modules
         else:
             modules = de_conv_modules
+        self.ffnn_blocks = ffnn_blocks
         super(DeConvModel, self).__init__(model_id, nn.Sequential(*modules))
 
     @classmethod
@@ -97,10 +97,9 @@ class DeConvModel(NeuralModel, ABC):
     def _state_params(self) -> Dict[AnyStr, Any]:
         return {
             "model_id": self.model_id,
-            "de_conv_dimension": self.conv_blocks[0].conv_dimension,
-            "input_size": self.conv_blocks[0].in_channels,
-            "output_size": self.ffnn_blocks[-1].out_features ,
-            "dff_model_input_size": self.ffnn_blocks[0].in_features
+            "input_size": self.de_conv_blocks[0].in_channels,
+            "output_size": self.ffnn_blocks[-1].out_features if self.ffnn_blocks is not None else -1,
+            "dff_model_input_size": self.ffnn_blocks[0].in_features if self.ffnn_blocks is not None else -1
         }
 
     @staticmethod

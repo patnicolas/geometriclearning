@@ -2,14 +2,14 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 import torch.nn as nn
-from typing import Tuple, Self
+from typing import Tuple, Self, Optional
+
 from dl.block.builder import ConvBlockBuilder
 from dl.block.builder.deconv1d_block_builder import DeConv1DBlockBuilder
 from dl.block.builder.conv2d_block_builder import Conv2DBlockBuilder
 from dl.block.builder.conv1d_block_builder import Conv1DBlockBuilder
 from dl.block.builder.deconv2d_block_builder import DeConv2DBlockBuilder
-from dl.block.conv_block import ConvBlock
-from dl import DLException, ConvException
+from dl import ConvException
 
 
 """    
@@ -25,14 +25,19 @@ from dl import DLException, ConvException
 
 
 class DeConvBlock(nn.Module):
-    def __int__(self, conv_block_builder: ConvBlockBuilder) -> None:
-        assert type(conv_block_builder) is not Conv2DBlockBuilder and type(conv_block_builder) is not Conv1DBlockBuilder, \
-            f'Cannot create a de-convolutional block from a block of type { type(conv_block_builder) }'
 
+    def __init__(self, conv_block_builder: ConvBlockBuilder, activation: Optional[nn.Module] = None) -> None:
         super(DeConvBlock, self).__init__()
-        self.in_channels = conv_block_builder.in_channels
-        self.out_channels = conv_block_builder.out_channels
-        self.modules = conv_block_builder()
+
+        if isinstance(conv_block_builder, Conv2DBlockBuilder):
+            activation_module = activation if activation is not None else conv_block_builder.activation
+            de_conv_block_builder = DeConv2DBlockBuilder.build(conv_block_builder, activation_module)
+        else:
+            raise ConvException(f'Cannot create a De convolutional block from type {type(conv_block_builder)}')
+
+        self.in_channels = de_conv_block_builder.in_channels
+        self.out_channels = de_conv_block_builder.out_channels
+        self.modules = de_conv_block_builder()
 
     @classmethod
     def build(cls,
@@ -45,7 +50,7 @@ class DeConvBlock(nn.Module):
               padding: int | Tuple[int, int],
               batch_norm: bool,
               activation: nn.Module,
-              bias: bool):
+              bias: bool) -> Self:
         """
             Alternative constructor for the de convolutional neural block
             @param conv_dimension: Dimension of the de convolution (1 or 2)
@@ -75,6 +80,7 @@ class DeConvBlock(nn.Module):
                 block_builder = DeConv1DBlockBuilder(
                     in_channels,
                     out_channels,
+                    input_size,
                     kernel_size,
                     stride,
                     padding,

@@ -95,8 +95,6 @@ class ConvBlockTest(unittest.TestCase):
                 True)
         else:
             raise ConvException(f'Dimension {dimension} is not supported')
-
-        has_bias = False
         return ConvBlock(conv_block_builder)
 
 

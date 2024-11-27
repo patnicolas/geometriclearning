@@ -1,7 +1,7 @@
 import unittest
 from torch import nn
 from dl.block.builder.conv2d_block_builder import Conv2DBlockBuilder
-from dl.block import ConvException
+from dl import ConvException
 from typing import Tuple
 import logging
 

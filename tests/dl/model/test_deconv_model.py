@@ -2,7 +2,7 @@ import unittest
 import torch.nn as nn
 from dl.block.deconv_block import DeConvBlock
 from dl.model.deconv_model import DeConvModel
-from dl.exception.dl_exception import DLException
+from dl import ConvException
 from typing import Tuple
 
 
@@ -22,7 +22,7 @@ class DeConvModelTest(unittest.TestCase):
             self.assertTrue(de_conv_model.out_channels == out_channels)
             print(repr(de_conv_model))
             assert True
-        except DLException as e:
+        except ConvException as e:
             assert False
 
     def test_init_failed(self):
@@ -39,7 +39,7 @@ class DeConvModelTest(unittest.TestCase):
             self.assertTrue(de_conv_model.out_channels == out_channels)
             print(repr(de_conv_model))
             assert False
-        except DLException as e:
+        except ConvException as e:
             assert True
 
     @staticmethod
@@ -49,10 +49,13 @@ class DeConvModelTest(unittest.TestCase):
         has_bias = False
         stride = (2, 2)
         padding = (2, 2)
-        return DeConvBlock(
+        input_size = (28, 28)
+
+        return DeConvBlock.build(
             2,
             in_channels,
             out_channels,
+            input_size,
             kernel_size,
             stride,
             padding,

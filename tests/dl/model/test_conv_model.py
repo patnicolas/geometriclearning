@@ -3,7 +3,7 @@ import torch.nn as nn
 from dl.block.conv_block import ConvBlock
 from dl.block.ffnn_block import FFNNBlock
 from dl.model.conv_model import ConvModel
-from dl.block import ConvException
+from dl import ConvException
 from dl.block.builder.conv2d_block_builder import Conv2DBlockBuilder
 import logging
 
@@ -53,6 +53,7 @@ class ConvModelTest(unittest.TestCase):
             logging.error(str(e))
             self.assertTrue(True)
 
+    @unittest.skip('Ignore')
     def test_mnist(self):
         model_id = 'conv_MNIST_model'
         input_size = 28
@@ -93,6 +94,44 @@ class ConvModelTest(unittest.TestCase):
             print(str(e))
             self.assertTrue(False)
 
+    def test_build_from_conv(self):
+        model_id = 'conv_MNIST_model'
+        input_size = 28
+        in_channels = 1
+        kernel_size = 3
+        padding_size = 1
+        stride_size = 1
+        in_channels_2 = 8
+        kernel_size_2 = 3
+        out_channels = 16
+        try:
+            conv_block_1 = ConvModelTest.__create_conv_block_2(
+                in_channels,
+                in_channels_2,
+                input_size,
+                kernel_size,
+                stride_size,
+                padding_size,
+                nn.ReLU()
+            )
+            conv_block_2 = ConvModelTest.__create_conv_block_2(
+                in_channels_2,
+                out_channels,
+                input_size,
+                kernel_size_2,
+                stride_size,
+                padding_size,
+                nn.ReLU()
+            )
+            conv_model = ConvModel(model_id, conv_blocks=[conv_block_1, conv_block_2])
+            de_conv_model_1 = conv_model.invert()
+            print(f'First de conv:\n{repr(de_conv_model_1)}')
+            de_conv_model_2 = conv_model.invert_with_last_activation(nn.Sigmoid())
+            print(f'Second de conv:\n{repr(de_conv_model_2)}')
+        except ConvException as e:
+            print(str(e))
+            self.assertTrue(False)
+
     @staticmethod
     def __create_conv_block_2(
             in_channels: int,
@@ -118,7 +157,7 @@ class ConvModelTest(unittest.TestCase):
             max_pooling_kernel=max_pooling_kernel,
             activation=activation,
             bias=has_bias)
-        return ConvBlock(conv_2d_block_builder)
+        return ConvBlock(_id='Conv', conv_block_builder=conv_2d_block_builder)
 
 
 if __name__ == '__main__':

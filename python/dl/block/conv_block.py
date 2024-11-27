@@ -2,11 +2,10 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from torch import nn
-from typing import Tuple, Self, Any, AnyStr
-from dl.block.builder import ConvBlockBuilder
-from dl.block.builder.conv2d_block_builder import Conv2DBlockBuilder
+from typing import Tuple, Any, AnyStr, Optional
 from dl.block.neural_block import NeuralBlock
 from dl.block.deconv_block import DeConvBlock
+from dl.block.builder import ConvBlockBuilder
 import logging
 logger = logging.getLogger('dl.block.ConvBlock')
 
@@ -41,7 +40,13 @@ class ConvBlock(NeuralBlock):
         super(ConvBlock, self).__init__(_id, tuple(modules))
 
     def invert(self) -> DeConvBlock:
-        return DeConvBlock(self.conv_block_builder)
+        return DeConvBlock(self.conv_block_builder, activation=None)
+
+    def invert_with_activation(self, activation: Optional[nn.Module] = None) -> DeConvBlock:
+        return DeConvBlock(self.conv_block_builder, activation=activation)
+
+    def get_out_channels(self) -> int:
+        return self.conv_block_builder.out_channels
 
     def compute_out_shapes(self) -> int | Tuple[int, int]:
         return self.conv_block_builder.get_conv_layer_out_shape()

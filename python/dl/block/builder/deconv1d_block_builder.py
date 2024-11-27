@@ -12,6 +12,7 @@ class DeConv1DBlockBuilder(ConvBlockBuilder, ABC):
     def __init__(self,
                  in_channels: int,
                  out_channels: int,
+                 input_size: int,
                  kernel_size: int,
                  stride: int,
                  padding: int,
@@ -39,6 +40,7 @@ class DeConv1DBlockBuilder(ConvBlockBuilder, ABC):
         """
         super(DeConv1DBlockBuilder, self).__init__( in_channels,
                                                     out_channels,
+                                                    input_size,
                                                     kernel_size,
                                                     stride,
                                                     padding,
