@@ -5,18 +5,18 @@ from typing import AnyStr, List
 from abc import ABC, abstractmethod
 from torch.utils.data import DataLoader, Dataset
 from dl import ConvException
-from dl.training.neural_net_train import NeuralNetTraining
-from dl.model.vision.conv_2D_config import Conv2DConfig
+from dl.training.neural_net_training import NeuralNetTraining
+from dl.model.vision.conv_2d_config import Conv2DConfig
 from dl.training.hyper_params import HyperParams
 from dl import DLException
 from dl.training.exec_config import ExecConfig
 import logging
 logger = logging.getLogger('dl.model.vision.BaseModel')
 
-__all__ = ['BaseModel']
+__all__ = ['Base2DModel']
 
 
-class BaseModel(ABC):
+class Base2DModel(ABC):
 
     def __init__(self, conv_2D_config: Conv2DConfig, data_batch_size: int, resize_image: int) -> None:
         """
@@ -80,10 +80,11 @@ class BaseModel(ABC):
     @abstractmethod
     def _extract_datasets(self, root_path: AnyStr) ->(Dataset, Dataset):
         """
-        Extract the training data and labels and test data and labels
+        Extract the training data and labels and test data and labels. This method has to be overwritten
+        in subclasses such as convolutional model for MNIST data set...
         @param root_path: Root path to MNIST dataset
         @type root_path: AnyStr
-        @return Tuple (train data, test data)
+        @return Tuple (train dataset, test dataset)
         @rtype Tuple[Dataset]
         """
         raise NotImplementedError('_extract_datasets is an abstract method')

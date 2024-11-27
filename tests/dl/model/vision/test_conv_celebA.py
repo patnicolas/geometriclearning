@@ -1,5 +1,5 @@
 import unittest
-from dl.model.vision.conv_2D_config import Conv2DConfig, ConvLayer2DConfig
+from dl.model.vision.conv_2d_config import Conv2DConfig, ConvLayer2DConfig
 from dl.model.vision.conv_celebA import ConvCelebA
 from dl.training.hyper_params import HyperParams
 import torch.nn as nn

@@ -5,7 +5,7 @@ from dl.model.neural_model import NeuralModel
 from dl.block.ffnn_block import FFNNBlock
 from dl.block.gcn_block import GCNBlock
 from dl.training.exec_config import ExecConfig
-from dl.training.neural_net_train import NeuralNetTraining
+from dl.training.neural_net_training import NeuralNetTraining
 from dl.training.hyper_params import HyperParams
 from dl import DLException, ConvException
 from typing import List, AnyStr, Optional, Self

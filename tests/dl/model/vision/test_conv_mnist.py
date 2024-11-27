@@ -1,4 +1,4 @@
-from dl.model.vision.conv_2D_config import Conv2DConfig, ConvLayer2DConfig
+from dl.model.vision.conv_2d_config import Conv2DConfig, ConvLayer2DConfig
 
 import unittest
 from dl.training.early_stop_logger import EarlyStopLogger

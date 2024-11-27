@@ -4,16 +4,16 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 from typing import List, AnyStr
 import torch
 import torch.nn as nn
-from dl.model.vision.base_model import BaseModel
+from dl.model.vision.base_2d_model import Base2DModel
 from dl.block.ffnn_block import FFNNBlock
 from dl.model.ffnn_model import FFNNModel
 import logging
 logger = logging.getLogger('dl.model.vision.FFNNMNIST')
 
-__all__ = ['BaseModel', 'FfnnMnist']
+__all__ = ['Base2DModel', 'FfnnMnist']
 
 
-class FfnnMnist(BaseModel):
+class FfnnMnist(Base2DModel):
     id = 'FFNN-MNIST'
     default_training_file = 'processed/training.pt'
     default_test_file = 'processed/test.pt'
@@ -44,7 +44,7 @@ class FfnnMnist(BaseModel):
         # Output layer
         ffnn_output_block = FFNNBlock.build(block_id='output',
                                             in_features=features[-1],
-                                            out_features = BaseModel.num_classes,
+                                            out_features = Base2DModel.num_classes,
                                             activation=nn.Softmax(dim=1))
 
         # Define the model and layout for the Feed Forward Neural Network
@@ -60,20 +60,20 @@ class FfnnMnist(BaseModel):
         @return Tuple (train data, labels, test data, labels)
         @rtype Tuple[torch.Tensor]
         """
-        from dl.training.neural_net_train import NeuralNetTraining
+        from dl.training.neural_net_training import NeuralNetTraining
         from torch.nn.functional import one_hot
 
         _, torch_device = NeuralNetTraining.get_device()
 
-        train_data = torch.load(f'{root_path}/{BaseModel.default_training_file}')
+        train_data = torch.load(f'{root_path}/{Base2DModel.default_training_file}')
         num_samples = len(train_data[0])
         train_features = train_data[0].reshape(num_samples, -1).float().to(torch_device)
-        train_labels = one_hot(train_data[1], num_classes=BaseModel.num_classes).float().to(torch_device)
+        train_labels = one_hot(train_data[1], num_classes=Base2DModel.num_classes).float().to(torch_device)
 
-        test_data = torch.load(f'{root_path}/{BaseModel.default_test_file}')
+        test_data = torch.load(f'{root_path}/{Base2DModel.default_test_file}')
         num_samples = len(test_data[0])
         test_features = test_data[0].reshape(num_samples, -1).float().to(torch_device)
-        test_labels = one_hot(test_data[1], num_classes=BaseModel.num_classes).float().to(torch_device)
+        test_labels = one_hot(test_data[1], num_classes=Base2DModel.num_classes).float().to(torch_device)
 
         return train_features, train_labels, test_features, test_labels
 

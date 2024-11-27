@@ -1,5 +1,5 @@
 import unittest
-from dl.model.vision.conv_2D_config import Conv2DConfig, ConvLayer2DConfig
+from dl.model.vision.conv_2d_config import Conv2DConfig, ConvLayer2DConfig
 from dl.model.vision.conv_caltech101 import ConvCaltech101
 from dl.training.hyper_params import HyperParams
 from dl.exception.dl_exception import DLException

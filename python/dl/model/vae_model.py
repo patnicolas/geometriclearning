@@ -5,7 +5,6 @@ from typing import AnyStr, Self, Callable
 from dl.model.neural_model import NeuralModel
 from dl.block.variational_block import VariationalBlock
 import torch
-
 import logging
 logger = logging.getLogger('dl.model.VAEModel')
 

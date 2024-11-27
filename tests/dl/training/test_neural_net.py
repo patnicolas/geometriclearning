@@ -5,7 +5,7 @@ from dl.block.ffnn_block import FFNNBlock
 from dl.training.hyper_params import HyperParams
 from dl.training.early_stop_logger import EarlyStopLogger
 from plots.plotter import PlotterParameters
-from dl.training.neural_net_train import NeuralNetTraining
+from dl.training.neural_net_training import NeuralNetTraining
 from metric.metric import Metric
 from dataset.labeled_dataset import LabeledDataset
 from dataset.unlabeled_dataset import UnlabeledDataset

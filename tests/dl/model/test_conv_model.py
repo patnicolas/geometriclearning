@@ -102,6 +102,7 @@ class ConvModelTest(unittest.TestCase):
             stride_size: int,
             padding_size: int,
             activation: nn.Module) -> ConvBlock:
+
         is_batch_normalization = True
         max_pooling_kernel = 2
         activation = activation
@@ -109,14 +110,14 @@ class ConvModelTest(unittest.TestCase):
         conv_2d_block_builder = Conv2DBlockBuilder(
             in_channels,
             out_channels,
-            (input_size, input_size),
-            (kernel_size, kernel_size),
-            (stride_size, stride_size),
-            (padding_size, padding_size),
-            is_batch_normalization,
-            max_pooling_kernel,
-            activation,
-            has_bias)
+            input_size = (input_size, input_size),
+            kernel_size = (kernel_size, kernel_size),
+            stride = (stride_size, stride_size),
+            padding = (padding_size, padding_size),
+            batch_norm=is_batch_normalization,
+            max_pooling_kernel=max_pooling_kernel,
+            activation=activation,
+            bias=has_bias)
         return ConvBlock(conv_2d_block_builder)
 
 

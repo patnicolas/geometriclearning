@@ -2,7 +2,7 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from typing import AnyStr, NoReturn
-from dl.model.vision.base_model import BaseModel
+from dl.model.vision.base_2d_model import Base2DModel
 from dl.model.vae_model import VAEModel
 from dl import ConvException, DLException
 from dl.training.early_stop_logger import EarlyStopLogger
@@ -12,7 +12,7 @@ from dl.training.hyper_params import HyperParams
 
 class VAEMNIST(object):
 
-    def __init__(self, base_mnist: BaseModel, latent_size: int) -> None:
+    def __init__(self, base_mnist: Base2DModel, latent_size: int) -> None:
         self.base_mnist = base_mnist
         self.vae_model = VAEModel('VAE MNIST', base_mnist.model, latent_size)
 

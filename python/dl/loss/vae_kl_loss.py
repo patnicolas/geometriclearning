@@ -3,11 +3,12 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from torch.nn.modules.loss import _Loss
 import torch
+import torch.nn as nn
 from typing import AnyStr
 
 
 class VAEKLLoss(_Loss):
-    def __init__(self, mu: torch.Tensor, log_var: torch.Tensor, num_records: int):
+    def __init__(self, mu: torch.Tensor, log_var: torch.Tensor, num_records: int, loss_func: nn.Module) -> None:
         """
         Constructor for the Kullback-Leibler divergence based loss for variational auto-encoder
         @param mu: Mean for the normal distribution in the representation layer
@@ -21,6 +22,7 @@ class VAEKLLoss(_Loss):
         self.mu = mu
         self.log_var = log_var
         self.num_records = num_records
+        self.loss_func = loss_func
 
     def forward(self, _input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         """
@@ -29,12 +31,13 @@ class VAEKLLoss(_Loss):
         @type _input: Tensor
         @param target: Target or labeled value
         @type target: Tensor
-        @return: Loss function as a Torch tensor
+        @return: Loss function as a Torch Tensor
         @rtype: Tensor
         """
-        reconstruction_loss = self.hyper_params.loss_function(_input, target)
+        reconstruction_loss = self.loss_func(_input, target)
         kl_loss = (-0.5 * torch.sum(1 + self.log_var - self.mu ** 2 - self.log_var.exp())) / self.num_records
         return reconstruction_loss + kl_loss
 
     def __repr__(self) -> AnyStr:
-        return f'\nMean: {self.mu}\nLog Variance: {self.log_var}\nNum records: {self.num_records}'
+        return (f'\nMean: {self.mu}\nLog Variance: {self.log_var}\nNum records: {self.num_records}'
+                f'\nLoss function: {self.loss_func}')

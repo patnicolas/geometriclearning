@@ -19,14 +19,25 @@ class PlotterParameters:
     x_label: AnyStr
     y_label: AnyStr
     title: AnyStr
+    is_image: Optional[bool] = False
     fig_size: Optional[Tuple[int, int]] = None
     time_str = datetime.now().strftime("%b-%d-%Y:%H.%M")
     """
-        Constructor
-        @param count: Count such as number of epoch, iteration or step
-        @param x_label: Label for X-axis
-        @param y_label: Label for Y_axis
-        @param title: Title for the plot
+    Constructor
+    @param count: Count such as number of epoch, iteration or step
+    @type count: int
+    @param x_label: Label for X-axis
+    @type x_label: str
+    @param y_label: Label for Y_axis
+    @type y_label: str
+    @param title: Title for the plot
+    @type title: str
+    @param is_image: Specify if this is an image to be displayed optional
+    @type is_image: bool
+    @param fig_size: Optional figure size
+    @type fig_size: (int, int)
+    @param time_str: Time stamp the plot was created, used for name of the file the plot image is stored
+    @type time_str: str
     """
 
     def __repr__(self):

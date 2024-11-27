@@ -1,8 +1,8 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
-from dl.model.vision.conv_2D_config import Conv2DConfig
-from dl.model.vision.base_model import BaseModel
+from dl.model.vision.conv_2d_config import Conv2DConfig
+from dl.model.vision.base_2d_model import Base2DModel
 from typing import AnyStr
 import torchvision.transforms as transforms
 from torchvision.transforms import InterpolationMode
@@ -13,7 +13,7 @@ logger = logging.getLogger('dl.model.vision.ConvCelebA')
 logging.basicConfig(level=logging.INFO)
 
 
-class ConvCelebA(BaseModel):
+class ConvCelebA(Base2DModel):
     id = 'Convolutional_CelebA'
 
     def __init__(self, conv_2D_config: Conv2DConfig, data_batch_size: int, resize_image: int) -> None:

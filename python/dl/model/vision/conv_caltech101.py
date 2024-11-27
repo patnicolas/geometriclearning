@@ -1,18 +1,18 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
-from dl.model.vision.conv_2D_config import Conv2DConfig
+from dl.model.vision.conv_2d_config import Conv2DConfig
 from typing import AnyStr
 from torch.utils.data import Dataset
 from torchvision.transforms import InterpolationMode
-from dl.model.vision.base_model import BaseModel
+from dl.model.vision.base_2d_model import Base2DModel
 from dl.model.vision import GrayscaleToRGB
 import logging
 logger = logging.getLogger('dl.model.vision.ConvCaltech101')
 logging.basicConfig(level=logging.INFO)
 
 
-class ConvCaltech101(BaseModel):
+class ConvCaltech101(Base2DModel):
     id = 'Convolutional_Caltech101'
 
     def __init__(self,

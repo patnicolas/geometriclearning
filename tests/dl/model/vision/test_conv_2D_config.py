@@ -1,6 +1,6 @@
 import unittest
 import torch.nn as nn
-from dl.model.vision.conv_2D_config import Conv2DConfig, ConvLayer2DConfig
+from dl.model.vision.conv_2d_config import Conv2DConfig, ConvLayer2DConfig
 
 
 class Conv2DConfigTest(unittest.TestCase):

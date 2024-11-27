@@ -2,8 +2,8 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from typing import AnyStr, Tuple
-from dl.model.vision.base_model import BaseModel
-from dl.model.vision.conv_2D_config import Conv2DConfig
+from dl.model.vision.base_2d_model import Base2DModel
+from dl.model.vision.conv_2d_config import Conv2DConfig
 from torch.utils.data import Dataset
 from torchvision.transforms import InterpolationMode
 from torchvision.datasets import MNIST
@@ -15,7 +15,7 @@ logger = logging.getLogger('dl.model.vision.ConvMNIST')
 __all__ = ['ConvMNIST']
 
 
-class ConvMNIST(BaseModel):
+class ConvMNIST(Base2DModel):
     id = 'Convolutional_MNIST'
 
     default_training_file = 'processed/training.pt'

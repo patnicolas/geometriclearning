@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 from abc import ABC
 
-from dl.training.neural_net_train import NeuralNetTraining
+from dl.training.neural_net_training import NeuralNetTraining
 from dl.training.hyper_params import HyperParams
 from dl.training.early_stop_logger import EarlyStopLogger
 from plots.plotter import PlotterParameters
@@ -12,12 +12,14 @@ from dl.model.vae_model import VAEModel
 from dl.training.exec_config import ExecConfig
 from dl import DLException
 from dl.loss.vae_kl_loss import VAEKLLoss
-from typing import AnyStr, List, Optional, Dict, NoReturn, Self
+from typing import AnyStr, List, Optional, Dict, NoReturn, Self, Tuple
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import torch
 import logging
 logger = logging.getLogger('dl.VAE')
+
+EvaluatedImages = Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
 
 """
 Light weight implementation of the variational auto-encoder using PyTorch and reusable neural block
@@ -31,13 +33,14 @@ The key components are
 
 
 class VAETraining(NeuralNetTraining, ABC):
+    max_debug_images = 3
     def __init__(self,
                  vae_model: VAEModel,
                  hyper_params: HyperParams,
                  early_stop_logger: EarlyStopLogger,
                  metrics: Dict[AnyStr, Metric],
                  exec_config: ExecConfig,
-                 plot_parameters: Optional[List[PlotterParameters]]):
+                 plot_parameters: Optional[List[PlotterParameters]] = None):
         """
         Default constructor for this variational auto-encoder
         @param vae_model: Model for the variational auto-encoder
@@ -107,13 +110,13 @@ class VAETraining(NeuralNetTraining, ABC):
 
     def _enc_dec_params(self) -> (dict, dict):
         """
-            Extract the model parameters for the encoder and decoder
-            :returns: pair of encoder and decoder parameters (dictionaries)
+        Extract the model parameters for the encoder and decoder
+        @returns: pair of encoder and decoder parameters (dictionaries)
         """
         return self.model.encoder_model.parameters(), self.model.decoder_model.parameters()
 
     """ ---------------------------   Private helper methods  --------------------------------  """
-
+    """
     def __compute_loss(
             self,
             predicted: torch.Tensor,
@@ -121,7 +124,7 @@ class VAETraining(NeuralNetTraining, ABC):
             mu: torch.Tensor,
             log_var: torch.Tensor,
             num_records: int) -> torch.Tensor:
-        """
+        
             Aggregate the loss of reconstruction and KL divergence between proposed and current Normal distribution
             @param predicted: Predicted values
             @type predicted: Torch tensor
@@ -135,15 +138,14 @@ class VAETraining(NeuralNetTraining, ABC):
             @type int
             @return: Aggregate auto-encoder loss
             @rtype: torch.Tensor
-        """
+        
         reconstruction_loss = self.__reconstruction_loss(predicted, x)
         kl_divergence = (-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp())) / num_records
         logger.info(f"Reconstruction loss {reconstruction_loss} KL divergence {kl_divergence}")
         return reconstruction_loss + kl_divergence
+    """
 
-    def __reconstruction_loss(self,
-                              predicted: torch.Tensor,
-                              x: torch.Tensor) -> float:
+    def __reconstruction_loss(self, predicted: torch.Tensor, x: torch.Tensor) -> float:
         from dl import DLException
 
         try:
@@ -179,10 +181,13 @@ class VAETraining(NeuralNetTraining, ABC):
             try:
                 for params in self.model.parameters():
                     params.grad = None
-                self.model.add_noise(data)
+
+                # Add noise if requested
+                data = self.model.add_noise(data)
+
+                # Forward pass
                 z = self.model(data)
                 loss = vae_kl_loss(z, data)
-                # loss = self.__compute_loss(z, data, self.model.mu, self.model.log_var, len(data_loader))
 
                 loss.backward(retain_graph=True)
                 total_loss += loss.data
@@ -201,16 +206,49 @@ class VAETraining(NeuralNetTraining, ABC):
         total_loss = 0
         vae_kl_loss = VAEKLLoss(self.model.mu, self.model.log_var, len(eval_loader))
         metric_collector = {}
+        eval_images: List[EvaluatedImages] = []
 
         with torch.no_grad():
-            for data in tqdm(eval_loader):
-                z = self.model(data)
-                if self.model.noise_func is not None:
-                    data = self.model.noise_func(0.5, data)
-                loss = vae_kl_loss(z, data)
+            images_cnt = 0
+            for data in eval_loader:
+                noisy_data = self.model.add_noise(data)
+                reconstructed = self.model(noisy_data)
+                loss = vae_kl_loss(reconstructed, noisy_data)
                 # loss = self.__compute_loss(z, data, self.model.mu, self.model.log_var, len(eval_loader))
                 total_loss += loss.data
 
+                if images_cnt < VAETraining.max_debug_images:
+                    eval_images.append((data, noisy_data, reconstructed))
+
         eval_loss = total_loss / len(eval_loader)
         metric_collector[Metric.eval_loss_label] = eval_loss
+        self.__visualize(eval_images)
         return metric_collector
+
+    def __visualize(self, eval_images: List[EvaluatedImages]) -> None:
+        if self.plot_parameters is not None and self.plot_parameters[0].is_image:
+            import matplotlib.pyplot as plt
+
+            fig_x = len(eval_images)
+            fig_y: int = 3 if eval_images[0][1] is not None else 2
+            plt.figure(figure_size=(fig_x, fig_y))
+
+            for i, eval_image in enumerate(eval_images):
+                idy = i+1+fig_x
+                plt.subplot(fig_y, fig_x, idy)
+                plt.imshow(eval_image[0].view(28, 28), cmap='gray')
+                plt.axis('off')
+
+                if fig_y == 3:
+                    idy += fig_x
+                    plt.subplot(fig_y, fig_x, idy)
+                    plt.imshow(eval_image[0].view(28, 28), cmap='gray')
+                    plt.axis('off')
+
+                idy += fig_x
+                plt.subplot(fig_y, fig_x, idy)
+                plt.imshow(eval_image[0].view(28, 28), cmap='gray')
+                plt.axis('off')
+
+
+
