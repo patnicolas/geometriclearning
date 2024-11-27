@@ -4,14 +4,16 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 from abc import ABC
 
 from dl.block.builder import ConvBlockBuilder
+from dl.block.builder.conv2d_block_builder import Conv2DBlockBuilder
 import torch.nn as nn
-from typing import Tuple
+from typing import Tuple, Self
 
 
 class DeConv2DBlockBuilder(ConvBlockBuilder, ABC):
     def __init__(self,
                  in_channels: int,
                  out_channels: int,
+                 input_size: Tuple[int, int],
                  kernel_size: Tuple[int, int],
                  stride: Tuple[int, int],
                  padding: Tuple[int, int],
@@ -39,6 +41,7 @@ class DeConv2DBlockBuilder(ConvBlockBuilder, ABC):
         """
         super(DeConv2DBlockBuilder, self).__init__( in_channels,
                                                     out_channels,
+                                                    input_size,
                                                     kernel_size,
                                                     stride,
                                                     padding,
@@ -46,6 +49,27 @@ class DeConv2DBlockBuilder(ConvBlockBuilder, ABC):
                                                     -1,
                                                     activation,
                                                     bias)
+
+    @classmethod
+    def build(cls, conv_2d_block_builder: Conv2DBlockBuilder, activation: nn.Module) -> Self:
+        """
+        Alternative constructor that create a de-convolutional block builder for a convolutional block builder
+        @param conv_2d_block_builder: convolutional block builder
+        @type conv_2d_block_builder: Conv2DBlockBuilder
+        @param activation: Activation function
+        @type activation: nn.Module
+        @return: A de-convolutional block that builds a mirror of the convolutional block builder
+        @rtype: DeConv2DBlockBuilder
+        """
+        return cls(conv_2d_block_builder.out_channels,
+                   conv_2d_block_builder.in_channels,
+                   conv_2d_block_builder.input_size,
+                   conv_2d_block_builder.kernel_size,
+                   conv_2d_block_builder.stride,
+                   conv_2d_block_builder.padding,
+                   conv_2d_block_builder.batch_norm,
+                   activation,
+                   conv_2d_block_builder.bias)
 
     def __call__(self) -> Tuple[nn.Module]:
         """

@@ -56,11 +56,12 @@ class Conv2DConfig(object):
             is_batch_normalization = True
             has_bias = False
             conf = conv_layers_2D_config[idx]
+            _out_channels = conv_layers_2D_config[idx + 1].in_channels if idx < len(conv_layers_2D_config)-1 \
+                else out_channels
 
             conv_2d_block_builder = Conv2DBlockBuilder(
                 in_channels=conf.in_channels,
-                out_channels=conv_layers_2D_config[idx + 1].in_channels if idx < len(conv_layers_2D_config)-1
-                else out_channels,
+                out_channels=_out_channels,
                 input_size=input_dim,
                 kernel_size=(conf.kernel_size, conf.kernel_size),
                 stride=(conf.stride_size, conf.stride_size),

@@ -4,7 +4,9 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 from torch import nn
 from typing import Tuple, Self, Any, AnyStr
 from dl.block.builder import ConvBlockBuilder
+from dl.block.builder.conv2d_block_builder import Conv2DBlockBuilder
 from dl.block.neural_block import NeuralBlock
+from dl.block.deconv_block import DeConvBlock
 import logging
 logger = logging.getLogger('dl.block.ConvBlock')
 
@@ -38,11 +40,11 @@ class ConvBlock(NeuralBlock):
         modules = self.conv_block_builder()
         super(ConvBlock, self).__init__(_id, tuple(modules))
 
+    def invert(self) -> DeConvBlock:
+        return DeConvBlock(self.conv_block_builder)
+
     def compute_out_shapes(self) -> int | Tuple[int, int]:
         return self.conv_block_builder.get_conv_layer_out_shape()
-
-    def invert(self) -> Self:
-        pass
 
     def __repr__(self) -> str:
         return ' '.join([f'id={self.id}\n{str(module)}' for module in self.modules])

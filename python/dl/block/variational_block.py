@@ -3,10 +3,9 @@ __copyright__ = "Copyright 2023, 2024  All rights reserved."
 
 import torch
 from torch import nn
-from torch.autograd import Variable
 from dl.block.neural_block import NeuralBlock
 from typing import Self, Tuple
-from dl import DLException
+from dl import VAEException
 
 
 class VariationalBlock(NeuralBlock):
@@ -29,7 +28,7 @@ class VariationalBlock(NeuralBlock):
         self.sampler_fc = sampler_fc
 
     def invert(self) -> Self:
-        raise DLException('Cannot invert variational Neural block')
+        raise VAEException('Cannot invert variational Neural block')
 
     def in_features(self) -> int:
         return self.mu.in_features

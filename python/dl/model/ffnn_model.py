@@ -40,8 +40,8 @@ class FFNNModel(NeuralModel):
         @return: This feed-forward neural network with an inverted layout
         @rtype: FFNNModel
         """
-        neural_blocks = [block.invert() for block in self.neural_blocks[::-1]]
-        return FFNNModel(f'_{self.model_id}', neural_blocks)
+        neural_blocks: list[FFNNBlock] = [block.invert() for block in self.neural_blocks[::-1]]
+        return FFNNModel(model_id=f'_{self.model_id}', neural_blocks=neural_blocks)
 
     def get_in_features(self) -> int:
         """

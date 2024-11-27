@@ -10,7 +10,7 @@ from plots.plotter import PlotterParameters
 from metric.metric import Metric
 from dl.model.vae_model import VAEModel
 from dl.training.exec_config import ExecConfig
-from dl import DLException
+from dl import DLException, VAEException
 from dl.loss.vae_kl_loss import VAEKLLoss
 from typing import AnyStr, List, Optional, Dict, NoReturn, Self, Tuple
 from torch.utils.data import DataLoader
@@ -155,13 +155,13 @@ class VAETraining(NeuralNetTraining, ABC):
             return self.hyper_params.loss_function(predicted, x)
         except RuntimeError as e:
             logger.error(f'Runtime error {str(e)}')
-            raise DLException(f'Runtime error {str(e)}')
+            raise VAEException(f'Runtime error {str(e)}')
         except ValueError as e:
             logger.error(f'Value error {str(e)}')
-            raise DLException(f'Value error {str(e)}')
+            raise VAEException(f'Value error {str(e)}')
         except KeyError as e:
             logger.error(f'Key error {str(e)}')
-            raise DLException(f'Key error {str(e)}')
+            raise VAEException(f'Key error {str(e)}')
 
     @staticmethod
     def _reshape_output_variation(shapes: list, z: torch.Tensor) -> torch.Tensor:
@@ -181,7 +181,6 @@ class VAETraining(NeuralNetTraining, ABC):
             try:
                 for params in self.model.parameters():
                     params.grad = None
-
                 # Add noise if requested
                 data = self.model.add_noise(data)
 
@@ -194,11 +193,11 @@ class VAETraining(NeuralNetTraining, ABC):
                 encoder_optimizer.step()
                 decoder_optimizer.step()
             except RuntimeError as e:
-                raise DLException(str(e))
+                raise VAEException(str(e))
             except AttributeError as e:
-                raise DLException(str(e))
+                raise VAEException(str(e))
             except Exception as e:
-                raise DLException(str(e))
+                raise VAEException(str(e))
         return total_loss / len(train_loader)
 
     def __eval(self, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
@@ -210,20 +209,30 @@ class VAETraining(NeuralNetTraining, ABC):
 
         with torch.no_grad():
             images_cnt = 0
-            for data in eval_loader:
-                noisy_data = self.model.add_noise(data)
-                reconstructed = self.model(noisy_data)
-                loss = vae_kl_loss(reconstructed, noisy_data)
-                # loss = self.__compute_loss(z, data, self.model.mu, self.model.log_var, len(eval_loader))
-                total_loss += loss.data
+            try:
+                for data in eval_loader:
+                    noisy_data = self.model.add_noise(data)
+                    reconstructed = self.model(noisy_data)
+                    loss = vae_kl_loss(reconstructed, noisy_data)
+                    total_loss += loss.data
 
-                if images_cnt < VAETraining.max_debug_images:
-                    eval_images.append((data, noisy_data, reconstructed))
+                    if self.__are_images(images_cnt):
+                        eval_images.append((data, noisy_data, reconstructed))
+            except RuntimeError as e:
+                raise VAEException(str(e))
+            except AttributeError as e:
+                raise VAEException(str(e))
 
         eval_loss = total_loss / len(eval_loader)
         metric_collector[Metric.eval_loss_label] = eval_loss
         self.__visualize(eval_images)
         return metric_collector
+
+    """ ------------------------------  Private helper method for visual debugging --------------- """
+    def __are_images(self, images_cnt: int) -> bool:
+        return self.plot_parameters is not None \
+            and self.plot_parameters[0].is_image \
+            and images_cnt < VAETraining.max_debug_images
 
     def __visualize(self, eval_images: List[EvaluatedImages]) -> None:
         if self.plot_parameters is not None and self.plot_parameters[0].is_image:

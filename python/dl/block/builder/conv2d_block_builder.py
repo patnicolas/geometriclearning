@@ -28,13 +28,13 @@ class Conv2DBlockBuilder(ConvBlockBuilder, ABC):
         @param out_channels: Number of output channels
         @type out_channels: int
         @param input_size: Height or width of the input
-        @type Tuple[int, int]
+        @type input_size: int or (int, int) for 2D
         @param kernel_size: Size of the kernel (num_records) for 1D and (num_records, num_records) for 2D
-        @type kernel_size: Tuple[int, int]
+        @type kernel_size: int for 1D or Tuple[int, int] for 2D data
         @param stride: Stride for convolution (st) for 1D, (st, st) for 2D
-        @type stride: Tuple[int, int]
+        @type stride: int for 1D or Tuple[int, int] for 2D data
         @param padding: Padding for convolution (st) for 1D, (st, st) for 2D
-        @type padding: Tuple[int, int]
+        @type padding: int for 1D or Tuple[int, int] for 2D data
         @param batch_norm: Boolean flag to specify if a batch normalization is required
         @type batch_norm: int
         @param max_pooling_kernel: Boolean flag to specify max pooling is needed

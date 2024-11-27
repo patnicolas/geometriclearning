@@ -12,7 +12,6 @@ logger = logging.getLogger('dl.model.vision.ConvMNISTTest')
 
 class ConvMNISTTest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
     def test_init(self):
         _id = 'test'
         input_size = 28
@@ -21,6 +20,8 @@ class ConvMNISTTest(unittest.TestCase):
         activation = nn.ReLU()
         ffnn_out_features = [64, 64]
         num_classes = 10
+        data_batch_size = 8
+        resize_image = -1
         conv_layer1_config = ConvLayer2DConfig(1, 3, 0, 1)
         conv_layer2_config = ConvLayer2DConfig(32, 3, 0, 1)
         conv_layer_2D_config = [conv_layer1_config, conv_layer2_config]
@@ -34,7 +35,7 @@ class ConvMNISTTest(unittest.TestCase):
                                           activation,
                                           ffnn_out_features,
                                           num_classes)
-            conv_MNIST_instance = ConvMNIST(conv_2D_config)
+            conv_MNIST_instance = ConvMNIST(conv_2D_config, data_batch_size, resize_image)
             print(repr(conv_MNIST_instance))
             self.assertTrue(True)
         except ConvException as e:
@@ -116,6 +117,7 @@ class ConvMNISTTest(unittest.TestCase):
                 fig_size=(11, 7))
         )
 
+    @unittest.skip('Ignore')
     def test_train(self):
         lr = 0.0004
         # activation = nn.LeakyReLU(negative_slope=0.03)

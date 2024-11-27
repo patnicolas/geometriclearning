@@ -1,7 +1,7 @@
 import unittest
 from torch import nn
 from dl.block.builder.deconv2d_block_builder import DeConv2DBlockBuilder
-from dl.exception.dl_exception import DLException
+from dl import ConvException
 from typing import Tuple
 
 class DeConv2DBlockBuilderTest(unittest.TestCase):
@@ -12,7 +12,7 @@ class DeConv2DBlockBuilderTest(unittest.TestCase):
             deconv_block_builder = DeConv2DBlockBuilderTest.__create_de_conv_block(kernel_size, output_channels)
             print(repr(deconv_block_builder))
             assert True
-        except DLException as e:
+        except ConvException as e:
             assert False
 
     def test_init_fails(self):
@@ -22,11 +22,11 @@ class DeConv2DBlockBuilderTest(unittest.TestCase):
             deconv_block_builder = DeConv2DBlockBuilderTest.__create_de_conv_block(kernel_size, output_channels)
             print(repr(deconv_block_builder))
             assert False
-        except DLException as e:
+        except ConvException as e:
             assert True
 
     @staticmethod
-    def __create_de_conv_block(kernel_size: Tuple[int, int], output_channels: int) -> DeConv2DBlockBuilder:
+    def __create_de_conv_block_1(kernel_size: Tuple[int, int], output_channels: int) -> DeConv2DBlockBuilder:
         input_channels = 62
         is_batch_normalization = True
         activation = nn.Tanh()

@@ -11,6 +11,10 @@ class DLException(Exception):
     def __init__(self, *args, **kwargs):
         super(DLException, self).__init__(args, kwargs)
 
+class VAEException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(VAEException, self).__init__(args, kwargs)
+
 
 class GraphException(Exception):
     def __init__(self, *args, **kwargs):
