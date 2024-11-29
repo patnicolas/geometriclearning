@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2024  All rights reserved."
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import numpy as np
 from typing import AnyStr, List, Self, NoReturn

@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2024  All rights reserved."
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from typing import AnyStr, Tuple
 from dl.model.vision.base_2d_model import Base2DModel

@@ -42,7 +42,6 @@ class NeuralNetTest(unittest.TestCase):
         network = NeuralNetTraining(binary_classifier, hyper_parameters, early_stop_logger, parameters)
         filename = '../../data/wages_cleaned.csv'
         tensor_dataset = UnlabeledDataset.from_file(filename, ['Reputation', 'Age', 'Caps', 'Apps', 'Salary'])
-        network.init_data_loader(batch_size=8, dataset=tensor_dataset)
 
     def test_train_wages(self):
         from python.metric.metric import Metric

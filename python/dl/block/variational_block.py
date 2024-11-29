@@ -1,10 +1,10 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2024  All rights reserved."
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import torch
 from torch import nn
 from dl.block.neural_block import NeuralBlock
-from typing import Self, Tuple
+from typing import Self, Tuple, AnyStr
 from dl import VAEException
 
 
@@ -33,9 +33,13 @@ class VariationalBlock(NeuralBlock):
     def in_features(self) -> int:
         return self.mu.in_features
 
-    def __repr__(self):
-        return f'\n      Id: {self.block_id}\n      Mean: {repr(self.mu)}\n      logvar: {repr(self.log_var)}\n' \
-               f'      Sampler: {repr(self.sampler_fc)}'
+    def list_modules(self, index: int = 0) -> AnyStr:
+        return (f'\n{index}: Mean-{str(self.mu)}\n{index+1}: LogVar-{str(self.log_var)}'
+                f'\n{index+2}: Sampler-{str(self.sampler_fc)}')
+
+    def __repr__(self) -> AnyStr:
+        return f'\n      Id: {self.block_id}\n      Mean: {str(self.mu)}\n      logvar: {str(self.log_var)}\n' \
+               f'      Sampler: {str(self.sampler_fc)}'
 
     @classmethod
     def re_parameterize(cls, mu: torch.Tensor, log_var: torch.Tensor) -> torch.Tensor:

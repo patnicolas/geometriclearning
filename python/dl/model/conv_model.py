@@ -1,15 +1,15 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2024  All rights reserved."
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from abc import ABC
 
-from dl.block.deconv_block import DeConvBlock
+from dl.block.builder.conv_output_size import SeqConvOutputSize
 from dl.block.ffnn_block import FFNNBlock
 from dl.block.conv_block import ConvBlock
 from dl.model.neural_model import NeuralModel
 from dl.model.ffnn_model import FFNNModel
 from dl.model.deconv_model import DeConvModel
-from typing import List, AnyStr, Dict, Any, Self, Optional
+from typing import List, AnyStr, Dict, Any, Self, Optional, Tuple
 import torch
 import torch.nn as nn
 import logging
@@ -82,6 +82,7 @@ class ConvModel(NeuralModel, ABC):
          @rtype: DeConvModel
          """
         de_conv_blocks = [conv_block.invert() for conv_block in self.conv_blocks]
+        de_conv_blocks.reverse()
         return DeConvModel(model_id=f'de_{self.model_id}', de_conv_blocks=de_conv_blocks, ffnn_blocks=None)
 
     def invert_with_last_activation(self, activation: nn.Module) -> DeConvModel:
@@ -90,11 +91,35 @@ class ConvModel(NeuralModel, ABC):
          @return: Instance of de convolutional model
          @rtype: DeConvModel
          """
-        de_conv_blocks = [conv_block.invert() if idx < len(self.conv_blocks)
+        de_conv_blocks = [conv_block.invert() if idx > 0
                           else conv_block.invert_with_activation(activation)
                           for idx, conv_block in enumerate(self.conv_blocks)]
-
+        de_conv_blocks.reverse()
         return DeConvModel(model_id=f'de_{self.model_id}', de_conv_blocks=de_conv_blocks)
+
+    def get_in_features(self) -> int:
+        """
+        Polymorphic method to retrieve the number of input features
+        @return: Number of input features
+        @rtype: int
+        """
+        return self.conv_blocks[0].conv_block_builder.in_channels
+
+    def get_out_featuresX(self) -> int:
+        return self.conv_blocks[-1].conv_block_builder.out_channels if self.ffnn_blocks is None \
+            else self.ffnn_blocks[-1].out_features
+
+    def get_conv_output_size(self) -> int | Tuple[int, int]:
+        """
+        Polymorphic method to retrieve the number of output features
+        @return: Number of output features
+        @rtype: int
+        """
+        last_conv_out_channels = self.conv_blocks[-1].conv_block_builder.out_channels
+        conv_output_sizes = [conv_block.get_conv_output_size() for conv_block in self.conv_blocks]
+        seq_conv_output_size = SeqConvOutputSize(conv_output_sizes)
+
+        return seq_conv_output_size(self.get_in_features(), last_conv_out_channels)
 
     def has_fully_connected(self) -> bool:
         """
@@ -117,10 +142,12 @@ class ConvModel(NeuralModel, ABC):
         """
         return x.view(resize, -1)
 
+    def list_modules(self, index: int = 0) -> AnyStr:
+        modules = [f'{idx+index}: {str(module)}' for idx, module in enumerate(self.get_modules())]
+        return '\n'.join(modules)
+
     def __repr__(self) -> str:
-        modules = [f'{idx}: {str(module)}' for idx, module in enumerate(self.get_modules())]
-        module_repr = '\n'.join(modules)
-        return f'State:{self._state_params()}\nModules:\n{module_repr}'
+        return f'State:{self._state_params()}\nModules:\n{self.list_modules(0)}'
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -173,7 +200,7 @@ class ConvModel(NeuralModel, ABC):
             assert next_in_channels == this_out_channels, \
                 f'Layer {index} input_tensor != layer {index+1} output'
 
-            this_output_shape = neural_blocks[index].compute_out_shapes()
+            this_output_shape = neural_blocks[index].get_conv_output_size()
             next_input_shape = neural_blocks[index + 1].conv_block_builder.input_size
             assert this_output_shape == next_input_shape, \
                 f'This output shape {str(this_output_shape)} should = next input shape {str(next_input_shape)}'

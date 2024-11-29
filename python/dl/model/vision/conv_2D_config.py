@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2024  All rights reserved."
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from dataclasses import dataclass
 from typing import List, AnyStr
@@ -71,11 +71,11 @@ class Conv2DConfig(object):
                 activation=activation,
                 bias=has_bias)
 
-            input_dim = conv_2d_block_builder.get_conv_layer_out_shape()
+            input_dim = conv_2d_block_builder.get_conv_output_size()
             conv_blocks.append(ConvBlock(str(idx + 1), conv_2d_block_builder))
 
         # Compute the number of output channels/nodes for the last convolutional layer
-        conv_output_shape = conv_blocks[len(conv_blocks) - 1].compute_out_shapes()
+        conv_output_shape = conv_blocks[len(conv_blocks) - 1].get_conv_output_size()
         # Compute the number of input featured for the first feed forward layer
         ffnn_input_shape = out_channels * conv_output_shape[0] * conv_output_shape[1]
 

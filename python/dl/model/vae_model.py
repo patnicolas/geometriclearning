@@ -1,12 +1,15 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2024  All rights reserved."
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-from typing import AnyStr, Self, Callable
+from typing import AnyStr, Self, Callable, Optional
 from dl.model.neural_model import NeuralModel
 from dl.block.variational_block import VariationalBlock
 import torch
+import torch.nn as nn
 import logging
 logger = logging.getLogger('dl.model.VAEModel')
+
+__all__ = ['VAEModel']
 
 """
 Variational Autoencoder build from reusable encoders and dimension of the latent space.
@@ -19,6 +22,7 @@ class VAEModel(NeuralModel):
                  model_id: AnyStr,
                  encoder: NeuralModel,
                  latent_size: int,
+                 decoder_out_activation: Optional[nn.Module] = None,
                  noise_func: Callable[[torch.Tensor], torch.Tensor] = None) -> None:
         """
         Constructor for the variational neural network
@@ -31,17 +35,24 @@ class VAEModel(NeuralModel):
         @param noise_func: Optional function to add noise to input data (features)
         @param noise_func: Callable (noise_factor, input)
         """
-        # Create a decoder as inverted from the encoder
-        decoder = encoder.invert()
+        # Create a decoder as inverted from the encoder (i.e. Deconvolution)
+        decoder = encoder.invert_with_last_activation(decoder_out_activation) if decoder_out_activation is not None \
+            else encoder.invert()
 
         # extract the Torch modules
         modules = list(encoder.get_model().modules())
+
+        # Build the inversion for the de convolutional network
         inverted_modules = list(decoder.get_model().modules())
+
         # construct the variational layer
-        variational_block = VariationalBlock(encoder.get_out_features(), latent_size)
+        flatten_variational_input = encoder.get_conv_output_size()
+        variational_block = VariationalBlock(flatten_variational_input, latent_size)
+
         # Build the Torch sequential module
         all_modules = modules + list(variational_block.modules) + inverted_modules
         seq_module: torch.nn.Module = torch.nn.Sequential(*all_modules)
+
         # Call base class
         super(VAEModel, self).__init__(model_id, seq_module, noise_func)
         # Initialize the internal model parameters
@@ -51,10 +62,16 @@ class VAEModel(NeuralModel):
         self.mu = None
         self.log_var = None
 
-    def __repr__(self):
-        return f'Model id: {self.model_id}\n *Encoder:{repr(self.encoder)}' \
-               f'\n *Variational: {repr(self.variational_block)}' \
-               f'\n * Decoder: {repr(self.decoder)}'
+    def __str__(self) -> AnyStr:
+        index2 = len(self.encoder.get_modules())
+        index3 = index2+3
+        return (self.encoder.list_modules(0) + self.variational_block.list_modules(index2) +
+                f'\n{self.decoder.list_modules(index3)}')
+
+    def __repr__(self) -> AnyStr:
+        return f'Model id: {self.model_id}\n*Encoder:{repr(self.encoder.modules)}' \
+               f'\n*Variational: {repr(self.variational_block)}' \
+               f'\n*Decoder: {repr(self.decoder.modules)}'
 
     def get_in_features(self) -> int:
         """
@@ -74,6 +91,7 @@ class VAEModel(NeuralModel):
         @return: Number of input features
         @rtype: int
         """
+        self.encoder.get_conv_layer_out_shape()
         return self.encoder.get_in_features()
 
     def latent_parameters(self) -> (torch.Tensor, torch.Tensor):

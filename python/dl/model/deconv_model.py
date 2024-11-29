@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2024  All rights reserved."
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from abc import ABC
 
@@ -93,6 +93,10 @@ class DeConvModel(NeuralModel, ABC):
             x = self.dff_model(x)
             log_size(x, 'Output connected Conv')
         return x
+
+    def list_modules(self, index: int = 0) -> AnyStr:
+        modules = [f'{idx + index}: {str(module)}' for idx, module in enumerate(self.get_modules())]
+        return '\n'.join(modules)
 
     def _state_params(self) -> Dict[AnyStr, Any]:
         return {

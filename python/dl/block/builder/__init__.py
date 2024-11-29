@@ -1,5 +1,5 @@
 _author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2024  All rights reserved."
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import abc
 import torch.nn as nn
@@ -56,7 +56,7 @@ class ConvBlockBuilder(object):
         raise ConvException('Cannot extract module from abstract class ConvInitBlockBuilder')
 
     @abc.abstractmethod
-    def get_conv_layer_out_shape(self) -> int | Tuple[int, int]:
+    def get_conv_output_size(self, input_size: int) -> int | Tuple[int, int]:
         raise ConvException('Computation of shape of convolution layer output is undefined')
 
 

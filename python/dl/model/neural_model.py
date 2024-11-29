@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2024  All rights reserved."
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import torch
 import torch.nn as nn
@@ -51,6 +51,9 @@ class NeuralModel(torch.nn.Module, ABC):
 
     def get_modules(self) -> List[nn.Module]:
         return list(self.model.children())
+
+    def list_modules(self, index: int = 0) -> AnyStr:
+        raise DLException('Cannot list module of abstract Neural model')
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """

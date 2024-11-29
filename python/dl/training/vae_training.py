@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2024  All rights reserved."
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from abc import ABC
 
@@ -10,7 +10,7 @@ from plots.plotter import PlotterParameters
 from metric.metric import Metric
 from dl.model.vae_model import VAEModel
 from dl.training.exec_config import ExecConfig
-from dl import DLException, VAEException
+from dl import ConvException, DLException, VAEException
 from dl.loss.vae_kl_loss import VAEKLLoss
 from typing import AnyStr, List, Optional, Dict, NoReturn, Self, Tuple
 from torch.utils.data import DataLoader
@@ -34,6 +34,7 @@ The key components are
 
 class VAETraining(NeuralNetTraining, ABC):
     max_debug_images = 3
+
     def __init__(self,
                  vae_model: VAEModel,
                  hyper_params: HyperParams,
@@ -144,24 +145,27 @@ class VAETraining(NeuralNetTraining, ABC):
         logger.info(f"Reconstruction loss {reconstruction_loss} KL divergence {kl_divergence}")
         return reconstruction_loss + kl_divergence
     """
-
+    """
     def __reconstruction_loss(self, predicted: torch.Tensor, x: torch.Tensor) -> float:
-        from dl import DLException
-
         try:
             # Cross-entropy for reconstruction loss for binary values
             # and MSE for continuous (TF-IDF) variable
             print(f'Input loss {x.shape}, Prediction shape {predicted.shape}')
             return self.hyper_params.loss_function(predicted, x)
+        except ConvException as e:
+            VAETraining.__process_error(e)
         except RuntimeError as e:
-            logger.error(f'Runtime error {str(e)}')
-            raise VAEException(f'Runtime error {str(e)}')
+            VAETraining.__process_error(e)
         except ValueError as e:
-            logger.error(f'Value error {str(e)}')
-            raise VAEException(f'Value error {str(e)}')
+            VAETraining.__process_error(e)
         except KeyError as e:
-            logger.error(f'Key error {str(e)}')
-            raise VAEException(f'Key error {str(e)}')
+            VAETraining.__process_error(e)
+    """
+
+    @staticmethod
+    def __process_error(e: Exception) -> None:
+        logging.error(str(e))
+        raise VAEException(str(e))
 
     @staticmethod
     def _reshape_output_variation(shapes: list, z: torch.Tensor) -> torch.Tensor:
@@ -192,12 +196,16 @@ class VAETraining(NeuralNetTraining, ABC):
                 total_loss += loss.data
                 encoder_optimizer.step()
                 decoder_optimizer.step()
+            except ConvException as e:
+                VAETraining.__process_error(e)
             except RuntimeError as e:
-                raise VAEException(str(e))
+                VAETraining.__process_error(e)
+            except ValueError as e:
+                VAETraining.__process_error(e)
+            except KeyError as e:
+                VAETraining.__process_error(e)
             except AttributeError as e:
-                raise VAEException(str(e))
-            except Exception as e:
-                raise VAEException(str(e))
+                VAETraining.__process_error(e)
         return total_loss / len(train_loader)
 
     def __eval(self, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
@@ -218,10 +226,16 @@ class VAETraining(NeuralNetTraining, ABC):
 
                     if self.__are_images(images_cnt):
                         eval_images.append((data, noisy_data, reconstructed))
+            except ConvException as e:
+                VAETraining.__process_error(e)
             except RuntimeError as e:
-                raise VAEException(str(e))
+                VAETraining.__process_error(e)
+            except ValueError as e:
+                VAETraining.__process_error(e)
+            except KeyError as e:
+                VAETraining.__process_error(e)
             except AttributeError as e:
-                raise VAEException(str(e))
+                VAETraining.__process_error(e)
 
         eval_loss = total_loss / len(eval_loader)
         metric_collector[Metric.eval_loss_label] = eval_loss

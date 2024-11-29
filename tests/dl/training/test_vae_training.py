@@ -24,7 +24,7 @@ class VAETest(unittest.TestCase):
         print(vae_model)
 
 
-    def test_train(self):
+    def test_train_1(self):
         from python.metric.metric import Metric
         from python.metric.built_in_metric import BuiltInMetric, MetricType
 
@@ -72,6 +72,8 @@ class VAETest(unittest.TestCase):
             metric_labels,
             plot_parameters)
         network(train_loader, eval_loader)
+
+    def test_train_2(self):
 
 
 if __name__ == '__main__':

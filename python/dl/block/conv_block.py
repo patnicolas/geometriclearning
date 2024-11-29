@@ -1,10 +1,11 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2024  All rights reserved."
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from torch import nn
 from typing import Tuple, Any, AnyStr, Optional
 from dl.block.neural_block import NeuralBlock
 from dl.block.deconv_block import DeConvBlock
+from dl.block.builder.conv_output_size import ConvOutputSize
 from dl.block.builder import ConvBlockBuilder
 import logging
 logger = logging.getLogger('dl.block.ConvBlock')
@@ -48,8 +49,9 @@ class ConvBlock(NeuralBlock):
     def get_out_channels(self) -> int:
         return self.conv_block_builder.out_channels
 
-    def compute_out_shapes(self) -> int | Tuple[int, int]:
-        return self.conv_block_builder.get_conv_layer_out_shape()
+    def get_conv_output_size(self) -> ConvOutputSize:
+        builder = self.conv_block_builder
+        return ConvOutputSize(builder.kernel_size, builder.stride, builder.padding, builder.max_pooling_kernel)
 
     def __repr__(self) -> str:
         return ' '.join([f'id={self.id}\n{str(module)}' for module in self.modules])

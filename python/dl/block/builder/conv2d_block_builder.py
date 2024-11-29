@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2024  All rights reserved."
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 
 from abc import ABC
@@ -95,62 +95,13 @@ class Conv2DBlockBuilder(ConvBlockBuilder, ABC):
         modules_list: List[nn.Module] = modules
         return tuple(modules_list)
 
-    def get_conv_layer_out_shape(self) -> int | Tuple[int, int]:
-        conv_out_shape = self.__get_conv_out_shape()
-        print(f'Conv output shape: {str(conv_out_shape)}')
-        conv_layer_out_shape = self.__get_pool_out_shape(conv_out_shape)
-        print(f'Conv layer output shape: {str(conv_out_shape)}')
-        return conv_layer_out_shape
+    def get_conv_output_size(self, input_size: int | Tuple[int, int]) -> int | Tuple[int, int]:
+        from dl.block.builder.conv_output_size import ConvOutputSize
 
-    """ ------------------ Private Helper Methods ------------------------------------- """
-
-    def __get_conv_out_shape(self) -> int | Tuple[int, int]:
-        """
-        Compute the output channels from the input channels, stride, padding and kernel size
-        @return: output channels if correct, -1 otherwise
-        @rtype: Tuple[int, int]
-        """
-        return self.__compute_out_dim_shape(0), self.__compute_out_dim_shape(1)
-
-    def __get_pool_out_shape(self, out_shape: int | Tuple[int, int]) -> int | Tuple[int, int]:
-        """
-        Compute the dimension for the shape of data output from the pooling layer if defined.
-        If undefined the output of the pooling module is the output of the previous
-        convolutional layer
-        @param out_shape: Output shape from the previous convolutional layer
-        @type out_shape: Tuple[int, int]
-        @return: Shape of output from the pooling module
-        @rtype: Tuple[int, int]
-        """
-        if self.max_pooling_kernel > 0:
-            #  if out_shape[0] % self.max_pooling_kernel != 0:
-            #      raise ConvException(f'Pooling shape: out {out_shape[0]} should be a multiple of '
-            #                          f'pooling kernel {self.max_pooling_kernel}')
-            #  if out_shape[1] % self.max_pooling_kernel != 0:
-            #      raise ConvException(f'Pooling shape: out {out_shape[1]} should be a multiple of '
-            #                         f'pooling kernel {self.max_pooling_kernel}')
-            h_shape = out_shape[0] - self.max_pooling_kernel + 1
-            w_shape = out_shape[1] - self.max_pooling_kernel + 1
-            return h_shape, w_shape
-        else:
-            return out_shape
+        conv_output_size = ConvOutputSize(self.kernel_size, self.stride, self.padding, self.max_pooling_kernel)
+        return conv_output_size(input_size)
 
     """ -------------------------  Private supporting methods --------------------- """
-
-    def __compute_out_dim_shape(self, dim: int) -> int:
-        assert 0 <= dim <= 1, f'Dimension {dim} for computing output channel is out of bounds (0, 1)'
-
-        stride = self.stride[dim]
-        padding = self.padding[dim]
-        kernel_size = self.kernel_size[dim]
-        num = (self.input_size[dim] + 2 * padding - kernel_size)
-        """
-        if num % stride != 0:
-            raise ConvException(f'Output channel cannot be computed {self.__str__()}')
-        return int(num / stride) + 1 if num % stride == 0 else -1
-        """
-        return int(num / stride) + 1
-
     @staticmethod
     def __validate_input(
             in_channels: int,
