@@ -3,12 +3,15 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from torch import nn
 from typing import Tuple, Any, AnyStr, Optional
+
+from dl import ConvException
 from dl.block.neural_block import NeuralBlock
-from dl.block.deconv_block import DeConvBlock
+from dl.block.conv_block_config import ConvBlockConfig
 from dl.block.builder.conv_output_size import ConvOutputSize
-from dl.block.builder import ConvBlockBuilder
 import logging
 logger = logging.getLogger('dl.block.ConvBlock')
+
+
 
 """    
     Generic convolutional neural block for 1 and 2 dimensions
@@ -16,7 +19,6 @@ logger = logging.getLogger('dl.block.ConvBlock')
          Convolution (kernel, Stride, padding)
          Batch normalization (Optional)
          Activation
-         Max pooling (Optional)
 
     Formula to compute output_dim of a convolutional block given an in_channels
         output_dim = (in_channels + 2*padding - kernel_size)/stride + 1
@@ -25,36 +27,27 @@ logger = logging.getLogger('dl.block.ConvBlock')
 
 
 class ConvBlock(NeuralBlock):
+    def __init__(self, block_id: Optional[AnyStr], conv_block_config: ConvBlockConfig, modules: Tuple[nn.Module]) -> None:
+        self.conv_block_config = conv_block_config
+        super(ConvBlock, self).__init__(block_id, modules)
 
-    def __init__(self, _id: AnyStr, conv_block_builder: ConvBlockBuilder) -> None:
-        """
-        Constructor for the convolutional neural block
-        @param _id: Identifier this convolutional neural block
-        @type _id: str
-        @param conv_block_builder: Convolutional block (dimension 1 or 2)
-        @type conv_block_builder: ConvBlockBuilder
-        """
-        self.id = _id
-        self.conv_block_builder = conv_block_builder
-
-        modules = self.conv_block_builder()
-        super(ConvBlock, self).__init__(_id, tuple(modules))
-
-    def invert(self) -> DeConvBlock:
-        return DeConvBlock(self.conv_block_builder, activation=None)
-
-    def invert_with_activation(self, activation: Optional[nn.Module] = None) -> DeConvBlock:
-        return DeConvBlock(self.conv_block_builder, activation=activation)
+    def invert(self, extra: Optional[nn.Module] = None) -> Any:
+        raise ConvException('Cannot invert abstract Convolutional block')
 
     def get_out_channels(self) -> int:
-        return self.conv_block_builder.out_channels
+        return self.conv_block_config.out_channels
 
     def get_conv_output_size(self) -> ConvOutputSize:
-        builder = self.conv_block_builder
-        return ConvOutputSize(builder.kernel_size, builder.stride, builder.padding, builder.max_pooling_kernel)
+        config = self.conv_block_config
+        return ConvOutputSize(config.kernel_size, config.stride, config.padding, config.max_pooling_kernel)
 
-    def __repr__(self) -> str:
-        return ' '.join([f'id={self.id}\n{str(module)}' for module in self.modules])
+    def __str__(self) -> AnyStr:
+        modules_str = self.__repr__()
+        config_str = str(self.conv_block_config)
+        return f'\nConfiguration {self.block_id}:\n{config_str}\nModules:\n{modules_str}'
+
+    def __repr__(self) -> AnyStr:
+        return ' '.join([f'{idx}: {str(module)}' for idx, module in enumerate(self.modules)])
 
     def get_modules_weights(self) -> Tuple[Any]:
         """

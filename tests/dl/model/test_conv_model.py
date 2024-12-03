@@ -1,10 +1,10 @@
 import unittest
 import torch.nn as nn
 from dl.block.conv_block import ConvBlock
+from dl.block.conv_2d_block import Conv2DBlock
 from dl.block.ffnn_block import FFNNBlock
 from dl.model.conv_model import ConvModel
 from dl import ConvException
-from dl.block.builder.conv2d_block_builder import Conv2DBlockBuilder
 import logging
 
 
@@ -53,47 +53,52 @@ class ConvModelTest(unittest.TestCase):
             logging.error(str(e))
             self.assertTrue(True)
 
-    @unittest.skip('Ignore')
+
     def test_mnist(self):
-        model_id = 'conv_MNIST_model'
-        input_size = 28
-        in_channels = 1
-        kernel_size = 3
-        padding_size = 1
-        stride_size = 1
-        in_channels_2 = 8
-        kernel_size_2 = 3
-        out_channels = 16
-        num_classes = 10
         try:
-            conv_block_1 = ConvModelTest.__create_conv_block_2(
-                in_channels,
-                in_channels_2,
-                input_size,
-                kernel_size,
-                stride_size,
-                padding_size,
-                nn.ReLU()
-            )
-            conv_block_2 = ConvModelTest.__create_conv_block_2(
-                in_channels_2,
-                out_channels,
-                input_size,
-                kernel_size_2,
-                stride_size,
-                padding_size,
-                nn.ReLU()
-            )
-            conv_output_shape = conv_block_2.get_conv_output_size()
-            ffnn_input_shape = out_channels*conv_output_shape[0]*conv_output_shape[1]
-            ffnn_block_1 = FFNNBlock.build('hidden', ffnn_input_shape, num_classes, nn.ReLU())
-            conv_model = ConvModel(model_id, [conv_block_1, conv_block_2], [ffnn_block_1])
+            conv_2d_block_1 = Conv2DBlock(block_id='conv_1',
+                                          in_channels=1,
+                                          out_channels=8,
+                                          kernel_size=(3, 3),
+                                          stride=(1, 1),
+                                          padding=(1,1),
+                                          batch_norm=True,
+                                          max_pooling_kernel=2,
+                                          activation=nn.ReLU(),
+                                          bias=False)
+            conv_2d_block_2 = Conv2DBlock(block_id='conv_1',
+                                          in_channels=8,
+                                          out_channels=16,
+                                          kernel_size=(3, 3),
+                                          stride=(1, 1),
+                                          padding=(1,1),
+                                          batch_norm=True,
+                                          max_pooling_kernel=2,
+                                          activation=nn.ReLU(),
+                                          bias=False)
+
+            """
+            out_channels = 16
+            conv_output_size = conv_2d_block_2.get_conv_output_size()
+            conv_output_sizes = conv_output_size(input_size=(28, 28))
+            ffnn_input_shape = out_channels*conv_output_sizes[0]*conv_output_sizes[1]
+            """
+            num_classes = 10
+            ffnn_block_1 = FFNNBlock.build(block_id='hidden',
+                                           in_features=0,
+                                           out_features=num_classes,
+                                           activation=nn.ReLU())
+            conv_model = ConvModel(model_id='MNIST',
+                                   input_size=(28, 28),
+                                   conv_blocks=[conv_2d_block_1, conv_2d_block_2],
+                                   ffnn_blocks=[ffnn_block_1])
             print(repr(conv_model))
             self.assertTrue(True)
         except ConvException as e:
             print(str(e))
             self.assertTrue(False)
 
+    @unittest.skip('Ignore')
     def test_build_from_conv(self):
         model_id = 'conv_MNIST_model'
         input_size = 28

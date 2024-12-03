@@ -54,13 +54,17 @@ class VAEModelTest(unittest.TestCase):
 
     def test_init3(self):
         encoder = VAEModelTest.create_mnist_conv()
-        latent_size = 64
-        decoder_out_activation = nn.Sigmoid()
-        vae_model = VAEModel('VAE - Mnist', encoder, latent_size, decoder_out_activation)
-        print(str(vae_model))
+        if encoder is not None:
+            latent_size = 64
+            decoder_out_activation = nn.Sigmoid()
+            vae_model = VAEModel('VAE - Mnist', encoder, latent_size, decoder_out_activation)
+            print(str(vae_model))
+            self.assertTrue(True)
+        else:
+            self.assertTrue(False)
 
     @staticmethod
-    def create_mnist_conv() -> ConvModel:
+    def create_mnist_conv() -> ConvModel | None:
         try:
             conv_2d_block_builder = Conv2DBlockBuilder(
                 in_channels=1,
@@ -89,8 +93,10 @@ class VAEModelTest(unittest.TestCase):
             return ConvModel(model_id ='conv_MNIST_model', conv_blocks=[conv_block_1, conv_block_2])
         except ConvException as e:
             print(str(e))
+            return None
         except VAEException as e:
             print(str(e))
+            return None
 
 
 if __name__ == '__main__':

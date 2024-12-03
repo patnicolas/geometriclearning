@@ -5,7 +5,7 @@ from abc import ABC
 
 from dl.model.neural_model import NeuralModel
 from dl.model.ffnn_model import FFNNModel
-from dl.block.deconv_block import DeConvBlock
+from dl.block.deconv_2d_block import DeConv2DBlock
 from dl.block.ffnn_block import FFNNBlock
 from typing import AnyStr, List, Optional, Self, Dict, Any
 from util import log_size
@@ -18,7 +18,7 @@ logger = logging.getLogger('dl.model.DeConvModel')
 class DeConvModel(NeuralModel, ABC):
     def __init__(self,
                  model_id: AnyStr,
-                 de_conv_blocks: List[DeConvBlock],
+                 de_conv_blocks: List[DeConv2DBlock],
                  ffnn_blocks: Optional[List[FFNNBlock]] = None) -> None:
         """
         Constructor for this de-convolutional neural network
@@ -47,7 +47,7 @@ class DeConvModel(NeuralModel, ABC):
         super(DeConvModel, self).__init__(model_id, nn.Sequential(*modules))
 
     @classmethod
-    def build(cls, model_id: AnyStr, de_conv_blocks: List[DeConvBlock]) -> Self:
+    def build(cls, model_id: AnyStr, de_conv_blocks: List[DeConv2DBlock]) -> Self:
         """
         Create a pure de-convolutional neural network as a convolutional decoder for
         variational auto-encoder or generative adversarial network
@@ -107,7 +107,7 @@ class DeConvModel(NeuralModel, ABC):
         }
 
     @staticmethod
-    def is_valid(de_conv_blocks: List[DeConvBlock], ffnn_blocks: List[FFNNBlock]) -> bool:
+    def is_valid(de_conv_blocks: List[DeConv2DBlock], ffnn_blocks: List[FFNNBlock]) -> bool:
         """
         Test if the layout/configuration of convolutional neural blocks and feed-forward neural blocks
         are valid
@@ -129,7 +129,7 @@ class DeConvModel(NeuralModel, ABC):
     """ ----------------------------   Private helper methods --------------------------- """
 
     @staticmethod
-    def __validate(neural_blocks: List[DeConvBlock]):
+    def __validate(neural_blocks: List[DeConv2DBlock]):
         assert len(neural_blocks) > 0, "Deep Feed Forward network needs at least one layer"
         for index in range(len(neural_blocks) - 1):
             assert neural_blocks[index + 1].in_channels == neural_blocks[index].out_channels, \

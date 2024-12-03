@@ -30,6 +30,7 @@ __all__ = ['ConvModel']
 
 class ConvModel(NeuralModel, ABC):
     def __init__(self,
+                 input_size: int | Tuple[int ,int],
                  model_id: AnyStr,
                  conv_blocks: List[ConvBlock],
                  ffnn_blocks: Optional[List[FFNNBlock]] = None):
@@ -42,21 +43,31 @@ class ConvModel(NeuralModel, ABC):
         @param ffnn_blocks: List of Feed-Forward Neural Blocks
         @type ffnn_blocks: List[FFNNBlock]
         """
-        ConvModel.is_valid(conv_blocks, ffnn_blocks)
+        ConvModel.is_valid(conv_blocks, ffnn_blocks, input_size)
+
+        self.input_size = input_size
         self.conv_blocks = conv_blocks
 
         # Record the number of input and output features from the first and last neural block respectively
-        self.in_features = conv_blocks[0].conv_block_builder.in_channels
+        self.in_features = conv_blocks[0].conv_block_config.in_channels
         self.out_features = ffnn_blocks[-1].out_features if ffnn_blocks is not None \
-            else conv_blocks[-1].conv_block_builder.out_channels
+            else conv_blocks[-1].conv_block_config.out_channels
+
         # Define the sequence of modules from the layout
         modules: List[nn.Module] = [module for block in conv_blocks for module in block.modules]
 
         # If fully connected are provided as CNN
         if ffnn_blocks is not None:
-            self.ffnn_blocks = ffnn_blocks
+            ffnn_input_size = ConvModel.__linear_layer_input_size(conv_blocks[-1], self.input_size)
             modules.append(nn.Flatten())
-            [modules.append(module) for block in ffnn_blocks for module in block.modules]
+            linear_block = FFNNBlock.build(ffnn_blocks[0].block_id,
+                                           ffnn_input_size,
+                                           ffnn_blocks[0].out_features,
+                                           ffnn_blocks[0].activation)
+            self.ffnn_blocks = [linear_block]
+            if len(ffnn_blocks) > 1:
+                [self.ffnn_blocks.append(ffnn_blocks[index]) for index in range(1, len(ffnn_blocks))]
+            [modules.append(module) for block in self.ffnn_blocks for module in block.modules]
         else:
             self.ffnn_blocks = None
         super(ConvModel, self).__init__(model_id, nn.Sequential(*modules))
@@ -75,24 +86,16 @@ class ConvModel(NeuralModel, ABC):
         """
         return  cls(model_id, conv_blocks = conv_blocks, ffnn_blocks = None)
 
-    def invert(self) -> DeConvModel:
+    def invert(self, extra: nn.Module = None) -> DeConvModel:
         """
          Build a de-convolutional neural model from an existing convolutional nodel
-         @return: Instance of de convolutional model
-         @rtype: DeConvModel
-         """
-        de_conv_blocks = [conv_block.invert() for conv_block in self.conv_blocks]
-        de_conv_blocks.reverse()
-        return DeConvModel(model_id=f'de_{self.model_id}', de_conv_blocks=de_conv_blocks, ffnn_blocks=None)
-
-    def invert_with_last_activation(self, activation: nn.Module) -> DeConvModel:
-        """
-         Build a de-convolutional neural model from an existing convolutional nodel
+         @param extra: Extra module to be added to the inverted neural structure
+         @type extra: nn.Module
          @return: Instance of de convolutional model
          @rtype: DeConvModel
          """
         de_conv_blocks = [conv_block.invert() if idx > 0
-                          else conv_block.invert_with_activation(activation)
+                          else conv_block.invert(extra)
                           for idx, conv_block in enumerate(self.conv_blocks)]
         de_conv_blocks.reverse()
         return DeConvModel(model_id=f'de_{self.model_id}', de_conv_blocks=de_conv_blocks)
@@ -104,10 +107,6 @@ class ConvModel(NeuralModel, ABC):
         @rtype: int
         """
         return self.conv_blocks[0].conv_block_builder.in_channels
-
-    def get_out_featuresX(self) -> int:
-        return self.conv_blocks[-1].conv_block_builder.out_channels if self.ffnn_blocks is None \
-            else self.ffnn_blocks[-1].out_features
 
     def get_conv_output_size(self) -> int | Tuple[int, int]:
         """
@@ -163,13 +162,13 @@ class ConvModel(NeuralModel, ABC):
         dff_model_input_size = self.ffnn_blocks[0].in_features if self.ffnn_blocks is not None else -1
         return {
             "model_id": self.model_id,
-            "input_size": self.conv_blocks[0].conv_block_builder.in_channels,
+            "input_size": self.input_size,
             "output_size": self.out_features,
             "dff_model_input_size": dff_model_input_size
         }
 
     @staticmethod
-    def is_valid(conv_blocks: List[ConvBlock], ffnn_blocks: List[FFNNBlock]) -> bool:
+    def is_valid(conv_blocks: List[ConvBlock], ffnn_blocks: List[FFNNBlock], input_size: int | Tuple[int, int]) -> bool:
         """
         Test if the layout/configuration of convolutional neural blocks and feed-forward neural blocks
         are valid
@@ -180,7 +179,7 @@ class ConvModel(NeuralModel, ABC):
         """
         try:
             assert conv_blocks, 'This convolutional model has not defined neural blocks'
-            ConvModel.__validate(conv_blocks)
+            ConvModel.__validate(conv_blocks, input_size)
             if not ffnn_blocks:
                 FFNNModel.is_valid(ffnn_blocks)
             return True
@@ -190,18 +189,25 @@ class ConvModel(NeuralModel, ABC):
 
     """ ----------------------------   Private helper methods --------------------------- """
     @staticmethod
-    def __validate(neural_blocks: List[ConvBlock]):
+    def __linear_layer_input_size(last_conv_block: ConvBlock, input_size: int) -> int:
+        conv_output_size = last_conv_block.get_conv_output_size()
+        conv_output_sizes = conv_output_size(input_size=input_size)
+        return last_conv_block.conv_block_config.out_channels * conv_output_sizes[0] * conv_output_sizes[1]
+
+
+    @staticmethod
+    def __validate(neural_blocks: List[ConvBlock], input_size: int | Tuple[int, int]):
         assert len(neural_blocks) > 0, "Deep Feed Forward network needs at least one layer"
 
         for index in range(len(neural_blocks) - 1):
             # Validate the in-channel and out-channels
-            next_in_channels = neural_blocks[index + 1].conv_block_builder.in_channels
-            this_out_channels = neural_blocks[index].conv_block_builder.out_channels
+            next_in_channels = neural_blocks[index + 1].conv_block_config.in_channels
+            this_out_channels = neural_blocks[index].conv_block_config.out_channels
             assert next_in_channels == this_out_channels, \
                 f'Layer {index} input_tensor != layer {index+1} output'
 
             this_output_shape = neural_blocks[index].get_conv_output_size()
-            next_input_shape = neural_blocks[index + 1].conv_block_builder.input_size
+            next_input_shape = input_size
             assert this_output_shape == next_input_shape, \
                 f'This output shape {str(this_output_shape)} should = next input shape {str(next_input_shape)}'
 

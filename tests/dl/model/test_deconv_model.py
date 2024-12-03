@@ -1,6 +1,6 @@
 import unittest
 import torch.nn as nn
-from dl.block.deconv_block import DeConvBlock
+from dl.block.deconv_2d_block import DeConvBlock
 from dl.model.deconv_model import DeConvModel
 from dl import ConvException
 from typing import Tuple

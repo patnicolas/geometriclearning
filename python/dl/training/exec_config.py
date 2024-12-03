@@ -2,7 +2,7 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import torch
-from typing import AnyStr
+from typing import AnyStr, Self
 from torch.optim import Optimizer
 from torch.utils.data import Dataset, DataLoader
 
@@ -39,6 +39,23 @@ class ExecConfig(object):
         self.pin_mem = pin_mem
         self.monitor_memory = monitor_memory
         self.accumulator = []
+
+    @classmethod
+    def default(cls, device_conf: AnyStr) -> Self:
+        """
+        Default setting for the configuration of execution of training: All optimization are disabled
+        @param device_conf: Name of the target device
+        @type device_conf: str
+        @return: Instance of Execution configuraiotn
+        @rtype: ExecConfig
+        """
+        return cls(empty_cache=False,
+                   mix_precision=False,
+                   subset_size=1,
+                   monitor_memory=False,
+                   grad_accu_steps=1,
+                   device_config=device_conf,
+                   pin_mem=False)
 
     def __str__(self) -> AnyStr:
         return (f'\nEmpty cache: {self.empty_cache}\nMix precision {self.mix_precision}\nSubset size: {self.subset_size}'

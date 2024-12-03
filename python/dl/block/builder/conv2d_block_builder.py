@@ -15,12 +15,12 @@ class Conv2DBlockBuilder(ConvBlockBuilder, ABC):
                  out_channels: int,
                  input_size: int | Tuple[int, int],
                  kernel_size: int | Tuple[int, int],
-                 stride: int | Tuple[int, int],
-                 padding: int | Tuple[int, int],
-                 batch_norm: bool,
-                 max_pooling_kernel: int,
-                 activation: nn.Module,
-                 bias: bool) -> None:
+                 stride: int | Tuple[int, int] = (1, 1),
+                 padding: int | Tuple[int, int] = (0, 0),
+                 batch_norm: bool = False,
+                 max_pooling_kernel: int = 1,
+                 activation: nn.Module = None,
+                 bias: bool = False) -> None:
         """
         Constructor for the initialization of 2-dimension convolutional neural block
         @param in_channels: Number of input_tensor channels

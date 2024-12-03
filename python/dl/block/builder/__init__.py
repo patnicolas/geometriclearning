@@ -53,7 +53,7 @@ class ConvBlockBuilder(object):
 
     @abc.abstractmethod
     def __call__(self) -> Tuple[nn.Module]:
-        raise ConvException('Cannot extract module from abstract class ConvInitBlockBuilder')
+        raise ConvException('Cannot extract module from abstract class ConvBlockBuilder')
 
     @abc.abstractmethod
     def get_conv_output_size(self, input_size: int) -> int | Tuple[int, int]:

@@ -86,8 +86,8 @@ class ConvMNISTTest(unittest.TestCase):
         gelu_f1_scores = ConvMNISTTest.extract_f1_scores('GELU')
         labels = ['ReLU', 'LeakyReLU', 'ELU', 'GELU']
         Plotter.plot(
-            values =[relu_f1_scores, leaky_relu_f1_scores, elu_f1_scores, gelu_f1_scores],
-            labels = labels,
+            values=[relu_f1_scores, leaky_relu_f1_scores, elu_f1_scores, gelu_f1_scores],
+            labels=labels,
             plotter_parameters=PlotterParameters(
                 0,
                 x_label='Epoch',
@@ -150,25 +150,18 @@ class ConvMNISTTest(unittest.TestCase):
         from dl.training.hyper_params import HyperParams
         from dl.training.exec_config import ExecConfig
 
-        _id = 'MNIST_1'
-        input_size = 28
-        max_pooling_kernel = 2
-        out_channels = 128
-        ffnn_out_features = [128, 128]
-        num_classes = 10
         batch_size = 128
         conv_layer1_config = ConvLayer2DConfig(3, 3, 0, 1)
         conv_layer2_config = ConvLayer2DConfig(32, 3, 0, 1)
         conv_layer3_config = ConvLayer2DConfig(64, 3, 0, 1)
-        conv_layer_2D_config = [conv_layer1_config, conv_layer2_config, conv_layer3_config]
-        conv_2D_config = Conv2DConfig(_id,
-                                      input_size,
-                                      conv_layer_2D_config,
-                                      max_pooling_kernel,
-                                      out_channels,
-                                      _activation,
-                                      ffnn_out_features,
-                                      num_classes)
+        conv_2D_config = Conv2DConfig(_id='MNIST_1',
+                                      input_size=28,
+                                      conv_layers_2D_config=[conv_layer1_config, conv_layer2_config, conv_layer3_config],
+                                      max_pooling_kernel=2,
+                                      out_channels=128,
+                                      activation=_activation,
+                                      ffnn_out_features=[128, 128],
+                                      num_classes=10)
         root_path = '../../../../data/MNIST'
 
         try:

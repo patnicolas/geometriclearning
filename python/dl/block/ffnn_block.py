@@ -33,14 +33,17 @@ class FFNNBlock(NeuralBlock):
         """
         self.in_features = layer.in_features
         self.out_features = layer.out_features
+
         # Starts a build the list of modules
         modules = [layer]
         if activation is not None:
             modules.append(activation)
+
         # Only if regularization is needed
         if drop_out > 0.0:
             modules.append(nn.Dropout(drop_out))
         super(FFNNBlock, self).__init__(block_id, tuple(modules))
+        self.activation = activation
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return super().forward(x)
@@ -69,7 +72,7 @@ class FFNNBlock(NeuralBlock):
         """
         return cls(block_id, nn.Linear(in_features, out_features, False), activation, drop_out)
 
-    def invert(self) -> Self:
+    def invert(self, extra: Optional[nn.Module] = None) -> Self:
         """
         Invert the layer size (in_feature <-> out_feature) and remove drop_out for decoder
         @return: Inverted feed forward neural network block

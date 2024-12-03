@@ -26,8 +26,7 @@ class NeuralBlock(nn.Module):
         self.modules = modules
         self.block_id = block_id
 
-    @classmethod
-    def invert(cls) -> Self:
+    def invert(self, extra: Optional[nn.Module] = None) -> Self:
         raise DLException('Cannot invert abstract Neural block')
 
     def __repr__(self):

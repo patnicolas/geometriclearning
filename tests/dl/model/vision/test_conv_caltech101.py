@@ -39,16 +39,11 @@ class ConvCaltech101Test(unittest.TestCase):
             encoding_len=101,  # No one-hot encoding
             normal_weight_initialization=False)
 
-        empty_cache: bool = False
-        mix_precision: bool = False
-        pin_memory: bool = False
-        subset_size: int = 200
-
         exec_config = ExecConfig(
-            empty_cache=empty_cache,
-            mix_precision=mix_precision,
-            pin_mem=pin_memory,
-            subset_size=subset_size,
+            empty_cache=False,
+            mix_precision=False,
+            pin_mem=False,
+            subset_size=200,
             monitor_memory=True,
             grad_accu_steps=1,
             device_config=None)

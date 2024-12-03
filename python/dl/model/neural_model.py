@@ -82,7 +82,7 @@ class NeuralModel(torch.nn.Module, ABC):
     def get_latent_features(self) -> int:
         raise NotImplementedError('NeuralModel.get_latent_features undefined for abstract neural model')
 
-    def invert(self) -> Self:
+    def invert(self, extra: nn.Module = None) -> Self:
         raise NotImplementedError('NeuralModel.invert is an abstract method')
 
     def __repr__(self) -> AnyStr:
