@@ -8,27 +8,71 @@ import torch.nn as nn
 
 
 class Conv2DBlock(ConvBlock):
-    def __init__(self,
-                 block_id: AnyStr,
-                 in_channels: int,
-                 out_channels: int,
-                 kernel_size: Tuple[int, int],
-                 stride: Tuple[int, int] = (1, 1),
-                 padding: Tuple[int, int] = (0, 0),
-                 batch_norm: bool = False,
-                 max_pooling_kernel: int = 1,
-                 activation: nn.Module = None,
-                 bias: bool = False) -> None:
+    def __init__(self, block_id: AnyStr, conv_block_config: ConvBlockConfig) -> None:
         """
         Constructor for a 2-dimension convolutional block
+        @param block_id: Identifier for the 2D convolutional block
+        @type block_id: str
+        @param conv_block_config: Configuration for this convolutional neural block
+        @type conv_block_config: ConvBlockConfig
+        """
+        modules = []
+
+        # First define the 2D convolution
+        conv_module = nn.Conv2d(
+            in_channels=conv_block_config.in_channels,
+            out_channels=conv_block_config.out_channels,
+            kernel_size=conv_block_config.kernel_size,
+            stride=conv_block_config.stride,
+            padding=conv_block_config.padding,
+            bias=conv_block_config.bias)
+        modules.append(conv_module)
+
+        # Add the batch normalization
+        if conv_block_config.batch_norm:
+            batch_module: nn.Module = nn.BatchNorm2d(conv_block_config.out_channels)
+            modules.append(batch_module)
+
+        # Activation to be added if needed
+        if conv_block_config.activation is not None:
+            activation_module: nn.Module = conv_block_config.activation
+            modules.append(activation_module)
+
+        # Added max pooling module if defined
+        if conv_block_config.max_pooling_kernel > 0:
+            max_pool_module: nn.Module = nn.MaxPool2d(kernel_size=conv_block_config.max_pooling_kernel,
+                                                      stride=1,
+                                                      padding=0)
+            modules.append(max_pool_module)
+        # modules_list: List[nn.Module] = modules
+        super(Conv2DBlock, self).__init__(block_id, conv_block_config, tuple(modules))
+
+    @classmethod
+    def build(cls,
+              block_id: AnyStr,
+              in_channels: int,
+              out_channels: int,
+              kernel_size: Tuple[int, int],
+              stride: Tuple[int, int] = (1, 1),
+              padding: Tuple[int, int] = (0, 0),
+              batch_norm: bool = False,
+              max_pooling_kernel: int = 1,
+              activation: nn.Module = None,
+              bias: bool = False) -> Self:
+        """
+        Alternative constructor for a 2-dimension convolutional block
+        @param block_id: Identifier for the block id
+        @type block_id: str
         @param in_channels: Number of input_tensor channels
         @type in_channels: int
         @param out_channels: Number of output channels
         @type out_channels: int
         @param kernel_size: Size of the kernel (num_records) for 1D and (num_records, num_records) for 2D
-        @type kernel_size: Union[int, Tuple[Int]]
+        @type kernel_size: Tuple[int, int]
         @param stride: Stride for convolution (st) for 1D, (st, st) for 2D
-        @type stride: Union[int, Tuple[Int]]
+        @type stride: Tuple[int, int]
+        @param padding: Padding for convolution (st) for 1D, (st, st) for 2D
+        @type stride: Tuple[int, int]
         @param batch_norm: Boolean flag to specify if a batch normalization is required
         @type batch_norm: int
         @param max_pooling_kernel: Boolean flag to specify max pooling is needed
@@ -47,37 +91,9 @@ class Conv2DBlock(ConvBlock):
                                             max_pooling_kernel,
                                             activation,
                                             bias)
-        modules = []
+        return cls(block_id, conv_block_config)
 
-        # First define the 2D convolution
-        conv_module = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=bias)
-        modules.append(conv_module)
-
-        # Add the batch normalization
-        if batch_norm:
-            batch_module: nn.Module = nn.BatchNorm2d(out_channels)
-            modules.append(batch_module)
-
-        # Activation to be added if needed
-        if activation is not None:
-            activation_module: nn.Module = activation
-            modules.append(activation_module)
-
-        # Added max pooling module if defined
-        if max_pooling_kernel > 0:
-            max_pool_module: nn.Module = nn.MaxPool2d(kernel_size=max_pooling_kernel, stride=1, padding=0)
-            modules.append(max_pool_module)
-
-        # modules_list: List[nn.Module] = modules
-        super(Conv2DBlock, self).__init__(block_id, conv_block_config, tuple(modules))
-
-    def invert(self, extra: Optional[nn.Module] = None) -> DeConv2DBlock:
+    def transpose(self, extra: Optional[nn.Module] = None) -> DeConv2DBlock:
         """
         Build a de-convolutional neural block from an existing convolutional block
         @param extra: Extra module to be added to the inverted neural structure
@@ -85,9 +101,10 @@ class Conv2DBlock(ConvBlock):
         @return: Instance of 2D de-convolutional block
         @rtype: DeConv2DBlock
         """
-        return DeConv2DBlock.from_conv(block_id=f'de_{self.block_id}',
-                                       conv_block_config=self.conv_block_config,
-                                       activation=extra)
+        self.conv_block_config.transpose()
+        return DeConv2DBlock(block_id=f'de_{self.block_id}',
+                             conv_block_config=self.conv_block_config,
+                             activation=extra)
 
 
 

@@ -35,7 +35,7 @@ class FFNNBlockTest(unittest.TestCase):
         activation = nn.ReLU()
         ffnn_block = FFNNBlock.build('id', in_features, out_features, activation, 0.2)
         print(f'Model: {repr(ffnn_block)}')
-        inverted_ffnn_block = ffnn_block.invert()
+        inverted_ffnn_block = ffnn_block.transpose()
         print(f'Inverted:\n{repr(inverted_ffnn_block)}')
 
 

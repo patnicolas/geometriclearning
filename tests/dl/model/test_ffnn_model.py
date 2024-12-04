@@ -30,7 +30,7 @@ class FFNNModelTest(unittest.TestCase):
         output_block = FFNNBlock.build('output', 5, out_features, torch.nn.ReLU())
         ffnn_model = FFNNModel('test1', [input_block, hidden_block, output_block])
         print(f'Original {repr(ffnn_model)}')
-        inverted_ffnn_model = ffnn_model.invert()
+        inverted_ffnn_model = ffnn_model.transpose()
         self.assertTrue(inverted_ffnn_model.in_features == out_features)
         self.assertTrue(inverted_ffnn_model.out_features == in_features)
         print(f'Inverted: {repr(inverted_ffnn_model)}')

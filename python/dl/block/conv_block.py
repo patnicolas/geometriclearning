@@ -28,10 +28,19 @@ logger = logging.getLogger('dl.block.ConvBlock')
 
 class ConvBlock(NeuralBlock):
     def __init__(self, block_id: Optional[AnyStr], conv_block_config: ConvBlockConfig, modules: Tuple[nn.Module]) -> None:
+        """
+        Constructor for the Generic Convolutional Neural block
+        @param block_id: Identifier for the block
+        @type block_id: str
+        @param conv_block_config: Configuration for the convolutional block
+        @type conv_block_config: ConvBlockConfig
+        @param modules: PyTorch modules components for this block
+        @type modules: Tuple (modules)
+        """
         self.conv_block_config = conv_block_config
         super(ConvBlock, self).__init__(block_id, modules)
 
-    def invert(self, extra: Optional[nn.Module] = None) -> Any:
+    def transpose(self, extra: Optional[nn.Module] = None) -> Any:
         raise ConvException('Cannot invert abstract Convolutional block')
 
     def get_out_channels(self) -> int:
@@ -47,7 +56,7 @@ class ConvBlock(NeuralBlock):
         return f'\nConfiguration {self.block_id}:\n{config_str}\nModules:\n{modules_str}'
 
     def __repr__(self) -> AnyStr:
-        return ' '.join([f'{idx}: {str(module)}' for idx, module in enumerate(self.modules)])
+        return '\n'.join([f'{idx}: {str(module)}' for idx, module in enumerate(self.modules)])
 
     def get_modules_weights(self) -> Tuple[Any]:
         """

@@ -5,10 +5,12 @@ import torch
 import torch.nn as nn
 from abc import ABC
 from typing import AnyStr, Self, List, Callable
-from dl import DLException
 from torch.utils.data import DataLoader
-from dl.training.exec_config import ExecConfig
+from dl import DLException
 import logging
+
+from dl.training.neural_net_training import NeuralNetTraining
+
 logger = logging.getLogger('dl.model.NeuralModel')
 
 
@@ -24,6 +26,7 @@ class NeuralModel(torch.nn.Module, ABC):
     def __init__(self,
                  model_id: AnyStr,
                  model: torch.nn.Module,
+                 execution: NeuralNetTraining,
                  noise_func: Callable[[torch.Tensor], torch.Tensor] = None) -> None:
         """
         Constructor
@@ -37,6 +40,7 @@ class NeuralModel(torch.nn.Module, ABC):
         super(NeuralModel, self).__init__()
         self.model_id = model_id
         self.model = model
+        self.execution = execution
         self.noise_func = noise_func
 
     def add_noise(self, x: torch.Tensor) -> torch.Tensor:
@@ -55,6 +59,9 @@ class NeuralModel(torch.nn.Module, ABC):
     def list_modules(self, index: int = 0) -> AnyStr:
         raise DLException('Cannot list module of abstract Neural model')
 
+    def do_train(self, net_training: NeuralNetTraining, train_loader: DataLoader, eval_loader: DataLoader):
+        net_training.train(self.model_id, self.model, train_loader, eval_loader)
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Execute the default forward method for all neural network models inherited from this class
@@ -63,10 +70,12 @@ class NeuralModel(torch.nn.Module, ABC):
         @return: Prediction for the input
         @rtype: Torch tensor
         """
-        print(f'Input {self.model_id}\n{x.shape}')
-        x = self.model(x)
-        print(f'Output {self.model_id}\n{x.shape}')
-        return x
+        with torch.no_grad():
+            print(f'Input {self.model_id}\n{x.shape}')
+            x= x.to(self.execution.target_device)
+            x = self.model(x)
+            print(f'Output {self.model_id}\n{x.shape}')
+            return x
 
     def get_in_features(self) -> int:
         raise NotImplementedError('NeuralModel.get_in_features undefined for abstract neural model')
@@ -82,14 +91,14 @@ class NeuralModel(torch.nn.Module, ABC):
     def get_latent_features(self) -> int:
         raise NotImplementedError('NeuralModel.get_latent_features undefined for abstract neural model')
 
-    def invert(self, extra: nn.Module = None) -> Self:
+    def transpose(self, extra: nn.Module = None) -> Self:
         raise NotImplementedError('NeuralModel.invert is an abstract method')
 
-    def __repr__(self) -> AnyStr:
-        return f'Model: {self.model_id}'
+    def __str__(self) -> AnyStr:
+        return f'\n{self.model_id}\n{str(self.model)}'
 
-    def get_model(self) -> torch.nn.Module:
-        return self.model
+    def __repr__(self) -> AnyStr:
+        return '\n'.join([f'{idx}: {str(module)}' for idx, module in enumerate(self.get_modules())])
 
     def save(self, extra_params: dict = None):
         raise NotImplementedError('NeuralModel.save is an abstract method')

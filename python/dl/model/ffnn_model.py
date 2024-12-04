@@ -34,13 +34,13 @@ class FFNNModel(NeuralModel):
         modules = [module for block in neural_blocks for module in block.modules]
         super(FFNNModel, self).__init__(model_id, torch.nn.Sequential(*modules))
 
-    def invert(self) -> Self:
+    def transpose(self) -> Self:
         """
         Generate the inverted neural layout for this feed forward neural network
         @return: This feed-forward neural network with an inverted layout
         @rtype: FFNNModel
         """
-        neural_blocks: list[FFNNBlock] = [block.invert() for block in self.neural_blocks[::-1]]
+        neural_blocks: list[FFNNBlock] = [block.transpose() for block in self.neural_blocks[::-1]]
         return FFNNModel(model_id=f'_{self.model_id}', neural_blocks=neural_blocks)
 
     def get_in_features(self) -> int:

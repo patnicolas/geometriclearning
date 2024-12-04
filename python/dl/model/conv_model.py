@@ -13,6 +13,9 @@ from typing import List, AnyStr, Dict, Any, Self, Optional, Tuple
 import torch
 import torch.nn as nn
 import logging
+
+from dl.training.neural_net_training import NeuralNetTraining
+
 logger = logging.getLogger('dl.model.ConvModel')
 
 __all__ = ['ConvModel']
@@ -33,7 +36,8 @@ class ConvModel(NeuralModel, ABC):
                  input_size: int | Tuple[int ,int],
                  model_id: AnyStr,
                  conv_blocks: List[ConvBlock],
-                 ffnn_blocks: Optional[List[FFNNBlock]] = None):
+                 ffnn_blocks: Optional[List[FFNNBlock]] = None,
+                 execution: Optional[NeuralNetTraining] = None) -> None:
         """
         Constructor for this convolutional neural network
         @param model_id: Identifier for this model
@@ -70,7 +74,7 @@ class ConvModel(NeuralModel, ABC):
             [modules.append(module) for block in self.ffnn_blocks for module in block.modules]
         else:
             self.ffnn_blocks = None
-        super(ConvModel, self).__init__(model_id, nn.Sequential(*modules))
+        super(ConvModel, self).__init__(model_id, nn.Sequential(*modules), execution)
 
     @classmethod
     def build(cls, model_id: AnyStr, conv_blocks: List[ConvBlock]) -> Self:
@@ -86,7 +90,7 @@ class ConvModel(NeuralModel, ABC):
         """
         return  cls(model_id, conv_blocks = conv_blocks, ffnn_blocks = None)
 
-    def invert(self, extra: nn.Module = None) -> DeConvModel:
+    def transpose(self, extra: nn.Module = None) -> DeConvModel:
         """
          Build a de-convolutional neural model from an existing convolutional nodel
          @param extra: Extra module to be added to the inverted neural structure
@@ -94,8 +98,8 @@ class ConvModel(NeuralModel, ABC):
          @return: Instance of de convolutional model
          @rtype: DeConvModel
          """
-        de_conv_blocks = [conv_block.invert() if idx > 0
-                          else conv_block.invert(extra)
+        de_conv_blocks = [conv_block.transpose() if idx > 0
+                          else conv_block.transpose(extra)
                           for idx, conv_block in enumerate(self.conv_blocks)]
         de_conv_blocks.reverse()
         return DeConvModel(model_id=f'de_{self.model_id}', de_conv_blocks=de_conv_blocks)
@@ -148,16 +152,6 @@ class ConvModel(NeuralModel, ABC):
     def __repr__(self) -> str:
         return f'State:{self._state_params()}\nModules:\n{self.list_modules(0)}'
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """
-        Process the model as sequence of modules, implicitly called by __call__
-        @param x: Input input_tensor
-        @type x: A torch tensor
-        @return: A tensor output from last layer
-        @rtype; Torch tensor
-        """
-        return self.model(x)
-
     def _state_params(self) -> Dict[AnyStr, Any]:
         dff_model_input_size = self.ffnn_blocks[0].in_features if self.ffnn_blocks is not None else -1
         return {
@@ -176,6 +170,7 @@ class ConvModel(NeuralModel, ABC):
         @type conv_blocks: List[ConvBlock]
         @param ffnn_blocks:  List of neural blocks which layout is to be evaluated
         @type ffnn_blocks: List[FFNNBlock]
+        @param input_size: Input size as int (1D) or Tuple (2D)
         """
         try:
             assert conv_blocks, 'This convolutional model has not defined neural blocks'

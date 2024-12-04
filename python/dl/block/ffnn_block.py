@@ -72,7 +72,7 @@ class FFNNBlock(NeuralBlock):
         """
         return cls(block_id, nn.Linear(in_features, out_features, False), activation, drop_out)
 
-    def invert(self, extra: Optional[nn.Module] = None) -> Self:
+    def transpose(self, extra: Optional[nn.Module] = None) -> Self:
         """
         Invert the layer size (in_feature <-> out_feature) and remove drop_out for decoder
         @return: Inverted feed forward neural network block

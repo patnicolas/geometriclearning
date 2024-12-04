@@ -5,7 +5,6 @@ import torch
 from torch import optim
 from torch import nn
 from typing import AnyStr, Optional, List
-from dl.model.neural_model import NeuralModel
 from dataset.dataset_exception import DatasetException
 import logging
 logger = logging.getLogger('dl.HyperParams')
@@ -77,7 +76,7 @@ class HyperParams(object):
         else:
             logger.warning('No normal initialization for hyper parameters')
 
-    def optimizer(self, model: NeuralModel) -> torch.optim.Optimizer:
+    def optimizer(self, model: nn.Module) -> torch.optim.Optimizer:
         """
         Select the optimizer for generated from encoder_model parameters given the optimization label
             - SGD with Nesterov momentum

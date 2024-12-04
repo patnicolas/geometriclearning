@@ -10,84 +10,33 @@ import logging
 
 class ConvModelTest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
-    def test_init(self):
-        model_id = 'conv_model_2d'
-        in_channels = 68
-        kernel_size = (4, 4)
-        in_channels_2 = 16
-        kernel_size_2 = (2, 2)
-        out_channels = 6
+    def test_mnist_small(self):
         try:
-            conv_block_1 = ConvModelTest.__create_conv_block_2(in_channels, in_channels_2, kernel_size)
-            conv_block_2 = ConvModelTest.__create_conv_block_2(in_channels_2, out_channels, kernel_size_2)
-            ffnn_block_1 = FFNNBlock.build('hidden', out_channels, 4, nn.ReLU())
-            ffnn_block_2 = FFNNBlock.build('output', 4, 4, nn.ReLU())
-            conv_model = ConvModel(model_id, [conv_block_1, conv_block_2], [ffnn_block_1, ffnn_block_2])
-            self.assertTrue(conv_model.has_fully_connected())
-            self.assertTrue(conv_model.in_features == in_channels)
-            self.assertTrue(conv_model.out_features == out_channels)
-            logging.info(repr(conv_model))
-            self.assertTrue(True)
-        except ConvException as e:
-            logging.error(str(e))
-            self.assertTrue(True)
-
-    @unittest.skip('Ignore')
-    def test_init_2(self):
-        model_id = 'conv_model_2d'
-        in_channels = 68
-        kernel_size = (4, 4)
-        in_channels_2 = 16
-        kernel_size_2 = (6, 6)
-        out_channels = 6
-        try:
-            conv_block_1 = ConvModelTest.__create_conv_block_2(in_channels, in_channels_2, kernel_size)
-            conv_block_2 = ConvModelTest.__create_conv_block_2(in_channels_2, out_channels, kernel_size_2)
-            ffnn_block_1 = FFNNBlock.build('hidden', out_channels, 4, nn.ReLU())
-            ffnn_block_2 = FFNNBlock.build('output', 4, 4, nn.ReLU())
-            conv_model = ConvModel(model_id, [conv_block_1, conv_block_2], [ffnn_block_1, ffnn_block_2])
-            logging.info(repr(conv_model))
-            self.assertTrue(False)
-        except ConvException as e:
-            logging.error(str(e))
-            self.assertTrue(True)
-
-
-    def test_mnist(self):
-        try:
-            conv_2d_block_1 = Conv2DBlock(block_id='conv_1',
-                                          in_channels=1,
-                                          out_channels=8,
-                                          kernel_size=(3, 3),
-                                          stride=(1, 1),
-                                          padding=(1,1),
-                                          batch_norm=True,
-                                          max_pooling_kernel=2,
-                                          activation=nn.ReLU(),
-                                          bias=False)
-            conv_2d_block_2 = Conv2DBlock(block_id='conv_1',
-                                          in_channels=8,
-                                          out_channels=16,
-                                          kernel_size=(3, 3),
-                                          stride=(1, 1),
-                                          padding=(1,1),
-                                          batch_norm=True,
-                                          max_pooling_kernel=2,
-                                          activation=nn.ReLU(),
-                                          bias=False)
-
-            """
-            out_channels = 16
-            conv_output_size = conv_2d_block_2.get_conv_output_size()
-            conv_output_sizes = conv_output_size(input_size=(28, 28))
-            ffnn_input_shape = out_channels*conv_output_sizes[0]*conv_output_sizes[1]
-            """
+            conv_2d_block_1 = Conv2DBlock.build(block_id='conv_1',
+                                                in_channels=1,
+                                                out_channels=8,
+                                                kernel_size=(3, 3),
+                                                stride=(1, 1),
+                                                padding=(1,1),
+                                                batch_norm=True,
+                                                max_pooling_kernel=2,
+                                                activation=nn.ReLU(),
+                                                bias=False)
+            conv_2d_block_2 = Conv2DBlock.build(block_id='conv_2',
+                                                in_channels=8,
+                                                out_channels=16,
+                                                kernel_size=(3, 3),
+                                                stride=(1, 1),
+                                                padding=(1,1),
+                                                batch_norm=True,
+                                                max_pooling_kernel=2,
+                                                activation=nn.ReLU(),
+                                                bias=False)
             num_classes = 10
             ffnn_block_1 = FFNNBlock.build(block_id='hidden',
                                            in_features=0,
                                            out_features=num_classes,
-                                           activation=nn.ReLU())
+                                           activation=nn.Softmax(dim=1))
             conv_model = ConvModel(model_id='MNIST',
                                    input_size=(28, 28),
                                    conv_blocks=[conv_2d_block_1, conv_2d_block_2],
@@ -98,71 +47,100 @@ class ConvModelTest(unittest.TestCase):
             print(str(e))
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
-    def test_build_from_conv(self):
-        model_id = 'conv_MNIST_model'
-        input_size = 28
-        in_channels = 1
-        kernel_size = 3
-        padding_size = 1
-        stride_size = 1
-        in_channels_2 = 8
-        kernel_size_2 = 3
-        out_channels = 16
+    def test_mnist_large(self):
         try:
-            conv_block_1 = ConvModelTest.__create_conv_block_2(
-                in_channels,
-                in_channels_2,
-                input_size,
-                kernel_size,
-                stride_size,
-                padding_size,
-                nn.ReLU()
-            )
-            conv_block_2 = ConvModelTest.__create_conv_block_2(
-                in_channels_2,
-                out_channels,
-                input_size,
-                kernel_size_2,
-                stride_size,
-                padding_size,
-                nn.ReLU()
-            )
-            conv_model = ConvModel(model_id, conv_blocks=[conv_block_1, conv_block_2])
-            de_conv_model_1 = conv_model.invert()
-            print(f'First de conv:\n{repr(de_conv_model_1)}')
-            de_conv_model_2 = conv_model.invert_with_last_activation(nn.Sigmoid())
-            print(f'Second de conv:\n{repr(de_conv_model_2)}')
+            conv_2d_block_1 = Conv2DBlock.build(block_id='conv_1',
+                                                in_channels=1,
+                                                out_channels=8,
+                                                kernel_size=(3, 3),
+                                                stride=(1, 1),
+                                                padding=(1, 1),
+                                                batch_norm=True,
+                                                max_pooling_kernel=2,
+                                                activation=nn.ReLU(),
+                                                bias=False)
+            conv_2d_block_2 = Conv2DBlock.build(block_id='conv_2',
+                                                in_channels=8,
+                                                out_channels=16,
+                                                kernel_size=(3, 3),
+                                                stride=(1, 1),
+                                                padding=(1, 1),
+                                                batch_norm=True,
+                                                max_pooling_kernel=2,
+                                                activation=nn.ReLU(),
+                                                bias=False)
+            conv_2d_block_3 = Conv2DBlock.build(block_id='conv_3',
+                                                in_channels=16,
+                                                out_channels=32,
+                                                kernel_size=(3, 3),
+                                                stride=(1, 1),
+                                                padding=(1, 1),
+                                                batch_norm=True,
+                                                max_pooling_kernel=2,
+                                                activation=nn.ReLU(),
+                                                bias=False)
+            ffnn_block_1 = FFNNBlock.build(block_id='hidden',
+                                           in_features=0,
+                                           out_features=64,
+                                           activation=nn.ReLU())
+            num_classes = 10
+            ffnn_block_2 = FFNNBlock.build(block_id='output',
+                                           in_features=64,
+                                           out_features=num_classes,
+                                           activation=nn.Softmax(dim=1))
+            conv_model = ConvModel(model_id='MNIST',
+                                   input_size=(28, 28),
+                                   conv_blocks=[conv_2d_block_1, conv_2d_block_2, conv_2d_block_3],
+                                   ffnn_blocks=[ffnn_block_1, ffnn_block_2])
+            print(repr(conv_model))
+            self.assertTrue(True)
         except ConvException as e:
             print(str(e))
             self.assertTrue(False)
 
-    @staticmethod
-    def __create_conv_block_2(
-            in_channels: int,
-            out_channels: int,
-            input_size: int,
-            kernel_size: int,
-            stride_size: int,
-            padding_size: int,
-            activation: nn.Module) -> ConvBlock:
-
-        is_batch_normalization = True
-        max_pooling_kernel = 2
-        activation = activation
-        has_bias = False
-        conv_2d_block_builder = Conv2DBlockBuilder(
-            in_channels,
-            out_channels,
-            input_size = (input_size, input_size),
-            kernel_size = (kernel_size, kernel_size),
-            stride = (stride_size, stride_size),
-            padding = (padding_size, padding_size),
-            batch_norm=is_batch_normalization,
-            max_pooling_kernel=max_pooling_kernel,
-            activation=activation,
-            bias=has_bias)
-        return ConvBlock(_id='Conv', conv_block_builder=conv_2d_block_builder)
+    def test_invert(self):
+        try:
+            conv_2d_block_1 = Conv2DBlock.build(block_id='conv_1',
+                                                in_channels=1,
+                                                out_channels=8,
+                                                kernel_size=(3, 3),
+                                                stride=(1, 1),
+                                                padding=(1, 1),
+                                                batch_norm=True,
+                                                max_pooling_kernel=2,
+                                                activation=nn.ReLU(),
+                                                bias=False)
+            conv_2d_block_2 = Conv2DBlock.build(block_id='conv_2',
+                                                in_channels=8,
+                                                out_channels=16,
+                                                kernel_size=(3, 3),
+                                                stride=(1, 1),
+                                                padding=(1, 1),
+                                                batch_norm=True,
+                                                max_pooling_kernel=2,
+                                                activation=nn.ReLU(),
+                                                bias=False)
+            conv_2d_block_3 = Conv2DBlock.build(block_id='conv_3',
+                                                in_channels=16,
+                                                out_channels=32,
+                                                kernel_size=(3, 3),
+                                                stride=(1, 1),
+                                                padding=(1, 1),
+                                                batch_norm=True,
+                                                max_pooling_kernel=2,
+                                                activation=nn.ReLU(),
+                                                bias=False)
+            conv_model = ConvModel(model_id='MNIST',
+                                   input_size=(28, 28),
+                                   conv_blocks=[conv_2d_block_1, conv_2d_block_2, conv_2d_block_3],
+                                   ffnn_blocks=None)
+            print(f'\nConv modules:---\n{repr(conv_model)}')
+            de_conv_model = conv_model.transpose(extra=nn.Sigmoid())
+            print(f'\nDe conv modules: ----\n{repr(de_conv_model)}')
+            self.assertTrue(True)
+        except ConvException as e:
+            print(str(e))
+            self.assertTrue(False)
 
 
 if __name__ == '__main__':

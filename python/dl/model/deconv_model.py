@@ -8,6 +8,8 @@ from dl.model.ffnn_model import FFNNModel
 from dl.block.deconv_2d_block import DeConv2DBlock
 from dl.block.ffnn_block import FFNNBlock
 from typing import AnyStr, List, Optional, Self, Dict, Any
+
+from dl.training.neural_net_training import NeuralNetTraining
 from util import log_size
 import torch.nn as nn
 import torch
@@ -19,7 +21,8 @@ class DeConvModel(NeuralModel, ABC):
     def __init__(self,
                  model_id: AnyStr,
                  de_conv_blocks: List[DeConv2DBlock],
-                 ffnn_blocks: Optional[List[FFNNBlock]] = None) -> None:
+                 ffnn_blocks: Optional[List[FFNNBlock]] = None,
+                 execution: Optional[NeuralNetTraining] = None) -> None:
         """
         Constructor for this de-convolutional neural network
         @param model_id: Identifier for this model
@@ -32,8 +35,10 @@ class DeConvModel(NeuralModel, ABC):
         self.de_conv_blocks = de_conv_blocks
 
         # Record the number of input and output features from the first and last neural block respectively
-        self.in_features = de_conv_blocks[0].in_channels
-        self.out_features = ffnn_blocks[-1].out_features if ffnn_blocks is not None else de_conv_blocks[-1].out_channels
+        self.in_features = de_conv_blocks[0].conv_block_config.in_channels
+        self.out_features = ffnn_blocks[-1].out_features if ffnn_blocks is not None \
+            else de_conv_blocks[-1].conv_block_config.out_channels
+
         # Define the sequence of modules from the layout
         de_conv_modules = [module for block in de_conv_blocks for module in block.modules]
 
@@ -44,7 +49,7 @@ class DeConvModel(NeuralModel, ABC):
         else:
             modules = de_conv_modules
         self.ffnn_blocks = ffnn_blocks
-        super(DeConvModel, self).__init__(model_id, nn.Sequential(*modules))
+        super(DeConvModel, self).__init__(model_id, nn.Sequential(*modules), execution)
 
     @classmethod
     def build(cls, model_id: AnyStr, de_conv_blocks: List[DeConv2DBlock]) -> Self:
@@ -94,6 +99,9 @@ class DeConvModel(NeuralModel, ABC):
             log_size(x, 'Output connected Conv')
         return x
 
+    def __repr__(self) -> str:
+        return f'State:{self._state_params()}\nModules:\n{self.list_modules(0)}'
+
     def list_modules(self, index: int = 0) -> AnyStr:
         modules = [f'{idx + index}: {str(module)}' for idx, module in enumerate(self.get_modules())]
         return '\n'.join(modules)
@@ -101,7 +109,7 @@ class DeConvModel(NeuralModel, ABC):
     def _state_params(self) -> Dict[AnyStr, Any]:
         return {
             "model_id": self.model_id,
-            "input_size": self.de_conv_blocks[0].in_channels,
+            "input_size": self.de_conv_blocks[0].conv_block_config.in_channels,
             "output_size": self.ffnn_blocks[-1].out_features if self.ffnn_blocks is not None else -1,
             "dff_model_input_size": self.ffnn_blocks[0].in_features if self.ffnn_blocks is not None else -1
         }

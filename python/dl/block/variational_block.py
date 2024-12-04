@@ -27,7 +27,7 @@ class VariationalBlock(NeuralBlock):
         self.log_var = log_var
         self.sampler_fc = sampler_fc
 
-    def invert(self, extra: Optional[nn.Module] = None) -> Self:
+    def transpose(self, extra: Optional[nn.Module] = None) -> Self:
         raise VAEException('Cannot invert variational Neural block')
 
     def in_features(self) -> int:

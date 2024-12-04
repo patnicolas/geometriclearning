@@ -18,7 +18,7 @@ class PoolingBlock(NeuralBlock):
     def default(cls, block_id: AnyStr, pooling_type: AnyStr, pooling_kernel: int) -> Self:
         return cls(block_id, pooling_type, pooling_kernel, pooling_stride=1)
 
-    def invert(self) -> Self:
+    def transpose(self) -> Self:
         raise ConvException('Cannot invert a pooling block')
 
     def get_modules(self) -> List[nn.Module]:

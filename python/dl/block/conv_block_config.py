@@ -69,6 +69,8 @@ class ConvBlockConfig(object):
         @type kernel_size: Union[int, Tuple[Int]]
         @param stride: Stride for convolution (st) for 1D, (st, st) for 2D
         @type stride: Union[int, Tuple[Int]]
+        @param padding: Padding for convolution (st) for 1D, (st, st) for 2D
+        @type padding: Union[int, Tuple[Int]]
         @param batch_norm: Boolean flag to specify if a batch normalization is required
         @type batch_norm: int
         @param activation: Activation function as nn.Module
@@ -76,7 +78,17 @@ class ConvBlockConfig(object):
         @param bias: Specify if bias is not null
         @type bias: bool
         """
-        return cls(in_channels, out_channels, kernel_size, stride, padding, batch_norm, -1, activation, bias)
+        return cls(out_channels, in_channels, kernel_size, stride, padding, batch_norm, -1, activation, bias)
+
+    def transpose(self, no_batch_norm: bool = True) -> None:
+        """
+        Transpose the convolutional block configuration by invert in and out channels
+        @param no_batch_norm: Specify is batch norm has to be removed
+        @type no_batch_norm: bool
+        """
+        self.out_channels, self.in_channels = self.in_channels, self.out_channels
+        if no_batch_norm:
+            self.batch_norm = False
 
     def __str__(self) -> AnyStr:
         return (f'\nIn channels: {self.in_channels}\nOut channels: {self.out_channels}\nKernel size: {self.kernel_size}\''

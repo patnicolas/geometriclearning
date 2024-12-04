@@ -37,7 +37,7 @@ class VAEModel(NeuralModel):
         """
         # Create a decoder as inverted from the encoder (i.e. Deconvolution)
         decoder = encoder.invert_with_last_activation(decoder_out_activation) if decoder_out_activation is not None \
-            else encoder.invert()
+            else encoder.transpose()
 
         # extract the Torch modules
         modules = list(encoder.get_model().modules())
@@ -127,7 +127,7 @@ class VAEModel(NeuralModel):
         self.log_var = log_var
         return z
 
-    def invert(self) -> Self:
+    def transpose(self) -> Self:
         """
         Variational autoencoder is composed of an encoder and mirror decoder but cannot itself be inverted
         It throws a NotImplemented error

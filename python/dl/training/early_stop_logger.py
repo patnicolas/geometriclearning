@@ -89,7 +89,7 @@ class EarlyStopLogger(object):
                 self.metrics[key] = [torch.Tensor(value)]
         return len(self.metrics.items()) > 0
 
-    def summary(self, output_filename: Optional[AnyStr] = None) -> NoReturn:
+    def summary(self, output_filename: Optional[AnyStr] = None) -> None:
         """
         Plots for the various metrics and stored metrics into torch local file
         @param output_filename: Relative name of file containing the summary of metrics and losses

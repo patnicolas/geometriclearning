@@ -24,7 +24,7 @@ class AEModel(NeuralModel):
         @param encoder: Encoder neural model
         @type encoder: NeuralModel
         """
-        _decoder = encoder.invert()
+        _decoder = encoder.transpose()
 
         modules = list(encoder.get_model().modules())
         inverted_modules = list(_decoder.get_model().modules())
@@ -65,7 +65,7 @@ class AEModel(NeuralModel):
         """
         return self.encoder.get_in_features()
 
-    def invert(self) -> Self:
+    def transpose(self) -> Self:
         """
         Autoencoder is composed of an encoder and mirror decoder but cannot itself be inverted
         It throws a NotImplemented error
