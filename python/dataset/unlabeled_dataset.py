@@ -5,7 +5,7 @@ import torch
 from typing import Callable, Optional, Self, List, AnyStr
 import numpy as np
 import pandas as pd
-from python.dataset.dataset_exception import DatasetException
+from dataset import DatasetException
 from python.dataset.tdataset import TDataset
 import logging
 logger = logging.getLogger('dataset.UnlabeledDataset')

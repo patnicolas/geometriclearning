@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from abc import ABC
 
-from dl.training.neural_net_training import NeuralNetTraining
+from dl.training.dl_training import DLTraining
 from dl.training.hyper_params import HyperParams
 from dl.training.early_stop_logger import EarlyStopLogger
 from plots.plotter import PlotterParameters
@@ -32,7 +32,7 @@ The key components are
 """
 
 
-class VAETraining(NeuralNetTraining, ABC):
+class VAETraining(DLTraining, ABC):
     max_debug_images = 3
 
     def __init__(self,

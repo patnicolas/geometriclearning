@@ -20,3 +20,13 @@ class VAEException(DLException):
 class GraphException(DLException):
     def __init__(self, *args, **kwargs):
         super(GraphException, self).__init__(args, kwargs)
+
+
+class TrainingException(DLException):
+    def __init__(self, *args, **kwargs):
+        super(TrainingException, self).__init__(args, kwargs)
+
+
+class ValidationException(DLException):
+    def __init__(self, *args, **kwargs):
+        super(ValidationException, self).__init__(args, kwargs)

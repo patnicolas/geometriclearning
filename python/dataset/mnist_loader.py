@@ -22,7 +22,7 @@ class MNISTLoader(BaseLoader):
         @param resize_image: Image to be resize if positive value, otherwise the original image is preserved
         @type resize_image: int
         """
-        super(MNISTLoader, self).__init__(batch_size=8, split_ratio=0.8, num_samples=-1)
+        super(MNISTLoader, self).__init__(num_samples=-1)
         self.resize_image = resize_image
 
     @staticmethod

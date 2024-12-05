@@ -4,7 +4,7 @@ from dl.block.conv_2d_block import Conv2DBlock
 from dl.block.ffnn_block import FFNNBlock
 from dl.model.conv_model import ConvModel
 from dl import ConvException
-from dl.training.neural_net_training import NeuralNetTraining
+from dl.training.dl_training import DLTraining
 
 
 class ConvModelTest(unittest.TestCase):
@@ -191,7 +191,7 @@ class ConvModelTest(unittest.TestCase):
             self.assertTrue(False)
 
     @staticmethod
-    def create_executor() -> NeuralNetTraining:
+    def create_executor() -> DLTraining:
         from dl.training.hyper_params import HyperParams
         from metric.metric import Metric
 
@@ -205,7 +205,7 @@ class ConvModelTest(unittest.TestCase):
             drop_out=0.0,
             train_eval_ratio=0.9)
         metric_labels = [ Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
-        return NeuralNetTraining.build(hyper_parameters, metric_labels)
+        return DLTraining.build(hyper_parameters, metric_labels)
 
 
 if __name__ == '__main__':

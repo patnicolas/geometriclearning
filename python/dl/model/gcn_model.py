@@ -5,7 +5,7 @@ from dl.model.neural_model import NeuralModel
 from dl.block.ffnn_block import FFNNBlock
 from dl.block.gcn_block import GCNBlock
 from dl.training.exec_config import ExecConfig
-from dl.training.neural_net_training import NeuralNetTraining
+from dl.training.dl_training import DLTraining
 from dl.training.hyper_params import HyperParams
 from dl import DLException, ConvException
 from typing import List, AnyStr, Optional, Self
@@ -102,7 +102,7 @@ class GCNModel(NeuralModel):
         @type plot_title: str
         """
         try:
-            network = NeuralNetTraining.build(self, hyper_parameters, metric_labels, exec_config)
+            network = DLTraining.build(self, hyper_parameters, metric_labels, exec_config)
             plot_title = f'{self.model_id}_metrics_{plot_title}'
             network.execute(plot_title=plot_title, loaders=self.load_dataset(data))
         except ConvException as e:

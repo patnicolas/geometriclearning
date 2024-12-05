@@ -5,7 +5,7 @@ from dl.block.ffnn_block import FFNNBlock
 from dl.training.hyper_params import HyperParams
 from dl.training.early_stop_logger import EarlyStopLogger
 from plots.plotter import PlotterParameters
-from dl.training.neural_net_training import NeuralNetTraining
+from dl.training.dl_training import DLTraining
 from metric.metric import Metric
 from dataset.labeled_dataset import LabeledDataset
 from dataset.unlabeled_dataset import UnlabeledDataset
@@ -15,7 +15,7 @@ from torch import nn
 import numpy as np
 
 
-class NeuralNetTest(unittest.TestCase):
+class DLTrainingTest(unittest.TestCase):
 
     @unittest.skip('Ignored')
     def test_init(self):
@@ -39,7 +39,7 @@ class NeuralNetTest(unittest.TestCase):
         early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
         labels = [Metric.train_loss_label, Metric.eval_loss_label, Metric.accuracy_label]
         parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(12, 8)) for label in labels]
-        network = NeuralNetTraining(binary_classifier, hyper_parameters, early_stop_logger, parameters)
+        network = DLTraining(binary_classifier, hyper_parameters, early_stop_logger, parameters)
         filename = '../../data/wages_cleaned.csv'
         tensor_dataset = UnlabeledDataset.from_file(filename, ['Reputation', 'Age', 'Caps', 'Apps', 'Salary'])
 
@@ -70,7 +70,7 @@ class NeuralNetTest(unittest.TestCase):
         }
         parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                       for label, _ in metric_labels.items()]
-        network = NeuralNetTraining(
+        network = DLTraining(
             binary_classifier,
             hyper_parameters,
             early_stop_logger,
@@ -123,7 +123,7 @@ class NeuralNetTest(unittest.TestCase):
         }
         parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                       for label, _ in metric_labels.items()]
-        network = NeuralNetTraining(
+        network = DLTraining(
             hyper_parameters,
             early_stop_logger,
             metric_labels,

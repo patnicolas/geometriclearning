@@ -1,5 +1,7 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
+__author__ = "Patrick Nicolas"
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from typing import Tuple, List
 
@@ -101,19 +103,11 @@ class SeqConvOutputSize(object):
         @return: Output size
         @rtype: either int or Tuple
         """
-
         # execute the sequence of transformation for the input size
         next_input_size = input_size
         for conv_output_size in self.conv_output_sizes:
             next_input_size = conv_output_size(next_input_size)
         return next_input_size
-        """
-        # If this is an image (2D convolution)
-        if isinstance(input_size, Tuple):
-            return out_channels*next_input_size[0]*next_input_size[1] if out_channels > 0 \
-                else next_input_size[0]*next_input_size[1]
-        else:
-            return next_input_size
-        """
+
 
 

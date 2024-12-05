@@ -15,7 +15,17 @@ class Caltech101Loader(BaseLoader):
     plot_layout = (4, 4)
 
     def __init__(self, split_ratio: float, resize_image: int = -1) -> None:
-        super(Caltech101Loader, self).__init__(batch_size=8, split_ratio=split_ratio, num_samples=-1)
+        """
+        Constructor for the Caltech-101 data set
+        @param split_ratio: Training-validation random split ratio
+        @type split_ratio: float
+        @param resize_image: Size of image to be resized. The image is not resized if -1
+        @type resize_image: int
+        """
+        assert 0.5 <= split_ratio <= 0.95, f'Training-validation split ratio {split_ratio} should be [0.5, 0.95]'
+
+        super(Caltech101Loader, self).__init__(num_samples=-1)
+        self.split_ratio = split_ratio
         self.resize_image = resize_image
 
     @staticmethod
@@ -27,17 +37,12 @@ class Caltech101Loader(BaseLoader):
         @param is_random: Flag to specify the images have to be randomly selected
         @type is_random: bool
         """
-        import random
         import matplotlib.pyplot as plt
         from PIL import Image
         import os
 
-        num_plots = Caltech101Loader.plot_layout[0] * Caltech101Loader.plot_layout[1]
         category_path = f'{data_path}/101_ObjectCategories'
-        category_dirs = os.listdir(category_path)
-        categories_indices = [random.randint(a=0, b=len(category_dirs)-1) if is_random else 0 for _ in range(num_plots)]
-        images = [f'{category_dirs[category_index]}/image_0001.jpg' for category_index in categories_indices]
-        labels = [category_dirs[category_index] for category_index in categories_indices]
+        images, labels = Caltech101Loader.__extract_images_and_labels(category_path)
         fig, axes = plt.subplots(nrows=Caltech101Loader.plot_layout[0],
                                  ncols=Caltech101Loader.plot_layout[1],
                                  figsize=(12, 6))
@@ -52,14 +57,6 @@ class Caltech101Loader(BaseLoader):
 
         plt.tight_layout()
         plt.show()
-
-    @staticmethod
-    def __extract_category(category_path: AnyStr) -> AnyStr:
-        all_categories_dir = '101_ObjectCategories'
-        end_index = category_path.find('/image')
-        start_index = category_path.find(all_categories_dir)
-        category = category_path[start_index + len(all_categories_dir): end_index]
-        return category
 
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):
         """
@@ -97,3 +94,25 @@ class Caltech101Loader(BaseLoader):
         except RuntimeError as e:
             logger.error(str(e))
             raise DatasetException(str(e))
+
+    @staticmethod
+    def __extract_images_and_labels(category_path: AnyStr, is_random: bool) -> (List[AnyStr], List[AnyStr]):
+        import os
+        import random
+
+        num_plots = Caltech101Loader.plot_layout[0] * Caltech101Loader.plot_layout[1]
+        #category_path = f'{data_path}/101_ObjectCategories'
+        category_dirs = os.listdir(category_path)
+        categories_indices = [random.randint(a=0, b=len(category_dirs) - 1) if is_random else 0 for _ in range(num_plots)]
+        images = [f'{category_dirs[category_index]}/image_0001.jpg' for category_index in categories_indices]
+        labels = [category_dirs[category_index] for category_index in categories_indices]
+
+        return images, labels
+
+    @staticmethod
+    def __extract_categoryX(category_path: AnyStr) -> AnyStr:
+        all_categories_dir = '101_ObjectCategories'
+        end_index = category_path.find('/image')
+        start_index = category_path.find(all_categories_dir)
+        category = category_path[start_index + len(all_categories_dir): end_index]
+        return category

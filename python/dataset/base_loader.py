@@ -1,19 +1,16 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-import torch
-from torch.utils.data import DataLoader, Dataset, random_split
+from torch.utils.data import DataLoader, Dataset
 from dl.training.exec_config import ExecConfig
 from typing import AnyStr
-from python.dataset.tdataset import TDataset
 from dataset import DatasetException
-import numpy as np
 import abc
 from abc import ABC
 
 
 class BaseLoader(ABC):
-    def __init__(self, batch_size: int, split_ratio: float, num_samples: int = -1):
+    def __init__(self, batch_size: int, num_samples: int = -1):
         """
         Constructor for this generic data set loader. A sub-sample is selected if num_samples is > 0 or
         the entire data set otherwise.
@@ -22,15 +19,10 @@ class BaseLoader(ABC):
         @type batch_size: int
         @param num_samples: Number of samples loaded (or all data if num_samples <= 0)
         @type num_samples: int
-        @param split_ratio: Training-validation random split ratio
-        @type split_ratio: float
         """
         assert batch_size >= 2, f'Batch size {batch_size} should be >= 4'
-        assert 0.5 <= split_ratio <= 0.95, f'Training-validation split ratio {split_ratio} should be [0.5, 0.95]'
-
         self.batch_size = batch_size
         self.num_samples = num_samples
-        self.split_ratio = split_ratio
 
     def loaders_from_path(self, root_path: AnyStr, exec_config: ExecConfig) -> (DataLoader, DataLoader):
         """
@@ -65,14 +57,14 @@ class BaseLoader(ABC):
         return train_loader, test_loader
 
     def __str__(self) -> AnyStr:
-        return f'Batch size: {self.batch_size}, Num samples: {self.num_samples}, Train-eval split: {self.split_ratio}'
+        return f'Batch size: {self.batch_size}, Num samples: {self.num_samples}'
 
     @abc.abstractmethod
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):
         raise DatasetException(f'Failed to load data from path {root_path}')
 
     """ --------------------  Helper method --------------------------- """
-
+    """
     def _generate_loader(self, dataset: Dataset):
         _dataset = torch.utils.data.Subset(dataset,
                                            np.arange(self.num_samples),
@@ -85,3 +77,4 @@ class BaseLoader(ABC):
         eval_data_loader = DataLoader(valid_dataset, batch_size=self.batch_size, shuffle=True)
 
         return train_data_loader, eval_data_loader
+    """

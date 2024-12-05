@@ -5,7 +5,7 @@ from typing import AnyStr, List
 from abc import ABC, abstractmethod
 from torch.utils.data import DataLoader, Dataset
 from dl import ConvException
-from dl.training.neural_net_training import NeuralNetTraining
+from dl.training.dl_training import DLTraining
 from dl.model.vision.conv_2d_config import Conv2DConfig
 from dl.training.hyper_params import HyperParams
 from dl import DLException
@@ -55,7 +55,7 @@ class Base2DModel(ABC):
         @type plot_title: str
         """
         try:
-            network = NeuralNetTraining.build(self.model, hyper_parameters, metric_labels, exec_config)
+            network = DLTraining.build(self.model, hyper_parameters, metric_labels, exec_config)
             plot_title = f'{self.model.model_id}_metrics_{plot_title}'
             network(plot_title=plot_title, loaders=self.load_dataset(root_path, exec_config))
         except ConvException as e:

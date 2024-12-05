@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from dl import DLException
 import logging
 
-from dl.training.neural_net_training import NeuralNetTraining
+from dl.training.dl_training import DLTraining
 
 logger = logging.getLogger('dl.model.NeuralModel')
 

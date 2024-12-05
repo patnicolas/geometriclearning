@@ -6,13 +6,12 @@ from torch.utils.data import DataLoader
 from abc import abstractmethod
 from typing import AnyStr, Dict, Self, List, Optional
 from dl.training.exec_config import ExecConfig
-from dl import DLException
+from dl import DLException, TrainingException, ValidationException
 from dl.training.hyper_params import HyperParams
 from dl.training.early_stop_logger import EarlyStopLogger
 from plots.plotter import PlotterParameters
 from metric.metric import Metric
 from metric.built_in_metric import create_metric_dict
-from tqdm import tqdm
 import torch.nn as nn
 import logging
 logger = logging.getLogger('dl.NeuralNet')
@@ -29,7 +28,7 @@ logger = logging.getLogger('dl.NeuralNet')
 """
 
 
-class NeuralNetTraining(object):
+class DLTraining(object):
     def __init__(self,
                  hyper_params: HyperParams,
                  early_stop_logger: EarlyStopLogger,
@@ -123,50 +122,6 @@ class NeuralNetTraining(object):
         self.early_stop_logger.summary(output_file_name)
         print(f"\nMPS usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
 
-    """
-    def __call__(self, model: NeuralModel, loaders: (DataLoader, DataLoader)) -> None:
-        try:
-            train_data_loader, test_data_loader = loaders
-            output_file = f'{model.model_id}_metrics_{self.plot_parameters[0].title}'
-            self.train(train_data_loader, test_data_loader, output_file)
-            print(f"\nMPS usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
-        except ConvException as e:
-            logger.error(str(e))
-            raise DLException(e)
-        except AssertionError as e:
-            logger.error(str(e))
-            raise DLException(e)
-    """
-
-    """
-    def forward(self, features: torch.Tensor) -> torch.Tensor:
-        with torch.no_grad():
-            try:
-                return self.model(features.to(self.target_device))
-            except RuntimeError as e:
-                raise DLException(str(e))
-            except AttributeError as e:
-                raise DLException(str(e))
-            except Exception as e:
-                raise DLException(str(e))
-    """
-
-    """
-    def init_data_loader(self, batch_size: int, dataset: Dataset) -> (DataLoader, DataLoader):
-        torch.manual_seed(42)
-
-        _len = len(dataset)
-        train_len = int(_len * self.hyper_params.train_eval_ratio)
-        test_len = _len - train_len
-        train_set, test_set = torch.utils.data.random_split(dataset, [train_len, test_len])
-        logger.info(f'Extract {len(train_set)} training and {len(test_set)} test data')
-
-        # Finally initialize the training and test1 loader
-        train_loader = DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True)
-        test_loader = DataLoader(dataset=test_set, batch_size=batch_size, shuffle=True)
-        return train_loader, test_loader
-    """
-
     def __repr__(self) -> str:
         return repr(self.hyper_params)
 
@@ -203,13 +158,13 @@ class NeuralNetTraining(object):
                 self.exec_config.apply_grad_accu_steps(idx, optimizer)
                 idx += 1
             except RuntimeError as e:
-                raise DLException(str(e))
+                raise TrainingException(str(e))
             except AttributeError as e:
-                raise DLException(str(e))
+                raise TrainingException(str(e))
             except ValueError as e:
-                raise DLException(f'{str(e)}, features: {str(features)}')
+                raise TrainingException(f'{str(e)}, features: {str(features)}')
             except Exception as e:
-                raise DLException(str(e))
+                raise TrainingException(str(e))
         return total_loss / len(train_loader)
 
     def __eval(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
@@ -248,13 +203,13 @@ class NeuralNetTraining(object):
                     total_loss += loss.data
                     count += 1
                 except RuntimeError as e:
-                    raise DLException(str(e))
+                    raise ValidationException(str(e))
                 except AttributeError as e:
-                    raise DLException(str(e))
+                    raise ValidationException(str(e))
                 except ValueError as e:
-                    raise DLException(str(e))
+                    raise ValidationException(str(e))
                 except Exception as e:
-                    raise DLException(str(e))
+                    raise ValidationException(str(e))
 
         eval_loss = total_loss / count
         metric_collector[Metric.eval_loss_label] = eval_loss

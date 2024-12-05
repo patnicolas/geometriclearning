@@ -120,6 +120,15 @@ class BuiltInMetric(Metric):
 
 
 def create_metric_dict(metric_labels: List[AnyStr], encoding_len: int) -> Dict[AnyStr, BuiltInMetric]:
+    """
+    Generate dynamically the metric dictionary {label : BuiltInMetric } from length of encoding and list of metric labels
+    @param metric_labels: List of labels of metrics to be collected during training
+    @type metric_labels: List
+    @param encoding_len: Length of encoding for all the metrics
+    @type encoding_len: int
+    @return Dictionary of metrics
+    @rtype Dict
+    """
     metrics = {}
     assert metric_labels is not None and len(metric_labels) > 0
 

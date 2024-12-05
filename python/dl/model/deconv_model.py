@@ -9,7 +9,7 @@ from dl.block.deconv_2d_block import DeConv2DBlock
 from dl.block.ffnn_block import FFNNBlock
 from typing import AnyStr, List, Optional, Self, Dict, Any
 
-from dl.training.neural_net_training import NeuralNetTraining
+from dl.training.dl_training import DLTraining
 from util import log_size
 import torch.nn as nn
 import torch
@@ -22,7 +22,7 @@ class DeConvModel(NeuralModel, ABC):
                  model_id: AnyStr,
                  de_conv_blocks: List[DeConv2DBlock],
                  ffnn_blocks: Optional[List[FFNNBlock]] = None,
-                 execution: Optional[NeuralNetTraining] = None) -> None:
+                 execution: Optional[DLTraining] = None) -> None:
         """
         Constructor for this de-convolutional neural network
         @param model_id: Identifier for this model
