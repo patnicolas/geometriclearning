@@ -68,11 +68,8 @@ class Base2DModel(ABC):
     def load_dataset(self, root_path: AnyStr, exec_config: ExecConfig) -> (DataLoader, DataLoader):
         train_dataset, test_dataset = self._extract_datasets(root_path)
 
-        # If we are experimenting with a subset of the data set for memory usage
-        train_dataset, test_dataset = exec_config.apply_sampling(train_dataset,  test_dataset)
-
         # Create DataLoaders for batch processing
-        train_loader, test_loader = exec_config.apply_optimize_loaders(self.data_batch_size, train_dataset, test_dataset)
+        train_loader, test_loader = exec_config.apply_data_loaders(self.data_batch_size, train_dataset, test_dataset)
         return train_loader, test_loader
 
     """ ---------------------  Private Helper Methods -------------------------- """

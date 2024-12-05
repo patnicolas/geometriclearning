@@ -9,7 +9,7 @@ import pandas as pd
 from typing import Tuple, AnyStr, Callable, Optional
 from python.dataset.unlabeled_dataset import UnlabeledDataset
 from python.dataset.tdataset import TDataset
-from python.dataset.tloader import TLoader
+from python.dataset.base_loader import BaseLoader
 
 """
     Wraps static methods to load public data sets. The methods generate two data loader
@@ -18,7 +18,7 @@ from python.dataset.tloader import TLoader
 """
 
 
-class UnlabeledLoader(TLoader):
+class UnlabeledLoader(BaseLoader):
     def __init__(self, batch_size: int, split_ratio: float, num_samples: int = -1):
         """
         Constructor for this generic data set loader. A sub-sample is selected if num_samples is > 0 or

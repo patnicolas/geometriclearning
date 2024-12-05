@@ -9,7 +9,7 @@ from torchvision import transforms
 from torchvision.datasets import MNIST
 from dataset.labeled_dataset import LabeledDataset
 from dataset.tdataset import TDataset
-from dataset.tloader import TLoader
+from dataset.base_loader import BaseLoader
 
 __all__ = ['LabeledLoader']
 
@@ -20,7 +20,7 @@ __all__ = ['LabeledLoader']
 """
 
 
-class LabeledLoader(TLoader):
+class LabeledLoader(BaseLoader):
     def __init__(self, batch_size: int, split_ratio: float, num_samples: int = -1):
         """
         Constructor for this generic data set loader. A sub-sample is selected if num_samples is > 0 or

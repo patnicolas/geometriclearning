@@ -108,7 +108,7 @@ class BuiltInMetric(Metric):
         from sklearn.metrics import accuracy_score
 
         _predicted = np.where(predicted > 0.5, 1.0, 0.0)
-        return accuracy_score(labels, _predicted, normalize=True, average="weighted") if self.is_weighted \
+        return accuracy_score(labels, _predicted, normalize=True, sample_weight="weighted") if self.is_weighted \
             else accuracy_score(labels, _predicted, normalize=True)
 
     def __f1(self, predicted: np.array, labels: np.array) -> np.array:

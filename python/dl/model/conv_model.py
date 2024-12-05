@@ -14,8 +14,6 @@ import torch
 import torch.nn as nn
 import logging
 
-from dl.training.neural_net_training import NeuralNetTraining
-
 logger = logging.getLogger('dl.model.ConvModel')
 
 __all__ = ['ConvModel']
@@ -36,8 +34,7 @@ class ConvModel(NeuralModel, ABC):
                  input_size: int | Tuple[int ,int],
                  model_id: AnyStr,
                  conv_blocks: List[ConvBlock],
-                 ffnn_blocks: Optional[List[FFNNBlock]] = None,
-                 execution: Optional[NeuralNetTraining] = None) -> None:
+                 ffnn_blocks: Optional[List[FFNNBlock]] = None) -> None:
         """
         Constructor for this convolutional neural network
         @param model_id: Identifier for this model
@@ -62,7 +59,7 @@ class ConvModel(NeuralModel, ABC):
 
         # If fully connected are provided as CNN
         if ffnn_blocks is not None:
-            ffnn_input_size = ConvModel.__linear_layer_input_size(conv_blocks[-1], self.input_size)
+            ffnn_input_size = self.__linear_layer_input_size(conv_blocks[-1])
             modules.append(nn.Flatten())
             linear_block = FFNNBlock.build(ffnn_blocks[0].block_id,
                                            ffnn_input_size,
@@ -74,7 +71,7 @@ class ConvModel(NeuralModel, ABC):
             [modules.append(module) for block in self.ffnn_blocks for module in block.modules]
         else:
             self.ffnn_blocks = None
-        super(ConvModel, self).__init__(model_id, nn.Sequential(*modules), execution)
+        super(ConvModel, self).__init__(model_id, nn.Sequential(*modules))
 
     @classmethod
     def build(cls, model_id: AnyStr, conv_blocks: List[ConvBlock]) -> Self:
@@ -183,12 +180,11 @@ class ConvModel(NeuralModel, ABC):
             return False
 
     """ ----------------------------   Private helper methods --------------------------- """
-    @staticmethod
-    def __linear_layer_input_size(last_conv_block: ConvBlock, input_size: int) -> int:
-        conv_output_size = last_conv_block.get_conv_output_size()
-        conv_output_sizes = conv_output_size(input_size=input_size)
+    def __linear_layer_input_size(self, last_conv_block: ConvBlock) -> int:
+        conv_block_sizes = [conv_block.get_conv_output_size() for conv_block in self.conv_blocks]
+        conv_model_output_sizes = SeqConvOutputSize(conv_block_sizes)
+        conv_output_sizes = conv_model_output_sizes(input_size=self.input_size)
         return last_conv_block.conv_block_config.out_channels * conv_output_sizes[0] * conv_output_sizes[1]
-
 
     @staticmethod
     def __validate(neural_blocks: List[ConvBlock], input_size: int | Tuple[int, int]):

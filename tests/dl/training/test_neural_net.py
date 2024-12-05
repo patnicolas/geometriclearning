@@ -124,10 +124,10 @@ class NeuralNetTest(unittest.TestCase):
         parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                       for label, _ in metric_labels.items()]
         network = NeuralNetTraining(
-            binary_classifier,
             hyper_parameters,
             early_stop_logger,
             metric_labels,
+            None,
             parameters)
         filename = '/users/patricknicolas/dev/geometriclearning/data/heart_diseases.csv'
         df = LabeledDataset.data_frame(filename)

@@ -34,11 +34,11 @@ class NeuralNetTraining(object):
                  hyper_params: HyperParams,
                  early_stop_logger: EarlyStopLogger,
                  metrics: Dict[AnyStr, Metric],
-                 exec_config: ExecConfig = None,
+                 exec_config: Optional[ExecConfig] = None,
                  plot_parameters: Optional[List[PlotterParameters]] = None) -> None:
         """
         Constructor for the training and execution of any neural network.
-        @param hyper_params: Hyper parameters associated with the training of th emodel
+        @param hyper_params: Hyper-parameters associated with the training of th emodel
         @type hyper_params: HyperParams
         @param early_stop_logger: Dynamic condition for early stop in training
         @type early_stop_logger: EarlyStopLogger
@@ -60,8 +60,7 @@ class NeuralNetTraining(object):
     @classmethod
     def build(cls,
               hyper_params: HyperParams,
-              metric_labels: List[AnyStr],
-              exec_config: ExecConfig) -> Self:
+              metric_labels: List[AnyStr]) -> Self:
         """
         Simplified constructor for the training and execution of any neural network.
         @param hyper_params: Hyper parameters associated with the training of th emodel
@@ -71,18 +70,18 @@ class NeuralNetTraining(object):
         @param exec_config: Configuration for optimization of execution of training
         @type exec_config: ExecConfig
         """
-        # Initialize the Early stop mechanism
-        patience = 2
-        min_diff_loss = -0.001
-        early_stopping_enabled = True
-        early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
 
         # Create metrics
         metrics_dict = create_metric_dict(metric_labels, hyper_params.encoding_len)
         # Initialize the plotting parameters
         plot_parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                            for label, _ in metrics_dict.items()]
-        return cls(hyper_params, early_stop_logger, metrics_dict, exec_config, plot_parameters)
+
+        return cls(hyper_params=hyper_params,
+                   early_stop_logger=EarlyStopLogger(patience=2, min_diff_loss=-0.001, early_stopping_enabled=True),
+                   metrics=metrics_dict,
+                   exec_config=ExecConfig.default(),
+                   plot_parameters=plot_parameters)
 
     @abstractmethod
     def model_label(self) -> AnyStr:
@@ -90,9 +89,9 @@ class NeuralNetTraining(object):
 
     def train(self,
               model_id: AnyStr,
-              model: nn.Module,
+              neural_model: nn.Module,
               train_loader: DataLoader,
-              test_loader: DataLoader) -> None:
+              eval_loader: DataLoader) -> None:
         """
         Train and evaluation of a neural network given a data loader for a training set, a
         data loader for the evaluation/test1 set and a encoder_model. The weights of the various linear modules
@@ -100,24 +99,24 @@ class NeuralNetTraining(object):
 
         @param model_id: Identifier for the model
         @type model_id: str
-        @param model: Torch module
-        @type model: nn_Module
+        @param neural_model: Neural model as torch module
+        @type neural_model: nn_Module
         @param train_loader: Data loader for the training set
         @type train_loader: DataLoader
-        @param test_loader:  Data loader for the valuation set
-        @type test_loader: DataLoader
+        @param eval_loader:  Data loader for the valuation set
+        @type eval_loader: DataLoader
         """
         torch.manual_seed(42)
         output_file_name = f'{model_id}_metrics_{self.plot_parameters[0].title}'
-        self.hyper_params.initialize_weight(list(model.children()))
+        self.hyper_params.initialize_weight(neural_model.get_modules())
 
         # Train and evaluation process
         for epoch in range(self.hyper_params.epochs):
             # Set training mode and execute training
-            train_loss = self.__train(epoch, train_loader)
+            train_loss = self.__train(neural_model, epoch, train_loader)
 
             # Set mode and execute evaluation
-            eval_metrics = self.__eval(epoch, test_loader)
+            eval_metrics = self.__eval(neural_model, epoch, eval_loader)
             self.early_stop_logger(epoch, train_loss, eval_metrics)
             self.exec_config.apply_monitor_memory()
         # Generate summary
@@ -173,21 +172,21 @@ class NeuralNetTraining(object):
 
     """ ------------------------------------   Private methods --------------------------------- """
 
-    def __train(self, model: nn.Module, epoch: int, train_loader: DataLoader) -> float:
+    def __train(self, neural_model: nn.Module, epoch: int, train_loader: DataLoader) -> float:
         total_loss = 0.0
         # Initialize the gradient for the optimizer
         loss_function = self.hyper_params.loss_function
-        optimizer = self.hyper_params.optimizer(model)
+        optimizer = self.hyper_params.optimizer(neural_model)
 
         _, torch_device = self.exec_config.apply_device()
-        model = model.to(torch_device)
+        model = neural_model.to(torch_device)
         idx = 0
         for features, labels in train_loader:
             try:
                 model.train()
 
                 # Add noise if the mode is defined
-                features = model.add_noise(features)
+                # features = model.add_noise(features)
 
                 # Transfer the input data and labels to the target device
                 features = features.to(torch_device)
@@ -213,7 +212,7 @@ class NeuralNetTraining(object):
                 raise DLException(str(e))
         return total_loss / len(train_loader)
 
-    def __eval(self, epoch: int, test_loader: DataLoader) -> Dict[AnyStr, float]:
+    def __eval(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
         total_loss = 0
         loss_func = self.hyper_params.loss_function
         metric_collector = {}
@@ -222,17 +221,18 @@ class NeuralNetTraining(object):
 
         # No need for computing gradient for evaluation (NO back-propagation)
         with torch.no_grad():
-            for features, labels in tqdm(test_loader):
+            count = 0
+            for features, labels in eval_loader:
                 try:
-                    self.model.eval()
+                    model.eval()
                     # Add noise if the mode is defined
-                    features = self.model.add_noise(features)
+                    # features = model.add_noise(features)
 
                     # Transfer the input data to GPU
                     features = features.to(torch_device)
                     labels = labels.to(torch_device)
                     # Execute inference/Prediction
-                    predicted = self.model(features)
+                    predicted = model(features)
 
                     # Transfer prediction and labels to CPU for metrics
                     np_predicted = predicted.cpu().numpy()
@@ -246,6 +246,7 @@ class NeuralNetTraining(object):
                     # Compute and accumulate the loss
                     loss = loss_func(predicted, labels)
                     total_loss += loss.data
+                    count += 1
                 except RuntimeError as e:
                     raise DLException(str(e))
                 except AttributeError as e:
@@ -255,7 +256,7 @@ class NeuralNetTraining(object):
                 except Exception as e:
                     raise DLException(str(e))
 
-        eval_loss = total_loss / len(test_loader)
+        eval_loss = total_loss / count
         metric_collector[Metric.eval_loss_label] = eval_loss
         return metric_collector
 

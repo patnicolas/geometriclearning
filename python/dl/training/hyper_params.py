@@ -5,7 +5,7 @@ import torch
 from torch import optim
 from torch import nn
 from typing import AnyStr, Optional, List
-from dataset.dataset_exception import DatasetException
+from dataset import DatasetException
 import logging
 logger = logging.getLogger('dl.HyperParams')
 

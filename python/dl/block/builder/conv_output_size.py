@@ -68,10 +68,12 @@ class ConvOutputSize(object):
         padding = self.padding[dim]
         kernel_size = self.kernel_size[dim]
         num = (input_size + 2 * padding - kernel_size)
-        return int(num / stride) + 1
+        out_size = int(num / stride) + 1
+        return out_size
 
     def __pooling_output_shape(self, input_size: int, dim: int) -> int:
-        return int((input_size - self.padding[dim])/self.stride[dim] + 1)
+        out_size = int((input_size - self.max_pooling_kernel) + 1)
+        return out_size
 
 
 class SeqConvOutputSize(object):
@@ -104,12 +106,14 @@ class SeqConvOutputSize(object):
         next_input_size = input_size
         for conv_output_size in self.conv_output_sizes:
             next_input_size = conv_output_size(next_input_size)
-
+        return next_input_size
+        """
         # If this is an image (2D convolution)
         if isinstance(input_size, Tuple):
             return out_channels*next_input_size[0]*next_input_size[1] if out_channels > 0 \
                 else next_input_size[0]*next_input_size[1]
         else:
             return next_input_size
+        """
 
 

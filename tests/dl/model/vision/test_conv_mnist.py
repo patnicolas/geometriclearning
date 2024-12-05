@@ -171,7 +171,6 @@ class ConvMNISTTest(unittest.TestCase):
                 epochs=3,
                 optim_label='adam',
                 batch_size=batch_size,
-                # loss_function=nn.NLLLoss(),
                 loss_function=nn.CrossEntropyLoss(),
                 drop_out=0.15,
                 train_eval_ratio=0.9,

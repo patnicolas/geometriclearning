@@ -41,7 +41,7 @@ class ExecConfig(object):
         self.accumulator = []
 
     @classmethod
-    def default(cls, device_conf: AnyStr) -> Self:
+    def default(cls, device_conf: AnyStr = None) -> Self:
         """
         Default setting for the configuration of execution of training: All optimization are disabled
         @param device_conf: Name of the target device
@@ -49,10 +49,10 @@ class ExecConfig(object):
         @return: Instance of Execution configuraiotn
         @rtype: ExecConfig
         """
-        return cls(empty_cache=False,
+        return cls(empty_cache=True,
                    mix_precision=False,
-                   subset_size=1,
-                   monitor_memory=False,
+                   subset_size=0,
+                   monitor_memory=True,
                    grad_accu_steps=1,
                    device_config=device_conf,
                    pin_mem=False)
@@ -113,7 +113,15 @@ class ExecConfig(object):
 
             train_dataset = Subset(train_dataset, indices=range(train_subset_size))
             test_dataset = Subset(test_dataset, indices=range(test_subset_size))
+
         return train_dataset, test_dataset
+
+    def apply_data_loaders(self,
+                           batch_size: int,
+                           train_dataset: Dataset,
+                           eval_dataset: Dataset) -> (DataLoader, DataLoader):
+        train_dataset, eval_dataset = self.apply_sampling(train_dataset, eval_dataset)
+        return self.apply_optimize_loaders(batch_size, train_dataset, eval_dataset)
 
     def apply_labels_dtype(self, x: torch.Tensor, convert_to_float: bool = True) -> torch.Tensor:
         return (x.float() if self.device_config == 'mps' else x) if convert_to_float else x
