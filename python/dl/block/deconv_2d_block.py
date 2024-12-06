@@ -2,11 +2,11 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import torch.nn as nn
-from typing import Tuple, Self, Optional, AnyStr
+from typing import Self, Optional, AnyStr
 
 from dl.block.neural_block import NeuralBlock
 from dl.block.conv_block_config import ConvBlockConfig
-from dl import ConvException
+from dl import ConvException, Conv2DataType
 
 
 """    
@@ -58,9 +58,9 @@ class DeConv2DBlock(NeuralBlock):
               block_id: Optional[AnyStr],
               in_channels: int,
               out_channels: int,
-              kernel_size: Tuple[int, int],
-              stride: Tuple[int, int] = (1, 1),
-              padding: Tuple[int, int] = (0, 0),
+              kernel_size: Conv2DataType,
+              stride: Conv2DataType = (1, 1),
+              padding: Conv2DataType = (0, 0),
               batch_norm: bool = False,
               activation: nn.Module = None,
               bias: bool = False) -> Self:

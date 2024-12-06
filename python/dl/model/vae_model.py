@@ -62,6 +62,7 @@ class VAEModel(NeuralModel):
         self.mu = None
         self.log_var = None
 
+
     def __str__(self) -> AnyStr:
         index2 = len(self.encoder.get_modules())
         index3 = index2+3

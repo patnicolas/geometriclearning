@@ -3,10 +3,10 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from dataset import DatasetException
 from dataset.base_loader import BaseLoader
-from typing import AnyStr
+from typing import AnyStr, List
 from torch.utils.data import Dataset
+from dl.model import GrayscaleToRGB
 from torchvision.transforms import InterpolationMode
-from dl.model.vision import GrayscaleToRGB
 import logging
 logger = logging.getLogger('dataset.Caltech101Loader')
 
@@ -14,9 +14,11 @@ logger = logging.getLogger('dataset.Caltech101Loader')
 class Caltech101Loader(BaseLoader):
     plot_layout = (4, 4)
 
-    def __init__(self, split_ratio: float, resize_image: int = -1) -> None:
+    def __init__(self, batch_size: int, split_ratio: float, resize_image: int = -1) -> None:
         """
         Constructor for the Caltech-101 data set
+        @param batch_size: size of batch for loading the Caltech101 data set
+        @param batch_size: 1
         @param split_ratio: Training-validation random split ratio
         @type split_ratio: float
         @param resize_image: Size of image to be resized. The image is not resized if -1
@@ -24,7 +26,7 @@ class Caltech101Loader(BaseLoader):
         """
         assert 0.5 <= split_ratio <= 0.95, f'Training-validation split ratio {split_ratio} should be [0.5, 0.95]'
 
-        super(Caltech101Loader, self).__init__(num_samples=-1)
+        super(Caltech101Loader, self).__init__(batch_size=batch_size, num_samples=-1)
         self.split_ratio = split_ratio
         self.resize_image = resize_image
 
@@ -101,7 +103,6 @@ class Caltech101Loader(BaseLoader):
         import random
 
         num_plots = Caltech101Loader.plot_layout[0] * Caltech101Loader.plot_layout[1]
-        #category_path = f'{data_path}/101_ObjectCategories'
         category_dirs = os.listdir(category_path)
         categories_indices = [random.randint(a=0, b=len(category_dirs) - 1) if is_random else 0 for _ in range(num_plots)]
         images = [f'{category_dirs[category_index]}/image_0001.jpg' for category_index in categories_indices]
@@ -109,10 +110,3 @@ class Caltech101Loader(BaseLoader):
 
         return images, labels
 
-    @staticmethod
-    def __extract_categoryX(category_path: AnyStr) -> AnyStr:
-        all_categories_dir = '101_ObjectCategories'
-        end_index = category_path.find('/image')
-        start_index = category_path.find(all_categories_dir)
-        category = category_path[start_index + len(all_categories_dir): end_index]
-        return category

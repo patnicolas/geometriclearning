@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from torch import nn
 from typing import Tuple, AnyStr, Self
-
+from dl import ConvDataType
 from dl import ConvException
 import logging
 logger = logging.getLogger('dl.block.ConvBlockConfig')
@@ -13,13 +13,14 @@ class ConvBlockConfig(object):
     def __init__(self,
                  in_channels: int,
                  out_channels: int,
-                 kernel_size: int | Tuple[int, int],
-                 stride: int | Tuple[int, int],
-                 padding: int | Tuple[int, int],
+                 kernel_size: ConvDataType,
+                 stride: ConvDataType,
+                 padding: ConvDataType,
                  batch_norm: bool,
                  max_pooling_kernel: int,
                  activation: nn.Module,
-                 bias: bool) -> None:
+                 bias: bool,
+                 drop_out: float) -> None:
         """
         Constructor for the configuration/initialization of the convolutional block
         @param in_channels: Number of input_tensor channels
@@ -48,14 +49,15 @@ class ConvBlockConfig(object):
         self.max_pooling_kernel = max_pooling_kernel
         self.activation = activation
         self.bias = bias
+        self.drop_out = drop_out
 
     @classmethod
     def de_conv(cls,
                 in_channels: int,
                 out_channels: int,
-                kernel_size: int | Tuple[int, int],
-                stride: int | Tuple[int, int],
-                padding: int | Tuple[int, int],
+                kernel_size: ConvDataType,
+                stride: ConvDataType,
+                padding: ConvDataType,
                 batch_norm: bool,
                 activation: nn.Module,
                 bias: bool) -> Self:

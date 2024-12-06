@@ -3,17 +3,16 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from abc import ABC
 
-from dl.block.builder.conv_output_size import SeqConvOutputSize
 from dl.block.ffnn_block import FFNNBlock
 from dl.block.conv_block import ConvBlock
 from dl.model.neural_model import NeuralModel
 from dl.model.ffnn_model import FFNNModel
 from dl.model.deconv_model import DeConvModel
-from typing import List, AnyStr, Dict, Any, Self, Optional, Tuple
+from dl import ConvDataType
+from typing import List, AnyStr, Dict, Any, Self, Optional
 import torch
 import torch.nn as nn
 import logging
-
 logger = logging.getLogger('dl.model.ConvModel')
 
 __all__ = ['ConvModel']
@@ -31,7 +30,7 @@ __all__ = ['ConvModel']
 
 class ConvModel(NeuralModel, ABC):
     def __init__(self,
-                 input_size: int | Tuple[int ,int],
+                 input_size: ConvDataType,
                  model_id: AnyStr,
                  conv_blocks: List[ConvBlock],
                  ffnn_blocks: Optional[List[FFNNBlock]] = None) -> None:
@@ -61,10 +60,9 @@ class ConvModel(NeuralModel, ABC):
         if ffnn_blocks is not None:
             ffnn_input_size = self.__linear_layer_input_size(conv_blocks[-1])
             modules.append(nn.Flatten())
-            linear_block = FFNNBlock.build(ffnn_blocks[0].block_id,
-                                           ffnn_input_size,
-                                           ffnn_blocks[0].out_features,
-                                           ffnn_blocks[0].activation)
+            linear_block = FFNNBlock.build(block_id=ffnn_blocks[0].block_id,
+                                           layer=nn.Linear(in_features=ffnn_input_size, out_features=ffnn_blocks[0].out_features, bias=False),
+                                           activation=ffnn_blocks[0].activation)
             self.ffnn_blocks = [linear_block]
             if len(ffnn_blocks) > 1:
                 [self.ffnn_blocks.append(ffnn_blocks[index]) for index in range(1, len(ffnn_blocks))]
@@ -109,7 +107,8 @@ class ConvModel(NeuralModel, ABC):
         """
         return self.conv_blocks[0].conv_block_builder.in_channels
 
-    def get_conv_output_size(self) -> int | Tuple[int, int]:
+    def get_conv_output_size(self) -> ConvDataType:
+        from dl.block.conv_output_size import SeqConvOutputSize
         """
         Polymorphic method to retrieve the number of output features
         @return: Number of output features
@@ -159,7 +158,7 @@ class ConvModel(NeuralModel, ABC):
         }
 
     @staticmethod
-    def is_valid(conv_blocks: List[ConvBlock], ffnn_blocks: List[FFNNBlock], input_size: int | Tuple[int, int]) -> bool:
+    def is_valid(conv_blocks: List[ConvBlock], ffnn_blocks: List[FFNNBlock], input_size: ConvDataType) -> bool:
         """
         Test if the layout/configuration of convolutional neural blocks and feed-forward neural blocks
         are valid
@@ -181,13 +180,15 @@ class ConvModel(NeuralModel, ABC):
 
     """ ----------------------------   Private helper methods --------------------------- """
     def __linear_layer_input_size(self, last_conv_block: ConvBlock) -> int:
+        from dl.block.conv_output_size import SeqConvOutputSize
+
         conv_block_sizes = [conv_block.get_conv_output_size() for conv_block in self.conv_blocks]
         conv_model_output_sizes = SeqConvOutputSize(conv_block_sizes)
         conv_output_sizes = conv_model_output_sizes(input_size=self.input_size)
         return last_conv_block.conv_block_config.out_channels * conv_output_sizes[0] * conv_output_sizes[1]
 
     @staticmethod
-    def __validate(neural_blocks: List[ConvBlock], input_size: int | Tuple[int, int]):
+    def __validate(neural_blocks: List[ConvBlock], input_size: ConvDataType):
         assert len(neural_blocks) > 0, "Deep Feed Forward network needs at least one layer"
 
         for index in range(len(neural_blocks) - 1):

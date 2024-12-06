@@ -3,8 +3,9 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from dl.block.conv_block import ConvBlock, ConvBlockConfig
 from dl.block.deconv_2d_block import DeConv2DBlock
-from typing import AnyStr, Tuple, Optional, List, Self
+from typing import AnyStr, Tuple, Optional, Self
 import torch.nn as nn
+from dl import Conv2DataType
 
 
 class Conv2DBlock(ConvBlock):
@@ -19,13 +20,12 @@ class Conv2DBlock(ConvBlock):
         modules = []
 
         # First define the 2D convolution
-        conv_module = nn.Conv2d(
-            in_channels=conv_block_config.in_channels,
-            out_channels=conv_block_config.out_channels,
-            kernel_size=conv_block_config.kernel_size,
-            stride=conv_block_config.stride,
-            padding=conv_block_config.padding,
-            bias=conv_block_config.bias)
+        conv_module = nn.Conv2d(in_channels=conv_block_config.in_channels,
+                                out_channels=conv_block_config.out_channels,
+                                kernel_size=conv_block_config.kernel_size,
+                                stride=conv_block_config.stride,
+                                padding=conv_block_config.padding,
+                                bias=conv_block_config.bias)
         modules.append(conv_module)
 
         # Add the batch normalization
@@ -44,6 +44,10 @@ class Conv2DBlock(ConvBlock):
                                                       stride=1,
                                                       padding=0)
             modules.append(max_pool_module)
+
+        if conv_block_config.drop_out > 0.0:
+            modules.append(nn.Dropout2d(conv_block_config.drop_out))
+
         # modules_list: List[nn.Module] = modules
         super(Conv2DBlock, self).__init__(block_id, conv_block_config, tuple(modules))
 
@@ -52,13 +56,14 @@ class Conv2DBlock(ConvBlock):
               block_id: AnyStr,
               in_channels: int,
               out_channels: int,
-              kernel_size: Tuple[int, int],
-              stride: Tuple[int, int] = (1, 1),
-              padding: Tuple[int, int] = (0, 0),
+              kernel_size: Conv2DataType,
+              stride: Conv2DataType = (1, 1),
+              padding: Conv2DataType = (0, 0),
               batch_norm: bool = False,
               max_pooling_kernel: int = 1,
               activation: nn.Module = None,
-              bias: bool = False) -> Self:
+              bias: bool = False,
+              drop_out: float = 0.0) -> Self:
         """
         Alternative constructor for a 2-dimension convolutional block
         @param block_id: Identifier for the block id
@@ -81,6 +86,8 @@ class Conv2DBlock(ConvBlock):
         @type activation: int
         @param bias: Specify if bias is not null
         @type bias: bool
+        @param drop_out: Regularization term applied if > 0
+        @type drop_out: float
         """
         conv_block_config = ConvBlockConfig(in_channels,
                                             out_channels,
@@ -90,7 +97,8 @@ class Conv2DBlock(ConvBlock):
                                             batch_norm,
                                             max_pooling_kernel,
                                             activation,
-                                            bias)
+                                            bias,
+                                            drop_out)
         return cls(block_id, conv_block_config)
 
     def transpose(self, extra: Optional[nn.Module] = None) -> DeConv2DBlock:

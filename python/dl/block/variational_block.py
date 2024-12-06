@@ -4,7 +4,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 import torch
 from torch import nn
 from dl.block.neural_block import NeuralBlock
-from typing import Self, Tuple, AnyStr, Optional
+from typing import Self, AnyStr, Optional
 from dl import VAEException
 
 

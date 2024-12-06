@@ -7,7 +7,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision.transforms import InterpolationMode
 from torchvision.datasets import MNIST
 import torchvision.transforms as transforms
-from dl.model.vision import GrayscaleToRGB
+from dl.model import GrayscaleToRGB
 from dataset import DatasetException
 import logging
 logger = logging.getLogger('dataset.MNISTLoader')
@@ -16,13 +16,15 @@ logger = logging.getLogger('dataset.MNISTLoader')
 class MNISTLoader(BaseLoader):
     plot_layout = (2, 4)
 
-    def __init__(self, resize_image: int = -1) -> None:
+    def __init__(self, batch_size: int, resize_image: int = -1) -> None:
         """
         Constructor for the MNIST torch data loader
+        @param batch_size: size of batch for loading the Caltech101 data set
+        @param batch_size: 1
         @param resize_image: Image to be resize if positive value, otherwise the original image is preserved
         @type resize_image: int
         """
-        super(MNISTLoader, self).__init__(num_samples=-1)
+        super(MNISTLoader, self).__init__(batch_size=batch_size, num_samples=-1)
         self.resize_image = resize_image
 
     @staticmethod

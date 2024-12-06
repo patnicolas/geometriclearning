@@ -1,5 +1,5 @@
 import unittest
-from dl.block.builder.conv_output_size import ConvOutputSize, SeqConvOutputSize
+from dl.block.conv_output_size import ConvOutputSize, SeqConvOutputSize
 
 
 class ConvOutputSizeTest(unittest.TestCase):

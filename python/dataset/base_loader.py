@@ -53,8 +53,8 @@ class BaseLoader(ABC):
         @rtype: Tuple[DataLoader, DataLoader]
         """
         # Create DataLoaders for batch processing
-        train_loader, test_loader = exec_config.apply_data_loaders(self.batch_size, train_dataset, eval_dataset)
-        return train_loader, test_loader
+        train_loader, eval_loader = exec_config.apply_data_loaders(self.batch_size, train_dataset, eval_dataset)
+        return train_loader, eval_loader
 
     def __str__(self) -> AnyStr:
         return f'Batch size: {self.batch_size}, Num samples: {self.num_samples}'

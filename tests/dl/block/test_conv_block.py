@@ -2,8 +2,6 @@ import unittest
 from torch import nn
 from dl.block.conv_block import ConvBlock
 from dl import ConvException
-from dl.block.builder.conv1d_block_builder import Conv1DBlockBuilder
-from dl.block.builder.conv2d_block_builder import Conv2DBlockBuilder
 
 
 class ConvBlockTest(unittest.TestCase):
@@ -39,7 +37,8 @@ class ConvBlockTest(unittest.TestCase):
                                                 batch_norm=True,
                                                 max_pooling_kernel=2,
                                                 activation=nn.Tanh(),
-                                                bias=False)
+                                                bias=False,
+                                                drop_out=0.0)
             return ConvBlock(block_id='Conv_2d', conv_block_config=conv_block_config, modules=(nn.Sigmoid(),))
         elif  dimension == 1:
             conv_block_config = ConvBlockConfig(in_channels=65,
@@ -50,7 +49,8 @@ class ConvBlockTest(unittest.TestCase):
                                                 batch_norm=True,
                                                 max_pooling_kernel=2,
                                                 activation=nn.Tanh(),
-                                                bias=False)
+                                                bias=False,
+                                                drop_out=0.0)
             return ConvBlock(block_id='Conv_1d', conv_block_config=conv_block_config, modules=(nn.Sigmoid(),))
         else:
             raise ConvException(f'Dimension {dimension} is not supported')
