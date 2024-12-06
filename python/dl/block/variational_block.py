@@ -20,8 +20,8 @@ class VariationalBlock(NeuralBlock):
         mu: nn.Module = nn.Linear(hidden_dim, latent_size)
         log_var: nn.Module = nn.Linear(hidden_dim, latent_size)
         sampler_fc: nn.Module = nn.Linear(latent_size, hidden_dim)
-        modules: Tuple[nn.Module] = tuple([mu, log_var, sampler_fc])
-        super(VariationalBlock, self).__init__(block_id='Gaussian', modules=tuple(modules))
+        modules = [mu, log_var, sampler_fc]
+        super(VariationalBlock, self).__init__(block_id='Variational', modules=tuple(modules))
 
         self.mu = mu
         self.log_var = log_var

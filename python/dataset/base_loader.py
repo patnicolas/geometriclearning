@@ -1,7 +1,7 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, random_split
 from dl.training.exec_config import ExecConfig
 from typing import AnyStr
 from dataset import DatasetException
@@ -62,19 +62,3 @@ class BaseLoader(ABC):
     @abc.abstractmethod
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):
         raise DatasetException(f'Failed to load data from path {root_path}')
-
-    """ --------------------  Helper method --------------------------- """
-    """
-    def _generate_loader(self, dataset: Dataset):
-        _dataset = torch.utils.data.Subset(dataset,
-                                           np.arange(self.num_samples),
-                                           TDataset.numpy_dtype('float32')) if self.num_samples > 0 else dataset
-
-        training_size = int(len(_dataset) * self.split_ratio)
-        validation_size = len(_dataset) - training_size
-        train_dataset, valid_dataset = random_split(dataset, (training_size, validation_size))
-        train_data_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True)
-        eval_data_loader = DataLoader(valid_dataset, batch_size=self.batch_size, shuffle=True)
-
-        return train_data_loader, eval_data_loader
-    """

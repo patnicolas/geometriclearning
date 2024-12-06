@@ -5,6 +5,7 @@ from typing import List, AnyStr, Self
 from dl.model.neural_model import NeuralModel
 from dl.block.ffnn_block import FFNNBlock
 import torch
+import torch.nn as nn
 import logging
 logger = logging.getLogger('dl.model.FFNNModel')
 
@@ -34,7 +35,7 @@ class FFNNModel(NeuralModel):
         modules = [module for block in neural_blocks for module in block.modules]
         super(FFNNModel, self).__init__(model_id, torch.nn.Sequential(*modules))
 
-    def transpose(self) -> Self:
+    def transpose(self, extra: nn.Module = None) -> Self:
         """
         Generate the inverted neural layout for this feed forward neural network
         @return: This feed-forward neural network with an inverted layout

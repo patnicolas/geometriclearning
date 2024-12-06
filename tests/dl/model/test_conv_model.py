@@ -171,8 +171,7 @@ class ConvModelTest(unittest.TestCase):
                                                 bias=False)
             num_classes = 10
             ffnn_block_1 = FFNNBlock.build(block_id='hidden',
-                                           in_features=0,
-                                           out_features=num_classes,
+                                           layer=nn.Linear(in_features=0, out_features=num_classes, bias=False),
                                            activation=nn.Softmax(dim=0))
             conv_model = ConvModel(model_id='MNIST',
                                    input_size=(28, 28),
