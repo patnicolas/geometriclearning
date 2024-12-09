@@ -2,6 +2,7 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from typing import List, AnyStr, Self
+from dl import ConvDataType
 from dl.model.neural_model import NeuralModel
 from dl.block.ffnn_block import FFNNBlock
 import torch
@@ -60,12 +61,17 @@ class FFNNModel(NeuralModel):
         """
         return self.out_features
 
+    def get_flatten_output_size(self) -> ConvDataType:
+        return self.out_features
+
     def get_latent_features(self) -> int:
         return self.neural_blocks[-1].in_features
 
+    def __str__(self) -> AnyStr:
+        return f'\nModel: {self.model_id}\nModules:\n{self.list_modules(0)}'
+
     def __repr__(self) -> AnyStr:
-        blocks_str = '\n'.join([f'{idx+1}:   {repr(block)}' for idx, block in enumerate(self.neural_blocks)])
-        return f'\n      Id: {self.model_id}\n{blocks_str}'
+        return f'\n{self.list_modules(0)}'
 
     def save(self, extra_params: dict = None):
         raise NotImplementedError('NeuralModel.save is an abstract method')

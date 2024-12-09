@@ -4,11 +4,11 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from typing import AnyStr, Self, Callable, Optional
 from dl.model.neural_model import NeuralModel
 from dl.block.variational_block import VariationalBlock
+from dl import ConvException, DLException, VAEException
 import torch
 import torch.nn as nn
 import logging
 logger = logging.getLogger('dl.model.VAEModel')
-
 __all__ = ['VAEModel']
 
 """
@@ -35,41 +35,49 @@ class VAEModel(NeuralModel):
         @param noise_func: Optional function to add noise to input data (features)
         @param noise_func: Callable (noise_factor, input)
         """
-        # Create a decoder as inverted from the encoder (i.e. Deconvolution)
-        decoder = encoder.invert_with_last_activation(decoder_out_activation) if decoder_out_activation is not None \
-            else encoder.transpose()
+        try:
+            # Create a decoder as inverted from the encoder (i.e. Deconvolution)
+            decoder = encoder.transpose(decoder_out_activation) if decoder_out_activation is not None \
+                else encoder.transpose()
 
-        # extract the Torch modules
-        modules = list(encoder.get_model().modules())
+            # extract the Torch modules
+            modules = list(encoder.model.modules())
 
-        # Build the inversion for the de convolutional network
-        inverted_modules = list(decoder.get_model().modules())
+            # Build the inversion for the de convolutional network
+            inverted_modules = list(decoder.model.modules())
 
-        # construct the variational layer
-        flatten_variational_input = encoder.get_conv_output_size()
-        variational_block = VariationalBlock(flatten_variational_input, latent_size)
+            # construct the variational layer
+            flatten_variational_input = encoder.get_flatten_output_size()
+            variational_block = VariationalBlock(flatten_variational_input, latent_size)
 
-        # Build the Torch sequential module
-        all_modules = modules + list(variational_block.modules) + inverted_modules
-        seq_module: torch.nn.Module = torch.nn.Sequential(*all_modules)
+            # Build the Torch sequential module
+            all_modules = modules + list(variational_block.modules) + inverted_modules
+            seq_module: torch.nn.Module = torch.nn.Sequential(*all_modules)
 
-        # Call base class
-        super(VAEModel, self).__init__(model_id, seq_module, noise_func)
-        # Initialize the internal model parameters
-        self.encoder = encoder
-        self.decoder = decoder
-        self.variational_block = variational_block
-        self.mu = None
-        self.log_var = None
+            # Call base class
+            super(VAEModel, self).__init__(model_id, seq_module, noise_func)
+            # Initialize the internal model parameters
+            self.encoder = encoder
+            self.decoder = decoder
+            self.variational_block = variational_block
+            self.z = None
+        except ConvException as e:
+            logger.error(str(e))
+            raise VAEException((str(e)))
+        except DLException as e:
+            logger.error(str(e))
+            raise VAEException((str(e)))
 
+    def get_mu_log_var(self) -> (nn.Module, nn.Module):
+        return self.variational_block.mu, self.variational_block.log_var
 
-    def __str__(self) -> AnyStr:
+    def __repr__(self) -> AnyStr:
         index2 = len(self.encoder.get_modules())
         index3 = index2+3
         return (self.encoder.list_modules(0) + self.variational_block.list_modules(index2) +
                 f'\n{self.decoder.list_modules(index3)}')
 
-    def __repr__(self) -> AnyStr:
+    def __str__(self) -> AnyStr:
         return f'Model id: {self.model_id}\n*Encoder:{repr(self.encoder.modules)}' \
                f'\n*Variational: {repr(self.variational_block)}' \
                f'\n*Decoder: {repr(self.decoder.modules)}'
@@ -116,19 +124,18 @@ class VAEModel(NeuralModel):
         logger.info(x, 'Input dff_vae')
         x = self.encoder(x)
         logger.info(x, 'after encoder_model')
-        batch, a = x.shape
-        x = x.view(batch, -1)
+        original_shape = x.shape
+        x = x.view(x.size(0), -1)
         logger.info(x, 'flattened')
         z, mu, log_var = self.variational_block(x)
         logger.info(z, 'after variational')
-        z = z.view(batch, a)
+        self.z = z
+        z = z.view(original_shape)
         logger.info(z, 'z.view')
         z = self.decoder(z)
-        self.mu = mu
-        self.log_var = log_var
         return z
 
-    def transpose(self) -> Self:
+    def transpose(self, extra: Optional[nn.Module] = None) -> Self:
         """
         Variational autoencoder is composed of an encoder and mirror decoder but cannot itself be inverted
         It throws a NotImplemented error

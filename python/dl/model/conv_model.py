@@ -93,11 +93,9 @@ class ConvModel(NeuralModel, ABC):
          @return: Instance of de convolutional model
          @rtype: DeConvModel
          """
-        de_conv_blocks = [conv_block.transpose() if idx > 0
-                          else conv_block.transpose(extra)
-                          for idx, conv_block in enumerate(self.conv_blocks)]
+        de_conv_blocks = [conv_block.transpose() for conv_block in self.conv_blocks]
         de_conv_blocks.reverse()
-        return DeConvModel(model_id=f'de_{self.model_id}', de_conv_blocks=de_conv_blocks)
+        return DeConvModel(model_id=f'de_{self.model_id}', de_conv_blocks=de_conv_blocks, last_activation=extra)
 
     def get_in_features(self) -> int:
         """
@@ -105,20 +103,16 @@ class ConvModel(NeuralModel, ABC):
         @return: Number of input features
         @rtype: int
         """
-        return self.conv_blocks[0].conv_block_builder.in_channels
+        return self.conv_blocks[0].conv_block_config.in_channels
 
-    def get_conv_output_size(self) -> ConvDataType:
-        from dl.block.conv_output_size import SeqConvOutputSize
+    def get_flatten_output_size(self) -> int:
         """
         Polymorphic method to retrieve the number of output features
         @return: Number of output features
         @rtype: int
         """
-        last_conv_out_channels = self.conv_blocks[-1].conv_block_builder.out_channels
-        conv_output_sizes = [conv_block.get_conv_output_size() for conv_block in self.conv_blocks]
-        seq_conv_output_size = SeqConvOutputSize(conv_output_sizes)
-
-        return seq_conv_output_size(self.get_in_features(), last_conv_out_channels)
+        flatten_out_size = self.__linear_layer_input_size(self.conv_blocks[-1])
+        return flatten_out_size
 
     def has_fully_connected(self) -> bool:
         """
@@ -141,12 +135,11 @@ class ConvModel(NeuralModel, ABC):
         """
         return x.view(resize, -1)
 
-    def list_modules(self, index: int = 0) -> AnyStr:
-        modules = [f'{idx+index}: {str(module)}' for idx, module in enumerate(self.get_modules())]
-        return '\n'.join(modules)
+    def __str__(self) -> str:
+        return f'\nModel: {self.model_id}\nState:{self._state_params()}\nModules:\n{self.list_modules(0)}'
 
     def __repr__(self) -> str:
-        return f'State:{self._state_params()}\nModules:\n{self.list_modules(0)}'
+        return f'\n{self.list_modules(0)}'
 
     def _state_params(self) -> Dict[AnyStr, Any]:
         dff_model_input_size = self.ffnn_blocks[0].in_features if self.ffnn_blocks is not None else -1

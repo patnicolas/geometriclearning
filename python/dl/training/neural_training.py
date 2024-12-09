@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from abc import abstractmethod
 from typing import AnyStr, Dict, Self, List, Optional
 from dl.training.exec_config import ExecConfig
-from dl import DLException, TrainingException, ValidationException
+from dl import TrainingException, ValidationException
 from dl.training.hyper_params import HyperParams
 from dl.training.early_stop_logger import EarlyStopLogger
 from plots.plotter import PlotterParameters
@@ -28,7 +28,7 @@ logger = logging.getLogger('dl.NeuralNet')
 """
 
 
-class DLTraining(object):
+class NeuralTraining(object):
     def __init__(self,
                  hyper_params: HyperParams,
                  early_stop_logger: EarlyStopLogger,
@@ -62,7 +62,7 @@ class DLTraining(object):
               metric_labels: List[AnyStr]) -> Self:
         """
         Simplified constructor for the training and execution of any neural network.
-        @param hyper_params: Hyper parameters associated with the training of th emodel
+        @param hyper_params: Hyperparameters associated with the training of th emodel
         @type hyper_params: HyperParams
         @param metric_labels: Labels for metric to be used
         @type metric_labels: List[str]
@@ -152,7 +152,8 @@ class DLTraining(object):
 
                 # Set back propagation
                 raw_loss.backward(retain_graph=True)
-                total_loss += raw_loss.data
+                total_loss += raw_loss.item
+
                 # Monitoring and caching for performance imp
                 self.exec_config.apply_empty_cache()
                 self.exec_config.apply_grad_accu_steps(idx, optimizer)

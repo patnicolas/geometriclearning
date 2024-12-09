@@ -4,9 +4,7 @@ from dl.model.ffnn_model import FFNNModel
 from dl.model.vae_model import VAEModel
 from dl.model.conv_model import ConvModel
 from dl.block.conv_block import ConvBlock
-from dl.block.builder.conv2d_block_builder import Conv2DBlockBuilder
 from dataset.unlabeled_loader import UnlabeledLoader
-from dataset.unlabeled_dataset import UnlabeledDataset
 from dl.training.exec_config import ExecConfig
 from dl.training.vae_training import VAETraining
 from dl.training.hyper_params import HyperParams

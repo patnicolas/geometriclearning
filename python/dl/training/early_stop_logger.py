@@ -68,10 +68,11 @@ class EarlyStopLogger(object):
             @rtype: Boolean
         """
         # Step 1. Apply early stopping criteria
-        is_early_stopping = self.__evaluate(torch.Tensor(eval_metrics[Metric.eval_loss_label]))
+        loss_value = eval_metrics[Metric.eval_loss_label]
+        is_early_stopping = self.__evaluate(torch.Tensor(loss_value))
         # Step 2: Record training, evaluation losses and metric
         self.__record(epoch, train_loss, eval_metrics)
-        print(f'Is early stopping {is_early_stopping}',flush=True)
+        print(f'Is early stopping {is_early_stopping}', flush=True)
         return is_early_stopping
 
     def update_metrics(self, metrics: Dict[AnyStr, float]) -> bool:

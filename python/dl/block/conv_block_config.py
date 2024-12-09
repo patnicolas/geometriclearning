@@ -5,6 +5,7 @@ from torch import nn
 from typing import Tuple, AnyStr, Self
 from dl import ConvDataType
 from dl import ConvException
+import copy
 import logging
 logger = logging.getLogger('dl.block.ConvBlockConfig')
 
@@ -82,15 +83,24 @@ class ConvBlockConfig(object):
         """
         return cls(out_channels, in_channels, kernel_size, stride, padding, batch_norm, -1, activation, bias)
 
-    def transpose(self, no_batch_norm: bool = True) -> None:
+    def transpose(self, no_batch_norm: bool = True) -> Self:
         """
         Transpose the convolutional block configuration by invert in and out channels
         @param no_batch_norm: Specify is batch norm has to be removed
         @type no_batch_norm: bool
         """
-        self.out_channels, self.in_channels = self.in_channels, self.out_channels
-        if no_batch_norm:
-            self.batch_norm = False
+        out_channels, in_channels = self.in_channels, self.out_channels
+        batch_norm = False if no_batch_norm else self.batch_norm
+        return ConvBlockConfig(in_channels=in_channels,
+                               out_channels=out_channels,
+                               kernel_size=self.kernel_size,
+                               stride=self.stride,
+                               padding=self.padding,
+                               batch_norm=batch_norm,
+                               max_pooling_kernel=self.max_pooling_kernel,
+                               activation=self.activation,
+                               bias=self.bias,
+                               drop_out=0.0)
 
     def __str__(self) -> AnyStr:
         return (f'\nIn channels: {self.in_channels}\nOut channels: {self.out_channels}\nKernel size: {self.kernel_size}\''

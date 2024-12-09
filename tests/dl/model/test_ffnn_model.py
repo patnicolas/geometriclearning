@@ -2,7 +2,7 @@ import unittest
 import torch.nn as nn
 from dl.block.ffnn_block import FFNNBlock
 from dl.model.ffnn_model import FFNNModel
-from dl.training.dl_training import DLTraining
+from dl.training.neural_training import NeuralTraining
 from dl import DLException
 
 
@@ -118,7 +118,7 @@ class FFNNModelTest(unittest.TestCase):
         net_training.train(ffnn_model.model_id, ffnn_model, train_loader, eval_loader)
 
     @staticmethod
-    def create_executor() -> DLTraining:
+    def create_executor() -> NeuralTraining:
         from dl.training.hyper_params import HyperParams
         from metric.metric import Metric
 
@@ -132,7 +132,7 @@ class FFNNModelTest(unittest.TestCase):
             drop_out=0.0,
             train_eval_ratio=0.9)
         metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
-        return DLTraining.build(hyper_parameters, metric_labels)
+        return NeuralTraining.build(hyper_parameters, metric_labels)
 
 
 if __name__ == '__main__':

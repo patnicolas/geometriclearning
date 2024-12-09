@@ -58,7 +58,7 @@ class ConvOutputSize(object):
             return (self.__pooling_output_shape(input_size=input_size[0], dim=0),
                     self.__pooling_output_shape(input_size=input_size[1], dim=1))
         else:
-            return self.__pooling_output_shape(input_size=[input_size], dim=0)
+            return self.__pooling_output_shape(input_size=input_size, dim=0)
 
     def __layer_output_shape(self, input_size: int, dim: int) -> int:
         assert 0 <= dim <= 1, f'Dimension {dim} for computing output channel is out of bounds (0, 1)'

@@ -17,9 +17,9 @@ class VariationalBlock(NeuralBlock):
         @param latent_size:  Number of hidden unit for the latent space the variational block
         @type latent_size:  int
         """
-        mu: nn.Module = nn.Linear(hidden_dim, latent_size)
-        log_var: nn.Module = nn.Linear(hidden_dim, latent_size)
-        sampler_fc: nn.Module = nn.Linear(latent_size, hidden_dim)
+        mu: nn.Module = nn.Linear(in_features=hidden_dim, out_features=latent_size)
+        log_var: nn.Module = nn.Linear(in_features=hidden_dim, out_features=latent_size)
+        sampler_fc: nn.Module = nn.Linear(in_features=latent_size, out_features=hidden_dim)
         modules = [mu, log_var, sampler_fc]
         super(VariationalBlock, self).__init__(block_id='Variational', modules=tuple(modules))
 
@@ -51,9 +51,9 @@ class VariationalBlock(NeuralBlock):
         @type log_var: torch.Tensor
         @return: Sampled data point from z-space
         """
-        std = log_var.mul(0.5).exp_()
-        std_dev = std.data.new(std.size()).normal_()
-        return std_dev.mul_(std).add_(mu)
+        std = torch.exp(0.5 * log_var)
+        eps = torch.randn_like(std)
+        return mu + std * eps
 
     def forward(self, x: torch.Tensor) -> (torch.Tensor, torch.Tensor, torch.Tensor):
         """
@@ -63,11 +63,11 @@ class VariationalBlock(NeuralBlock):
         @return: z, mean and log variance input_tensor
         @rtype: torch tensor
         """
-        print(f'fc variational input shape {x.shape}')
+        # print(f'fc variational input shape {x.shape}')
         mu = self.mu(x)
-        print(f'mu variational shape {mu.shape}')
+        # print(f'mu variational shape {mu.shape}')
         log_var = self.log_var(x)
         z = VariationalBlock.re_parameterize(mu, log_var)
-        print(f'z variational shape {z.shape}')
+        # print(f'z variational shape {z.shape}')
         return self.sampler_fc(z), mu, log_var
 

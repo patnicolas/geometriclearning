@@ -87,14 +87,19 @@ class HyperParams(object):
         @return: Appropriate Torch optimizer
         @rtype: torch.optim.Optimizer
         """
+        optimizer = None
         match self.optim_label:
             case HyperParams.optim_adam_label:
-                return optim.Adam(model.parameters(), self.learning_rate)
+                optimizer = optim.Adam(model.parameters(), self.learning_rate)
             case HyperParams.optim_nesterov_label:
-                return optim.SGD(model.parameters(),lr=self.learning_rate,momentum=self.momentum,nesterov=True)
+                optimizer = optim.SGD(model.parameters(), lr=self.learning_rate, momentum=self.momentum, nesterov=True)
             case _:
-                logger.info(f'Type of optimization {self.optim_label} not supported: reverted to SGD')
-                return optim.SGD(model.parameters(),lr=self.learning_rate, momentum=self.momentum,nesterov=False)
+                logger.warn(f'Type of optimization {self.optim_label} not supported: reverted to SGD')
+                optimizer = optim.SGD(model.parameters(), lr=self.learning_rate, momentum=self.momentum, nesterov=False)
+        # Set the gradient values of the selected optimizer to 0.0
+        optimizer.zero_grad()
+        return optimizer
+
 
     def __repr__(self) -> str:
         return f'   Learning rate: {self.learning_rate}\n   Momentum: {self.momentum}' \

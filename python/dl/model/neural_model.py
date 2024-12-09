@@ -6,10 +6,10 @@ import torch.nn as nn
 from abc import ABC
 from typing import AnyStr, Self, List, Callable
 from torch.utils.data import DataLoader
-from dl import DLException
+from dl import DLException, ConvDataType
 import logging
 
-from dl.training.dl_training import DLTraining
+from dl.training.neural_training import NeuralTraining
 
 logger = logging.getLogger('dl.model.NeuralModel')
 
@@ -55,7 +55,11 @@ class NeuralModel(torch.nn.Module, ABC):
         return list(self.model.children())
 
     def list_modules(self, index: int = 0) -> AnyStr:
-        raise DLException('Cannot list module of abstract Neural model')
+        modules = [f'{idx+index}: {str(module)}' for idx, module in enumerate(self.get_modules())]
+        return '\n'.join(modules)
+
+    def get_flatten_output_size(self) -> ConvDataType:
+        raise DLException('Abstract class cannot have a flatten output size')
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -65,10 +69,9 @@ class NeuralModel(torch.nn.Module, ABC):
         @return: Prediction for the input
         @rtype: Torch tensor
         """
-        print(f'Input {self.model_id}\n{x.shape}')
-        # x= x.to(self.execution.target_device)
+        # print(f'Input {self.model_id}\n{x.shape}')
         x = self.model(x)
-        print(f'Output {self.model_id}\n{x.shape}')
+        # print(f'Output {self.model_id}\n{x.shape}')
         return x
 
     def get_in_features(self) -> int:

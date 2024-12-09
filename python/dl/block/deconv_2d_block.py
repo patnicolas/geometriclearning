@@ -22,10 +22,7 @@ from dl import ConvException, Conv2DataType
 
 
 class DeConv2DBlock(NeuralBlock):
-    def __init__(self,
-                 block_id: Optional[AnyStr],
-                 conv_block_config: ConvBlockConfig,
-                 activation: Optional[nn.Module] = None) -> None:
+    def __init__(self, block_id: Optional[AnyStr], conv_block_config: ConvBlockConfig) -> None:
         """
         Alternate constructor using a pre-configured block and an optional overwriting activation function. If the
         activation function is not specified, the activation function of the convolutional block is used
@@ -33,8 +30,6 @@ class DeConv2DBlock(NeuralBlock):
         @type block_id: str
         @param conv_block_config: Configuration
         @type conv_block_config: ConvBlockConfig
-        @param activation: New Activation function
-        @type activation: nn.Module
         """
         modules = []
         conv_module = nn.ConvTranspose2d(in_channels=conv_block_config.in_channels,
@@ -45,11 +40,13 @@ class DeConv2DBlock(NeuralBlock):
                                          bias=conv_block_config.bias)
         modules.append(conv_module)
 
+        # If the encoder had batch norm... include it into the decoder
         if conv_block_config.batch_norm:
             modules.append(nn.BatchNorm2d(conv_block_config.out_channels))
-        if activation is not None:
-            conv_block_config.activation = activation
-            modules.append(activation)
+
+        # The decoder blocks inherits the activation of the encoder blocks
+        modules.append(conv_block_config.activation)
+
         super(DeConv2DBlock, self).__init__(block_id, tuple(modules))
         self.conv_block_config = conv_block_config
 

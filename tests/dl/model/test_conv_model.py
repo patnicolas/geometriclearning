@@ -4,7 +4,7 @@ from dl.block.conv_2d_block import Conv2DBlock
 from dl.block.ffnn_block import FFNNBlock
 from dl.model.conv_model import ConvModel
 from dl import ConvException
-from dl.training.dl_training import DLTraining
+from dl.training.neural_training import NeuralTraining
 
 
 class ConvModelTest(unittest.TestCase):
@@ -100,7 +100,7 @@ class ConvModelTest(unittest.TestCase):
             print(str(e))
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+
     def test_transpose(self):
         try:
             conv_2d_block_1 = Conv2DBlock.build(block_id='conv_1',
@@ -195,6 +195,7 @@ class ConvModelTest(unittest.TestCase):
             print(str(e))
             self.assertTrue(False)
 
+    @unittest.skip('Ignore')
     def test_caltech101_train(self):
         from dataset.caltech101_loader import Caltech101Loader
         from dl.training.exec_config import ExecConfig
@@ -257,7 +258,7 @@ class ConvModelTest(unittest.TestCase):
             self.assertTrue(False)
 
     @staticmethod
-    def create_executor() -> DLTraining:
+    def create_executor() -> NeuralTraining:
         from dl.training.hyper_params import HyperParams
         from metric.metric import Metric
 
@@ -271,7 +272,7 @@ class ConvModelTest(unittest.TestCase):
             drop_out=0.0,
             train_eval_ratio=0.9)
         metric_labels = [ Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
-        return DLTraining.build(hyper_parameters, metric_labels)
+        return NeuralTraining.build(hyper_parameters, metric_labels)
 
 
 if __name__ == '__main__':

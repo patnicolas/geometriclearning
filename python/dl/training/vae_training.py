@@ -3,21 +3,22 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from abc import ABC
 
-from dl.training.dl_training import DLTraining
+import torch.nn as nn
+from dl.training.neural_training import NeuralTraining
 from dl.training.hyper_params import HyperParams
 from dl.training.early_stop_logger import EarlyStopLogger
 from plots.plotter import PlotterParameters
 from metric.metric import Metric
-from dl.model.vae_model import VAEModel
+from metric.built_in_metric import create_metric_dict
 from dl.training.exec_config import ExecConfig
-from dl import ConvException, DLException, VAEException
+from dl import ConvException, VAEException
 from dl.loss.vae_kl_loss import VAEKLLoss
 from typing import AnyStr, List, Optional, Dict, NoReturn, Self, Tuple
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import torch
 import logging
-logger = logging.getLogger('dl.VAE')
+logger = logging.getLogger('dl.VAETraining')
 
 EvaluatedImages = Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
 
@@ -32,11 +33,10 @@ The key components are
 """
 
 
-class VAETraining(DLTraining, ABC):
+class VAETraining(NeuralTraining, ABC):
     max_debug_images = 3
 
     def __init__(self,
-                 vae_model: VAEModel,
                  hyper_params: HyperParams,
                  early_stop_logger: EarlyStopLogger,
                  metrics: Dict[AnyStr, Metric],
@@ -44,8 +44,6 @@ class VAETraining(DLTraining, ABC):
                  plot_parameters: Optional[List[PlotterParameters]] = None):
         """
         Default constructor for this variational auto-encoder
-        @param vae_model: Model for the variational auto-encoder
-        @type vae_model: VAEModel
         @param hyper_params:  Hyper-parameters for training and optimizatoin
         @type hyper_params: HyperParams
         @param early_stop_logger: Training monitoring
@@ -57,8 +55,7 @@ class VAETraining(DLTraining, ABC):
         @param plot_parameters: Optional plotting parameters
         @type plot_parameters: List[PlotterParameters]
         """
-        super(VAETraining, self).__init__(vae_model,
-                                          hyper_params,
+        super(VAETraining, self).__init__(hyper_params,
                                           early_stop_logger,
                                           metrics,
                                           exec_config,
@@ -66,106 +63,72 @@ class VAETraining(DLTraining, ABC):
 
     @classmethod
     def build(cls,
-              vae_model: VAEModel,
               hyper_params: HyperParams,
-              early_stop_logger: EarlyStopLogger,
-              exec_config: ExecConfig) -> Self:
+              metric_labels: List[AnyStr]) -> Self:
         """
-        Alternative, simplified constructor for this variational auto-encoder for which only the training
-        and evaluation losses are created
-        @param vae_model: Model for the variational auto-encoder
-        @type vae_model: VAEModel
-        @param hyper_params:  Hyper-parameters for training and optimizatoin
+        Simplified constructor for the training and execution of any neural network.
+        @param hyper_params: Hyper parameters associated with the training of th emodel
         @type hyper_params: HyperParams
-        @param early_stop_logger: Training monitoring
-        @type early_stop_logger: EarlyStopLogger
-        @param exec_config: Configuration for optimization of execution of training
-        @type exec_config: ExecConfig
-        @return Instance of VAE
+        @param metric_labels: Labels for metric to be used
+        @type metric_labels: List[str]
         """
-        return cls(vae_model, hyper_params, early_stop_logger, metrics={}, exec_config=exec_config, plot_parameters=[])
+        # Create metrics
+        metrics_dict = create_metric_dict(metric_labels, hyper_params.encoding_len)
+        # Initialize the plotting parameters
+        plot_parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
+                           for label, _ in metrics_dict.items()]
+        return cls(hyper_params=hyper_params,
+                   early_stop_logger=EarlyStopLogger(patience=2, min_diff_loss=-0.001, early_stopping_enabled=True),
+                   metrics=metrics_dict,
+                   exec_config=ExecConfig.default(),
+                   plot_parameters=plot_parameters)
 
-    def __call__(self, plot_title: AnyStr, loaders: (DataLoader, DataLoader)) -> NoReturn:
+    def train(self,
+              model_id: AnyStr,
+              neural_model: nn.Module,
+              train_loader: DataLoader,
+              eval_loader: DataLoader) -> None:
         """
-        Polymorphic execution of the cycle of training and evaluation for the variational auto-encoder
-        @param plot_title: Labeling metric for output to file and plots
-        @type plot_title: str
-        @param loaders: Pair of loader for training data and test data
-        @type loaders: Tuple[DataLoader]
+        Train and evaluation of a neural network given a data loader for a training set, a
+        data loader for the evaluation/test1 set and a encoder_model. The weights of the various linear modules
+        (neural_blocks) will be initialized if self.hyper_params using a Normal distribution
+
+        @param model_id: Identifier for the model
+        @type model_id: str
+        @param neural_model: Neural model as torch module
+        @type neural_model: nn_Module
+        @param train_loader: Data loader for the training set
+        @type train_loader: DataLoader
+        @param eval_loader:  Data loader for the valuation set
+        @type eval_loader: DataLoader
         """
+        from dl.model.vae_model import VAEModel
+
+        if not isinstance(neural_model, VAEModel):
+            raise VAEException(f'Neural model {type(neural_model)} cannot not be trained as VAE')
+
         # Initialization of the weights
         torch.manual_seed(42)
-        self.hyper_params.initialize_weight(list(self.model.modules()))
+        self.hyper_params.initialize_weight(neural_model.get_modules())
 
-        train_loader, eval_loader = loaders
         for epoch in tqdm(range(self.hyper_params.epochs)):
             # Set training mode and execute training
-            train_loss = self.__train(epoch, train_loader)
+            train_loss = self.__train(neural_model, epoch, train_loader)
+            print(f'Training loss: {train_loss}', flush=True)
 
             # Set mode and execute evaluation
-            eval_metrics = self.__eval(epoch, eval_loader)
+            eval_metrics = self.__eval(neural_model, epoch, eval_loader)
             self.early_stop_logger(epoch, train_loss, eval_metrics)
 
         # Generate summary
         self.early_stop_logger.summary()
 
+    """
     def _enc_dec_params(self) -> (dict, dict):
-        """
         Extract the model parameters for the encoder and decoder
         @returns: pair of encoder and decoder parameters (dictionaries)
-        """
-        return self.model.encoder_model.parameters(), self.model.decoder_model.parameters()
-
-    """ ---------------------------   Private helper methods  --------------------------------  """
+        return self.neural_model.encoder_model.parameters(), self.model.decoder_model.parameters()
     """
-    def __compute_loss(
-            self,
-            predicted: torch.Tensor,
-            x: torch.Tensor,
-            mu: torch.Tensor,
-            log_var: torch.Tensor,
-            num_records: int) -> torch.Tensor:
-        
-            Aggregate the loss of reconstruction and KL divergence between proposed and current Normal distribution
-            @param predicted: Predicted values
-            @type predicted: Torch tensor
-            @param x: target values
-            @type x: Torch tensor
-            @param mu: Mean of the proposed Normal distribution
-            @type mu:Torch tensor
-            @param log_var: Log of variance of the proposed Gaussian distribution
-            @type log_var: Torch tensor
-            @param num_records: Number of records used to compute the reconstruction loss and KL divergence
-            @type int
-            @return: Aggregate auto-encoder loss
-            @rtype: torch.Tensor
-        
-        reconstruction_loss = self.__reconstruction_loss(predicted, x)
-        kl_divergence = (-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp())) / num_records
-        logger.info(f"Reconstruction loss {reconstruction_loss} KL divergence {kl_divergence}")
-        return reconstruction_loss + kl_divergence
-    """
-    """
-    def __reconstruction_loss(self, predicted: torch.Tensor, x: torch.Tensor) -> float:
-        try:
-            # Cross-entropy for reconstruction loss for binary values
-            # and MSE for continuous (TF-IDF) variable
-            print(f'Input loss {x.shape}, Prediction shape {predicted.shape}')
-            return self.hyper_params.loss_function(predicted, x)
-        except ConvException as e:
-            VAETraining.__process_error(e)
-        except RuntimeError as e:
-            VAETraining.__process_error(e)
-        except ValueError as e:
-            VAETraining.__process_error(e)
-        except KeyError as e:
-            VAETraining.__process_error(e)
-    """
-
-    @staticmethod
-    def __process_error(e: Exception) -> None:
-        logging.error(str(e))
-        raise VAEException(str(e))
 
     @staticmethod
     def _reshape_output_variation(shapes: list, z: torch.Tensor) -> torch.Tensor:
@@ -173,45 +136,72 @@ class VAETraining(DLTraining, ABC):
         return z.view(shapes[0], shapes[1], shapes[2], shapes[3]) if len(shapes) == 4 \
             else z.view(shapes[0], shapes[1], shapes[2])
 
-    def __train(self, epoch: int, train_loader: DataLoader) -> float:
-        self.model.train()
+    """ -----------------------  Private class and object methods -------------------- """
+    """
+    @staticmethod
+    def __process_error(e: Exception) -> None:
+        logging.error(str(e))
+        raise VAEException(str(e))
+    """
+
+    def __train(self, neural_model: nn.Module, epoch: int, train_loader: DataLoader) -> float:
+        neural_model.train()
         total_loss = 0
 
-        encoder_optimizer = self.hyper_params.optimizer(self.model)
-        decoder_optimizer = self.hyper_params.optimizer(self.model)
-        vae_kl_loss = VAEKLLoss(self.model.mu, self.model.log_var, len(train_loader))
+        encoder_optimizer = self.hyper_params.optimizer(neural_model)
+        decoder_optimizer = self.hyper_params.optimizer(neural_model)
+        num_records = len(train_loader)
+        mu, log_var = neural_model.get_mu_log_var()
+        model = neural_model.to(self.target_device)
+        vae_kl_loss = VAEKLLoss(mu=mu,
+                                log_var=log_var,
+                                num_records=num_records,
+                                loss_func=self.hyper_params.loss_function)
 
-        for data in tqdm(train_loader):
+        for data in train_loader:
             try:
-                for params in self.model.parameters():
-                    params.grad = None
                 # Add noise if requested
-                data = self.model.add_noise(data)
+                # data = self.model.add_noise(data)
 
                 # Forward pass
-                z = self.model(data)
-                loss = vae_kl_loss(z, data)
+                input = data[0].to(self.target_device)
+                reconstructed = model(input)
 
+                _input = input.view(input.size(0), input.size(1), -1)
+                _reconstructed = reconstructed.view(input.size(0), input.size(1), -1)
+                loss = vae_kl_loss(_reconstructed, model.z, _input)
+
+                if loss is torch.nan:
+                    raise VAEException(f'Loss for Prediction: {_reconstructed}, z: {model.z} and output {_input} is NAN')
                 loss.backward(retain_graph=True)
-                total_loss += loss.data
+                total_loss += loss.item()
+
                 encoder_optimizer.step()
                 decoder_optimizer.step()
             except ConvException as e:
-                VAETraining.__process_error(e)
+                raise VAEException(str(e))
             except RuntimeError as e:
-                VAETraining.__process_error(e)
+                raise VAEException(str(e))
             except ValueError as e:
-                VAETraining.__process_error(e)
+                raise VAEException(str(e))
             except KeyError as e:
-                VAETraining.__process_error(e)
+                raise VAEException(str(e))
             except AttributeError as e:
-                VAETraining.__process_error(e)
-        return total_loss / len(train_loader)
+                raise VAEException(str(e))
 
-    def __eval(self, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
-        self.model.eval()
+        return total_loss / num_records
+
+    def __eval(self, neural_model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
+        neural_model.eval()
         total_loss = 0
-        vae_kl_loss = VAEKLLoss(self.model.mu, self.model.log_var, len(eval_loader))
+        mu, log_var = neural_model.get_mu_log_var()
+        model = neural_model.to(self.target_device)
+        num_records = len(eval_loader)
+        vae_kl_loss = VAEKLLoss(mu=mu,
+                                log_var=log_var,
+                                num_records=num_records,
+                                loss_func=self.hyper_params.loss_function)
+
         metric_collector = {}
         eval_images: List[EvaluatedImages] = []
 
@@ -219,25 +209,30 @@ class VAETraining(DLTraining, ABC):
             images_cnt = 0
             try:
                 for data in eval_loader:
-                    noisy_data = self.model.add_noise(data)
-                    reconstructed = self.model(noisy_data)
-                    loss = vae_kl_loss(reconstructed, noisy_data)
-                    total_loss += loss.data
+                    # noisy_data = neural_model.add_noise(data)
+
+                    input = data[0].to(self.target_device)
+                    reconstructed = model(input)
+
+                    _input = input.view(input.size(0), input.size(1), -1)
+                    _reconstructed = reconstructed.view(input.size(0), input.size(1), -1)
+                    loss = vae_kl_loss(_reconstructed, model.z, _input)
+                    total_loss += loss.item()
 
                     if self.__are_images(images_cnt):
-                        eval_images.append((data, noisy_data, reconstructed))
+                        eval_images.append((data, data, reconstructed))
             except ConvException as e:
-                VAETraining.__process_error(e)
+                raise VAEException(str(e))
             except RuntimeError as e:
-                VAETraining.__process_error(e)
+                raise VAEException(str(e))
             except ValueError as e:
-                VAETraining.__process_error(e)
+                raise VAEException(str(e))
             except KeyError as e:
-                VAETraining.__process_error(e)
+                raise VAEException(str(e))
             except AttributeError as e:
-                VAETraining.__process_error(e)
+                raise VAEException(str(e))
 
-        eval_loss = total_loss / len(eval_loader)
+        eval_loss = total_loss / num_records
         metric_collector[Metric.eval_loss_label] = eval_loss
         self.__visualize(eval_images)
         return metric_collector

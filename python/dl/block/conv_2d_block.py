@@ -60,7 +60,7 @@ class Conv2DBlock(ConvBlock):
               stride: Conv2DataType = (1, 1),
               padding: Conv2DataType = (0, 0),
               batch_norm: bool = False,
-              max_pooling_kernel: int = 1,
+              max_pooling_kernel: int = -1,
               activation: nn.Module = None,
               bias: bool = False,
               drop_out: float = 0.0) -> Self:
@@ -89,16 +89,16 @@ class Conv2DBlock(ConvBlock):
         @param drop_out: Regularization term applied if > 0
         @type drop_out: float
         """
-        conv_block_config = ConvBlockConfig(in_channels,
-                                            out_channels,
-                                            kernel_size,
-                                            stride,
-                                            padding,
-                                            batch_norm,
-                                            max_pooling_kernel,
-                                            activation,
-                                            bias,
-                                            drop_out)
+        conv_block_config = ConvBlockConfig(in_channels=in_channels,
+                                            out_channels=out_channels,
+                                            kernel_size=kernel_size,
+                                            stride=stride,
+                                            padding=padding,
+                                            batch_norm=batch_norm,
+                                            max_pooling_kernel=max_pooling_kernel,
+                                            activation=activation,
+                                            bias=bias,
+                                            drop_out=drop_out)
         return cls(block_id, conv_block_config)
 
     def transpose(self, extra: Optional[nn.Module] = None) -> DeConv2DBlock:
@@ -109,10 +109,8 @@ class Conv2DBlock(ConvBlock):
         @return: Instance of 2D de-convolutional block
         @rtype: DeConv2DBlock
         """
-        self.conv_block_config.transpose()
-        return DeConv2DBlock(block_id=f'de_{self.block_id}',
-                             conv_block_config=self.conv_block_config,
-                             activation=extra)
+        transposed = self.conv_block_config.transpose()
+        return DeConv2DBlock(block_id=f'de_{self.block_id}', conv_block_config=transposed)
 
 
 

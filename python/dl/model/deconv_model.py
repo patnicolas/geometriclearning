@@ -9,7 +9,7 @@ from dl.block.deconv_2d_block import DeConv2DBlock
 from dl.block.ffnn_block import FFNNBlock
 from typing import AnyStr, List, Optional, Self, Dict, Any
 
-from dl.training.dl_training import DLTraining
+from dl.training.neural_training import NeuralTraining
 from util import log_size
 import torch.nn as nn
 import torch
@@ -21,8 +21,9 @@ class DeConvModel(NeuralModel, ABC):
     def __init__(self,
                  model_id: AnyStr,
                  de_conv_blocks: List[DeConv2DBlock],
+                 last_activation: Optional[nn.Module] = None,
                  ffnn_blocks: Optional[List[FFNNBlock]] = None,
-                 execution: Optional[DLTraining] = None) -> None:
+                 execution: Optional[NeuralTraining] = None) -> None:
         """
         Constructor for this de-convolutional neural network
         @param model_id: Identifier for this model
@@ -41,6 +42,8 @@ class DeConvModel(NeuralModel, ABC):
 
         # Define the sequence of modules from the layout
         de_conv_modules = [module for block in de_conv_blocks for module in block.modules]
+        if last_activation is not None:
+            de_conv_modules[-1] = last_activation
 
         # If fully connected are provided as CNN
         if ffnn_blocks is not None:
@@ -73,10 +76,11 @@ class DeConvModel(NeuralModel, ABC):
         """
         return len(self.ffnn_blocks) > 1
 
+    def __str__(self) -> str:
+        return f'\nModel: {self.model_id}\nState:{self._state_params()}\nModules:\n{self.list_modules(0)}'
+
     def __repr__(self) -> str:
-        modules = [str(module) for module in self.get_modules()]
-        module_repr = '\n'.join(modules)
-        return f'State:{self._state_params()}\nModules:\n{module_repr}'
+        return f'\n{self.list_modules(0)}'
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -86,21 +90,18 @@ class DeConvModel(NeuralModel, ABC):
         @return: A tensor output from last layer
         @rtype; Torch tensor
         """
-        log_size(x, 'Input Conv model')
-        x = self.conv_model(x)
-        log_size(x, 'Output Conv model')
+        logger.info(x, 'Input Conv model')
+        x = self.model(x)
+        logger.info(x, 'Output Conv model')
         # If a full connected network is appended to the convolutional layers
-        if self.dff_model is not None:
-            log_size(x, 'Before width Conv')
+        if self.ffnn_blocks is not None and len(self.ffnn_blocks) > 0:
+            logger.info(x, 'Before width Conv')
             sz = x.shape[0]
             x = DeConvModel.reshape(x, sz)
-            log_size(x, 'After width Conv')
+            logger.info(x, 'After width Conv')
             x = self.dff_model(x)
-            log_size(x, 'Output connected Conv')
+            logger.info(x, 'Output connected Conv')
         return x
-
-    def __repr__(self) -> str:
-        return f'State:{self._state_params()}\nModules:\n{self.list_modules(0)}'
 
     def list_modules(self, index: int = 0) -> AnyStr:
         modules = [f'{idx + index}: {str(module)}' for idx, module in enumerate(self.get_modules())]

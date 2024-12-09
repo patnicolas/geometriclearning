@@ -27,6 +27,7 @@ class MNISTLoader(BaseLoader):
         super(MNISTLoader, self).__init__(batch_size=batch_size, num_samples=-1)
         self.resize_image = resize_image
 
+
     @staticmethod
     def show_samples(images_set: Dataset, is_random: bool = True) -> None:
         """
@@ -54,6 +55,14 @@ class MNISTLoader(BaseLoader):
 
         plt.tight_layout()
         plt.show()
+
+    def extract_features(self, root_path: AnyStr)-> (Dataset, Dataset):
+        train_dataset, eval_dataset = self._extract_datasets(root_path)
+        data = train_dataset.data
+        return train_dataset, eval_dataset
+
+
+
 
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):
         """
@@ -84,13 +93,13 @@ class MNISTLoader(BaseLoader):
                 transform=transform  # Apply transformations
             )
 
-            test_dataset = MNIST(
+            eval_dataset = MNIST(
                 root=root_path,  # Directory to store the dataset
                 train=False,  # Load test data
                 download=True,  # Download if not already present
                 transform=transform  # Apply transformations
             )
-            return train_dataset, test_dataset
+            return train_dataset, eval_dataset
 
         except RuntimeError as e:
             logger.error(str(e))
