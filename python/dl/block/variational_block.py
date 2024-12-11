@@ -17,9 +17,9 @@ class VariationalBlock(NeuralBlock):
         @param latent_size:  Number of hidden unit for the latent space the variational block
         @type latent_size:  int
         """
-        mu: nn.Module = nn.Linear(in_features=hidden_dim, out_features=latent_size)
-        log_var: nn.Module = nn.Linear(in_features=hidden_dim, out_features=latent_size)
-        sampler_fc: nn.Module = nn.Linear(in_features=latent_size, out_features=hidden_dim)
+        mu: nn.Module = nn.Linear(in_features=hidden_dim, out_features=latent_size, bias=True)
+        log_var: nn.Module = nn.Linear(in_features=hidden_dim, out_features=latent_size, bias=True)
+        sampler_fc: nn.Module = nn.Linear(in_features=latent_size, out_features=hidden_dim, bias=True)
         modules = [mu, log_var, sampler_fc]
         super(VariationalBlock, self).__init__(block_id='Variational', modules=tuple(modules))
 
@@ -51,8 +51,11 @@ class VariationalBlock(NeuralBlock):
         @type log_var: torch.Tensor
         @return: Sampled data point from z-space
         """
+        # Compute standard deviation from logvar
         std = torch.exp(0.5 * log_var)
+        # Sample epsilon from N(0, 1)
         eps = torch.randn_like(std)
+        # Re-parameterization trick
         return mu + std * eps
 
     def forward(self, x: torch.Tensor) -> (torch.Tensor, torch.Tensor, torch.Tensor):
@@ -63,11 +66,31 @@ class VariationalBlock(NeuralBlock):
         @return: z, mean and log variance input_tensor
         @rtype: torch tensor
         """
-        # print(f'fc variational input shape {x.shape}')
+        # Compute the mean for the tensor
+        x = VariationalBlock.__laplace_zero_tensor(x)
         mu = self.mu(x)
-        # print(f'mu variational shape {mu.shape}')
+        weight = self.mu.weight
+        # Computes log (exp(sqr(std))
         log_var = self.log_var(x)
         z = VariationalBlock.re_parameterize(mu, log_var)
-        # print(f'z variational shape {z.shape}')
+        if VariationalBlock.__is_z_nan(z):
+            has_non_zeros = VariationalBlock.input_has_non_zeros(x)
+            raise VAEException(f'VAE z is nan with x has non zeros? {has_non_zeros}')
         return self.sampler_fc(z), mu, log_var
+
+    @staticmethod
+    def __is_z_nan(z: torch.Tensor) -> bool:
+        dim = len(z.shape)
+        return (dim == 1 and torch.isnan(z[0])) or (dim == 2 and torch.isnan(z[0][0]))
+
+    @staticmethod
+    def __laplace_zero_tensor(x: torch.Tensor) -> torch.Tensor:
+        if not bool(x.any()):
+            s = list(x.shape)
+            return (torch.rand(s) - 0.5).to(torch.device("mps"))
+        else:
+            return x
+
+
+
 

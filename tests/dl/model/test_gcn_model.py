@@ -60,7 +60,7 @@ class GCNModelTest(unittest.TestCase):
             drop_out=0.2,
             train_eval_ratio=0.9,
             encoding_len=101,  # No one-hot encoding
-            normal_weight_initialization=False)
+            weight_initialization=False)
 
         empty_cache: bool = False
         mix_precision: bool = False

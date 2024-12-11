@@ -85,7 +85,7 @@ class VAEModelTest(unittest.TestCase):
                                                 batch_norm=True,
                                                 max_pooling_kernel=-1,
                                                 activation=nn.ReLU(),
-                                                bias=False,
+                                                bias=True,
                                                 drop_out=0.25)
             conv_2d_block_2 = Conv2DBlock.build(block_id='conv_2',
                                                 in_channels=8,
@@ -96,7 +96,7 @@ class VAEModelTest(unittest.TestCase):
                                                 batch_norm=True,
                                                 max_pooling_kernel=-1,
                                                 activation=nn.ReLU(),
-                                                bias=False,
+                                                bias=True,
                                                 drop_out=0.25)
             conv_model = ConvModel(model_id='MNIST',
                                    input_size=(28, 28),
@@ -133,36 +133,13 @@ class VAEModelTest(unittest.TestCase):
             batch_size=8,
             loss_function=nn.CrossEntropyLoss(),
             drop_out=0.0,
-            train_eval_ratio=0.9)
+            train_eval_ratio=0.9,
+            encoding_len=-1,
+            weight_initialization='xavier'
+        )
         metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
         return VAETraining.build(hyper_parameters, metric_labels)
 
-"""
-
-    def test_train(self):
-        input_size = 784
-        features = [256, 128]
-        root_path = '../../../../data/MNIST'
-
-        hyper_parameters = HyperParams(
-            lr=0.0004,
-            momentum=0.97,
-            epochs=860,
-            optim_label='adam',
-            batch_size=32,
-            loss_function=nn.MSELoss(),
-            drop_out=0.2,
-            train_eval_ratio=0.9,
-            normal_weight_initialization=False)
-        try:
-            ffnn_mnist = FfnnMnist(input_size, features)
-            vae_mnist = VAEMNIST(ffnn_mnist, latent_size=12)
-            print(repr(vae_mnist))
-            vae_mnist.do_train(root_path, hyper_parameters)
-        except Exception as e:
-            print(str(e))
-
-"""
 
 if __name__ == '__main__':
     unittest.main()

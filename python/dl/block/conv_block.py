@@ -40,6 +40,7 @@ class ConvBlock(NeuralBlock):
         self.conv_block_config = conv_block_config
         super(ConvBlock, self).__init__(block_id, modules)
 
+
     def transpose(self, extra: Optional[nn.Module] = None) -> Any:
         raise ConvException('Cannot invert abstract Convolutional block')
 

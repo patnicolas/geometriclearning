@@ -2,7 +2,8 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import numpy as np
-from typing import List, AnyStr, Optional
+import torch
+from typing import List, AnyStr, Optional, Self
 from geomstats.geometry.base import LevelSet
 from dataclasses import dataclass
 
@@ -24,6 +25,10 @@ class ManifoldPoint:
     tgt_vector: Optional[List[float]] = None
     geodesic: Optional[bool] = False
     intrinsic: Optional[bool] = False
+
+    @classmethod
+    def build(cls, _id: AnyStr, location: torch.Tensor) -> Self:
+        return cls(_id, location.numpy())
 
     def ndim(self) -> int:
         return len(self.location)

@@ -5,7 +5,7 @@ from geomstats.geometry.euclidean import Euclidean
 from geometry.geometric_space import GeometricSpace
 from typing import NoReturn
 import numpy as np
-from geometry.space_visualization import VisualizationParams, SpaceVisualization
+from geometry.visualization.space_visualization import VisualizationParams, SpaceVisualization
 
 """
     Define the Euclidean space and its components

@@ -7,6 +7,9 @@ from torch import nn
 from typing import AnyStr, Optional, List
 from dataset import DatasetException
 import logging
+
+from dl import TrainingException
+
 logger = logging.getLogger('dl.HyperParams')
 
 """
@@ -31,7 +34,7 @@ class HyperParams(object):
                  drop_out: float,
                  train_eval_ratio: float = default_train_eval_ratio,
                  encoding_len: int = -1,
-                 normal_weight_initialization: Optional[bool] = False):
+                 weight_initialization: Optional[AnyStr] = 'xavier'):
         """
             Constructor
             @param lr: Learning rate for the selected optimizer
@@ -55,7 +58,7 @@ class HyperParams(object):
         self.momentum = momentum
         self.encoding_len = encoding_len
         self.train_eval_ratio = train_eval_ratio
-        self.normal_weight_initialization = normal_weight_initialization
+        self.weight_initialization = weight_initialization
         self.optim_label = optim_label
         self.drop_out = drop_out
         torch.manual_seed(42)
@@ -71,10 +74,20 @@ class HyperParams(object):
         @param modules: torch module to be initializes
         @type modules: List
         """
-        if self.normal_weight_initialization is True:
-            [nn.init.normal_(module.weight) for module in modules if type(module) == nn.Linear]
-        else:
-            logger.warning('No normal initialization for hyper parameters')
+        def is_layer_module(m: nn.Module) -> bool:
+            return isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d) or isinstance(m, nn.Conv1d)
+
+        match self.weight_initialization :
+            case 'normal':
+                [nn.init.normal_(module.weight) for module in modules if is_layer_module(module)]
+            case 'xavier':
+                [nn.init.xavier_uniform_(module.weight) for module in modules if is_layer_module(module)]
+            case 'constant':
+                [nn.init.constant_(module.weight, val=0.5) for module in modules if is_layer_module(module)]
+            case _:
+                raise TrainingException(f'initialization {self.weight_initialization} '
+                                        'for layer module weights is not supported')
+        [nn.init.constant_(module.bias, val=0.1) for module in modules if is_layer_module(module)]
 
     def optimizer(self, model: nn.Module) -> torch.optim.Optimizer:
         """
@@ -131,7 +144,7 @@ class HyperParams(object):
             batch_size,
             self.loss_function,
             self.drop_out,
-            self.normal_weight_initialization) for lr in lr_rates for batch_size in batch_sizes)
+            self.weight_initialization) for lr in lr_rates for batch_size in batch_sizes)
 
     # ---------------------  Helper private methods -----------------------
     @staticmethod

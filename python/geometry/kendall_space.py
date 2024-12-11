@@ -2,7 +2,7 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from geomstats.geometry.pre_shape import PreShapeSpace
-from geometry.space_visualization import VisualizationParams, SpaceVisualization
+from geometry.visualization.space_visualization import VisualizationParams, SpaceVisualization
 from geometry.geometric_space import GeometricSpace
 import numpy as np
 from typing import NoReturn, AnyStr

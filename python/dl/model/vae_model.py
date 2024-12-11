@@ -60,6 +60,7 @@ class VAEModel(NeuralModel):
             self.encoder = encoder
             self.decoder = decoder
             self.variational_block = variational_block
+            # Used to collect distribution/tensor of the latent space
             self.z = None
         except ConvException as e:
             logger.error(str(e))

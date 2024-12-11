@@ -15,6 +15,7 @@ logger = logging.getLogger('dataset.MNISTLoader')
 
 class MNISTLoader(BaseLoader):
     plot_layout = (2, 4)
+    default_normalization = (0.5, 0.5, 0.5)
 
     def __init__(self, batch_size: int, resize_image: int = -1) -> None:
         """
@@ -56,12 +57,9 @@ class MNISTLoader(BaseLoader):
         plt.tight_layout()
         plt.show()
 
-    def extract_features(self, root_path: AnyStr)-> (Dataset, Dataset):
+    def extract_features(self, root_path: AnyStr) -> (Dataset, Dataset):
         train_dataset, eval_dataset = self._extract_datasets(root_path)
-        data = train_dataset.data
         return train_dataset, eval_dataset
-
-
 
 
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):
@@ -78,12 +76,12 @@ class MNISTLoader(BaseLoader):
                 GrayscaleToRGB(),
                 transforms.ToTensor(),  # Convert images to PyTorch tensors
                 # Normalize with mean and std for RGB channels
-                transforms.Normalize(mean=(0.0, 0.0, 0.0), std=(0.5, 0.5, 0.5))
+                transforms.Normalize(mean=MNISTLoader.default_normalization, std=MNISTLoader.default_normalization)
             ]) if self.resize_image > 0 else transforms.Compose([
                 GrayscaleToRGB(),
                 transforms.ToTensor(),  # Convert images to PyTorch tensors
                 # Normalize with mean and std for RGB channels
-                transforms.Normalize(mean=(0.0, 0.0, 0.0), std=(0.5, 0.5, 0.5))
+                transforms.Normalize(mean=MNISTLoader.default_normalization, std=MNISTLoader.default_normalization)
             ])
 
             train_dataset = MNIST(

@@ -1,0 +1,52 @@
+__author__ = "Patrick Nicolas"
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
+
+from geometry.visualization.manifold_plot import ManifoldPlot
+from typing import List
+import numpy as np
+from geometry import GeometricException
+
+
+
+class SO3Plot(ManifoldPlot):
+    def __init__(self, manifold_points: List[np.array]) -> None:
+        """
+        Constructor for plotting Special Orthogonal Group in dimension 3
+        @param manifold_points: List of points on the hypersphere implemented as torch Tensors
+        @type manifold_points: List of Numpy arrays representing points on the manifold
+        @type manifold_points: List
+        """
+        super(SO3Plot, self).__init__(manifold_points)
+
+    def show(self) -> None:
+        import matplotlib.pyplot as plt
+        import geomstats.backend as gs
+
+        num_points = len(self.manifold_points)
+        theta = np.linspace(start=0.0, stop=np.pi, num=num_points)
+        phi = np.linspace(start=0.0, stop=2 * np.pi, num=num_points)
+        theta, phi = np.meshgrid(theta, phi)
+        x = np.sin(theta) * np.cos(phi)
+        y = np.sin(theta) * np.sin(phi)
+        z = np.cos(theta)
+
+        fig = plt.figure(figsize=(10, 10))
+        ax = fig.add_subplot(111, projection="3d")
+        for i, rotation in enumerate(self.manifold_points):
+            # Apply the rotation to the sphere points
+            points = np.stack(arrays=[x.ravel(), y.ravel(), z.ravel()], axis=1)
+            r_points = gs.matmul(rotation, points.T).T  # Apply rotation
+
+            # Reshape rotated points for plotting
+            x_r = r_points[:, 0].reshape(num_points, num_points)
+            y_r = r_points[:, 1].reshape(num_points, num_points)
+            z_r = r_points[:, 2].reshape(num_points, num_points)
+
+            # Plot the rotated sphere
+            ax.plot_surface(
+                x_r, y_r, z, alpha=0.6, edgecolor='k', linewidth=0.3, label=f"Rotation {i + 1}"
+            )
+
+        ManifoldPlot._create_legend(title='SO(3) Rotations acting on the Unit Sphere', ax=ax)
+        plt.show()
+

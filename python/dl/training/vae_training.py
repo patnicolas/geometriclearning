@@ -123,13 +123,6 @@ class VAETraining(NeuralTraining, ABC):
         # Generate summary
         self.early_stop_logger.summary()
 
-    """
-    def _enc_dec_params(self) -> (dict, dict):
-        Extract the model parameters for the encoder and decoder
-        @returns: pair of encoder and decoder parameters (dictionaries)
-        return self.neural_model.encoder_model.parameters(), self.model.decoder_model.parameters()
-    """
-
     @staticmethod
     def _reshape_output_variation(shapes: list, z: torch.Tensor) -> torch.Tensor:
         assert 2 < len(shapes) < 5, f'Shape {str(shapes)} for variational auto encoder should have at least 3 dimension'
@@ -137,12 +130,6 @@ class VAETraining(NeuralTraining, ABC):
             else z.view(shapes[0], shapes[1], shapes[2])
 
     """ -----------------------  Private class and object methods -------------------- """
-    """
-    @staticmethod
-    def __process_error(e: Exception) -> None:
-        logging.error(str(e))
-        raise VAEException(str(e))
-    """
 
     def __train(self, neural_model: nn.Module, epoch: int, train_loader: DataLoader) -> float:
         neural_model.train()
@@ -172,7 +159,7 @@ class VAETraining(NeuralTraining, ABC):
                 loss = vae_kl_loss(_reconstructed, model.z, _input)
 
                 if loss is torch.nan:
-                    raise VAEException(f'Loss for Prediction: {_reconstructed}, z: {model.z} and output {_input} is NAN')
+                    raise VAEException(f'Train loss: {_reconstructed}, z: {model.z} output {_input} is NAN')
                 loss.backward(retain_graph=True)
                 total_loss += loss.item()
 
@@ -217,6 +204,8 @@ class VAETraining(NeuralTraining, ABC):
                     _input = input.view(input.size(0), input.size(1), -1)
                     _reconstructed = reconstructed.view(input.size(0), input.size(1), -1)
                     loss = vae_kl_loss(_reconstructed, model.z, _input)
+                    if loss is torch.nan:
+                        raise VAEException(f'Eval Loss: {_reconstructed}, z: {model.z}, output {_input} is NAN')
                     total_loss += loss.item()
 
                     if self.__are_images(images_cnt):

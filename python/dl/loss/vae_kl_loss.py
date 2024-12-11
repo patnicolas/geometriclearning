@@ -56,7 +56,7 @@ class VAEKLLoss(_Loss):
         log_var_value = self.log_var(z)
         mu_value = self.mu(z)
         kl_loss = (-0.5 * torch.sum(1 + log_var_value - mu_value ** 2 - log_var_value.exp())) / self.num_records
-        if kl_loss == torch.inf or kl_loss > 1e+6:
+        if torch.isinf(kl_loss) or kl_loss > 1e+6:
             kl_loss = 1e+6
         return reconstruction_loss + self.beta*kl_loss
 

@@ -7,7 +7,7 @@ from geomstats.geometry.base import LevelSet
 import numpy as np
 from typing import AnyStr, Optional, List
 from geometry.manifold_point import ManifoldPoint
-from geometry.geometric_exception import GeometricException
+from geometry import GeometricException
 
 """
     Create a formal Riemann connection with associated metric from a Manifold or Level set.

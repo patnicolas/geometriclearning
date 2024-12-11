@@ -6,7 +6,7 @@ from sklearn.model_selection import cross_validate
 from dataclasses import dataclass
 from typing import AnyStr, NoReturn
 import numpy as np
-from geomstats.geometry.spd_matrices import SPDMatrices, SPDAffineMetric, SPDLogEuclideanMetric
+from geomstats.geometry.spd_matrices import SPDMatrices
 from geomstats.geometry.riemannian_metric import RiemannianMetric
 import geomstats.backend as gs  # Numpy
 

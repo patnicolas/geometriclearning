@@ -6,7 +6,7 @@ import numpy as np
 import geomstats.backend as gs
 from geomstats.geometry.functions import HilbertSphere
 from geometry.manifold_point import ManifoldPoint
-from geometry.geometric_exception import GeometricException
+from geometry import GeometricException
 
 
 """

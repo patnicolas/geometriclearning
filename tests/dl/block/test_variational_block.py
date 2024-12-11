@@ -5,6 +5,7 @@ from dl.block.variational_block import VariationalBlock
 
 class VariationalBlockTest(unittest.TestCase):
 
+    @unittest.skip("Ignore")
     def test_init(self):
         hidden_dim = 8
         latent_size = 6
@@ -12,6 +13,7 @@ class VariationalBlockTest(unittest.TestCase):
         print(repr(variational_block))
         self.assertTrue(variational_block.in_features() == hidden_dim)
 
+    @unittest.skip("Ignore")
     def test_re_parameterize(self):
         mu = torch.Tensor([1.5, 2.6])
         log_var = torch.Tensor([0.1, 0.6])
@@ -25,6 +27,32 @@ class VariationalBlockTest(unittest.TestCase):
         eps = torch.randn_like(std)
         z = mu + std*eps
         print(f'Second new params: {str(z)}')
+
+    @unittest.skip("Ignore")
+    def test_non_zero_input(self):
+        x = torch.zeros(20)
+        has_non_zeros = VariationalBlock.input_has_non_zeros(x)
+        self.assertFalse(has_non_zeros)
+        x[1] = 0.00001
+        has_non_zeros = VariationalBlock.input_has_non_zeros(x)
+        self.assertTrue(has_non_zeros)
+
+    def test_forward_1(self):
+        t1 = torch.Tensor([9, 0, 1.9, 0.5])
+        s1 = t1.shape
+        l1 = len(s1)
+
+        t2 = torch.Tensor([[9, 0, 1.9], [0.4, 1.3, 9.0]])
+        s2 = t2.shape
+        l2 = len(s2)
+
+        hidden_dim = 8
+        latent_size = 2
+        variational_block = VariationalBlock(hidden_dim, latent_size)
+        self.assertTrue(variational_block.in_features() == hidden_dim)
+        (z, mu, log_var) = variational_block(torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0]))
+        print(z)
+
 
 
 

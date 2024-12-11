@@ -8,8 +8,8 @@ from typing import Tuple, NoReturn, AnyStr, List
 import numpy as np
 import geomstats.visualization as visualization
 from dataclasses import dataclass
-from geometric_space import ManifoldPoint
-from geometric_exception import GeometricException
+from geometry.manifold_point import ManifoldPoint
+from geometry.geometric_exception import GeometricException
 
 
 @dataclass

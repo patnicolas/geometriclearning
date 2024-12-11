@@ -6,10 +6,10 @@ from geomstats.geometry.hypersphere import Hypersphere, HypersphereMetric
 from typing import NoReturn, List
 import numpy as np
 
-from geometry.space_visualization import VisualizationParams, SpaceVisualization
+from geometry.visualization.space_visualization import VisualizationParams, SpaceVisualization
 from geometry.geometric_space import GeometricSpace, ManifoldPoint
 import geomstats.backend as gs
-from geometry.geometric_exception import GeometricException
+from geometry import GeometricException
 
 """
     Define the Hypersphere geometric space as a 2D manifold in a 3D Euclidean space.
@@ -31,7 +31,7 @@ class HypersphereSpace(GeometricSpace):
         GeometricSpace.manifold_type = 'Hypersphere'
         coordinates_type = 'intrinsic' if intrinsic else 'extrinsic'
         # 1. Instantiate the Hypersphere
-        self.space = Hypersphere(dim=self.dimension, equip=equip, default_coords_type=coordinates_type)
+        self.space = Hypersphere(dim=self.dimension, equip=equip)
         # 2. Generated the default metric
         self.hypersphere_metric = HypersphereMetric(self.space)
 
@@ -55,7 +55,7 @@ class HypersphereSpace(GeometricSpace):
         from geomstats.learning.frechet_mean import FrechetMean
 
         frechet_mean = FrechetMean(self.space)
-        x = np.stack((manifold_pt1.location, manifold_pt2.location), axis=0)
+        x = np.stack(arrays=(manifold_pt1.location, manifold_pt2.location), axis=0)
         frechet_mean.fit(x)
         return frechet_mean.estimate_
 
