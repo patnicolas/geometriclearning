@@ -2,30 +2,37 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from geometry.visualization.manifold_plot import ManifoldPlot
-from typing import List
+from typing import List, Optional
 import numpy as np
-from geometry import GeometricException
 
 
 
 class SO3Plot(ManifoldPlot):
-    def __init__(self, manifold_points: List[np.array]) -> None:
+    def __init__(self, manifold_points: np.array) -> None:
         """
         Constructor for plotting Special Orthogonal Group in dimension 3
-        @param manifold_points: List of points on the hypersphere implemented as torch Tensors
         @type manifold_points: List of Numpy arrays representing points on the manifold
         @type manifold_points: List
         """
         super(SO3Plot, self).__init__(manifold_points)
 
-    def show(self) -> None:
+    def show(self, extra_components: Optional[np.array] = None) -> None:
+        """
+        Plot the SO3 rotation 3x3 matrices on a 3D plot with rho =1, theta and phi
+        @param extra_components: Optional components to be added to the plot
+        @type extra_components: Numpy array
+        """
         import matplotlib.pyplot as plt
         import geomstats.backend as gs
 
         num_points = len(self.manifold_points)
+
+        # Build the 3D grid
         theta = np.linspace(start=0.0, stop=np.pi, num=num_points)
         phi = np.linspace(start=0.0, stop=2 * np.pi, num=num_points)
         theta, phi = np.meshgrid(theta, phi)
+
+        # Create the coordinate for the matrix
         x = np.sin(theta) * np.cos(phi)
         y = np.sin(theta) * np.sin(phi)
         z = np.cos(theta)

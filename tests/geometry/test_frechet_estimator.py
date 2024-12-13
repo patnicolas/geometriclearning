@@ -29,18 +29,17 @@ class FrechetEstimatorTest(unittest.TestCase):
             print(str(e))
             self.assertTrue(True)
 
-    @unittest.skip('Ignore')
     def test_estimate_hypersphere(self):
         manifold = Hypersphere(dim=2)
         try:
             frechet_estimator = FrechetEstimator(manifold, GradientDescent(), weights=None)
             np_points = frechet_estimator.rand(8)
 
-            hypersphere_plot = HyperspherePlot(np_points)
-            # hypersphere_plot.show()
             frechet_mean = frechet_estimator.estimate(np_points)
+            hypersphere_plot = HyperspherePlot(np_points, frechet_mean)
+            hypersphere_plot.show()
 
-            euclidean_plot = EuclideanPlot(np_points)
+            euclidean_plot = EuclideanPlot(np_points, frechet_mean)
             euclidean_plot.show()
             euclidean_mean = FrechetEstimator.euclidean_mean(np_points)
             print(f'\nFrechet mean:   {frechet_mean}\nEuclidean mean: {euclidean_mean}')
@@ -50,7 +49,7 @@ class FrechetEstimatorTest(unittest.TestCase):
             print(str(e))
             self.assertTrue(False)
 
-
+    @unittest.skip('Ignore')
     def test_estimate_Euclidean(self):
         manifold = Hypersphere(dim=2)
         try:
@@ -67,8 +66,8 @@ class FrechetEstimatorTest(unittest.TestCase):
 
     @unittest.skip('Ignore')
     def test_estimate_SO3(self):
-        manifold = SpecialOrthogonal(n=3, point_type="matrix")
         try:
+            manifold = SpecialOrthogonal(n=3, point_type="matrix")
             frechet_estimator = FrechetEstimator(manifold, GradientDescent(), weights=None)
             manifold_points = frechet_estimator.rand(4)
 

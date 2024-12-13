@@ -5,12 +5,12 @@ from geomstats.geometry.manifold import Manifold
 from geomstats.learning.frechet_mean import FrechetMean, BaseGradientDescent
 from torch import Tensor
 import numpy as np
-from typing import List, AnyStr
+from typing import List, Optional
 from geometry import GeometricException
 
 
 class FrechetEstimator(object):
-    def __init__(self, space: Manifold, optimizer: BaseGradientDescent, weights: Tensor = None) -> None:
+    def __init__(self, space: Manifold, optimizer: BaseGradientDescent, weights: Optional[Tensor] = None) -> None:
         """
         Constructor for the Frechet estimator. The instance relies on the Geomstats FrechetMean class
         @param space: Manifold for which the Frechet mean is computed
@@ -25,24 +25,11 @@ class FrechetEstimator(object):
         self.weights = weights
         self.space = space
 
-    def estimate(self, X: List[np.array]) -> np.array:
-        if len(X) < 1:
-            raise GeometricException('Frechet estimator: At least one tensor does not belong to the manifold')
+    def estimate(self, X: np.array) -> np.array:
+        self.frechet_mean.fit(X=X, y=None, weights=self.weights)
+        return self.frechet_mean.estimate_
 
-        def estimate_step(X: List[np.array]) -> np.array:
-            if len(X) > 1:
-                sub_mean = []
-                for idx in range(len(X)-1):
-                    stacked = np.stack(arrays=[X[idx], X[idx+1]], axis=0)
-                    self.frechet_mean.fit(X=stacked, y=None, weights=self.weights)
-                    z = self.frechet_mean.estimate_
-                    sub_mean.append(z)
-                return estimate_step(sub_mean)
-            else:
-                return X[0]
-        return Tensor(estimate_step(X=X))
-
-    def rand(self, num_samples: int) -> List[np.array]:
+    def rand(self, num_samples: int) -> np.array:
         """
         Generate num_samples random value on a given manifold specified in the constructor (space)
         @param num_samples: Number of samples
@@ -52,7 +39,6 @@ class FrechetEstimator(object):
         """
         if num_samples < 2:
             raise GeometricException(f'Need at least 2 data point to compute the Frechet mean')
-
         from geomstats.geometry.hypersphere import Hypersphere
         from geomstats.geometry.special_orthogonal import _SpecialOrthogonalMatrices
 
@@ -60,7 +46,12 @@ class FrechetEstimator(object):
         if not (isinstance(self.space, Hypersphere) or isinstance(self.space, _SpecialOrthogonalMatrices)):
             raise GeometricException('Cannot generate random values on unsupported manifold')
         X = self.space.random_uniform(num_samples)
-        return [x for x in X if self.__belongs(x)]
+
+        # Validate the randomly generated belongs to the manifold 'self.space'
+        are_points_valid = all([self.space.belongs(x) for x in X])
+        if not are_points_valid:
+            raise GeometricException('Some generated points do not belong to the manifold')
+        return X
 
     @staticmethod
     def euclidean_mean(manifold_points: List[Tensor]) -> np.array:

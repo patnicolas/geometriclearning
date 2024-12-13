@@ -11,7 +11,7 @@ import numpy as np
 
 
 class ManifoldPlot(ABC):
-    def __init__(self,  manifold_points: List[np.array]) -> None:
+    def __init__(self,  manifold_points: np.array) -> None:
         """
         Constructor for plotting points on manifold
         @param manifold_points: List of points on the hypersphere implemented as torch Tensors
@@ -22,7 +22,7 @@ class ManifoldPlot(ABC):
         self.manifold_points = manifold_points
 
     @abstractmethod
-    def show(self) -> None:
+    def show(self, extra: Optional[np.array] = None) -> None:
         pass
 
     @staticmethod
