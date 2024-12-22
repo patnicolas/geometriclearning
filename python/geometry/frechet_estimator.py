@@ -54,7 +54,7 @@ class FrechetEstimator(object):
         return X
 
     @staticmethod
-    def euclidean_mean(manifold_points: List[Tensor]) -> np.array:
+    def euclidean_mean(manifold_points: np.array) -> np.array:
         """
         Compute the Euclidean mean for a set of data point on a manifold
         @param manifold_points List of manifold data points

@@ -182,7 +182,6 @@ class Plotter(object):
             title='')
         axes[index].grid()
 
-
     @staticmethod
     def __validate_params(
             dict_values: Dict[AnyStr, List[torch.Tensor]],
