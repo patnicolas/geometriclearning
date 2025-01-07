@@ -1,17 +1,16 @@
 import unittest
 
 import os
-from dl.block.graph.custom_gnn_block import CustomGNNBlock
-from dl.model.custom_gnn_model import CustomGNNModel
+from dl.block.graph.gnn_base_block import GNNBaseBlock
+from dl.model.gnn_base_model import GNNBaseModel
 from dl.training.exec_config import ExecConfig
 from dl.training.hyper_params import HyperParams
 from torch_geometric.nn import GraphConv
 import torch.nn as nn
 
 
-class GCNModelTest(unittest.TestCase):
+class GNNBaseModelTest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
     def test_init_1(self):
         import numpy as np
         import torch
@@ -36,13 +35,13 @@ class GCNModelTest(unittest.TestCase):
         print("Sparse Tensor:")
         print(sparse_tensor)
 
-    @unittest.skip('Ignore')
+
     def test_init_2(self):
         batch_size = 4
         walk_length = 6
         num_node_features = 24
         num_classes = 8
-        gcn_model = GCNModelTest.build(batch_size, walk_length, num_node_features, num_classes)
+        gcn_model = GNNBaseModelTest.build(batch_size, walk_length, num_node_features, num_classes)
         print(repr(gcn_model))
 
 
@@ -80,34 +79,34 @@ class GCNModelTest(unittest.TestCase):
         _data = Flickr(path)
         _data.num_nodes = _data.num_node_features
         _data.num_edges = _data.num_edge_features
-        gcn_model = GCNModelTest.build(batch_size=4,
-                                       walk_length=6,
-                                       num_node_features = _data.num_nodes,
-                                       num_classes = _data.num_classes)
+        gcn_model = GNNBaseModelTest.build(batch_size=4,
+                                           walk_length=6,
+                                           num_node_features = _data.num_nodes,
+                                           num_classes = _data.num_classes)
 
         gcn_model.do_train(data=_data,
                            hyper_parameters=hyper_parameters,
-                           metric_labels=['Precision', 'Recall'],
-                           exec_config = exec_config,
-                           plot_title ='Karate club metrics')
+                           metric_labels=['Precision', 'Recall'])
 
     @staticmethod
-    def build(batch_size: int, walk_length: int, num_node_features: int, num_classes: int) -> CustomGNNModel:
+    def build(batch_size: int, walk_length: int, num_node_features: int, num_classes: int) -> GNNBaseModel:
+        from torch_geometric.nn import BatchNorm
+
         hidden_channels = 256
         conv_1 = GraphConv(in_channels=num_node_features, out_channels=hidden_channels)
-        gcn_conv_1 = CustomGNNBlock(_id='K1',
-                                    message_passing=conv_1,
-                                    activation=nn.ReLU(),
-                                    batch_norm=nn.BatchNorm1d(hidden_channels),
-                                    drop_out=0.2)
+        gcn_conv_1 = GNNBaseBlock(_id='K1',
+                                  message_passing=conv_1,
+                                  activation=nn.ReLU(),
+                                  batch_norm=BatchNorm(hidden_channels),
+                                  drop_out=0.2)
         conv_2 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-        gcn_conv_2 = CustomGNNBlock(_id='K2', message_passing=conv_2, activation=nn.ReLU())
+        gcn_conv_2 = GNNBaseBlock(_id='K2', message_passing=conv_2, activation=nn.ReLU())
         conv_3 = GraphConv(in_channels=hidden_channels, out_channels=num_classes)
-        gcn_conv_3 = CustomGNNBlock(_id='K3', message_passing=conv_3)
+        gcn_conv_3 = GNNBaseBlock(_id='K3', message_passing=conv_3)
 
-        return CustomGNNModel.build(model_id='Karate club test',
-                                    batch_size=batch_size,
-                                    walk_length=walk_length,
-                                    gcn_blocks=[gcn_conv_1, gcn_conv_2, gcn_conv_3])
+        return GNNBaseModel.build(model_id='Karate club test',
+                                  batch_size=batch_size,
+                                  walk_length=walk_length,
+                                  gcn_blocks=[gcn_conv_1, gcn_conv_2, gcn_conv_3])
 
 

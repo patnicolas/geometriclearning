@@ -5,6 +5,7 @@ from dl.block.neural_block import NeuralBlock
 from typing import AnyStr, List
 import torch.nn as nn
 from torch_geometric.nn.conv import MessagePassing
+from torch_geometric.nn import BatchNorm
 
 """
 Implementation of a very simple Graph Convolutional Neural block which consists of 
@@ -15,12 +16,12 @@ Implementation of a very simple Graph Convolutional Neural block which consists 
 """
 
 
-class CustomGNNBlock(NeuralBlock):
+class GNNBaseBlock(NeuralBlock):
     def __init__(self,
                  _id: AnyStr,
                  message_passing: MessagePassing,
                  activation: nn.Module = None,
-                 batch_norm: nn.BatchNorm1d = None,
+                 batch_norm: BatchNorm = None,
                  drop_out: float = 0.0) -> None:
         """
         Constructor for this simple Graph Neural block
@@ -46,7 +47,7 @@ class CustomGNNBlock(NeuralBlock):
         if activation is not None:
             modules.append(activation)
 
-        super(CustomGNNBlock, self).__init__(_id, tuple(modules))
+        super(GNNBaseBlock, self).__init__(_id, tuple(modules))
 
     def __repr__(self) -> AnyStr:
         modules_str = '\n'.join([str(module) for module in self.modules])
