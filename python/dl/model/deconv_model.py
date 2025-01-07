@@ -5,12 +5,11 @@ from abc import ABC
 
 from dl.model.neural_model import NeuralModel
 from dl.model.ffnn_model import FFNNModel
-from dl.block.deconv_2d_block import DeConv2DBlock
+from dl.block.cnn.deconv_2d_block import DeConv2DBlock
 from dl.block.ffnn_block import FFNNBlock
 from typing import AnyStr, List, Optional, Self, Dict, Any
 
 from dl.training.neural_training import NeuralTraining
-from util import log_size
 import torch.nn as nn
 import torch
 import logging

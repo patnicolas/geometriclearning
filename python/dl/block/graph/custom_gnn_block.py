@@ -7,7 +7,7 @@ import torch.nn as nn
 from torch_geometric.nn.conv import MessagePassing
 
 """
-Implementation of a very simple Graph Neural block which consists of 
+Implementation of a very simple Graph Convolutional Neural block which consists of 
 - Message passing operator
 - Optional activation function
 - Optional batch norm 1-dimension
@@ -15,7 +15,7 @@ Implementation of a very simple Graph Neural block which consists of
 """
 
 
-class GCNBlock(NeuralBlock):
+class CustomGNNBlock(NeuralBlock):
     def __init__(self,
                  _id: AnyStr,
                  message_passing: MessagePassing,
@@ -46,7 +46,7 @@ class GCNBlock(NeuralBlock):
         if activation is not None:
             modules.append(activation)
 
-        super(GCNBlock, self).__init__(_id, tuple(modules))
+        super(CustomGNNBlock, self).__init__(_id, tuple(modules))
 
     def __repr__(self) -> AnyStr:
         modules_str = '\n'.join([str(module) for module in self.modules])

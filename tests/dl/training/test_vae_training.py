@@ -3,7 +3,7 @@ from dl.block.ffnn_block import FFNNBlock
 from dl.model.ffnn_model import FFNNModel
 from dl.model.vae_model import VAEModel
 from dl.model.conv_model import ConvModel
-from dl.block.conv_block import ConvBlock
+from dl.block.cnn.conv_block import ConvBlock
 from dataset.unlabeled_loader import UnlabeledLoader
 from dl.training.exec_config import ExecConfig
 from dl.training.vae_training import VAETraining
@@ -43,7 +43,7 @@ class VAETest(unittest.TestCase):
         vae_model = VAEModel('Autoencoder', encoder, latent_size)
         print(vae_model)
 
-        filename = '/users/patricknicolas/dev/geometriclearning/data/heart_diseases.csv'
+        filename = '/users/patricknicolas/dev/geometric_learning/data/heart_diseases.csv'
         df = UnlabeledDataset.data_frame(filename)
         features_df = df[features]
         batch_size = 4

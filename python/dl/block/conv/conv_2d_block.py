@@ -1,8 +1,8 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-from dl.block.conv_block import ConvBlock, ConvBlockConfig
-from dl.block.deconv_2d_block import DeConv2DBlock
+from dl.block.conv.conv_block import ConvBlock, ConvBlockConfig
+from dl.block.conv.deconv_2d_block import DeConv2DBlock
 from typing import AnyStr, Tuple, Optional, Self
 import torch.nn as nn
 from dl import Conv2DataType

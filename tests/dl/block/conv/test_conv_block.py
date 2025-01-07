@@ -1,6 +1,6 @@
 import unittest
 from torch import nn
-from dl.block.conv_block import ConvBlock
+from dl.block.conv.conv_block import ConvBlock
 from dl import ConvException
 
 
@@ -27,7 +27,8 @@ class ConvBlockTest(unittest.TestCase):
 
     @staticmethod
     def __create_conv_block(dimension: int, out_channels: int) -> ConvBlock:
-        from dl.block.conv_block import ConvBlockConfig
+        from dl.block.conv.conv_block_config import ConvBlockConfig
+
         if dimension == 2:
             conv_block_config = ConvBlockConfig(in_channels=68,
                                                 out_channels=out_channels,

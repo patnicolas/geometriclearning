@@ -1,13 +1,9 @@
 import unittest
 from torch import nn
 
-from dl.block.conv_block_config import ConvBlockConfig
-from dl.block.deconv_2d_block import DeConv2DBlock
-from dl.block.conv_2d_block import Conv2DBlock
-from dl.block.conv_block import ConvBlock
-from dl.block.builder.conv2d_block_builder import Conv2DBlockBuilder
+from dl.block.conv.conv_block_config import ConvBlockConfig
+from dl.block.conv.deconv_2d_block import DeConv2DBlock
 from dl import ConvException
-from typing import Tuple
 
 
 class DeConv2DBlockTest(unittest.TestCase):

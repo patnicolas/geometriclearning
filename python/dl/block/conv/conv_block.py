@@ -6,8 +6,8 @@ from typing import Tuple, Any, AnyStr, Optional
 
 from dl import ConvException
 from dl.block.neural_block import NeuralBlock
-from dl.block.conv_block_config import ConvBlockConfig
-from dl.block.conv_output_size import ConvOutputSize
+from dl.block.conv.conv_block_config import ConvBlockConfig
+from dl.block.conv.conv_output_size import ConvOutputSize
 import logging
 logger = logging.getLogger('dl.block.ConvBlock')
 

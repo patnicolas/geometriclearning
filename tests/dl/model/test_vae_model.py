@@ -1,7 +1,7 @@
 import unittest
 import torch.nn as nn
 
-from dl.block.conv_2d_block import Conv2DBlock
+from dl.block.cnn.conv_2d_block import Conv2DBlock
 from dl.block.ffnn_block import FFNNBlock
 from dl.model.ffnn_model import FFNNModel
 from dl.model.conv_model import ConvModel

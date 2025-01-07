@@ -1,5 +1,5 @@
 import unittest
-from dl.block.conv_block_config import ConvBlockConfig
+from dl.block.conv.conv_block_config import ConvBlockConfig
 import torch.nn as nn
 
 

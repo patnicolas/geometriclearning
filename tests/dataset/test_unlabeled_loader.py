@@ -20,7 +20,7 @@ class UnlabeledLoaderTest(unittest.TestCase):
         print(output)
 
     def test_load_file(self):
-        filename = '/users/patricknicolas/dev/geometriclearning/data/wages_cleaned.csv'
+        filename = '/users/patricknicolas/dev/geometric_learning/data/wages_cleaned.csv'
         dataset = UnlabeledDataset.from_file(filename, ['Reputation', 'Salary'])
         batch_size = 4
         train_eval_split_ratio = 0.85

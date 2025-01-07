@@ -129,7 +129,7 @@ class DLTrainingTest(unittest.TestCase):
             metric_labels,
             None,
             parameters)
-        filename = '/users/patricknicolas/dev/geometriclearning/data/heart_diseases.csv'
+        filename = '/users/patricknicolas/dev/geometric_learning/data/heart_diseases.csv'
         df = LabeledDataset.data_frame(filename)
         print(f'Heart Diseases data frame---\nColumns: {df.columns}\n{str(df)}')
 

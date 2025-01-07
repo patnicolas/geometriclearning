@@ -4,7 +4,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from abc import ABC
 
 from dl.block.ffnn_block import FFNNBlock
-from dl.block.conv_block import ConvBlock
+from dl.block.cnn.conv_block import ConvBlock
 from dl.model.neural_model import NeuralModel
 from dl.model.ffnn_model import FFNNModel
 from dl.model.deconv_model import DeConvModel
@@ -173,7 +173,7 @@ class ConvModel(NeuralModel, ABC):
 
     """ ----------------------------   Private helper methods --------------------------- """
     def __linear_layer_input_size(self, last_conv_block: ConvBlock) -> int:
-        from dl.block.conv_output_size import SeqConvOutputSize
+        from dl.block.cnn.conv_output_size import SeqConvOutputSize
 
         conv_block_sizes = [conv_block.get_conv_output_size() for conv_block in self.conv_blocks]
         conv_model_output_sizes = SeqConvOutputSize(conv_block_sizes)

@@ -5,7 +5,7 @@ import torch.nn as nn
 from typing import Self, Optional, AnyStr
 
 from dl.block.neural_block import NeuralBlock
-from dl.block.conv_block_config import ConvBlockConfig
+from dl.block.conv.conv_block_config import ConvBlockConfig
 from dl import ConvException, Conv2DataType
 
 

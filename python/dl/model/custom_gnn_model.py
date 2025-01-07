@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from dl.model.neural_model import NeuralModel
 from dl.block.ffnn_block import FFNNBlock
-from dl.block.gcn_block import GCNBlock
+from dl.block.graph.custom_gnn_block import CustomGNNBlock
 from dl.training.exec_config import ExecConfig
 from dl.training.neural_training import NeuralTraining
 from dl.training.hyper_params import HyperParams
@@ -16,16 +16,16 @@ import torch.nn as nn
 import logging
 logger = logging.getLogger('dl.model.GCNModel')
 
-__all__ = ['GCNModel']
+__all__ = ['CustomGNNModel']
 
 
-class GCNModel(NeuralModel):
+class CustomGNNModel(NeuralModel):
 
     def __init__(self,
                  model_id: AnyStr,
                  batch_size: int,
                  walk_length: int,
-                 gcn_blocks: List[GCNBlock],
+                 gcn_blocks: List[CustomGNNBlock],
                  ffnn_blocks: Optional[List[FFNNBlock]] = None) -> None:
         """
         Constructor for this simple Graph convolutional neural network
@@ -49,10 +49,10 @@ class GCNModel(NeuralModel):
             self.ffnn_blocks = ffnn_blocks
             modules.append(nn.Flatten())
             [modules.append(module) for block in ffnn_blocks for module in block.modules]
-        super(GCNModel, self).__init__(model_id, nn.Sequential(*modules))
+        super(CustomGNNModel, self).__init__(model_id, nn.Sequential(*modules))
 
     @classmethod
-    def build(cls, model_id: AnyStr, batch_size: int, walk_length: int, gcn_blocks: List[GCNBlock]) -> Self:
+    def build(cls, model_id: AnyStr, batch_size: int, walk_length: int, gcn_blocks: List[CustomGNNBlock]) -> Self:
         """
         Create a pure convolutional neural network as a graph convolutional encoder for
         variational auto-encoder or generative adversarial network
@@ -65,7 +65,7 @@ class GCNModel(NeuralModel):
         @param gcn_blocks: List of convolutional blocks
         @type gcn_blocks: List[ConvBlock]
         @return: Instance of decoder of type GCNModel
-        @rtype: GCNModel
+        @rtype: CustomGNNModel
         """
         return cls(model_id, batch_size=batch_size, walk_length=walk_length, gcn_blocks=gcn_blocks, ffnn_blocks=None)
 

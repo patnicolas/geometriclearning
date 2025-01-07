@@ -1,8 +1,8 @@
 import unittest
 
 import os
-from dl.block.gcn_block import GCNBlock
-from dl.model.gcn_model import GCNModel
+from dl.block.graph.custom_gnn_block import CustomGNNBlock
+from dl.model.custom_gnn_model import CustomGNNModel
 from dl.training.exec_config import ExecConfig
 from dl.training.hyper_params import HyperParams
 from torch_geometric.nn import GraphConv
@@ -92,22 +92,22 @@ class GCNModelTest(unittest.TestCase):
                            plot_title ='Karate club metrics')
 
     @staticmethod
-    def build(batch_size: int, walk_length: int, num_node_features: int, num_classes: int) -> GCNModel:
+    def build(batch_size: int, walk_length: int, num_node_features: int, num_classes: int) -> CustomGNNModel:
         hidden_channels = 256
         conv_1 = GraphConv(in_channels=num_node_features, out_channels=hidden_channels)
-        gcn_conv_1 = GCNBlock(_id='K1',
-                              message_passing=conv_1,
-                              activation=nn.ReLU(),
-                              batch_norm=nn.BatchNorm1d(hidden_channels),
-                              drop_out=0.2)
+        gcn_conv_1 = CustomGNNBlock(_id='K1',
+                                    message_passing=conv_1,
+                                    activation=nn.ReLU(),
+                                    batch_norm=nn.BatchNorm1d(hidden_channels),
+                                    drop_out=0.2)
         conv_2 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-        gcn_conv_2 = GCNBlock(_id='K2', message_passing=conv_2, activation=nn.ReLU())
+        gcn_conv_2 = CustomGNNBlock(_id='K2', message_passing=conv_2, activation=nn.ReLU())
         conv_3 = GraphConv(in_channels=hidden_channels, out_channels=num_classes)
-        gcn_conv_3 = GCNBlock(_id='K3', message_passing=conv_3)
+        gcn_conv_3 = CustomGNNBlock(_id='K3', message_passing=conv_3)
 
-        return GCNModel.build(model_id='Karate club test',
-                              batch_size=batch_size,
-                              walk_length=walk_length,
-                              gcn_blocks=[gcn_conv_1, gcn_conv_2, gcn_conv_3])
+        return CustomGNNModel.build(model_id='Karate club test',
+                                    batch_size=batch_size,
+                                    walk_length=walk_length,
+                                    gcn_blocks=[gcn_conv_1, gcn_conv_2, gcn_conv_3])
 
 

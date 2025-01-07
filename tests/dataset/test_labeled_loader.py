@@ -33,7 +33,7 @@ class LabeledLoaderTest(unittest.TestCase):
     @unittest.skip('Ignore')
     def test_load_csv_file(self):
         try:
-            filename = '/users/patricknicolas/dev/geometriclearning/data/wages_cleaned.csv'
+            filename = '/users/patricknicolas/dev/geometric_learning/data/wages_cleaned.csv'
             df = UnlabeledDataset.data_frame(filename)
             df = df[['Reputation', 'Age', 'Caps', 'Apps', 'Salary']]
             average_salary = df['Salary'].mean()
