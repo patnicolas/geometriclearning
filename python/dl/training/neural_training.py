@@ -138,15 +138,17 @@ class NeuralTraining(object):
         model = neural_model.to(torch_device)
         model.train()
         idx = 0
-        for data in train_loader:
+
+        for features, labels in train_loader:
             try:
                 # Add noise if the mode is defined
                 # features = model.add_noise(features)
                 # Transfer the input data and labels to the target device
-                features = data.to(torch_device)
+                features = features.to(torch_device)
+                labels = labels.to(torch_device)
 
-                predicted = model(data.x, data.edge_index)  # Call forward - prediction
-                raw_loss = loss_function(predicted, data.y)
+                predicted = model(features)  # Call forward - prediction
+                raw_loss = loss_function(predicted, labels)
 
                 # Set back propagation
                 raw_loss.backward(retain_graph=True)
@@ -161,10 +163,10 @@ class NeuralTraining(object):
             except AttributeError as e:
                 raise TrainingException(str(e))
             except ValueError as e:
-                raise TrainingException(f'{str(e)}, features: {str(data)}')
+                raise TrainingException(f'{str(e)}, features: {str(features)}')
             except Exception as e:
-                raise TrainingException(str(e))
-        return total_loss / len(train_loader)
+                 raise TrainingException(str(e))
+            return total_loss / len(train_loader)
 
     def __eval(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
         total_loss = 0
@@ -177,19 +179,20 @@ class NeuralTraining(object):
         # No need for computing gradient for evaluation (NO back-propagation)
         with torch.no_grad():
             count = 0
-            for data in eval_loader:
+            for features, labels in eval_loader:
                 try:
                     # Add noise if the mode is defined
                     # features = model.add_noise(features)
 
                     # Transfer the input data to GPU
-                    data = data.to(torch_device)
+                    features = features.to(torch_device)
+                    labels = labels.to(torch_device)
                     # Execute inference/Prediction
-                    predicted = model(data.x, data.edge_index)
+                    predicted = model(features)
 
                     # Transfer prediction and labels to CPU for metrics
                     np_predicted = predicted.cpu().numpy()
-                    np_labels = data.y.cpu().numpy()
+                    np_labels = labels.cpu().numpy()
 
                     # Update the metrics
                     for key, metric in self.metrics.items():
@@ -197,7 +200,7 @@ class NeuralTraining(object):
                         metric_collector[key] = value
 
                     # Compute and accumulate the loss
-                    loss = loss_func(predicted, data.y)
+                    loss = loss_func(predicted, labels)
                     total_loss += loss.data
                     count += 1
                 except RuntimeError as e:

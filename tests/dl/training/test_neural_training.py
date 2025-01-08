@@ -7,24 +7,28 @@ from dl.training.early_stop_logger import EarlyStopLogger
 from plots.plotter import PlotterParameters
 from dl.training.neural_training import NeuralTraining
 from metric.metric import Metric
-from dataset.labeled_dataset import LabeledDataset
-from dataset.unlabeled_dataset import UnlabeledDataset
 from dataset.labeled_loader import LabeledLoader
-from dataset.tdataset import min_max_scaler
 from torch import nn
 import numpy as np
 
 
-class DLTrainingTest(unittest.TestCase):
+class NeuralTrainingTest(unittest.TestCase):
 
     @unittest.skip('Ignored')
     def test_init(self):
-        input_block = FFNNBlock.build('../../../python/input', 32, 16, nn.ReLU())
-        hidden_block = FFNNBlock.build('hidden', 16, 4, nn.ReLU())
-        output_block = FFNNBlock.build('output', 4, 1)
-        binary_classifier = FFNNModel('test1', [input_block, hidden_block, output_block])
+        input_block = FFNNBlock.build(
+            block_id='../../../python/input',
+            layer=nn.Linear(in_features=32, out_features=16),
+            activation=nn.ReLU())
+        hidden_block = FFNNBlock.build(block_id='hidden',
+                                       layer=nn.Linear(in_features=16, out_features=4),
+                                       activation=nn.ReLU())
+        output_block = FFNNBlock.build(block_id='output',
+                                       layer=nn.Linear(in_features=4, out_features=1),
+                                       activation=None)
+        binary_classifier = FFNNModel(model_id='test1', neural_blocks=[input_block, hidden_block, output_block])
         print(repr(binary_classifier))
-        hyper_parameters = HyperParams(
+        hyper_params = HyperParams(
             lr=0.001,
             momentum=0.95,
             epochs=12,
@@ -33,15 +37,9 @@ class DLTrainingTest(unittest.TestCase):
             loss_function=nn.CrossEntropyLoss(),
             drop_out=0.2,
             train_eval_ratio=0.9)
-        patience = 2
-        min_diff_loss = -0.001
-        early_stopping_enabled = True
-        early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
-        labels = [Metric.train_loss_label, Metric.eval_loss_label, Metric.accuracy_label]
-        parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(12, 8)) for label in labels]
-        network = NeuralTraining(binary_classifier, hyper_parameters, early_stop_logger, parameters)
-        filename = '../../data/wages_cleaned.csv'
-        tensor_dataset = UnlabeledDataset.from_file(filename, ['Reputation', 'Age', 'Caps', 'Apps', 'Salary'])
+        metric_labels = [Metric.train_loss_label, Metric.eval_loss_label, Metric.accuracy_label]
+        network_training = NeuralTraining.build(hyper_params, metric_labels)
+
 
     def test_train_wages(self):
         from python.metric.metric import Metric

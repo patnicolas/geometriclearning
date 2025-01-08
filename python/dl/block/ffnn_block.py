@@ -39,7 +39,7 @@ class FFNNBlock(NeuralBlock):
     def build(cls,
               block_id: AnyStr,
               layer: nn.Linear,
-              activation: nn.Module,
+              activation: nn.Module = None,
               drop_out: float = 0.0):
         """
         Alternative constructor

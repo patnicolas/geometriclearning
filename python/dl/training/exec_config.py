@@ -85,6 +85,10 @@ class ExecConfig(object):
         if self.empty_cache:
             torch.mps.empty_cache()
 
+    def apply_batch_optimization(self, idx: int, optimizer: Optimizer) -> None:
+        self.apply_empty_cache()
+        self.apply_grad_accu_steps(idx, optimizer)
+
     def apply_optimize_loaders(self,
                                batch_size: int,
                                train_dataset: Dataset,
