@@ -127,7 +127,6 @@ def main(args: list):
     input_file = args[2]
     post = HttpPost(target, new_headers, is_predefined_target)
     successes, total = post.post_batch(input_file)
-    constants.log_info(f'Successes: {successes} All counts {total}')
 
 
 import sys

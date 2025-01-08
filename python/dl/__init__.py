@@ -23,9 +23,9 @@ class VAEException(DLException):
         super(VAEException, self).__init__(args, kwargs)
 
 
-class GraphException(DLException):
+class GNNException(DLException):
     def __init__(self, *args, **kwargs):
-        super(GraphException, self).__init__(args, kwargs)
+        super(GNNException, self).__init__(args, kwargs)
 
 
 class TrainingException(DLException):

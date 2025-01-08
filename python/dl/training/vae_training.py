@@ -151,11 +151,11 @@ class VAETraining(NeuralTraining, ABC):
                 # data = self.model.add_noise(data)
 
                 # Forward pass
-                input = data[0].to(self.target_device)
-                reconstructed = model(input)
+                input_data = data[0].to(self.target_device)
+                reconstructed = model(input_data)
 
-                _input = input.view(input.size(0), input.size(1), -1)
-                _reconstructed = reconstructed.view(input.size(0), input.size(1), -1)
+                _input = input_data.view(input_data.size(0), input_data.size(1), -1)
+                _reconstructed = reconstructed.view(input_data.size(0), input_data.size(1), -1)
                 loss = vae_kl_loss(_reconstructed, model.z, _input)
 
                 if loss is torch.nan:

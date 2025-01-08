@@ -271,7 +271,7 @@ class ConvModelTest(unittest.TestCase):
             loss_function=nn.CrossEntropyLoss(),
             drop_out=0.0,
             train_eval_ratio=0.9)
-        metric_labels = [ Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
+        metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
         return NeuralTraining.build(hyper_parameters, metric_labels)
 
 

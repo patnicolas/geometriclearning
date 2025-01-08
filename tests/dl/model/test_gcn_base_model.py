@@ -35,7 +35,6 @@ class GNNBaseModelTest(unittest.TestCase):
         print("Sparse Tensor:")
         print(sparse_tensor)
 
-
     def test_init_2(self):
         batch_size = 4
         walk_length = 6
@@ -47,6 +46,7 @@ class GNNBaseModelTest(unittest.TestCase):
 
     def test_train(self):
         from torch_geometric.datasets.flickr import Flickr
+        from torch.utils.data import Dataset
 
         lr = 0.001
         hyper_parameters = HyperParams(
@@ -58,33 +58,18 @@ class GNNBaseModelTest(unittest.TestCase):
             loss_function=nn.CrossEntropyLoss(),
             drop_out=0.2,
             train_eval_ratio=0.9,
-            encoding_len=101,  # No one-hot encoding
-            weight_initialization=False)
-
-        empty_cache: bool = False
-        mix_precision: bool = False
-        pin_memory: bool = False
-        subset_size: int = 200
-
-        exec_config = ExecConfig(
-            empty_cache=empty_cache,
-            mix_precision=mix_precision,
-            pin_mem=pin_memory,
-            subset_size=subset_size,
-            monitor_memory=True,
-            grad_accu_steps=1,
-            device_config=None)
+            encoding_len=101)
 
         path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
-        _data = Flickr(path)
-        _data.num_nodes = _data.num_node_features
-        _data.num_edges = _data.num_edge_features
+        _dataset: Dataset = Flickr(path)
+        num_nodes = _dataset[0].num_node_features
+        num_edges = _dataset[0].num_edge_features
         gcn_model = GNNBaseModelTest.build(batch_size=4,
                                            walk_length=6,
-                                           num_node_features = _data.num_nodes,
-                                           num_classes = _data.num_classes)
+                                           num_node_features=num_nodes,
+                                           num_classes=_dataset[0].num_classes)
 
-        gcn_model.do_train(data=_data,
+        gcn_model.do_train(data_source =_dataset,
                            hyper_parameters=hyper_parameters,
                            metric_labels=['Precision', 'Recall'])
 

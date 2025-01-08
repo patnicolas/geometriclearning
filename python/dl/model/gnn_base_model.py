@@ -6,14 +6,14 @@ from dl.block.ffnn_block import FFNNBlock
 from dl.block.graph.gnn_base_block import GNNBaseBlock
 from dl.training.neural_training import NeuralTraining
 from dl.training.hyper_params import HyperParams
-from dl import DLException, ConvException
+from dl import DLException, GNNException
 from typing import List, AnyStr, Optional, Self
 from torch_geometric.loader import GraphSAINTRandomWalkSampler
 from torch_geometric.data import Data
 from torch.utils.data import DataLoader, Dataset
 import torch.nn as nn
 import logging
-logger = logging.getLogger('dl.model.GCNModel')
+logger = logging.getLogger('dl.model.GNNBaseModel')
 
 __all__ = ['GNNBaseModel']
 
@@ -39,6 +39,8 @@ class GNNBaseModel(NeuralModel):
         @param ffnn_blocks: List of Feed-Forward Neural Blocks
         @type ffnn_blocks: List[FFNNBlock]
         """
+
+        assert 0 < batch_size < 8192, f'Batch size {batch_size} if out of range [1, 8192['
         self.batch_size = batch_size
         self.walk_length = walk_length
 
@@ -87,8 +89,8 @@ class GNNBaseModel(NeuralModel):
                  metric_labels: List[AnyStr]) -> None:
         """
         Execute the training, evaluation and metrics for any model for MNIST data set
-        @param data: Specifically formatted input training data
-        @type data: Data or Dataset
+        @param data_source: Specifically formatted input training data
+        @type data_source: Data or Dataset
         @param hyper_parameters: Hyper-parameters for the execution of the
         @type hyper_parameters: HyperParams
         @param metric_labels: List of metrics to be used
@@ -96,17 +98,23 @@ class GNNBaseModel(NeuralModel):
         """
         try:
             network = NeuralTraining.build(hyper_parameters, metric_labels)
-            train_dataset, test_dataset = self.load_dataset(data)
+            train_dataset, test_dataset = self.load_data_source(data_source)
             network.train(self.model_id, self.model, train_dataset, test_dataset)
-        except ConvException as e:
+        except GNNException as e:
             logger.error(str(e))
             raise DLException(e)
         except AssertionError as e:
             logger.error(str(e))
             raise DLException(e)
 
-
     def load_data_source(self, data_source: Data | Dataset) -> (DataLoader, DataLoader):
+        """
+        Implement a generic loader for
+        @param data_source: Source of data of type Data or Dataset
+        @type data_source: Union[Data, Dataset]
+        @return: Pair (loader training data, loader test data)
+        @rtype: Tuple[DataLoader, DataLoader]
+        """
         return self.__load_data(data_source) if isinstance(data_source, Data) \
             else self.__load_dataset(data_source)
 
@@ -128,6 +136,7 @@ class GNNBaseModel(NeuralModel):
         raise NotImplementedError('GCNModel.save is an abstract method')
 
     """ ----------------------  Private helper methods ------------------  """
+
     def __load_data(self, data: Data) -> (DataLoader, DataLoader):
         train_loader = GraphSAINTRandomWalkSampler(data=data,
                                                    batch_size=self.batch_size,

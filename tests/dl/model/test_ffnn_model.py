@@ -87,8 +87,7 @@ class FFNNModelTest(unittest.TestCase):
             batch_size=16,
             loss_function=nn.CrossEntropyLoss(),
             drop_out=0.20,
-            train_eval_ratio=0.9,
-            weight_initialization=False)
+            train_eval_ratio=0.9)
 
         num_classes = 10
         ffnn_input_block = FFNNBlock.build(block_id='input',

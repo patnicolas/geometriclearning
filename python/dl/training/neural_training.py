@@ -129,26 +129,24 @@ class NeuralTraining(object):
 
     def __train(self, neural_model: nn.Module, epoch: int, train_loader: DataLoader) -> float:
         total_loss = 0.0
+
         # Initialize the gradient for the optimizer
         loss_function = self.hyper_params.loss_function
         optimizer = self.hyper_params.optimizer(neural_model)
 
         _, torch_device = self.exec_config.apply_device()
         model = neural_model.to(torch_device)
+        model.train()
         idx = 0
-        for features, labels in train_loader:
+        for data in train_loader:
             try:
-                model.train()
-
                 # Add noise if the mode is defined
                 # features = model.add_noise(features)
-
                 # Transfer the input data and labels to the target device
-                features = features.to(torch_device)
-                labels = labels.to(torch_device)
+                features = data.to(torch_device)
 
-                predicted = model(features)  # Call forward - prediction
-                raw_loss = loss_function(predicted, labels)
+                predicted = model(data.x, data.edge_index)  # Call forward - prediction
+                raw_loss = loss_function(predicted, data.y)
 
                 # Set back propagation
                 raw_loss.backward(retain_graph=True)
@@ -163,13 +161,14 @@ class NeuralTraining(object):
             except AttributeError as e:
                 raise TrainingException(str(e))
             except ValueError as e:
-                raise TrainingException(f'{str(e)}, features: {str(features)}')
+                raise TrainingException(f'{str(e)}, features: {str(data)}')
             except Exception as e:
                 raise TrainingException(str(e))
         return total_loss / len(train_loader)
 
     def __eval(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
         total_loss = 0
+        model.eval()
         loss_func = self.hyper_params.loss_function
         metric_collector = {}
 
@@ -178,21 +177,19 @@ class NeuralTraining(object):
         # No need for computing gradient for evaluation (NO back-propagation)
         with torch.no_grad():
             count = 0
-            for features, labels in eval_loader:
+            for data in eval_loader:
                 try:
-                    model.eval()
                     # Add noise if the mode is defined
                     # features = model.add_noise(features)
 
                     # Transfer the input data to GPU
-                    features = features.to(torch_device)
-                    labels = labels.to(torch_device)
+                    data = data.to(torch_device)
                     # Execute inference/Prediction
-                    predicted = model(features)
+                    predicted = model(data.x, data.edge_index)
 
                     # Transfer prediction and labels to CPU for metrics
                     np_predicted = predicted.cpu().numpy()
-                    np_labels = labels.cpu().numpy()
+                    np_labels = data.y.cpu().numpy()
 
                     # Update the metrics
                     for key, metric in self.metrics.items():
@@ -200,7 +197,7 @@ class NeuralTraining(object):
                         metric_collector[key] = value
 
                     # Compute and accumulate the loss
-                    loss = loss_func(predicted, labels)
+                    loss = loss_func(predicted, data.y)
                     total_loss += loss.data
                     count += 1
                 except RuntimeError as e:
