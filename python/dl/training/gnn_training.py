@@ -11,10 +11,12 @@ from torch_geometric.data.data import Data
 from typing import Dict, AnyStr, Optional, List
 import torch.nn as nn
 import torch
+import torch_geometric
 from torch.utils.data import DataLoader
 
 
 class GNNTraining(NeuralTraining):
+
     def __init__(self,
                  hyper_params: HyperParams,
                  early_stop_logger: EarlyStopLogger,
@@ -46,7 +48,8 @@ class GNNTraining(NeuralTraining):
     def train(self,
               model_id: AnyStr,
               neural_model: nn.Module,
-              data: Data) -> None:
+              train_loader: DataLoader,
+              eval_loader: DataLoader) -> None:
         """
         Train and evaluation of a neural network given a data loader for a training set, a
         data loader for the evaluation/test1 set and a encoder_model. The weights of the various linear modules
@@ -56,11 +59,16 @@ class GNNTraining(NeuralTraining):
         @type model_id: str
         @param neural_model: Neural model as torch module
         @type neural_model: nn_Module
-        @param data:  Data loader for the valuation set
-        @type data: Data
+        @param train_loader:  Data loader for the training set
+        @type train_loader: torch_geometric.loader.DataLoader
+        @param eval_loader: Data loader for the evaluation set
+        @param eval_loader: torch_geometric.loader.DataLoader
         """
         if not isinstance(neural_model, GNNBaseModel):
             raise GNNException(f'Neural model {type(neural_model)} cannot not be trained as GNN')
+        if (not isinstance(train_loader,  torch_geometric.loader.DataLoader) or
+                not isinstance(eval_loader, torch_geometric.loader.DataLoader)) :
+            raise GNNException(f'Training data has incorrect type {type(train_loader)}')
 
         torch.manual_seed(42)
         output_file_name = f'{model_id}_metrics_{self.plot_parameters[0].title}'
@@ -69,12 +77,13 @@ class GNNTraining(NeuralTraining):
         # Train and evaluation process
         for epoch in range(self.hyper_params.epochs):
             # Set training mode and execute training
-            train_loss = self.__train(neural_model, epoch, data_loader)
+            train_loss = self.__train(neural_model, epoch, train_loader)
 
             # Set mode and execute evaluation
-            eval_metrics = self.__eval(neural_model, epoch, data_loader)
+            eval_metrics = self.__eval(neural_model, epoch, eval_loader)
             self.early_stop_logger(epoch, train_loss, eval_metrics)
             self.exec_config.apply_monitor_memory()
+
         # Generate summary
         self.early_stop_logger.summary(output_file_name)
         print(f"\nMPS usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
@@ -85,7 +94,6 @@ class GNNTraining(NeuralTraining):
         neural_model.train()
         total_loss = 0
         idx = 0
-
         optimizer = self.hyper_params.optimizer(neural_model)
         loss_function = self.hyper_params.loss_function
         _, torch_device = self.exec_config.apply_device()
@@ -117,7 +125,6 @@ class GNNTraining(NeuralTraining):
                 raise GNNException(str(e))
 
         return total_loss / num_records
-
 
     def __eval(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
         total_loss = 0

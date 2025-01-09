@@ -3,13 +3,13 @@ from dl.block.ffnn_block import FFNNBlock
 from dl.model.ffnn_model import FFNNModel
 from dl.model.vae_model import VAEModel
 from dl.model.conv_model import ConvModel
-from dl.block.cnn.conv_block import ConvBlock
+from dl.block.conv.conv_2d_block import Conv2DBlock
+from dl.block.conv.conv_block_config import ConvBlockConfig
 from dataset.unlabeled_loader import UnlabeledLoader
 from dl.training.exec_config import ExecConfig
 from dl.training.vae_training import VAETraining
 from dl.training.hyper_params import HyperParams
 from dl.training.early_stop_logger import EarlyStopLogger
-from plots.plotter import PlotterParameters
 from metric.metric import Metric, MetricType
 from metric.built_in_metric import BuiltInMetric
 from dl import ConvException, VAEException
@@ -23,11 +23,15 @@ class VAETest(unittest.TestCase):
     def test_init(self):
         features = ['age', 'sex', 'chest pain type', 'cholesterol', 'fasting blood sugar', 'max heart rate',
                     'exercise angina', 'ST slope']
-        hidden_block = FFNNBlock.build('hidden', len(features), 4, nn.ReLU())
-        output_block = FFNNBlock.build('latent', 4, 4, nn.ReLU())
-        encoder = FFNNModel('encoder', [hidden_block, output_block])
-        latent_size = 6
-        vae_model = VAEModel('Autoencoder', encoder, latent_size)
+        hidden_block = FFNNBlock.build(block_id='hidden',
+                                       layer=nn.Linear(in_features=len(features), out_features=4),
+                                       activation=nn.ReLU())
+        output_block = FFNNBlock.build(block_id='latent',
+                                       layer=nn.Linear(in_features=4, out_features=4),
+                                       activation=nn.ReLU())
+        vae_model = VAEModel(model_id='Autoencoder',
+                             encoder=FFNNModel(model_id='encoder', neural_blocks=[hidden_block, output_block]),
+                             latent_size=6)
         print(vae_model)
 
     def test_train_1(self):
@@ -36,11 +40,15 @@ class VAETest(unittest.TestCase):
 
         features = ['age', 'sex', 'chest pain type', 'cholesterol', 'fasting blood sugar', 'max heart rate',
                     'exercise angina', 'ST slope']
-        hidden_block = FFNNBlock.build('hidden', len(features), 4, nn.ReLU())
-        output_block = FFNNBlock.build('latent', 4, 4, nn.ReLU())
-        encoder = FFNNModel('encoder', [hidden_block, output_block])
-        latent_size = 4
-        vae_model = VAEModel('Autoencoder', encoder, latent_size)
+        hidden_block = FFNNBlock.build(block_id='hidden',
+                                       layer=nn.Linear(in_features=len(features), out_features=4),
+                                       activation=nn.ReLU())
+        output_block = FFNNBlock.build(block_id='latent',
+                                       layer=nn.Linear(in_features=4, out_features=4),
+                                       activation=nn.ReLU())
+        vae_model = VAEModel(model_id='Autoencoder',
+                             encoder=FFNNModel(model_id='encoder', neural_blocks=[hidden_block, output_block]),
+                             latent_size =4)
         print(vae_model)
 
         filename = '/users/patricknicolas/dev/geometric_learning/data/heart_diseases.csv'
@@ -65,16 +73,12 @@ class VAETest(unittest.TestCase):
         metric_labels = {
             Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, True)
         }
-        plot_parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
-                           for label, _ in metric_labels.items()]
         network = VAETraining(
-            vae_model,
             hyper_parameters,
             early_stop_logger,
             metric_labels,
-            ExecConfig.default('mps'),
-            plot_parameters)
-        network(train_loader, eval_loader)
+            ExecConfig.default('mps'))
+        network.train(vae_model.id, vae_model, train_loader, eval_loader)
 
     def test_train_2(self):
         vae_model =  VAETest.create_mnist_vae_model()
@@ -92,8 +96,7 @@ class VAETest(unittest.TestCase):
             metric_labels = {
                 Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, True)
             }
-            vae_training = VAETraining(vae_model=vae_model,
-                                       hyper_params=hyper_parameters,
+            vae_training = VAETraining(hyper_params=hyper_parameters,
                                        early_stop_logger=early_stop_logger,
                                        metrics=metric_labels,
                                        exec_config=ExecConfig.default('mps'),
@@ -102,7 +105,7 @@ class VAETest(unittest.TestCase):
                                                                exec_config=ExecConfig.default('mps'),
                                                                batch_size=8,
                                                                image_size=28)
-            vae_training(train_dataset, eval_dataset)
+            vae_training.train(vae_model.id, vae_model, train_dataset, eval_dataset)
 
     @staticmethod
     def load_dataset(root_path: AnyStr,
@@ -129,7 +132,7 @@ class VAETest(unittest.TestCase):
         """
         from torchvision.datasets import MNIST
         import torchvision.transforms as transforms
-        from dl.model.vision import GrayscaleToRGB
+        from dl.model import GrayscaleToRGB
 
         transform = transforms.Compose([
             transforms.Resize(size =(size_image, size_image), interpolation=transforms.InterpolationMode.BILINEAR),
@@ -160,14 +163,12 @@ class VAETest(unittest.TestCase):
         return train_dataset, test_dataset
 
 
-
     @staticmethod
     def create_mnist_vae_model() -> VAEModel | None:
         try:
-            conv_2d_block_builder = Conv2DBlockBuilder(
+            conv_2d_block_config = ConvBlockConfig(
                 in_channels=1,
                 out_channels=32,
-                input_size=(28, 28),
                 kernel_size=(4, 4),
                 stride=(2, 2),
                 padding=(1, 1),
@@ -175,11 +176,11 @@ class VAETest(unittest.TestCase):
                 max_pooling_kernel=-1,
                 activation=nn.ReLU(),
                 bias=False)
-            conv_block_1 = ConvBlock(_id='Conv1', conv_block_builder=conv_2d_block_builder)
-            conv_2d_block_builder = Conv2DBlockBuilder(
+            conv_block_1 = Conv2DBlock( block_id='Conv1',
+                                        conv_block_config=conv_2d_block_config)
+            conv_2d_block_config = ConvBlockConfig(
                 in_channels=32,
                 out_channels=64,
-                input_size=(28, 28),
                 kernel_size=(4, 4),
                 stride=(2, 2),
                 padding=(1, 1),
@@ -187,7 +188,7 @@ class VAETest(unittest.TestCase):
                 max_pooling_kernel=-1,
                 activation=nn.ReLU(),
                 bias=False)
-            conv_block_2 = ConvBlock(_id='Conv2', conv_block_builder=conv_2d_block_builder)
+            conv_block_2 = Conv2DBlock(block_id='Conv2', conv_block_config=conv_2d_block_config)
             conv_model = ConvModel(model_id ='conv_MNIST_model', conv_blocks=[conv_block_1, conv_block_2])
             return VAEModel(model_id='VAE - Mnist',
                             encoder=conv_model,

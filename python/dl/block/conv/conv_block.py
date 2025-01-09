@@ -27,7 +27,10 @@ logger = logging.getLogger('dl.block.ConvBlock')
 
 
 class ConvBlock(NeuralBlock):
-    def __init__(self, block_id: Optional[AnyStr], conv_block_config: ConvBlockConfig, modules: Tuple[nn.Module]) -> None:
+    def __init__(self,
+                 block_id: Optional[AnyStr],
+                 conv_block_config: ConvBlockConfig,
+                 modules: Tuple[nn.Module]) -> None:
         """
         Constructor for the Generic Convolutional Neural block
         @param block_id: Identifier for the block
@@ -39,7 +42,6 @@ class ConvBlock(NeuralBlock):
         """
         self.conv_block_config = conv_block_config
         super(ConvBlock, self).__init__(block_id, modules)
-
 
     def transpose(self, extra: Optional[nn.Module] = None) -> Any:
         raise ConvException('Cannot invert abstract Convolutional block')

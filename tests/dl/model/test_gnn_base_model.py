@@ -63,7 +63,6 @@ class GNNBaseModelTest(unittest.TestCase):
         path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
         _dataset: Dataset = Flickr(path)
         num_nodes = _dataset[0].num_node_features
-        num_edges = _dataset[0].num_edge_features
         gcn_model = GNNBaseModelTest.build(batch_size=4,
                                            walk_length=6,
                                            num_node_features=num_nodes,

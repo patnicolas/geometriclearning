@@ -1,6 +1,8 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
+from aiohttp.web_routedef import static
+
 from dl.model.neural_model import NeuralModel
 from dl.block.ffnn_block import FFNNBlock
 from dl.block.graph.gnn_base_block import GNNBaseBlock
@@ -84,7 +86,7 @@ class GNNBaseModel(NeuralModel):
         return len(self.ffnn_blocks) > 0
 
     def do_train(self,
-                 data_source: Dataset | Data,
+                 data_loader: DataLoader,
                  hyper_parameters: HyperParams,
                  metric_labels: List[AnyStr]) -> None:
         """
@@ -134,6 +136,14 @@ class GNNBaseModel(NeuralModel):
 
     def save(self, extra_params: dict = None):
         raise NotImplementedError('GCNModel.save is an abstract method')
+
+
+    from torch_geometric.datasets import TUDataset
+
+    @staticmethod
+    def convert_dataset_to_data(dataset: TUDataset) -> Data:
+        return dataset.data
+
 
     """ ----------------------  Private helper methods ------------------  """
 
