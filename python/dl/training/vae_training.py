@@ -227,6 +227,7 @@ class VAETraining(NeuralTraining, ABC):
         return metric_collector
 
     """ ------------------------------  Private helper method for visual debugging --------------- """
+
     def __are_images(self, images_cnt: int) -> bool:
         return self.plot_parameters is not None \
             and self.plot_parameters[0].is_image \

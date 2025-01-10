@@ -3,8 +3,10 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from dl.block.neural_block import NeuralBlock
 from typing import AnyStr, List
+import torch
 import torch.nn as nn
 from torch_geometric.nn.conv import MessagePassing
+from torch_geometric.typing import Adj
 from torch_geometric.nn import BatchNorm
 
 """
@@ -48,6 +50,11 @@ class GNNBaseBlock(NeuralBlock):
             modules.append(activation)
 
         super(GNNBaseBlock, self).__init__(_id, tuple(modules))
+
+    def forward(self, x: torch.Tensor, edge_index: Adj) -> torch.Tensor:
+        for idx, module in enumerate(self.modules):
+            x = module(x, edge_index) if idx == 0 else module(x)
+        return x
 
     def __repr__(self) -> AnyStr:
         modules_str = '\n'.join([str(module) for module in self.modules])

@@ -1,3 +1,5 @@
+__author__ = "Patrick Nicolas"
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from dl.training.neural_training import NeuralTraining
 from dl.training.hyper_params import HyperParams
@@ -7,7 +9,6 @@ from dl import GNNException
 from plots.plotter import PlotterParameters
 from metric.metric import Metric
 from dl.training.exec_config import ExecConfig
-from torch_geometric.data.data import Data
 from typing import Dict, AnyStr, Optional, List
 import torch.nn as nn
 import torch
@@ -64,15 +65,16 @@ class GNNTraining(NeuralTraining):
         @param eval_loader: Data loader for the evaluation set
         @param eval_loader: torch_geometric.loader.DataLoader
         """
-        if not isinstance(neural_model, GNNBaseModel):
-            raise GNNException(f'Neural model {type(neural_model)} cannot not be trained as GNN')
-        if (not isinstance(train_loader,  torch_geometric.loader.DataLoader) or
-                not isinstance(eval_loader, torch_geometric.loader.DataLoader)) :
-            raise GNNException(f'Training data has incorrect type {type(train_loader)}')
+        # if not isinstance(neural_model, GNNBaseModel):
+        #    raise GNNException(f'Neural model {type(neural_model)} cannot not be trained as GNN')
+
+       # if (not isinstance(train_loader,  torch_geometric.loader.DataLoader) or
+       #         not isinstance(eval_loader, torch_geometric.loader.DataLoader)) :
+       #     raise GNNException(f'Training data has incorrect type {type(train_loader)}')
 
         torch.manual_seed(42)
         output_file_name = f'{model_id}_metrics_{self.plot_parameters[0].title}'
-        self.hyper_params.initialize_weight(neural_model.get_modules())
+        # self.hyper_params.initialize_weight(neural_model.get_modules())
 
         # Train and evaluation process
         for epoch in range(self.hyper_params.epochs):
@@ -90,27 +92,26 @@ class GNNTraining(NeuralTraining):
 
     """ -----------------------------  Private helper methods ------------------------------  """
 
-    def __train(self, neural_model: nn.Module, epoch: int, train_loader: DataLoader) -> float:
+    def __train(self, neural_model: nn.Module, epoch: int, train_loader: DataLoader) -> torch.Tensor:
         neural_model.train()
-        total_loss = 0
+        total_loss = 0.0
         idx = 0
         optimizer = self.hyper_params.optimizer(neural_model)
-        loss_function = self.hyper_params.loss_function
-        _, torch_device = self.exec_config.apply_device()
         num_records = len(train_loader)
         model = neural_model.to(self.target_device)
 
         for data in train_loader:
             try:
                 # Forward pass
-                data = data.to(torch_device)
+                data = data.to(self.target_device)
 
-                predicted = model(data.x, data.edge_index)  # Call forward - prediction
-                raw_loss = loss_function(predicted, data.y)
+                predicted = model(data)  # Call forward - prediction
+                raw_loss = self.hyper_params.loss_function(predicted, data.y)
 
                 # Set back propagation
                 raw_loss.backward(retain_graph=True)
-                total_loss += raw_loss.item
+                total_loss += raw_loss.item()
+                print(f'Total loss: {total_loss}')
 
                 # Monitoring and caching for performance
                 self.exec_config.apply_batch_optimization(idx, optimizer)
@@ -123,16 +124,12 @@ class GNNTraining(NeuralTraining):
                 raise GNNException(str(e))
             except AttributeError as e:
                 raise GNNException(str(e))
+        return torch.tensor(total_loss / num_records)
 
-        return total_loss / num_records
-
-    def __eval(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
+    def __eval(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, torch.Tensor]:
         total_loss = 0
         model.eval()
-        loss_func = self.hyper_params.loss_function
         metric_collector = {}
-
-        _, torch_device = self.exec_config.apply_device()
 
         # No need for computing gradient for evaluation (NO back-propagation)
         with torch.no_grad():
@@ -141,10 +138,9 @@ class GNNTraining(NeuralTraining):
                 try:
                     # Add noise if the mode is defined
 
-                    data = data.to(torch_device)
-
-                    predicted = model(data.x, data.edge_index)  # Call forward - prediction
-                    raw_loss = loss_func(predicted, data.y)
+                    data = data.to(self.target_device)
+                    predicted = model(data)  # Call forward - prediction
+                    raw_loss = self.hyper_params.loss_function(predicted, data.y)
 
                     # Transfer prediction and labels to CPU for metrics
                     np_predicted = predicted.cpu().numpy()
@@ -156,7 +152,7 @@ class GNNTraining(NeuralTraining):
                         metric_collector[key] = value
 
                     # Compute and accumulate the loss
-                    total_loss += raw_loss.data
+                    total_loss += raw_loss.item()
                     count += 1
                 except RuntimeError as e:
                     raise GNNException(str(e))
@@ -168,5 +164,5 @@ class GNNTraining(NeuralTraining):
                     raise GNNException(str(e))
 
         eval_loss = total_loss / count
-        metric_collector[Metric.eval_loss_label] = eval_loss
+        metric_collector[Metric.eval_loss_label] = torch.tensor(eval_loss)
         return metric_collector

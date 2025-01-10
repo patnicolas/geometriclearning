@@ -1,6 +1,7 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
+import torch
 from torch_geometric.data import Data
 from torch.utils.data import DataLoader
 from torch_geometric.loader import (NeighborLoader, RandomNodeLoader, GraphSAINTRandomWalkSampler,
@@ -33,7 +34,9 @@ ClusterLoader
 
 
 class GraphDataLoader(object):
-    def __init__(self, loader_attributes: Dict[AnyStr, Any], data: Data) -> None:
+    def __init__(self,
+                 loader_attributes: Dict[AnyStr, Any],
+                 data: Data) -> None:
         """
         Constructor for the Generic Graph Data Loader
         @param loader_attributes: Map for attributes for a given Data loader
@@ -45,7 +48,7 @@ class GraphDataLoader(object):
         self.data = data
         self.attributes_map = loader_attributes
 
-    def __call__(self) -> (DataLoader, DataLoader):
+    def __call__(self, num_workers: int) -> (DataLoader, DataLoader):
         """
         Generate the data loader for both training and evaluation set
         @return: A pair of training loader and evaluation loader
@@ -63,7 +66,7 @@ class GraphDataLoader(object):
             case 'ShaDowKHopSampler':
                 return self.__shadow_khop_sampler()
             case 'GraphSAINTRandomWalkSampler':
-                return self.__graph_saint_random_walk()
+                return self.__graph_saint_random_walk(num_workers)
             case 'ClusterLoader':
                 return self.__cluster_loader()
             case _:
@@ -133,7 +136,7 @@ class GraphDataLoader(object):
                                             shuffle=False)
         return train_loader, eval_loader
 
-    def __graph_saint_random_walk(self) -> (DataLoader, DataLoader):
+    def __graph_saint_random_walk(self, num_workers: int) -> (DataLoader, DataLoader):
         walk_length = self.attributes_map['walk_length']
         batch_size = self.attributes_map['batch_size']
         num_steps = self.attributes_map['num_steps']
@@ -228,8 +231,8 @@ class GraphDataLoader(object):
 
     __attrs_map_def: AnyStr =('Attributes map:\nNeighborLoader: num_neighbors, batch_size, replace'
                               '\nRandomNodeLoader: num_parts\nGraphSAINTRandomWalkSampler: walk_length, batch_size'
-                              'num_steps, sample_coverage\nGraphSAINTNodeSampler: alk_length, batch_size, num_steps'
-                              '\nGraphSAINTNodeSampler: walk_length, batch_size um_steps\nShaDowKHopSampler: depth'
+                              'num_steps, sample_coverage\nGraphSAINTNodeSampler: batch_size, num_steps sample_coverage'
+                              '\nGraphSAINTEdgeSampler: batch_size num_steps sample_coverage\nShaDowKHopSampler: depth'
                               'num_neighbors node_idx\nClusterLoader: num_parts, recursive batch_size'
                               'keep_inter_cluster_edges')
 

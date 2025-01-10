@@ -10,6 +10,7 @@ from dl.training.neural_training import NeuralTraining
 from dl.training.hyper_params import HyperParams
 from dl import DLException, GNNException
 from typing import List, AnyStr, Optional, Self
+import torch
 from torch_geometric.loader import GraphSAINTRandomWalkSampler
 from torch_geometric.data import Data
 from torch.utils.data import DataLoader, Dataset
@@ -24,27 +25,18 @@ class GNNBaseModel(NeuralModel):
 
     def __init__(self,
                  model_id: AnyStr,
-                 batch_size: int,
-                 walk_length: int,
                  gnn_blocks: List[GNNBaseBlock],
                  ffnn_blocks: Optional[List[FFNNBlock]] = None) -> None:
         """
         Constructor for this simple Graph convolutional neural network
         @param model_id: Identifier for this model
         @type model_id: Str
-        @param batch_size: Number of “root” nodes (not each batch’s final number of nodes!)
-        @type batch_size: int
-        @param walk_length: Number of steps to take on each random walk starting from a “root” node
-        @type walk_length: int
         @param gnn_blocks: List of Graph convolutional neural blocks
         @type gnn_blocks: List[ConvBlock]
         @param ffnn_blocks: List of Feed-Forward Neural Blocks
         @type ffnn_blocks: List[FFNNBlock]
         """
-
-        assert 0 < batch_size < 8192, f'Batch size {batch_size} if out of range [1, 8192['
-        self.batch_size = batch_size
-        self.walk_length = walk_length
+        self.gnn_blocks = gnn_blocks
 
         modules: List[nn.Module] = [module for block in gnn_blocks for module in block.modules]
         # If fully connected are provided as CNN
@@ -55,22 +47,17 @@ class GNNBaseModel(NeuralModel):
         super(GNNBaseModel, self).__init__(model_id, nn.Sequential(*modules))
 
     @classmethod
-    def build(cls, model_id: AnyStr, batch_size: int, walk_length: int, gcn_blocks: List[GNNBaseBlock]) -> Self:
+    def build(cls, model_id: AnyStr, gnn_blocks: List[GNNBaseBlock]) -> Self:
         """
-        Create a pure convolutional neural network as a graph convolutional encoder for
-        variational auto-encoder or generative adversarial network
+        Create a pure graph neural network
         @param model_id: Identifier for the model
         @type model_id: AnyStr
-        @param batch_size: Number of “root” nodes (not each batch’s final number of nodes!)
-        @type batch_size: int
-        @param walk_length: Number of steps to take on each random walk starting from a “root” node
-        @type walk_length: int
-        @param gcn_blocks: List of convolutional blocks
-        @type gcn_blocks: List[ConvBlock]
+        @param gnn_blocks: List of convolutional blocks
+        @type gnn_blocks: List[ConvBlock]
         @return: Instance of decoder of type GCNModel
         @rtype: GNNBaseModel
         """
-        return cls(model_id, batch_size=batch_size, walk_length=walk_length, gnn_blocks=gcn_blocks, ffnn_blocks=None)
+        return cls(model_id, gnn_blocks=gnn_blocks, ffnn_blocks=None)
 
     def __repr__(self) -> str:
         modules = [f'{idx}: {str(module)}' for idx, module in enumerate(self.get_modules())]
@@ -85,14 +72,34 @@ class GNNBaseModel(NeuralModel):
         """
         return len(self.ffnn_blocks) > 0
 
+    def forward(self, data: Data) -> torch.Tensor:
+        """
+        Execute the default forward method for all neural network models inherited from this class
+        @param x: Input tensor
+        @type x: Torch tensor
+        @return: Prediction for the input
+        @rtype: Torch tensor
+        """
+        # print(f'Input {self.model_id}\n{x.shape}')
+        x = data.x
+        edge_index = data.edge_index
+        output = []
+        for gnn_block in self.gnn_blocks:
+            x = gnn_block(x, edge_index)
+            output.append(x)
+        x = torch.cat(output, dim=-1)
+        ffnn = self.ffnn_blocks[0]
+        linear = ffnn.modules[0]
+        x = linear(x)
+
+        # print(f'Output {self.model_id}\n{x.shape}')
+        return x
+
     def do_train(self,
-                 data_loader: DataLoader,
                  hyper_parameters: HyperParams,
                  metric_labels: List[AnyStr]) -> None:
         """
         Execute the training, evaluation and metrics for any model for MNIST data set
-        @param data_source: Specifically formatted input training data
-        @type data_source: Data or Dataset
         @param hyper_parameters: Hyper-parameters for the execution of the
         @type hyper_parameters: HyperParams
         @param metric_labels: List of metrics to be used

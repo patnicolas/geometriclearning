@@ -54,7 +54,7 @@ class EarlyStopLogger(object):
         """
         return cls(patience, Metric.default_min_loss, early_stopping_enabled=True)
 
-    def __call__(self, epoch: int, train_loss: float, eval_metrics: Dict[AnyStr, float] = None) -> bool:
+    def __call__(self, epoch: int, train_loss: torch.Tensor, eval_metrics: Dict[AnyStr, torch.Tensor] = None) -> bool:
         """
             Implement the early stop and logging of training, evaluation loss. It is assumed that at least one
             metric is provided
@@ -69,11 +69,11 @@ class EarlyStopLogger(object):
         """
         # Step 1. Apply early stopping criteria
         loss_value = eval_metrics[Metric.eval_loss_label]
-        is_early_stopping = self.__evaluate(torch.Tensor(loss_value))
+        # is_early_stopping = self.__evaluate(torch.Tensor(loss_value))
         # Step 2: Record training, evaluation losses and metric
         self.__record(epoch, train_loss, eval_metrics)
-        print(f'Is early stopping {is_early_stopping}', flush=True)
-        return is_early_stopping
+        # print(f'Is early stopping {is_early_stopping}', flush=True)
+        return False
 
     def update_metrics(self, metrics: Dict[AnyStr, float]) -> bool:
         """
@@ -87,7 +87,8 @@ class EarlyStopLogger(object):
                 values.append(torch.Tensor(value))
                 self.metrics[key] = values
             else:
-                self.metrics[key] = [torch.Tensor(value)]
+                values = [torch.Tensor(value)]
+                self.metrics[key] = values
         return len(self.metrics.items()) > 0
 
     def summary(self, output_filename: Optional[AnyStr] = None) -> None:
@@ -96,13 +97,15 @@ class EarlyStopLogger(object):
         @param output_filename: Relative name of file containing the summary of metrics and losses
         @type output_filename: str
         """
-        y_labels = ['Accuracy', 'Precision', 'Training Loss', 'Evaluation Loss']
-        parameters = [PlotterParameters(0, x_label='Iteration', y_label=y_labels[idx], title=k, fig_size=(12, 8))
+        y_labels = ['Accuracy', 'Precision', 'Recall', 'Training Loss', 'Evaluation Loss']
+        for idx, k in enumerate(self.metrics.keys()):
+            print(k)
+        parameters = [PlotterParameters(0, x_label='Iteration', y_label=k, title=f'{k} Plot', fig_size=(12, 8))
                       for idx, k in enumerate(self.metrics.keys())]
 
         # Save the statistics in PyTorch format
-        if output_filename is not None:
-            self.__save_summary(output_filename)
+        # if output_filename is not None:
+        #    self.__save_summary(output_filename)
         # Plot statistics
         Plotter.multi_plot(self.metrics, parameters, output_filename)
 

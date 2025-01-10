@@ -87,11 +87,11 @@ class Plotter(object):
         fig, axes = plt.subplots(ncols=1, nrows=len(dict_values), figsize=plotter_params_list[0].fig_size)
         x = np.arange(0, num_points, 1)
         for plot_index in range(len(dict_values)):
-            title = plotter_params_list[plot_index].title
-            y = dict_values[title]
+            key = plotter_params_list[plot_index].y_label
+            y = dict_values[key]
             Plotter.__axis_plot(x, plotter_params_list[plot_index], y, axes, plot_index)
 
-        fig.savefig(f"{Plotter.images_folder}/plot-{plot_title}.png")
+        # fig.savefig(f"{Plotter.images_folder}/plot-{plot_title}.png")
         plt.show()
 
     @staticmethod

@@ -82,10 +82,6 @@ class NeuralTraining(object):
                    exec_config=ExecConfig.default(),
                    plot_parameters=plot_parameters)
 
-    @abstractmethod
-    def model_label(self) -> AnyStr:
-        raise NotImplementedError('NeuralNet.model_label is an abstract method')
-
     def train(self,
               model_id: AnyStr,
               neural_model: nn.Module,

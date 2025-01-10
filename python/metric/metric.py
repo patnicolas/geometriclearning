@@ -2,8 +2,7 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from abc import abstractmethod
-from typing import AnyStr, List, Dict
-from metric.metric_type import MetricType
+from typing import List
 import torch
 import logging
 logger = logging.getLogger('metric.Metric')
