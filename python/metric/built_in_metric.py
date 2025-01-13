@@ -57,11 +57,11 @@ class BuiltInMetric(Metric):
 
             case MetricType.Precision:
                 return precision_score(_labeled, _predicted, average="weighted") if self.is_weighted \
-                        else precision_score(_labeled, _predicted, average='micro')
+                        else precision_score(_labeled, _predicted, average='macro')
 
             case MetricType.Recall:
                 return recall_score(_labeled, _predicted, average="weighted") if self.is_weighted \
-                        else precision_score(_labeled, _predicted, average='micro')
+                        else precision_score(_labeled, _predicted, average='macro')
 
             case MetricType.F1:
                 return f1_score(_labeled, _predicted, average="weighted") if self.is_weighted \
@@ -111,7 +111,6 @@ class BuiltInMetric(Metric):
         # Need transfer prediction and labels to CPU for using numpy
         np_metric = self.from_numpy(predicted, labels)
         return torch.tensor(np_metric)
-
 
 
 def create_metric_dict(metric_labels: List[AnyStr],

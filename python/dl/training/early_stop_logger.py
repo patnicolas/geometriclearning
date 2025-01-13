@@ -21,7 +21,8 @@ logger = logging.getLogger('dl.EarlyStopLogger')
 
 
 class EarlyStopLogger(object):
-    output_folder = '../../../../tests/output'
+    import os
+    output_folder = os.path.join('../../', 'output')
 
     def __init__(self,
                  patience: int,
@@ -97,15 +98,14 @@ class EarlyStopLogger(object):
         @param output_filename: Relative name of file containing the summary of metrics and losses
         @type output_filename: str
         """
-        y_labels = ['Accuracy', 'Precision', 'Recall', 'Training Loss', 'Evaluation Loss']
         for idx, k in enumerate(self.metrics.keys()):
             print(k)
         parameters = [PlotterParameters(0, x_label='Iteration', y_label=k, title=f'{k} Plot', fig_size=(12, 8))
                       for idx, k in enumerate(self.metrics.keys())]
 
         # Save the statistics in PyTorch format
-        # if output_filename is not None:
-        #    self.__save_summary(output_filename)
+        if output_filename is not None:
+            self.__save_summary(output_filename)
         # Plot statistics
         Plotter.multi_plot(self.metrics, parameters, output_filename)
 

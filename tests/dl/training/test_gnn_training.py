@@ -1,11 +1,12 @@
 import unittest
 
+from dl import GNNException
+from dataset import DatasetException
 from dl.block.ffnn_block import FFNNBlock
 from dl.training.hyper_params import HyperParams
 from dl.training.gnn_training import GNNTraining
 from dl.model.gnn_base_model import GNNBaseModel
 from dataset.graph_data_loader import GraphDataLoader
-from torch_geometric.loader import RandomNodeLoader
 from metric.metric import Metric
 import torch.nn as nn
 import os
@@ -15,38 +16,240 @@ class GNNTrainingTest(unittest.TestCase):
     import torch
     torch.set_default_dtype(torch.float32)
 
-    def test_train(self):
+
+    def test_train_random_walk_loader(self):
         from torch_geometric.datasets.flickr import Flickr
 
-        path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
-        _dataset = Flickr(path)
-        _data = _dataset[0]
-        metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
-        hyper_parameters = HyperParams(
-            lr=0.001,
-            momentum=0.89,
-            epochs=12,
-            optim_label='adam',
-            batch_size=4,
-            loss_function=nn.CrossEntropyLoss(),
-            drop_out=0.2,
-            train_eval_ratio=0.9,
-            encoding_len=_dataset.num_classes)
+        try:
+            path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
+            _dataset = Flickr(path)
+            _data = _dataset[0]
+            metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
+            hyper_parameters = HyperParams(
+                lr=0.0005,
+                momentum=0.90,
+                epochs=48,
+                optim_label='adam',
+                batch_size=128,
+                loss_function=nn.CrossEntropyLoss(),
+                drop_out=0.2,
+                train_eval_ratio=0.9,
+                encoding_len=_dataset.num_classes)
 
-        network = GNNTraining.build(hyper_parameters, metric_labels)
-        gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
-                                               num_classes=_dataset.num_classes)
-        attrs ={
-            'id': 'GraphSAINTRandomWalkSampler',
-            'walk_length': 2,
-            'num_steps': 5,
-            'batch_size': 128,
-            'sample_coverage': 100
-        }
-        graph_data_loader = GraphDataLoader(loader_attributes=attrs,  data=_data)
-        train_loader, eval_loader = graph_data_loader(num_workers=4)
+            attrs = {
+                'id': 'GraphSAINTRandomWalkSampler',
+                'walk_length': 2,
+                'num_steps': 384,
+                'batch_size': 2048,
+                'sample_coverage': 128
+            }
+            network = GNNTraining.build(hyper_params=hyper_parameters,
+                                        metric_labels=metric_labels,
+                                        title_attribute='GraphSAINTRandomWalkSampler,walk:2,steps:384,batch:2048')
 
-        network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
+            gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
+                                                   num_classes=_dataset.num_classes)
+            graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
+            train_loader, eval_loader = graph_data_loader(num_workers=4)
+
+            network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
+            accuracy_list = network.early_stop_logger.metrics['Accuracy']
+            self.assertTrue(len(accuracy_list) > 1)
+            self.assertTrue(accuracy_list[-1].float() > 0.2)
+        except GNNException as e:
+            print(f'Error: {str(e)}')
+            self.assertTrue(False)
+        except DatasetException as e:
+            print(f'Error: {str(e)}')
+            self.assertTrue(False)
+        except Exception as e:
+            print(f'Error: {str(e)}')
+            self.assertTrue(False)
+
+
+    def test_train_neighbor_loader_1(self):
+        from torch_geometric.datasets.flickr import Flickr
+        try:
+            path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
+            _dataset = Flickr(path)
+            _data = _dataset[0]
+            metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
+            hyper_parameters = HyperParams(
+                lr=0.0005,
+                momentum=0.90,
+                epochs=48,
+                optim_label='adam',
+                batch_size=128,
+                loss_function=nn.CrossEntropyLoss(),
+                drop_out=0.2,
+                train_eval_ratio=0.9,
+                encoding_len=_dataset.num_classes)
+
+            attrs = {
+                'id': 'NeighborLoader',
+                'num_neighbors': [8, 8],
+                'batch_size': 1024,
+                'replace': True
+            }
+            network = GNNTraining.build(hyper_params=hyper_parameters,
+                                        metric_labels=metric_labels,
+                                        title_attribute='NeighborLoader,neighbors:[8, 8],batch:1024')
+
+            gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
+                                                   num_classes=_dataset.num_classes)
+            graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
+            train_loader, eval_loader = graph_data_loader(num_workers=4)
+
+            network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
+            accuracy_list = network.early_stop_logger.metrics['Accuracy']
+            self.assertTrue(len(accuracy_list) > 1)
+            self.assertTrue(accuracy_list[-1].float() > 0.2)
+        except GNNException as e:
+            print(f'Error: {str(e)}')
+            self.assertTrue(False)
+        except DatasetException as e:
+            print(f'Error: {str(e)}')
+            self.assertTrue(False)
+        except Exception as e:
+            print(f'Error: {str(e)}')
+            self.assertTrue(False)
+
+    def test_train_neighbor_loader_2(self):
+        from torch_geometric.datasets.flickr import Flickr
+        try:
+            path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
+            _dataset = Flickr(path)
+            _data = _dataset[0]
+            metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
+            hyper_parameters = HyperParams(
+                lr=0.0005,
+                momentum=0.90,
+                epochs=48,
+                optim_label='adam',
+                batch_size=128,
+                loss_function=nn.CrossEntropyLoss(),
+                drop_out=0.2,
+                train_eval_ratio=0.9,
+                encoding_len=_dataset.num_classes)
+
+            attrs = {
+                'id': 'NeighborLoader',
+                'num_neighbors': [16, 12],
+                'batch_size': 1024,
+                'replace': True
+            }
+            network = GNNTraining.build(hyper_params=hyper_parameters,
+                                        metric_labels=metric_labels,
+                                        title_attribute='NeighborLoader,neighbors:[16, 12],batch:1024')
+
+            gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
+                                                   num_classes=_dataset.num_classes)
+            graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
+            train_loader, eval_loader = graph_data_loader(num_workers=4)
+
+            network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
+            accuracy_list = network.early_stop_logger.metrics['Accuracy']
+            self.assertTrue(len(accuracy_list) > 1)
+            self.assertTrue(accuracy_list[-1].float() > 0.2)
+        except GNNException as e:
+            print(f'Error: {str(e)}')
+            self.assertTrue(False)
+        except DatasetException as e:
+            print(f'Error: {str(e)}')
+            self.assertTrue(False)
+        except Exception as e:
+            print(f'Error: {str(e)}')
+            self.assertTrue(False)
+
+    def test_train_random_loader_1(self):
+        from torch_geometric.datasets.flickr import Flickr
+        try:
+            path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
+            _dataset = Flickr(path)
+            _data = _dataset[0]
+            metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
+            hyper_parameters = HyperParams(
+                lr=0.0005,
+                momentum=0.90,
+                epochs=40,
+                optim_label='adam',
+                batch_size=128,
+                loss_function=nn.CrossEntropyLoss(),
+                drop_out=0.2,
+                train_eval_ratio=0.9,
+                encoding_len=_dataset.num_classes)
+
+            attrs = {
+                'id': 'RandomNodeLoader',
+                'num_parts':256
+            }
+            network = GNNTraining.build(hyper_params=hyper_parameters,
+                                        metric_labels=metric_labels,
+                                        title_attribute='RandomNodeLoader,num_parts=256')
+
+            gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
+                                                   num_classes=_dataset.num_classes)
+            graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
+            train_loader, eval_loader = graph_data_loader(num_workers=4)
+
+            network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
+            accuracy_list = network.early_stop_logger.metrics['Accuracy']
+            self.assertTrue(len(accuracy_list) > 1)
+            self.assertTrue(accuracy_list[-1].float() > 0.2)
+        except GNNException as e:
+            print(f'Error: {str(e)}')
+            self.assertTrue(False)
+        except DatasetException as e:
+            print(f'Error: {str(e)}')
+            self.assertTrue(False)
+        except Exception as e:
+            print(f'Error: {str(e)}')
+            self.assertTrue(False)
+
+    def test_train_random_loader_2(self):
+        from torch_geometric.datasets.flickr import Flickr
+        try:
+            path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
+            _dataset = Flickr(path)
+            _data = _dataset[0]
+            metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
+            hyper_parameters = HyperParams(
+                lr=0.0005,
+                momentum=0.90,
+                epochs=60,
+                optim_label='adam',
+                batch_size=128,
+                loss_function=nn.CrossEntropyLoss(),
+                drop_out=0.2,
+                train_eval_ratio=0.9,
+                encoding_len=_dataset.num_classes)
+
+            attrs = {
+                'id': 'RandomNodeLoader',
+                'num_parts': 256
+            }
+            network = GNNTraining.build(hyper_params=hyper_parameters,
+                                        metric_labels=metric_labels,
+                                        title_attribute='RandomNodeLoader,num_parts=128')
+
+            gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
+                                                   num_classes=_dataset.num_classes)
+            graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
+            train_loader, eval_loader = graph_data_loader(num_workers=4)
+
+            network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
+            accuracy_list = network.early_stop_logger.metrics['Accuracy']
+            self.assertTrue(len(accuracy_list) > 1)
+            self.assertTrue(accuracy_list[-1].float() > 0.2)
+        except GNNException as e:
+            print(f'Error: {str(e)}')
+            self.assertTrue(False)
+        except DatasetException as e:
+            print(f'Error: {str(e)}')
+            self.assertTrue(False)
+        except Exception as e:
+            print(f'Error: {str(e)}')
+            self.assertTrue(False)
 
     @staticmethod
     def build(num_node_features: int, num_classes: int) -> GNNBaseModel:

@@ -2,7 +2,7 @@ from unittest import TestCase
 import unittest
 import torch
 from util.image_tensor import ImageTensor
-img_dir = '../../output/test1'
+img_dir = '../output/test1'
 
 
 class TestImageTensor(TestCase):

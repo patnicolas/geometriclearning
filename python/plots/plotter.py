@@ -1,6 +1,8 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
+import os.path
+
 import numpy as np
 from matplotlib import pyplot as plt
 from datetime import datetime
@@ -45,7 +47,7 @@ class PlotterParameters:
 
 
 class Plotter(object):
-    images_folder = '../../../../tests/images/'
+    test_images_folder = '../../output_images'
     markers = ['-', '--', '-.', '--', '^', '-']
     colors = ['blue', 'green', 'red', 'orange', 'black', 'grey']
 
@@ -55,7 +57,7 @@ class Plotter(object):
         axes.plot(np_array1, np_array2)
         axes.set(xlabel=plotter_parameters.x_label, ylabel=plotter_parameters.y_label, title=plotter_parameters.title)
         axes.grid()
-        fig.savefig(f"{Plotter.images_folder}/plot-{plotter_parameters.time_str}.png")
+        fig.savefig(f"{Plotter.test_images_folder}/plot-{plotter_parameters.time_str}.png")
         plt.show()
 
     @staticmethod
@@ -66,14 +68,13 @@ class Plotter(object):
         axes.plot(x, y)
         axes.set(xlabel=plotter_parameters.x_label, ylabel=plotter_parameters.y_label, title=plotter_parameters.title)
         axes.grid()
-        fig.savefig(f"{Plotter.images_folder}/plot-{plotter_parameters.time_str}.png")
+        fig.savefig(f"{Plotter.test_images_folder}/plot-{plotter_parameters.time_str}.png")
         plt.show()
 
     @staticmethod
-    def multi_plot(
-            dict_values: Dict[AnyStr, List[torch.Tensor]],
-            plotter_params_list: List[PlotterParameters],
-            plot_title: Optional[AnyStr]) -> NoReturn:
+    def multi_plot(dict_values: Dict[AnyStr, List[torch.Tensor]],
+                   plotter_params_list: List[PlotterParameters],
+                   plot_title: Optional[AnyStr]) -> NoReturn:
         """
         Generic 1, 2, or 3 sub-plots with one variable value
         @param dict_values: Dictionary of array of floating values
@@ -91,8 +92,9 @@ class Plotter(object):
             y = dict_values[key]
             Plotter.__axis_plot(x, plotter_params_list[plot_index], y, axes, plot_index)
 
-        # fig.savefig(f"{Plotter.images_folder}/plot-{plot_title}.png")
-        plt.show()
+        plt.title(plot_title, y=6.0)
+        fig.savefig(f"{Plotter.test_images_folder}/plot_{plot_title}.png")
+        # plt.show()
 
     @staticmethod
     def plot(values: List[List[float]], labels: List[AnyStr], plotter_parameters: PlotterParameters) -> NoReturn:
@@ -146,7 +148,7 @@ class Plotter(object):
         x = np.arange(0, len(values1), 1)
         for i in range(2):
             Plotter.__axis_plot(x, plotter_parameters_list[i], [torch.Tensor(x) for x in values1], axes, i)
-        fig.savefig(f"{Plotter.images_folder}/plot-{Plotter.time_str()}.png")
+        fig.savefig(f"{Plotter.test_images_folder}/plot-{Plotter.time_str()}.png")
         plt.show()
 
     @staticmethod
@@ -163,7 +165,7 @@ class Plotter(object):
         x = np.arange(0, len(values1), 1)
         for i in range(3):
             Plotter.__axis_plot(x, plotter_parameters_list[i], [torch.Tensor(x) for x in values1], axes, i)
-        fig.savefig(f"{Plotter.images_folder}/plot-{Plotter.time_str()}.png")
+        fig.savefig(f"{Plotter.test_images_folder}/plot-{Plotter.time_str()}.png")
         plt.show()
 
     @staticmethod

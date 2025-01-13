@@ -4,7 +4,6 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from dl.training.neural_training import NeuralTraining
 from dl.training.hyper_params import HyperParams
 from dl.training.early_stop_logger import EarlyStopLogger
-from dl.model.gnn_base_model import GNNBaseModel
 from dl import GNNException
 from plots.plotter import PlotterParameters
 from metric.metric import Metric
@@ -53,7 +52,7 @@ class GNNTraining(NeuralTraining):
               eval_loader: DataLoader) -> None:
         """
         Train and evaluation of a neural network given a data loader for a training set, a
-        data loader for the evaluation/test1 set and a encoder_model. The weights of the various linear modules
+        data loader for the evaluation/test1 set and an encoder_model. The weights of the various linear modules
         (neural_blocks) will be initialized if self.hyper_params using a Normal distribution
 
         @param model_id: Identifier for the model
@@ -65,16 +64,8 @@ class GNNTraining(NeuralTraining):
         @param eval_loader: Data loader for the evaluation set
         @param eval_loader: torch_geometric.loader.DataLoader
         """
-        # if not isinstance(neural_model, GNNBaseModel):
-        #    raise GNNException(f'Neural model {type(neural_model)} cannot not be trained as GNN')
-
-       # if (not isinstance(train_loader,  torch_geometric.loader.DataLoader) or
-       #         not isinstance(eval_loader, torch_geometric.loader.DataLoader)) :
-       #     raise GNNException(f'Training data has incorrect type {type(train_loader)}')
-
         torch.manual_seed(42)
-        output_file_name = f'{model_id}_metrics_{self.plot_parameters[0].title}'
-        # self.hyper_params.initialize_weight(neural_model.get_modules())
+        output_file_name = f'{model_id}: {self.plot_parameters[0].title}'
 
         # Train and evaluation process
         for epoch in range(self.hyper_params.epochs):

@@ -1,7 +1,6 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-import torch
 from torch_geometric.data import Data
 from torch.utils.data import DataLoader
 from torch_geometric.loader import (NeighborLoader, RandomNodeLoader, GraphSAINTRandomWalkSampler,
@@ -82,8 +81,8 @@ class GraphDataLoader(object):
 
     def __random_node_loader(self) -> (DataLoader, DataLoader):
         num_parts = self.attributes_map['num_parts']
-        train_loader = RandomNodeLoader(self.data, num_parts=num_parts, shuffle=True, mask=self.data.train_mask)
-        eval_loader = RandomNodeLoader(self.data, num_parts=num_parts, shuffle=False, mask=self.data.val_mask)
+        train_loader = RandomNodeLoader(self.data, num_parts=num_parts, shuffle=True)
+        eval_loader = RandomNodeLoader(self.data, num_parts=num_parts, shuffle=False)
         return train_loader, eval_loader
 
     def __neighbors_loader(self) -> (DataLoader, DataLoader):
@@ -94,12 +93,14 @@ class GraphDataLoader(object):
                                       num_neighbors=num_neighbors,
                                       batch_size=batch_size,
                                       replace=replace,
+                                      drop_last=False,
                                       shuffle=True,
                                       input_nodes=self.data.train_mask)
         eval_loader = NeighborLoader(self.data,
                                      num_neighbors=num_neighbors,
                                      batch_size=batch_size,
                                      replace=replace,
+                                     drop_last=False,
                                      shuffle=False,
                                      input_nodes=self.data.val_mask)
         return train_loader, eval_loader

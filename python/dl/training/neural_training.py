@@ -59,21 +59,26 @@ class NeuralTraining(object):
     @classmethod
     def build(cls,
               hyper_params: HyperParams,
-              metric_labels: List[AnyStr]) -> Self:
+              metric_labels: List[AnyStr],
+              title_attribute: Optional[AnyStr] = None) -> Self:
         """
         Simplified constructor for the training and execution of any neural network.
         @param hyper_params: Hyperparameters associated with the training of th emodel
         @type hyper_params: HyperParams
         @param metric_labels: Labels for metric to be used
         @type metric_labels: List[str]
-        @param exec_config: Configuration for optimization of execution of training
-        @type exec_config: ExecConfig
+        @param title_attribute: Optional comments or attributes to be added to the title for display
+        @type title_attribute: AnyStr
         """
 
         # Create metrics
         metrics_dict = create_metric_dict(metric_labels, hyper_params.encoding_len)
         # Initialize the plotting parameters
-        plot_parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
+        plot_parameters = [PlotterParameters(0,
+                                             x_label='x',
+                                             y_label='y',
+                                             title='Plot' if title_attribute is None else title_attribute,
+                                             fig_size=(11, 8))
                            for label, _ in metrics_dict.items()]
 
         return cls(hyper_params=hyper_params,
