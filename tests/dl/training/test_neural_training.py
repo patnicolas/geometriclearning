@@ -3,7 +3,7 @@ import unittest
 from dl.model.ffnn_model import FFNNModel
 from dl.block.ffnn_block import FFNNBlock
 from dl.training.hyper_params import HyperParams
-from dl.training.early_stop_logger import EarlyStopLogger
+from dl.training.training_summary import TrainingSummary
 from plots.plotter import PlotterParameters
 from dl.training.neural_training import NeuralTraining
 from metric.metric import Metric
@@ -61,7 +61,7 @@ class NeuralTrainingTest(unittest.TestCase):
         patience = 2
         min_diff_loss = -0.002
         early_stopping_enabled = True
-        early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
+        training_summary = TrainingSummary(patience, min_diff_loss, early_stopping_enabled)
         metric_labels = {
             Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, is_weighted=True),
             Metric.precision_label: BuiltInMetric(MetricType.Precision, is_weighted=True)
@@ -71,7 +71,7 @@ class NeuralTrainingTest(unittest.TestCase):
         network = NeuralTraining(
             binary_classifier,
             hyper_parameters,
-            early_stop_logger,
+            training_summary,
             metric_labels,
             parameters)
         filename = '../../../data/misc/wages_cleaned.csv'
@@ -113,7 +113,7 @@ class NeuralTrainingTest(unittest.TestCase):
         patience = 2
         min_diff_loss = -0.001
         early_stopping_enabled = True
-        early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
+        training_summary = TrainingSummary(patience, min_diff_loss, early_stopping_enabled)
         metric_labels = {
             Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, True),
             Metric.precision_label: BuiltInMetric(MetricType.Precision, True),
@@ -123,7 +123,7 @@ class NeuralTrainingTest(unittest.TestCase):
                       for label, _ in metric_labels.items()]
         network = NeuralTraining(
             hyper_parameters,
-            early_stop_logger,
+            training_summary,
             metric_labels,
             None,
             parameters)

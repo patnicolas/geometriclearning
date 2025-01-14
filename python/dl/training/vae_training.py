@@ -6,7 +6,7 @@ from abc import ABC
 import torch.nn as nn
 from dl.training.neural_training import NeuralTraining
 from dl.training.hyper_params import HyperParams
-from dl.training.early_stop_logger import EarlyStopLogger
+from dl.training.training_summary import TrainingSummary
 from plots.plotter import PlotterParameters
 from metric.metric import Metric
 from metric.built_in_metric import create_metric_dict
@@ -38,7 +38,7 @@ class VAETraining(NeuralTraining, ABC):
 
     def __init__(self,
                  hyper_params: HyperParams,
-                 early_stop_logger: EarlyStopLogger,
+                 training_summary: TrainingSummary,
                  metrics: Dict[AnyStr, Metric],
                  exec_config: ExecConfig,
                  plot_parameters: Optional[List[PlotterParameters]] = None):
@@ -46,8 +46,8 @@ class VAETraining(NeuralTraining, ABC):
         Default constructor for this variational auto-encoder
         @param hyper_params:  Hyper-parameters for training and optimizatoin
         @type hyper_params: HyperParams
-        @param early_stop_logger: Training monitoring
-        @type early_stop_logger: EarlyStopLogger
+        @param training_summary: Training monitoring
+        @type training_summary: TrainingSummary
         @param metrics: Dictionary of metrics and values
         @type metrics: Dictionary
         @param exec_config: Configuration for optimization of execution of training
@@ -56,7 +56,7 @@ class VAETraining(NeuralTraining, ABC):
         @type plot_parameters: List[PlotterParameters]
         """
         super(VAETraining, self).__init__(hyper_params,
-                                          early_stop_logger,
+                                          training_summary,
                                           metrics,
                                           exec_config,
                                           plot_parameters)
@@ -78,7 +78,7 @@ class VAETraining(NeuralTraining, ABC):
         plot_parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                            for label, _ in metrics_dict.items()]
         return cls(hyper_params=hyper_params,
-                   early_stop_logger=EarlyStopLogger(patience=2, min_diff_loss=-0.001, early_stopping_enabled=True),
+                   training_summary=TrainingSummary(patience=2, min_diff_loss=-0.001, early_stopping_enabled=True),
                    metrics=metrics_dict,
                    exec_config=ExecConfig.default(),
                    plot_parameters=plot_parameters)
@@ -118,10 +118,10 @@ class VAETraining(NeuralTraining, ABC):
 
             # Set mode and execute evaluation
             eval_metrics = self.__eval(neural_model, epoch, eval_loader)
-            self.early_stop_logger(epoch, train_loss, eval_metrics)
+            self.training_summary(epoch, train_loss, eval_metrics)
 
         # Generate summary
-        self.early_stop_logger.summary()
+        self.training_summary.summary()
 
     @staticmethod
     def _reshape_output_variation(shapes: list, z: torch.Tensor) -> torch.Tensor:

@@ -1,8 +1,6 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-import os.path
-
 import numpy as np
 from matplotlib import pyplot as plt
 from datetime import datetime

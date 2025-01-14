@@ -7,6 +7,7 @@ from dl.training.hyper_params import HyperParams
 from dl.training.gnn_training import GNNTraining
 from dl.model.gnn_base_model import GNNBaseModel
 from dataset.graph_data_loader import GraphDataLoader
+from dl.training.training_summary import TrainingSummary
 from metric.metric import Metric
 import torch.nn as nn
 import os
@@ -16,7 +17,6 @@ class GNNTrainingTest(unittest.TestCase):
     import torch
     torch.set_default_dtype(torch.float32)
 
-    @unittest.skip('Ignore')
     def test_train_random_walk_loader(self):
         from torch_geometric.datasets.flickr import Flickr
 
@@ -28,7 +28,7 @@ class GNNTrainingTest(unittest.TestCase):
             hyper_parameters = HyperParams(
                 lr=0.0005,
                 momentum=0.90,
-                epochs=48,
+                epochs=60,
                 optim_label='adam',
                 batch_size=128,
                 loss_function=nn.CrossEntropyLoss(),
@@ -39,13 +39,13 @@ class GNNTrainingTest(unittest.TestCase):
             attrs = {
                 'id': 'GraphSAINTRandomWalkSampler',
                 'walk_length': 2,
-                'num_steps': 384,
-                'batch_size': 2048,
+                'num_steps': 4,
+                'batch_size': 128,
                 'sample_coverage': 128
             }
             network = GNNTraining.build(hyper_params=hyper_parameters,
                                         metric_labels=metric_labels,
-                                        title_attribute='GraphSAINTRandomWalkSampler,walk:2,steps:384,batch:2048')
+                                        title_attribute='GraphSAINTRandomWalkSampler,walk_length:2,steps:4,batch:128')
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
@@ -53,7 +53,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader(num_workers=4)
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.early_stop_logger.metrics['Accuracy']
+            accuracy_list = network.training_summary.metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GNNException as e:
@@ -101,7 +101,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader(num_workers=4)
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.early_stop_logger.metrics['Accuracy']
+            accuracy_list = network.training_summary.metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GNNException as e:
@@ -149,7 +149,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader(num_workers=4)
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.early_stop_logger.metrics['Accuracy']
+            accuracy_list = network.training_summary.metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GNNException as e:
@@ -195,7 +195,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader(num_workers=4)
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.early_stop_logger.metrics['Accuracy']
+            accuracy_list = network.training_summary.metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GNNException as e:
@@ -233,7 +233,7 @@ class GNNTrainingTest(unittest.TestCase):
             }
             network = GNNTraining.build(hyper_params=hyper_parameters,
                                         metric_labels=metric_labels,
-                                        title_attribute='RandomNodeLoader,num_parts=128')
+                                        title_attribute='RandomNodeLoader,num_parts=256')
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
@@ -241,7 +241,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader(num_workers=4)
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.early_stop_logger.metrics['Accuracy']
+            accuracy_list = network.training_summary.metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GNNException as e:
@@ -263,9 +263,9 @@ class GNNTrainingTest(unittest.TestCase):
             _data = _dataset[0]
             metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
             hyper_parameters = HyperParams(
-                lr=0.0005,
+                lr=0.0008,
                 momentum=0.90,
-                epochs=48,
+                epochs=60,
                 optim_label='adam',
                 batch_size=128,
                 loss_function=nn.CrossEntropyLoss(),
@@ -289,7 +289,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader(num_workers=4)
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.early_stop_logger.metrics['Accuracy']
+            accuracy_list = network.training_summary.metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GNNException as e:
@@ -337,7 +337,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader(num_workers=4)
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.early_stop_logger.metrics['Accuracy']
+            accuracy_list = network.training_summary.metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GNNException as e:
@@ -386,7 +386,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader(num_workers=4)
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.early_stop_logger.metrics['Accuracy']
+            accuracy_list = network.training_summary.metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GNNException as e:
@@ -435,7 +435,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader(num_workers=4)
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.early_stop_logger.metrics['Accuracy']
+            accuracy_list = network.training_summary.metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GNNException as e:
@@ -448,6 +448,7 @@ class GNNTrainingTest(unittest.TestCase):
             print(f'Error: {str(e)}')
             self.assertTrue(False)
 
+    @unittest.skip('Ignore')
     def test_draw_sample(self):
         from torch_geometric.datasets.flickr import Flickr
         try:
@@ -467,6 +468,31 @@ class GNNTrainingTest(unittest.TestCase):
         except DatasetException as e:
             print(str(e))
             self.assertTrue(False)
+
+    @unittest.skip('Ignore')
+    def test_compare_accuracy(self):
+        from plots.plotter import PlotterParameters, Plotter
+
+        file_neighbor_loader = 'Flickr: NeighborLoader,neighbors:[16, 12],batch:1024'
+        neighbor_loader_dict = TrainingSummary.load_summary(TrainingSummary.output_folder, file_neighbor_loader)
+        accuracy_neighbor = [float(x) for x in neighbor_loader_dict['Accuracy']]
+
+        file_random_loader = 'Flickr: RandomNodeLoader,num_parts=256'
+        random_loader_dict = TrainingSummary.load_summary(TrainingSummary.output_folder, file_random_loader)
+        accuracy_random = [float(x) for x in random_loader_dict['Accuracy']]
+
+        file_graph_saint_random_walk_loader = 'Flickr: GraphSAINTRandomWalkSampler,walk:4,steps:3,batch:4096'
+        graph_saint_random_walk_dict = TrainingSummary.load_summary(TrainingSummary.output_folder,
+                                                                    file_graph_saint_random_walk_loader)
+        accuracy_graph_saint_random_walk = [float(x) for x in graph_saint_random_walk_dict['Accuracy']]
+        plotter_params = PlotterParameters(0,
+                                           x_label='epochs',
+                                           y_label='Accuracy',
+                                           title='Comparison Accuracy Graph Data Loader',
+                                           fig_size=(11, 8))
+        Plotter.plot([accuracy_neighbor[0:40], accuracy_random[0:40], accuracy_graph_saint_random_walk[0:40]],
+                     ['NeighborLoader', 'RandomLoader', 'GraphsSAINTRandomWalk'],
+                     plotter_params)
 
 
     @staticmethod

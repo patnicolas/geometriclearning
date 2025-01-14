@@ -2,11 +2,11 @@ import unittest
 import random
 import torch
 from metric.metric import Metric
-from dl.training.early_stop_logger import EarlyStopLogger
+from dl.training.training_summary import TrainingSummary
 from typing import Dict, AnyStr, List
 
 
-class EarlyStopLoggerTest(unittest.TestCase):
+class TrainingSummaryTest(unittest.TestCase):
 
     @unittest.skip('Ignore')
     def test_metrics_dict(self):
@@ -26,15 +26,15 @@ class EarlyStopLoggerTest(unittest.TestCase):
         patience = 2
         min_diff_loss = -0.001
         early_stopping_enabled = True
-        early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
+        training_summary = TrainingSummary(patience, min_diff_loss, early_stopping_enabled)
 
         new_metrics1 = {'Accuracy': torch.Tensor(0.5), 'F1': torch.Tensor(0.6)}
-        early_stop_logger.update_metrics(new_metrics1)
+        training_summary.update_metrics(new_metrics1)
         new_metrics2 = {'Accuracy': torch.Tensor(0.67), 'F1': torch.Tensor(0.62)}
-        early_stop_logger.update_metrics(new_metrics2)
+        training_summary.update_metrics(new_metrics2)
         new_metrics3 = {'Accuracy': torch.Tensor(0.69), 'F1': torch.Tensor(0.67)}
-        early_stop_logger.update_metrics(new_metrics3)
-        early_stop_logger.summary(None)
+        training_summary.update_metrics(new_metrics3)
+        training_summary.summary(None)
 
     @unittest.skip('Ignore')
     def test_summary(self):
@@ -42,7 +42,7 @@ class EarlyStopLoggerTest(unittest.TestCase):
         patience = 2
         min_diff_loss = -0.001
         early_stopping_enabled = True
-        early_stop_logger = EarlyStopLogger(patience, min_diff_loss, early_stopping_enabled)
+        training_summary = TrainingSummary(patience, min_diff_loss, early_stopping_enabled)
 
         train_loss = [10*math.exp(-n) + random.random() for n in range(1, 100)]
         eval_loss = [12 * math.exp(-n) + 1.5*random.random() for n in range(1, 100)]
@@ -51,20 +51,20 @@ class EarlyStopLoggerTest(unittest.TestCase):
         max_index = min(len(train_loss), len(eval_loss), len(accuracy))
         print(f'Recorded {max_index} values')
         for i in range(max_index):
-            early_stop_logger(
+            training_summary(
                 i,
                 torch.Tensor(train_loss[i]),
                 {
                     Metric.accuracy_label: torch.Tensor(accuracy[i]),
                     Metric.f1_label: torch.Tensor(f1[i])
                 })
-        early_stop_logger.summary(None)
+        training_summary.summary(None)
 
 
     def test_load_torch_tensor(self):
         from dl.model.vision.conv_mnist import ConvMNIST
         output_filename = f'stats_{ConvMNIST.id}'
-        summary_metrics = EarlyStopLogger.load('../../../tests/output', output_filename)
+        summary_metrics = TrainingSummary.load('../../../tests/output', output_filename)
         print(str(summary_metrics))
 
 

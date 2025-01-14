@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from dl.training.neural_training import NeuralTraining
 from dl.training.hyper_params import HyperParams
-from dl.training.early_stop_logger import EarlyStopLogger
+from dl.training.training_summary import TrainingSummary
 from dl import GNNException
 from plots.plotter import PlotterParameters
 from metric.metric import Metric
@@ -19,7 +19,7 @@ class GNNTraining(NeuralTraining):
 
     def __init__(self,
                  hyper_params: HyperParams,
-                 early_stop_logger: EarlyStopLogger,
+                 training_summary: TrainingSummary,
                  metrics: Dict[AnyStr, Metric],
                  exec_config: ExecConfig,
                  plot_parameters: Optional[List[PlotterParameters]] = None):
@@ -27,8 +27,8 @@ class GNNTraining(NeuralTraining):
         Default constructor for this variational auto-encoder
         @param hyper_params:  Hyper-parameters for training and optimizatoin
         @type hyper_params: HyperParams
-        @param early_stop_logger: Training monitoring
-        @type early_stop_logger: EarlyStopLogger
+        @param training_summary: Training monitoring
+        @type training_summary: TrainingSummary
         @param metrics: Dictionary of metrics and values
         @type metrics: Dictionary
         @param exec_config: Configuration for optimization of execution of training
@@ -37,7 +37,7 @@ class GNNTraining(NeuralTraining):
         @type plot_parameters: List[PlotterParameters]
         """
         super(GNNTraining, self).__init__(hyper_params,
-                                          early_stop_logger,
+                                          training_summary,
                                           metrics,
                                           exec_config,
                                           plot_parameters)
@@ -74,11 +74,11 @@ class GNNTraining(NeuralTraining):
 
             # Set mode and execute evaluation
             eval_metrics = self.__eval(neural_model, epoch, eval_loader)
-            self.early_stop_logger(epoch, train_loss, eval_metrics)
+            self.training_summary(epoch, train_loss, eval_metrics)
             self.exec_config.apply_monitor_memory()
 
         # Generate summary
-        self.early_stop_logger.summary(output_file_name)
+        self.training_summary.summary(output_file_name)
         print(f"\nMPS usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
 
     """ -----------------------------  Private helper methods ------------------------------  """

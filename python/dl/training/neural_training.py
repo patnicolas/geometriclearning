@@ -8,7 +8,7 @@ from typing import AnyStr, Dict, Self, List, Optional
 from dl.training.exec_config import ExecConfig
 from dl import TrainingException, ValidationException
 from dl.training.hyper_params import HyperParams
-from dl.training.early_stop_logger import EarlyStopLogger
+from dl.training.training_summary import TrainingSummary
 from plots.plotter import PlotterParameters
 from metric.metric import Metric
 from metric.built_in_metric import create_metric_dict
@@ -31,7 +31,7 @@ logger = logging.getLogger('dl.NeuralNet')
 class NeuralTraining(object):
     def __init__(self,
                  hyper_params: HyperParams,
-                 early_stop_logger: EarlyStopLogger,
+                 training_summary: TrainingSummary,
                  metrics: Dict[AnyStr, Metric],
                  exec_config: Optional[ExecConfig] = None,
                  plot_parameters: Optional[List[PlotterParameters]] = None) -> None:
@@ -39,8 +39,8 @@ class NeuralTraining(object):
         Constructor for the training and execution of any neural network.
         @param hyper_params: Hyper-parameters associated with the training of th emodel
         @type hyper_params: HyperParams
-        @param early_stop_logger: Dynamic condition for early stop in training
-        @type early_stop_logger: EarlyStopLogger
+        @param training_summary: Dynamic condition for early stop in training
+        @type training_summary: TrainingSummary
         @param metrics: Dictionary of metric {metric_name: build_in_metric instance}
         @type metrics: Dict[AnyStr, Metric]
         @param exec_config: Configuration for optimization of execution of training
@@ -51,7 +51,7 @@ class NeuralTraining(object):
         self.hyper_params = hyper_params
         _, self.target_device = exec_config.apply_device()
 
-        self.early_stop_logger = early_stop_logger
+        self.training_summary = training_summary
         self.plot_parameters = plot_parameters
         self.exec_config = exec_config
         self.metrics: Dict[AnyStr, Metric] = metrics
@@ -82,7 +82,7 @@ class NeuralTraining(object):
                            for label, _ in metrics_dict.items()]
 
         return cls(hyper_params=hyper_params,
-                   early_stop_logger=EarlyStopLogger(patience=2, min_diff_loss=-0.001, early_stopping_enabled=True),
+                   training_summary=TrainingSummary(patience=2, min_diff_loss=-0.001, early_stopping_enabled=True),
                    metrics=metrics_dict,
                    exec_config=ExecConfig.default(),
                    plot_parameters=plot_parameters)
@@ -117,10 +117,11 @@ class NeuralTraining(object):
 
             # Set mode and execute evaluation
             eval_metrics = self.__eval(neural_model, epoch, eval_loader)
-            self.early_stop_logger(epoch, train_loss, eval_metrics)
+            self.training_summary(epoch, train_loss, eval_metrics)
             self.exec_config.apply_monitor_memory()
+
         # Generate summary
-        self.early_stop_logger.summary(output_file_name)
+        self.training_summary.summary(output_file_name)
         print(f"\nMPS usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
 
     def __repr__(self) -> str:
