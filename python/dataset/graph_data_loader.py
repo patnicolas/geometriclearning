@@ -7,6 +7,7 @@ from torch_geometric.loader import (NeighborLoader, RandomNodeLoader, GraphSAINT
                                     GraphSAINTNodeSampler, GraphSAINTEdgeSampler, ShaDowKHopSampler,
                                     ClusterData, ClusterLoader)
 from typing import Dict, AnyStr, Any
+from networkx import Graph
 from dataset import DatasetException
 __all__ = ['GraphDataLoader']
 
@@ -76,6 +77,63 @@ class GraphDataLoader(object):
 
     def __len__(self) -> int:
         return len(self.data.x)
+
+    def to_networkx(self, first_node_index: int, last_node_index: int) -> Graph:
+        """
+        Generate a graphic representation of the graph defined in this loader
+        @param first_node_index: Index of the first node of the graph to be drawn
+        @type first_node_index: int
+        @param last_node_index: Index of the last node of the graph to be drawn
+        @type last_node_index: int
+        @return: Instance of Networkx graph
+        @rtype: networkx.Graph
+        """
+        import numpy as np
+        import networkx as nx
+
+        # Create NetworkX graph from edge index
+        edge_index = self.data.edge_index.numpy()
+        transposed = edge_index.T
+        # Sample the edges of the graph
+        condition = ((transposed[:, 0] >= first_node_index) & (transposed[:, 0] <= last_node_index))
+        samples = transposed[np.where(condition)]
+        # Create a NetworkX graph
+        graph = nx.Graph()
+        graph.add_edges_from(samples)
+        return graph
+
+    def draw_sample(self, first_node_index: int, last_node_index: int, node_color: AnyStr, node_size: int) -> None:
+        """
+        Draw a sample or subgraph of the graph associated with this loader.
+        The sample of nodes to be drawn have the range [first_node_index, first_node_index+1, ..., last_node_index]
+        @param first_node_index: Index of the first node of the graph to be drawn
+        @type first_node_index: int
+        @param last_node_index: Index of the last node of the graph to be drawn
+        @type last_node_index: int
+        @param node_color: Color of the node to be dranw
+        @type node_color: AnyStr
+        @param node_size: Size of the nodes to be drawn
+        @type node_size: int
+        """
+        import matplotlib.pyplot as plt
+        import networkx as nx
+
+        assert 0 < first_node_index < last_node_index, \
+            f'Cannot draw sample with node index in range [{first_node_index}, {last_node_index}]'
+        assert 20 < node_size < 512, f'Cannot draw sample with a node size {node_size}'
+
+        graph = self.to_networkx(first_node_index, last_node_index)
+        # Plot the graph using matplotlib
+        plt.figure(figsize=(8, 8))
+        pos = nx.spring_layout(graph, k=1)  # Spring layout for positioning nodes
+        # Draw nodes and edges
+        nx.draw(graph, pos, node_size=node_size, node_color=node_color)
+        nx.draw_networkx_edges(graph, pos, arrowsize=40, alpha=0.5, edge_color="black")
+
+        # Configure plot
+        plt.title("Flickr Dataset Visualization")
+        plt.axis("off")
+        plt.show()
 
     """ ------------------------ Private Helper Methods ------------------------ """
 
@@ -159,19 +217,18 @@ class GraphDataLoader(object):
     def __shadow_khop_sampler(self) -> (DataLoader, DataLoader):
         depth = self.attributes_map['depth']
         num_neighbors = self.attributes_map['num_neighbors']
-        node_idx = self.attributes_map['node_idx']
-        replace = self.attributes_map['replace']
+        batch_size = self.attributes_map['batch_size']
         train_loader = ShaDowKHopSampler(data=self.data,
                                          depth=depth,
                                          num_neighbors=num_neighbors,
-                                         node_idx=node_idx,
-                                         replace=replace,
+                                         node_idx=self.data.train_mask,
+                                         batch_size=batch_size,
                                          shuffle=True)
         eval_loader = ShaDowKHopSampler(data=self.data,
                                         depth=depth,
                                         num_neighbors=num_neighbors,
-                                        node_idx=node_idx,
-                                        replace=replace,
+                                        node_idx=self.data.val_mask,
+                                        batch_size=batch_size,
                                         shuffle=False)
         return train_loader, eval_loader
 
@@ -219,8 +276,7 @@ class GraphDataLoader(object):
                 case 'ShaDowKHopSampler':
                     is_valid = ('depth' in attributes_map and
                                 'num_neighbors' in attributes_map and
-                                'node_idx' in attributes_map and
-                                'replace' in attributes_map)
+                                'batch_size' in attributes_map)
 
                 case 'ClusterLoader':
                     is_valid = ('num_parts' in attributes_map and
