@@ -3,7 +3,6 @@ import unittest
 import os
 from dl.block.graph.gnn_base_block import GNNBaseBlock
 from dl.model.gnn_base_model import GNNBaseModel
-from dl.training.exec_config import ExecConfig
 from dl.training.hyper_params import HyperParams
 from torch_geometric.nn import GraphConv
 import torch.nn as nn
@@ -40,9 +39,8 @@ class GNNBaseModelTest(unittest.TestCase):
         walk_length = 6
         num_node_features = 24
         num_classes = 8
-        gcn_model = GNNBaseModelTest.build(batch_size, walk_length, num_node_features, num_classes)
+        gcn_model = GNNBaseModelTest.build(num_node_features, num_classes)
         print(repr(gcn_model))
-
 
     def test_train(self):
         from torch_geometric.datasets.flickr import Flickr
@@ -63,17 +61,14 @@ class GNNBaseModelTest(unittest.TestCase):
         path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
         _dataset: Dataset = Flickr(path)
         num_nodes = _dataset[0].num_node_features
-        gcn_model = GNNBaseModelTest.build(batch_size=4,
-                                           walk_length=6,
-                                           num_node_features=num_nodes,
+        gcn_model = GNNBaseModelTest.build(num_node_features=num_nodes,
                                            num_classes=_dataset[0].num_classes)
 
-        gcn_model.do_train(data_source =_dataset,
-                           hyper_parameters=hyper_parameters,
+        gcn_model.do_train(hyper_parameters=hyper_parameters,
                            metric_labels=['Precision', 'Recall'])
 
     @staticmethod
-    def build(batch_size: int, walk_length: int, num_node_features: int, num_classes: int) -> GNNBaseModel:
+    def build(num_node_features: int, num_classes: int) -> GNNBaseModel:
         from torch_geometric.nn import BatchNorm
 
         hidden_channels = 256
@@ -89,8 +84,6 @@ class GNNBaseModelTest(unittest.TestCase):
         gcn_conv_3 = GNNBaseBlock(_id='K3', message_passing=conv_3)
 
         return GNNBaseModel.build(model_id='Karate club test',
-                                  batch_size=batch_size,
-                                  walk_length=walk_length,
-                                  gcn_blocks=[gcn_conv_1, gcn_conv_2, gcn_conv_3])
+                                  gnn_blocks=[gcn_conv_1, gcn_conv_2, gcn_conv_3])
 
 

@@ -75,12 +75,11 @@ class GNNBaseModel(NeuralModel):
     def forward(self, data: Data) -> torch.Tensor:
         """
         Execute the default forward method for all neural network models inherited from this class
-        @param x: Input tensor
-        @type x: Torch tensor
+        @param data: Graph representation
+        @type data: Data
         @return: Prediction for the input
         @rtype: Torch tensor
         """
-        # print(f'Input {self.model_id}\n{x.shape}')
         x = data.x
         edge_index = data.edge_index
         output = []
@@ -91,8 +90,6 @@ class GNNBaseModel(NeuralModel):
         ffnn = self.ffnn_blocks[0]
         linear = ffnn.modules[0]
         x = linear(x)
-
-        # print(f'Output {self.model_id}\n{x.shape}')
         return x
 
     def do_train(self,
@@ -144,13 +141,11 @@ class GNNBaseModel(NeuralModel):
     def save(self, extra_params: dict = None):
         raise NotImplementedError('GCNModel.save is an abstract method')
 
-
     from torch_geometric.datasets import TUDataset
 
     @staticmethod
     def convert_dataset_to_data(dataset: TUDataset) -> Data:
         return dataset.data
-
 
     """ ----------------------  Private helper methods ------------------  """
 
@@ -166,7 +161,4 @@ class GNNBaseModel(NeuralModel):
                                                   num_steps=3,
                                                   is_train=False)
         return train_loader, test_loader
-
-    def __load_dataset(self, dataset: Dataset) -> (DataLoader, DataLoader):
-        return None
 

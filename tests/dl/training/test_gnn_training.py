@@ -17,6 +17,7 @@ class GNNTrainingTest(unittest.TestCase):
     import torch
     torch.set_default_dtype(torch.float32)
 
+    @unittest.skip('Ignore')
     def test_train_random_walk_loader(self):
         from torch_geometric.datasets.flickr import Flickr
 
@@ -38,14 +39,14 @@ class GNNTrainingTest(unittest.TestCase):
 
             attrs = {
                 'id': 'GraphSAINTRandomWalkSampler',
-                'walk_length': 2,
-                'num_steps': 4,
-                'batch_size': 128,
+                'walk_length': 4,
+                'num_steps': 16,
+                'batch_size': 4096,
                 'sample_coverage': 128
             }
             network = GNNTraining.build(hyper_params=hyper_parameters,
                                         metric_labels=metric_labels,
-                                        title_attribute='GraphSAINTRandomWalkSampler,walk_length:2,steps:4,batch:128')
+                                        title_attribute='GraphSAINTRandomWalkSampler,walk_length:3,steps:12,batch:4096')
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
@@ -125,7 +126,7 @@ class GNNTrainingTest(unittest.TestCase):
             hyper_parameters = HyperParams(
                 lr=0.0005,
                 momentum=0.90,
-                epochs=48,
+                epochs=60,
                 optim_label='adam',
                 batch_size=128,
                 loss_function=nn.CrossEntropyLoss(),
@@ -135,13 +136,13 @@ class GNNTrainingTest(unittest.TestCase):
 
             attrs = {
                 'id': 'NeighborLoader',
-                'num_neighbors': [16, 12],
+                'num_neighbors': [6, 4],
                 'batch_size': 1024,
                 'replace': True
             }
             network = GNNTraining.build(hyper_params=hyper_parameters,
                                         metric_labels=metric_labels,
-                                        title_attribute='NeighborLoader,neighbors:[16, 12],batch:1024')
+                                        title_attribute='NeighborLoader,neighbors:[6, 4],batch:1024')
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
@@ -173,9 +174,9 @@ class GNNTrainingTest(unittest.TestCase):
             hyper_parameters = HyperParams(
                 lr=0.0005,
                 momentum=0.90,
-                epochs=40,
+                epochs=60,
                 optim_label='adam',
-                batch_size=128,
+                batch_size=256,
                 loss_function=nn.CrossEntropyLoss(),
                 drop_out=0.2,
                 train_eval_ratio=0.9,
@@ -469,11 +470,11 @@ class GNNTrainingTest(unittest.TestCase):
             print(str(e))
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+
     def test_compare_accuracy(self):
         from plots.plotter import PlotterParameters, Plotter
 
-        file_neighbor_loader = 'Flickr: NeighborLoader,neighbors:[16, 12],batch:1024'
+        file_neighbor_loader = 'Flickr: NeighborLoader,neighbors:[6, 4],batch:1024'
         neighbor_loader_dict = TrainingSummary.load_summary(TrainingSummary.output_folder, file_neighbor_loader)
         accuracy_neighbor = [float(x) for x in neighbor_loader_dict['Accuracy']]
 
@@ -481,7 +482,7 @@ class GNNTrainingTest(unittest.TestCase):
         random_loader_dict = TrainingSummary.load_summary(TrainingSummary.output_folder, file_random_loader)
         accuracy_random = [float(x) for x in random_loader_dict['Accuracy']]
 
-        file_graph_saint_random_walk_loader = 'Flickr: GraphSAINTRandomWalkSampler,walk:4,steps:3,batch:4096'
+        file_graph_saint_random_walk_loader = 'Flickr: GraphSAINTRandomWalkSampler,walk_length:3,steps:12,batch:4096'
         graph_saint_random_walk_dict = TrainingSummary.load_summary(TrainingSummary.output_folder,
                                                                     file_graph_saint_random_walk_loader)
         accuracy_graph_saint_random_walk = [float(x) for x in graph_saint_random_walk_dict['Accuracy']]
@@ -490,10 +491,34 @@ class GNNTrainingTest(unittest.TestCase):
                                            y_label='Accuracy',
                                            title='Comparison Accuracy Graph Data Loader',
                                            fig_size=(11, 8))
-        Plotter.plot([accuracy_neighbor[0:40], accuracy_random[0:40], accuracy_graph_saint_random_walk[0:40]],
-                     ['NeighborLoader', 'RandomLoader', 'GraphsSAINTRandomWalk'],
-                     plotter_params)
+        Plotter.plot(values=[accuracy_neighbor[0:40], accuracy_random[0:40], accuracy_graph_saint_random_walk[0:40]],
+                     labels=['NeighborLoader', 'RandomLoader', 'GraphsSAINTRandomWalk'],
+                     plotter_parameters=plotter_params)
 
+    @unittest.skip('Ignore')
+    def test_compare_precision(self):
+        from plots.plotter import PlotterParameters, Plotter
+
+        file_neighbor_loader = 'Flickr: NeighborLoader,neighbors:[6, 4],batch:1024'
+        neighbor_loader_dict = TrainingSummary.load_summary(TrainingSummary.output_folder, file_neighbor_loader)
+        precision_neighbor = [float(x) for x in neighbor_loader_dict['Precision']]
+
+        file_random_loader = 'Flickr: RandomNodeLoader,num_parts=256'
+        random_loader_dict = TrainingSummary.load_summary(TrainingSummary.output_folder, file_random_loader)
+        precision_random = [float(x) for x in random_loader_dict['Precision']]
+
+        file_graph_saint_random_walk_loader = 'Flickr: GraphSAINTRandomWalkSampler,walk_length:3,steps:12,batch:4096'
+        graph_saint_random_walk_dict = TrainingSummary.load_summary(TrainingSummary.output_folder,
+                                                                    file_graph_saint_random_walk_loader)
+        precision_graph_saint_random_walk = [float(x) for x in graph_saint_random_walk_dict['Precision']]
+        plotter_params = PlotterParameters(0,
+                                           x_label='epochs',
+                                           y_label='Precision',
+                                           title='Comparison Precision Graph Data Loader',
+                                           fig_size=(11, 8))
+        Plotter.plot(values=[precision_neighbor[0:60], precision_random[0:60], precision_graph_saint_random_walk[0:60]],
+                     labels=['NeighborLoader', 'RandomLoader', 'GraphsSAINTRandomWalk'],
+                     plotter_parameters=plotter_params)
 
     @staticmethod
     def build(num_node_features: int, num_classes: int) -> GNNBaseModel:

@@ -85,12 +85,13 @@ class Plotter(object):
         num_points = Plotter.__validate_params(dict_values, plotter_params_list)
         fig, axes = plt.subplots(ncols=1, nrows=len(dict_values), figsize=plotter_params_list[0].fig_size)
         x = np.arange(0, num_points, 1)
-        for plot_index in range(len(dict_values)):
+        num_plots = len(dict_values)
+        for plot_index in range(num_plots):
             key = plotter_params_list[plot_index].y_label
             y = dict_values[key]
-            Plotter.__axis_plot(x, plotter_params_list[plot_index], y, axes, plot_index)
+            Plotter.__axis_plot(x, plotter_params_list[plot_index], y, axes, plot_index, plot_index == num_plots-1)
 
-        plt.title(plot_title, y=6.0)
+        plt.title(label=plot_title, y=6.0, fontdict={'family': 'sans-serif', 'size': 20})
         fig.savefig(f"{Plotter.test_images_folder}/plot_{plot_title}.png")
         # plt.show()
 
@@ -118,7 +119,7 @@ class Plotter(object):
 
         plt.title(
             plotter_parameters.title,
-            fontdict = {'family': 'serif', 'size': 20, 'weight': 'bold'}
+            fontdict = {'family': 'sans-serif', 'size': 22, 'weight': 'bold'}
         )
         plt.xlabel(
             plotter_parameters.x_label,
@@ -171,15 +172,21 @@ class Plotter(object):
             x: np.array,
             plotter_param: PlotterParameters,
             torch_values: List[torch.Tensor],
-            axes: np.array,
-            index: int) -> NoReturn:
+            axes,
+            index: int,
+            last_plot: bool) -> NoReturn:
         values = [value.cpu().float() for value in torch_values]
         y = np.asarray(values)
         axes[index].plot(x, y)
-        axes[index].set(
-            xlabel=plotter_param.x_label,
-            ylabel=plotter_param.y_label,
-            title='')
+        axes[index].set(xlabel=plotter_param.x_label,ylabel=plotter_param.y_label,title='')
+        if last_plot:
+            axes[index].xaxis.label.set_fontsize(16)
+            axes[index].tick_params(axis='x', labelsize=14, labelrotation=0)
+        else:
+            axes[index].xaxis.label.set_fontsize(1)
+            axes[index].tick_params(axis='x', labelsize=1, labelrotation=0)
+        axes[index].yaxis.label.set_fontsize(16)
+        axes[index].tick_params(axis='y', labelsize=14)
         axes[index].grid()
 
     @staticmethod

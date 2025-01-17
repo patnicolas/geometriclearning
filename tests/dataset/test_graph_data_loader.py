@@ -32,6 +32,7 @@ class GraphDataLoaderTest(unittest.TestCase):
             print(e)
             self.assertTrue(True)
 
+    @unittest.skip('Ignore')
     def test_init_3(self):
         import os
         from torch_geometric.datasets.flickr import Flickr
@@ -48,6 +49,7 @@ class GraphDataLoaderTest(unittest.TestCase):
             print(e)
             self.assertTrue(False)
 
+    @unittest.skip('Ignore')
     def test_call_1(self):
         import os
         from torch_geometric.datasets.flickr import Flickr

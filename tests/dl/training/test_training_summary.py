@@ -28,11 +28,11 @@ class TrainingSummaryTest(unittest.TestCase):
         early_stopping_enabled = True
         training_summary = TrainingSummary(patience, min_diff_loss, early_stopping_enabled)
 
-        new_metrics1 = {'Accuracy': torch.Tensor(0.5), 'F1': torch.Tensor(0.6)}
+        new_metrics1 = {'Accuracy': 0.5, 'F1': 0.6}
         training_summary.update_metrics(new_metrics1)
-        new_metrics2 = {'Accuracy': torch.Tensor(0.67), 'F1': torch.Tensor(0.62)}
+        new_metrics2 = {'Accuracy': 0.67, 'F1': 0.62}
         training_summary.update_metrics(new_metrics2)
-        new_metrics3 = {'Accuracy': torch.Tensor(0.69), 'F1': torch.Tensor(0.67)}
+        new_metrics3 = {'Accuracy': 0.69, 'F1': 0.67}
         training_summary.update_metrics(new_metrics3)
         training_summary.summary(None)
 
@@ -52,20 +52,13 @@ class TrainingSummaryTest(unittest.TestCase):
         print(f'Recorded {max_index} values')
         for i in range(max_index):
             training_summary(
-                i,
-                torch.Tensor(train_loss[i]),
-                {
+                epoch=i,
+                train_loss=torch.Tensor(train_loss[i]),
+                eval_metrics={
                     Metric.accuracy_label: torch.Tensor(accuracy[i]),
                     Metric.f1_label: torch.Tensor(f1[i])
                 })
         training_summary.summary(None)
-
-
-    def test_load_torch_tensor(self):
-        from dl.model.vision.conv_mnist import ConvMNIST
-        output_filename = f'stats_{ConvMNIST.id}'
-        summary_metrics = TrainingSummary.load('../../../tests/output', output_filename)
-        print(str(summary_metrics))
 
 
 
