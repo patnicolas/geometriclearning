@@ -12,7 +12,7 @@ class GNNPlotter(object):
     def __init__(self, graph: Graph, data: Data, sampled_node_index_range: Tuple[int, int] = None) -> None:
         """
         Constructor for the visual representation of the data associated with a Graph Neural Network
-        The graph is sampled  is the parameter is defined. The nodes of the graph are arbitrary selected
+        The graph is sampled is the parameter is defined. The nodes of the graph are arbitrary selected
         as follows:
         node indices [0, 1, ... sampled_node_index_range[0], ...,sampled_node_index_range[1], ...]
 
@@ -57,10 +57,12 @@ class GNNPlotter(object):
         """
         return cls(nx.DiGraph(), data, sampled_node_index_range)
 
+    def len(self) -> int:
+        return len(self.data.edge_index)
 
-    def sample(self) -> None:
+    def sample(self) -> int:
         """
-        Sample a graph by selecting its nodes through a range of indices
+        Sample/extract a subgraph from a large graph by selecting its nodes through a range of indices
         """
         import numpy as np
 
@@ -77,12 +79,13 @@ class GNNPlotter(object):
             sampled_nodes = transposed
         # Assign the samples to the edge of the graph
         self.graph.add_edges_from(sampled_nodes)
+        return len(sampled_nodes)
 
     def draw(self,
              layout_func: Callable[[Graph], Dict[Any, Any]],
              node_color: AnyStr,
              node_size: int,
-             title: AnyStr) -> None:
+             title: AnyStr) -> int:
         """
         Draw a sample or subgraph of the graph associated with this loader.
         The sample of nodes to be drawn have the range [first_node_index, first_node_index+1, ..., last_node_index]
@@ -95,7 +98,7 @@ class GNNPlotter(object):
         @param title: Title of the plot
         @type title: str
         """
-        self.sample()
+        num_sampled_nodes = self.sample()
 
         # Plot the graph using matplotlib
         plt.figure(figsize=(8, 8))
@@ -109,10 +112,11 @@ class GNNPlotter(object):
         plt.title(title)
         plt.axis("off")
         plt.show()
+        return num_sampled_nodes
 
     def draw_all(self,
                  node_size: int,
-                 title: AnyStr) -> None:
+                 title: AnyStr) -> int:
         """
         Draw a sample or subgraph of the graph using a set of predefined layout.
         @param node_size: Size of the nodes to be drawn
@@ -120,45 +124,28 @@ class GNNPlotter(object):
         @param title: Title of the plot
         @type title: str
         """
-        def spring_layout(graph: Graph) -> Dict[Any, Any]:
-            return nx.spring_layout(graph, k=1)
-
-        def random_layout(graph: Graph) -> Dict[Any, Any]:
-            return nx.random_layout(graph, center=None, dim=2)
-
-        def spiral_layout(graph: Graph) -> Dict[Any, Any]:
-            return nx.spiral_layout(graph)
-
-        def arf_layout(graph: Graph) -> Dict[Any, Any]:
-            return nx.arf_layout(graph)
-
-        def planar_layout(graph: Graph) -> Dict[Any, Any]:
-            return nx.planar_layout(graph)
-
-        def kamada_kawai_layout(graph: Graph) -> Dict[Any, Any]:
-            return nx.kamada_kawai_layout(graph)
-
         layout_funcs = {
-            'Spring layout': spring_layout,
-            'Random layout': random_layout,
-            'Kamada-Kawai layout': kamada_kawai_layout,
-            'Planar layout': planar_layout,
-            'Spiral layout': spiral_layout,
-            'Arf layout': arf_layout
+            'Spring layout': lambda graph: nx.spring_layout(graph, k=1),
+            'Random layout': lambda graph: nx.random_layout(graph, center=None, dim=2),
+            'Kamada-Kawai layout': lambda graph: nx.kamada_kawai_layout(graph),
+            'Planar layout': lambda graph: nx.kamada_kawai_layout(graph),
+            'Spiral layout': lambda graph: nx.spiral_layout(graph),
+            'Arf layout': lambda graph: nx.arf_layout(graph)
         }
 
-        self.sample()
-        plt.figure(figsize=(9, 9))
-        node_colors = ['blue', 'green', 'red', 'magenta', 'gray', 'black']
+        num_sampled_nodes = self.sample()
+        plt.figure(figsize=(10, 10))
+        node_colors = ['blue', 'green', 'red', 'magenta', 'gray', 'orange']
 
         for idx, (plot_type, layout_func) in enumerate(layout_funcs.items(), 1):
             plt.subplot(3, 2, idx)
             pos = layout_func(self.graph)
             nx.draw(self.graph, pos, node_size=node_size, node_color=node_colors[idx-1])
-            nx.draw_networkx_edges(self.graph, pos, arrowsize=40, alpha=0.5, edge_color="black")
-            plt.title(f'{title}: {plot_type}')
+            nx.draw_networkx_edges(self.graph, pos, arrowsize=18, alpha=0.5, edge_color="black")
+            plt.title(f'{title}: {plot_type}', fontdict={'family': 'sans-serif', 'size': 15})
             plt.axis("off")
         plt.show()
+        return num_sampled_nodes
 
     """ ---------------------  Private help methods ------------------------  """
 
