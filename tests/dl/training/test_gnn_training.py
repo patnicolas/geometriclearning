@@ -1,4 +1,5 @@
 import unittest
+from dataclasses import dataclass
 
 from dl import GNNException
 from dataset import DatasetException
@@ -11,6 +12,11 @@ from dl.training.training_summary import TrainingSummary
 from metric.metric import Metric
 import torch.nn as nn
 import os
+from typing import Dict, Any, AnyStr
+
+
+def show(attrs: Dict[AnyStr, Any]) -> AnyStr:
+    return ', '.join([f'{k}:{v}' for k, v in attrs.items()])
 
 
 class GNNTrainingTest(unittest.TestCase):
@@ -46,7 +52,7 @@ class GNNTrainingTest(unittest.TestCase):
             }
             network = GNNTraining.build(hyper_params=hyper_parameters,
                                         metric_labels=metric_labels,
-                                        title_attribute='GraphSAINTRandomWalkSampler,walk_length:3,steps:12,batch:4096')
+                                        title_attribute=show(attrs))
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
@@ -94,7 +100,7 @@ class GNNTrainingTest(unittest.TestCase):
             }
             network = GNNTraining.build(hyper_params=hyper_parameters,
                                         metric_labels=metric_labels,
-                                        title_attribute='NeighborLoader,neighbors:[8, 8],batch:1024')
+                                        title_attribute=show(attrs))
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
@@ -142,7 +148,7 @@ class GNNTrainingTest(unittest.TestCase):
             }
             network = GNNTraining.build(hyper_params=hyper_parameters,
                                         metric_labels=metric_labels,
-                                        title_attribute='NeighborLoader,neighbors:[6, 4],batch:1024')
+                                        title_attribute=show(attrs))
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
@@ -184,11 +190,11 @@ class GNNTrainingTest(unittest.TestCase):
 
             attrs = {
                 'id': 'RandomNodeLoader',
-                'num_parts':256
+                'num_parts': 256
             }
             network = GNNTraining.build(hyper_params=hyper_parameters,
                                         metric_labels=metric_labels,
-                                        title_attribute='RandomNodeLoader,num_parts=256')
+                                        title_attribute=show(attrs))
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
@@ -234,7 +240,7 @@ class GNNTrainingTest(unittest.TestCase):
             }
             network = GNNTraining.build(hyper_params=hyper_parameters,
                                         metric_labels=metric_labels,
-                                        title_attribute='RandomNodeLoader,num_parts=256')
+                                        title_attribute=show(attrs))
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
@@ -282,7 +288,7 @@ class GNNTrainingTest(unittest.TestCase):
             }
             network = GNNTraining.build(hyper_params=hyper_parameters,
                                         metric_labels=metric_labels,
-                                        title_attribute='GraphSAINTNodeSampler,num_parts=256,batch_size=1024,sample_coverage=100')
+                                        title_attribute=show(attrs))
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
@@ -330,7 +336,7 @@ class GNNTrainingTest(unittest.TestCase):
             }
             network = GNNTraining.build(hyper_params=hyper_parameters,
                                         metric_labels=metric_labels,
-                                        title_attribute='ShaDowKHopSampler,num_neighbors=8,batch_size=1024,depth=3')
+                                        title_attribute=show(attrs))
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
@@ -379,7 +385,7 @@ class GNNTrainingTest(unittest.TestCase):
             }
             network = GNNTraining.build(hyper_params=hyper_parameters,
                                         metric_labels=metric_labels,
-                                        title_attribute='ClusterLoader,num_parts=256,non-recursive,batch_size=2048')
+                                        title_attribute=show(attrs))
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
@@ -428,7 +434,7 @@ class GNNTrainingTest(unittest.TestCase):
             }
             network = GNNTraining.build(hyper_params=hyper_parameters,
                                         metric_labels=metric_labels,
-                                        title_attribute='ClusterLoader,num_parts=256,recursive,batch_size=2048')
+                                        title_attribute=show(attrs))
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
@@ -464,36 +470,71 @@ class GNNTrainingTest(unittest.TestCase):
                 'keep_inter_cluster_edges': False
             }
             graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
-            graph_data_loader.draw_sample(first_node_index=10, last_node_index=24)
+            graph_data_loader.draw_sample(
+                first_node_index=10,
+                last_node_index=26,
+                node_color='blue',
+                node_size=30,
+                label=f'Flickr - ClusterLoader,num_parts:256,batch_size:2048,range:[10,25]')
             self.assertTrue(True)
         except DatasetException as e:
             print(str(e))
             self.assertTrue(False)
 
+    def test_draw_sample_2(self):
+        from torch_geometric.datasets.flickr import Flickr
+        try:
+            path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
+            _dataset = Flickr(path)
+            _data = _dataset[0]
+            attrs = {
+                'id': 'GraphSAINTNodeSampler',
+                'num_steps': 256,
+                'sample_coverage': 100,
+                'batch_size': 1024
+            }
+            graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
+            num_nodes = graph_data_loader.draw_sample(
+                first_node_index=10,
+                last_node_index=15,
+                node_color='orange',
+                node_size=22,
+                label=f'Flickr - GraphSAINTNodeSampler\nnum_steps:256,batch_size:1024,range:[10,28]')
+            print(f'Number of nodes {num_nodes}')
+            self.assertTrue(num_nodes > 0)
+        except DatasetException as e:
+            print(str(e))
+            self.assertTrue(False)
 
+    @unittest.skip('Ignore')
     def test_compare_accuracy(self):
         from plots.plotter import PlotterParameters, Plotter
 
-        file_neighbor_loader = 'Flickr: NeighborLoader,neighbors:[6, 4],batch:1024'
-        neighbor_loader_dict = TrainingSummary.load_summary(TrainingSummary.output_folder, file_neighbor_loader)
-        accuracy_neighbor = [float(x) for x in neighbor_loader_dict['Accuracy']]
+        try:
+            file_neighbor_loader = 'Flickr: NeighborLoader,neighbors:[6, 4],batch:1024'
+            neighbor_loader_dict = TrainingSummary.load_summary(TrainingSummary.output_folder, file_neighbor_loader)
+            accuracy_neighbor = [float(x) for x in neighbor_loader_dict['Accuracy']]
 
-        file_random_loader = 'Flickr: RandomNodeLoader,num_parts=256'
-        random_loader_dict = TrainingSummary.load_summary(TrainingSummary.output_folder, file_random_loader)
-        accuracy_random = [float(x) for x in random_loader_dict['Accuracy']]
+            file_random_loader = 'Flickr: RandomNodeLoader,num_parts=256'
+            random_loader_dict = TrainingSummary.load_summary(TrainingSummary.output_folder, file_random_loader)
+            accuracy_random = [float(x) for x in random_loader_dict['Accuracy']]
 
-        file_graph_saint_random_walk_loader = 'Flickr: GraphSAINTRandomWalkSampler,walk_length:3,steps:12,batch:4096'
-        graph_saint_random_walk_dict = TrainingSummary.load_summary(TrainingSummary.output_folder,
-                                                                    file_graph_saint_random_walk_loader)
-        accuracy_graph_saint_random_walk = [float(x) for x in graph_saint_random_walk_dict['Accuracy']]
-        plotter_params = PlotterParameters(0,
-                                           x_label='epochs',
-                                           y_label='Accuracy',
-                                           title='Comparison Accuracy Graph Data Loader',
-                                           fig_size=(11, 8))
-        Plotter.plot(values=[accuracy_neighbor[0:40], accuracy_random[0:40], accuracy_graph_saint_random_walk[0:40]],
-                     labels=['NeighborLoader', 'RandomLoader', 'GraphsSAINTRandomWalk'],
-                     plotter_parameters=plotter_params)
+            file_graph_saint_random_walk_loader = 'GraphSAINTRandomWalkSampler,walk_length:3,steps:12,batch:4096'
+            graph_saint_random_walk_dict = TrainingSummary.load_summary(TrainingSummary.output_folder,
+                                                                        file_graph_saint_random_walk_loader)
+            accuracy_graph_saint_random_walk = [float(x) for x in graph_saint_random_walk_dict['Accuracy']]
+            plotter_params = PlotterParameters(0,
+                                               x_label='epochs',
+                                               y_label='Accuracy',
+                                               title='Comparison Accuracy Graph Data Loader',
+                                               fig_size=(11, 8))
+            Plotter.plot(values=[accuracy_neighbor[0:40], accuracy_random[0:40], accuracy_graph_saint_random_walk[0:40]],
+                         labels=['NeighborLoader', 'RandomLoader', 'GraphsSAINTRandomWalk'],
+                         plotter_parameters=plotter_params)
+            self.assertTrue(True)
+        except DatasetException as e:
+            print(str(e))
+            self.assertTrue(False)
 
     @unittest.skip('Ignore')
     def test_compare_precision(self):
@@ -528,14 +569,14 @@ class GNNTrainingTest(unittest.TestCase):
 
         hidden_channels = 256
         conv_1 = GraphConv(in_channels=num_node_features, out_channels=hidden_channels)
-        gnn_block_1 = GNNBaseBlock(_id='K1',
-                                   message_passing=conv_1,
-                                   activation=nn.ReLU(),
-                                   drop_out=0.2)
+        gnn_block_1 = GNNBaseBlock(block_id='K1',
+                                   message_passing_module=conv_1,
+                                   activation_module=nn.ReLU(),
+                                   drop_out_module=0.2)
         conv_2 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-        gnn_block_2 = GNNBaseBlock(_id='K2', message_passing=conv_2, activation=nn.ReLU(), drop_out=0.2)
+        gnn_block_2 = GNNBaseBlock(block_id='K2', message_passing_module=conv_2, activation_module=nn.ReLU(), drop_out_module=0.2)
         conv_3 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-        gnn_block_3 = GNNBaseBlock(_id='K3', message_passing=conv_3, activation=nn.ReLU(), drop_out=0.2)
+        gnn_block_3 = GNNBaseBlock(block_id='K3', message_passing_module=conv_3, activation_module=nn.ReLU(), drop_out_module=0.2)
 
         ffnn_block = FFNNBlock.build(block_id='Output',
                                      layer=nn.Linear(3*hidden_channels, num_classes),

@@ -5,7 +5,6 @@ from typing import List, AnyStr, Self
 from dl import ConvDataType
 from dl.model.neural_model import NeuralModel
 from dl.block.ffnn_block import FFNNBlock
-import torch
 import torch.nn as nn
 import logging
 logger = logging.getLogger('dl.model.FFNNModel')
@@ -28,21 +27,63 @@ class FFNNModel(NeuralModel):
         FFNNModel.is_valid(neural_blocks)
 
         self.neural_blocks = neural_blocks
-        # Record the number of input and output features from the first and last neural block respectively
+        # Record the number of input and output features from
+        # the first and last neural block respectively
         self.in_features = neural_blocks[0].in_features
         self.out_features = neural_blocks[-1].out_features
 
-        # Define the sequence of modules from the layout
+        # Define the sequence of modules from the layout of neural blocks
         modules = [module for block in neural_blocks for module in block.modules]
-        super(FFNNModel, self).__init__(model_id, torch.nn.Sequential(*modules))
+        super(FFNNModel, self).__init__(model_id, nn.Sequential(*modules))
 
-    def transpose(self, extra: nn.Module = None) -> Self:
+    @classmethod
+    def build(cls,
+              model_id: AnyStr,
+              in_features: List[int],
+              activation: nn.Module,
+              drop_out: float,
+              output_activation: nn.Module = None) -> Self:
+        ffnn_blocks = FFNNModel.create_ffnn_blocks(
+            model_id,
+            in_features,
+            activation,
+            drop_out,
+            output_activation
+        )
+        return cls(model_id, ffnn_blocks)
+
+    @staticmethod
+    def create_ffnn_blocks(
+            model_id: AnyStr,
+            in_features: List[int],
+            activation: nn.Module,
+            drop_out: float = 0.2,
+            output_activation: nn.Module = None) -> List[FFNNBlock]:
+        ffnn_blocks = []
+        in_feature = in_features[0]
+        for idx in range(1, len(in_features)):
+            layer = nn.Linear(in_features=in_feature,
+                              out_features=in_features[idx],
+                              bias=False)
+            activation_module = output_activation \
+                if idx == len(in_features) - 1 and activation_module is not None \
+                else activation
+            ffnn_block = FFNNBlock.build(
+                block_id=f'{model_id}-con-{idx}',
+                layer=layer,
+                activation=activation_module,
+                drop_out=drop_out)
+            ffnn_blocks.append(ffnn_block)
+            in_feature = in_features[idx]
+        return ffnn_blocks
+
+    def transpose(self, output_activation: nn.Module = None) -> Self:
         """
         Generate the inverted neural layout for this feed forward neural network
         @return: This feed-forward neural network with an inverted layout
         @rtype: FFNNModel
         """
-        neural_blocks: list[FFNNBlock] = [block.transpose() for block in self.neural_blocks[::-1]]
+        neural_blocks = [block.transpose(output_activation) for block in self.neural_blocks[::-1]]
         return FFNNModel(model_id=f'_{self.model_id}', neural_blocks=neural_blocks)
 
     def get_in_features(self) -> int:

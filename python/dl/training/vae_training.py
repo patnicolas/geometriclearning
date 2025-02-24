@@ -117,7 +117,7 @@ class VAETraining(NeuralTraining, ABC):
             print(f'Training loss: {train_loss}', flush=True)
 
             # Set mode and execute evaluation
-            eval_metrics = self.__eval(neural_model, epoch, eval_loader)
+            eval_metrics = self.__val(neural_model, epoch, eval_loader)
             self.training_summary(epoch, train_loss, eval_metrics)
 
         # Generate summary
@@ -178,7 +178,7 @@ class VAETraining(NeuralTraining, ABC):
 
         return total_loss / num_records
 
-    def __eval(self, neural_model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
+    def __val(self, neural_model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
         neural_model.eval()
         total_loss = 0
         mu, log_var = neural_model.get_mu_log_var()

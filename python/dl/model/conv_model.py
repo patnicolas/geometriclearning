@@ -4,11 +4,11 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from abc import ABC
 
 from dl.block.ffnn_block import FFNNBlock
-from dl.block.cnn.conv_block import ConvBlock
+from dl.block.conv.conv_block import ConvBlock
 from dl.model.neural_model import NeuralModel
 from dl.model.ffnn_model import FFNNModel
 from dl.model.deconv_model import DeConvModel
-from dl import ConvDataType
+from dl.block.conv import ConvDataType
 from typing import List, AnyStr, Dict, Any, Self, Optional
 import torch
 import torch.nn as nn
@@ -30,8 +30,8 @@ __all__ = ['ConvModel']
 
 class ConvModel(NeuralModel, ABC):
     def __init__(self,
-                 input_size: ConvDataType,
                  model_id: AnyStr,
+                 input_size: ConvDataType,
                  conv_blocks: List[ConvBlock],
                  ffnn_blocks: Optional[List[FFNNBlock]] = None) -> None:
         """
@@ -48,31 +48,46 @@ class ConvModel(NeuralModel, ABC):
         self.input_size = input_size
         self.conv_blocks = conv_blocks
 
-        # Record the number of input and output features from the first and last neural block respectively
+        # Record the number of input and output features from
+        # the first and last neural block respectively
         self.in_features = conv_blocks[0].conv_block_config.in_channels
         self.out_features = ffnn_blocks[-1].out_features if ffnn_blocks is not None \
             else conv_blocks[-1].conv_block_config.out_channels
 
         # Define the sequence of modules from the layout
-        modules: List[nn.Module] = [module for block in conv_blocks for module in block.modules]
+        modules = [module for block in conv_blocks for module in block.modules]
 
-        # If fully connected are provided as CNN
+        # If fully connected layers are specified
         if ffnn_blocks is not None:
             ffnn_input_size = self.__linear_layer_input_size(conv_blocks[-1])
             modules.append(nn.Flatten())
+
+            # First fully connected module
+            linear_module_1 = nn.Linear(in_features=ffnn_input_size,
+                                        out_features=ffnn_blocks[0].out_features,
+                                        bias=False)
+            # First fully connected block is built
             linear_block = FFNNBlock.build(block_id=ffnn_blocks[0].block_id,
-                                           layer=nn.Linear(in_features=ffnn_input_size, out_features=ffnn_blocks[0].out_features, bias=False),
+                                           layer=linear_module_1,
                                            activation=ffnn_blocks[0].activation)
             self.ffnn_blocks = [linear_block]
+
+            # If there are more than one fully connected layer
             if len(ffnn_blocks) > 1:
-                [self.ffnn_blocks.append(ffnn_blocks[index]) for index in range(1, len(ffnn_blocks))]
-            [modules.append(module) for block in self.ffnn_blocks for module in block.modules]
+                [self.ffnn_blocks.append(ffnn_blocks[index])
+                 for index in range(1, len(ffnn_blocks))]
+
+            # Generate the sequence of modules
+            [modules.append(module) for block in self.ffnn_blocks
+             for module in block.modules]
         else:
             self.ffnn_blocks = None
+
         super(ConvModel, self).__init__(model_id, nn.Sequential(*modules))
 
+
     @classmethod
-    def build(cls, model_id: AnyStr, conv_blocks: List[ConvBlock]) -> Self:
+    def buildX(cls, model_id: AnyStr, conv_blocks: List[ConvBlock]) -> Self:
         """
         Create a pure convolutional neural network as a convolutional encoder for
         variational auto-encoder or generative adversarial network
@@ -83,7 +98,7 @@ class ConvModel(NeuralModel, ABC):
         @return: Instance of decoder of type ConvModel
         @rtype: ConvModel
         """
-        return  cls(model_id, conv_blocks = conv_blocks, ffnn_blocks = None)
+        return cls(model_id, conv_blocks=conv_blocks, ffnn_blocks=None)
 
     def transpose(self, extra: nn.Module = None) -> DeConvModel:
         """
@@ -95,7 +110,7 @@ class ConvModel(NeuralModel, ABC):
          """
         de_conv_blocks = [conv_block.transpose() for conv_block in self.conv_blocks]
         de_conv_blocks.reverse()
-        return DeConvModel(model_id=f'de_{self.model_id}', de_conv_blocks=de_conv_blocks, last_activation=extra)
+        return DeConvModel(model_id=f'de_{self.model_id}', deconv_blocks=de_conv_blocks, last_activation=extra)
 
     def get_in_features(self) -> int:
         """
@@ -173,7 +188,7 @@ class ConvModel(NeuralModel, ABC):
 
     """ ----------------------------   Private helper methods --------------------------- """
     def __linear_layer_input_size(self, last_conv_block: ConvBlock) -> int:
-        from dl.block.cnn.conv_output_size import SeqConvOutputSize
+        from dl.block.conv.conv_output_size import SeqConvOutputSize
 
         conv_block_sizes = [conv_block.get_conv_output_size() for conv_block in self.conv_blocks]
         conv_model_output_sizes = SeqConvOutputSize(conv_block_sizes)

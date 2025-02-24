@@ -1,6 +1,6 @@
 import unittest
 import torch.nn as nn
-from dl.block.cnn.conv_2d_block import Conv2DBlock
+from dl.block.conv.conv_2d_block import Conv2dBlock
 from dl.block.ffnn_block import FFNNBlock
 from dl.model.conv_model import ConvModel
 from dl import ConvException
@@ -12,23 +12,23 @@ class ConvModelTest(unittest.TestCase):
     @unittest.skip('Ignore')
     def test_mnist_small(self):
         try:
-            conv_2d_block_1 = Conv2DBlock.build(block_id='conv_1',
+            conv_2d_block_1 = Conv2dBlock.build(block_id='conv_1',
                                                 in_channels=1,
                                                 out_channels=8,
                                                 kernel_size=(3, 3),
                                                 stride=(1, 1),
-                                                padding=(1,1),
+                                                padding=(1, 1),
                                                 batch_norm=True,
                                                 max_pooling_kernel=2,
                                                 activation=nn.ReLU(),
                                                 bias=False,
                                                 drop_out=0.2)
-            conv_2d_block_2 = Conv2DBlock.build(block_id='conv_2',
+            conv_2d_block_2 = Conv2dBlock.build(block_id='conv_2',
                                                 in_channels=8,
                                                 out_channels=16,
                                                 kernel_size=(3, 3),
                                                 stride=(1, 1),
-                                                padding=(1,1),
+                                                padding=(1, 1),
                                                 batch_norm=True,
                                                 max_pooling_kernel=2,
                                                 activation=nn.ReLU(),
@@ -103,7 +103,7 @@ class ConvModelTest(unittest.TestCase):
 
     def test_transpose(self):
         try:
-            conv_2d_block_1 = Conv2DBlock.build(block_id='conv_1',
+            conv_2d_block_1 = Conv2dBlock.build(block_id='conv_1',
                                                 in_channels=1,
                                                 out_channels=8,
                                                 kernel_size=(3, 3),
@@ -114,7 +114,7 @@ class ConvModelTest(unittest.TestCase):
                                                 activation=nn.ReLU(),
                                                 bias=False,
                                                 drop_out=0.25)
-            conv_2d_block_2 = Conv2DBlock.build(block_id='conv_2',
+            conv_2d_block_2 = Conv2dBlock.build(block_id='conv_2',
                                                 in_channels=8,
                                                 out_channels=16,
                                                 kernel_size=(3, 3),
@@ -125,7 +125,7 @@ class ConvModelTest(unittest.TestCase):
                                                 activation=nn.ReLU(),
                                                 bias=False,
                                                 drop_out=0.25)
-            conv_2d_block_3 = Conv2DBlock.build(block_id='conv_3',
+            conv_2d_block_3 = Conv2dBlock.build(block_id='conv_3',
                                                 in_channels=16,
                                                 out_channels=32,
                                                 kernel_size=(3, 3),
@@ -154,7 +154,7 @@ class ConvModelTest(unittest.TestCase):
         from dl.training.exec_config import ExecConfig
 
         try:
-            conv_2d_block_1 = Conv2DBlock.build(block_id='conv_1',
+            conv_2d_block_1 = Conv2dBlock.build(block_id='conv_1',
                                                 in_channels=3,
                                                 out_channels=8,
                                                 kernel_size=(3, 3),
@@ -165,7 +165,7 @@ class ConvModelTest(unittest.TestCase):
                                                 activation=nn.ReLU(),
                                                 bias=False,
                                                 drop_out=0.25)
-            conv_2d_block_2 = Conv2DBlock.build(block_id='conv_2',
+            conv_2d_block_2 = Conv2dBlock.build(block_id='conv_2',
                                                 in_channels=8,
                                                 out_channels=16,
                                                 kernel_size=(3, 3),
@@ -202,7 +202,7 @@ class ConvModelTest(unittest.TestCase):
 
         try:
             target_size = 128
-            conv_2d_block_1 = Conv2DBlock.build(block_id='conv_1',
+            conv_2d_block_1 = Conv2dBlock.build(block_id='conv_1',
                                                 in_channels=3,
                                                 out_channels=64,
                                                 kernel_size=(3, 3),
@@ -213,7 +213,7 @@ class ConvModelTest(unittest.TestCase):
                                                 activation=nn.ReLU(),
                                                 bias=False,
                                                 drop_out=0.25)
-            conv_2d_block_2 = Conv2DBlock.build(block_id='conv_2',
+            conv_2d_block_2 = Conv2dBlock.build(block_id='conv_2',
                                                 in_channels=64,
                                                 out_channels=128,
                                                 kernel_size=(3, 3),
@@ -224,7 +224,7 @@ class ConvModelTest(unittest.TestCase):
                                                 activation=nn.ReLU(),
                                                 bias=False,
                                                 drop_out=0.25)
-            conv_2d_block_3 = Conv2DBlock.build(block_id='conv_3',
+            conv_2d_block_3 = Conv2dBlock.build(block_id='conv_3',
                                                 in_channels=128,
                                                 out_channels=256,
                                                 kernel_size=(3, 3),
@@ -238,7 +238,7 @@ class ConvModelTest(unittest.TestCase):
             num_classes = 101
             ffnn_block_1 = FFNNBlock.build(block_id='hidden',
                                            layer=nn.Linear(in_features=0, out_features=512, bias=False),
-                                           activation=nn.Softmax(dim=0))
+                                           activation=nn.ReLU())
             ffnn_block_2 = FFNNBlock.build(block_id='output',
                                            layer=nn.Linear(in_features=512, out_features=num_classes, bias=False),
                                            activation=nn.Softmax(dim=0))

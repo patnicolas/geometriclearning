@@ -1,6 +1,6 @@
 import unittest
 from torch import nn
-from dl.block.conv.conv_block import ConvBlock
+from dl.block.conv.conv_block_b import ConvBlockB
 from dl import ConvException
 
 
@@ -26,7 +26,7 @@ class ConvBlockTest(unittest.TestCase):
             self.assertTrue(False)
 
     @staticmethod
-    def __create_conv_block(dimension: int, out_channels: int) -> ConvBlock:
+    def __create_conv_block(dimension: int, out_channels: int) -> ConvBlockB:
         from dl.block.conv.conv_block_config import ConvBlockConfig
 
         if dimension == 2:
@@ -40,7 +40,7 @@ class ConvBlockTest(unittest.TestCase):
                                                 activation=nn.Tanh(),
                                                 bias=False,
                                                 drop_out=0.0)
-            return ConvBlock(block_id='Conv_2d', conv_block_config=conv_block_config, modules=(nn.Sigmoid(),))
+            return ConvBlockB(block_id='Conv_2d', conv_block_config=conv_block_config, modules=(nn.Sigmoid(),))
         elif  dimension == 1:
             conv_block_config = ConvBlockConfig(in_channels=65,
                                                 out_channels=out_channels,
@@ -52,7 +52,7 @@ class ConvBlockTest(unittest.TestCase):
                                                 activation=nn.Tanh(),
                                                 bias=False,
                                                 drop_out=0.0)
-            return ConvBlock(block_id='Conv_1d', conv_block_config=conv_block_config, modules=(nn.Sigmoid(),))
+            return ConvBlockB(block_id='Conv_1d', conv_block_config=conv_block_config, modules=(nn.Sigmoid(),))
         else:
             raise ConvException(f'Dimension {dimension} is not supported')
 

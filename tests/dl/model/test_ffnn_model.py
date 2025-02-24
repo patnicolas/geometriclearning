@@ -64,7 +64,7 @@ class FFNNModelTest(unittest.TestCase):
                                            layer=nn.Linear(in_features=16, out_features=1, bias=False),
                                            activation=nn.Softmax())
             ffnn_model = FFNNModel(model_id='test1', neural_blocks=[input_block, hidden_block, output_block])
-            ffnn_model_transposed = ffnn_model.transpose(extra=None)
+            ffnn_model_transposed = ffnn_model.transpose(output_activation=None)
             self.assertTrue(ffnn_model_transposed.in_features == 1)
             self.assertTrue(ffnn_model_transposed.out_features == 8)
             assert True

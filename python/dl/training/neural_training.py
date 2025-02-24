@@ -116,7 +116,7 @@ class NeuralTraining(object):
             train_loss = self.__train(neural_model, epoch, train_loader)
 
             # Set mode and execute evaluation
-            eval_metrics = self.__eval(neural_model, epoch, eval_loader)
+            eval_metrics = self.__val(neural_model, epoch, eval_loader)
             self.training_summary(epoch, train_loss, eval_metrics)
             self.exec_config.apply_monitor_memory()
 
@@ -170,7 +170,7 @@ class NeuralTraining(object):
                  raise TrainingException(str(e))
             return total_loss / len(train_loader)
 
-    def __eval(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
+    def __val(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
         total_loss = 0
         model.eval()
         loss_func = self.hyper_params.loss_function

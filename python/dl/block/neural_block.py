@@ -12,7 +12,9 @@ Basic Neural block for all deep learning architectures
 
 
 class NeuralBlock(nn.Module):
-    def __init__(self, block_id: Optional[AnyStr], modules: Tuple[nn.Module]):
+    supported_activations = ('Sigmoid', 'ReLU', 'Softmax', 'Tanh', 'ELU', 'LeakyReLU')
+
+    def __init__(self, block_id: AnyStr, modules: Tuple[nn.Module]):
         """
         Constructor for basic Neural block
         @param block_id: Optional identifier for the Neural block

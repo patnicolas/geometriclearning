@@ -5,11 +5,10 @@ import torch
 import torch.nn as nn
 from abc import ABC
 from typing import AnyStr, Self, List, Callable
-from torch.utils.data import DataLoader
+from torch import Tensor
 from dl import DLException, ConvDataType
 import logging
 
-from dl.training.neural_training import NeuralTraining
 
 logger = logging.getLogger('dl.model.NeuralModel')
 
@@ -23,25 +22,19 @@ forward and save methods
 
 
 class NeuralModel(torch.nn.Module, ABC):
-    def __init__(self,
-                 model_id: AnyStr,
-                 model: torch.nn.Module,
-                 noise_func: Callable[[torch.Tensor], torch.Tensor] = None) -> None:
+    def __init__(self, model_id: AnyStr, modules_seq: nn.Module) -> None:
         """
         Constructor
         @param model_id: Identifier for this model
         @type model_id: str
-        @param model: Model as a Torch neural module
-        @type model: nn.Module
-        @param noise_func: Function to add noise to input data (features)
-        @param noise_func: Callable (noise_factor, input)
+        @param modules_seq: Model as a Torch neural module
+        @type modules_seq: nn.Module
         """
         super(NeuralModel, self).__init__()
         self.model_id = model_id
-        self.model = model
-        self.noise_func = noise_func
+        self.modules_seq = modules_seq
 
-    def add_noise(self, x: torch.Tensor) -> torch.Tensor:
+    def add_noise(self, x: Tensor) -> Tensor:
         """
         Add noise to the input data if defined in the constructor
         @param x: input training data as tensor
@@ -52,7 +45,7 @@ class NeuralModel(torch.nn.Module, ABC):
         return self.noise_func(x) if self.noise_func is not None else x
 
     def get_modules(self) -> List[nn.Module]:
-        return list(self.model.children())
+        return list(self.modules_seq.children())
 
     def list_modules(self, index: int = 0) -> AnyStr:
         modules = [f'{idx+index}: {str(module)}' for idx, module in enumerate(self.get_modules())]
@@ -61,7 +54,7 @@ class NeuralModel(torch.nn.Module, ABC):
     def get_flatten_output_size(self) -> ConvDataType:
         raise DLException('Abstract class cannot have a flatten output size')
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: Tensor) -> Tensor:
         """
         Execute the default forward method for all neural network models inherited from this class
         @param x: Input tensor
@@ -70,7 +63,7 @@ class NeuralModel(torch.nn.Module, ABC):
         @rtype: Torch tensor
         """
         # print(f'Input {self.model_id}\n{x.shape}')
-        x = self.model(x)
+        x = self.modules_seq(x)
         # print(f'Output {self.model_id}\n{x.shape}')
         return x
 
@@ -92,7 +85,7 @@ class NeuralModel(torch.nn.Module, ABC):
         raise NotImplementedError('NeuralModel.invert is an abstract method')
 
     def __str__(self) -> AnyStr:
-        return f'\n{self.model_id}\n{str(self.model)}'
+        return f'\n{self.model_id}\n{str(self.modules_seq)}'
 
     def __repr__(self) -> AnyStr:
         return '\n'.join([f'{idx}: {str(module)}' for idx, module in enumerate(self.get_modules())])

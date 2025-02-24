@@ -5,7 +5,7 @@ from abc import ABC
 
 from dl.model.neural_model import NeuralModel
 from dl.model.ffnn_model import FFNNModel
-from dl.block.cnn.deconv_2d_block import DeConv2DBlock
+from dl.block.conv.deconv_2d_block import DeConv2dBlock
 from dl.block.ffnn_block import FFNNBlock
 from typing import AnyStr, List, Optional, Self, Dict, Any
 
@@ -19,28 +19,28 @@ logger = logging.getLogger('dl.model.DeConvModel')
 class DeConvModel(NeuralModel, ABC):
     def __init__(self,
                  model_id: AnyStr,
-                 de_conv_blocks: List[DeConv2DBlock],
-                 last_activation: Optional[nn.Module] = None,
+                 deconv_blocks: List[DeConv2dBlock],
                  ffnn_blocks: Optional[List[FFNNBlock]] = None,
+                 last_activation: Optional[nn.Module] = None,
                  execution: Optional[NeuralTraining] = None) -> None:
         """
         Constructor for this de-convolutional neural network
         @param model_id: Identifier for this model
         @type model_id: Str
-        @param de_conv_blocks: List of Convolutional Neural Blocks
-        @type de_conv_blocks: List[ConvBlock]
+        @param deconv_blocks: List of Convolutional Neural Blocks
+        @type deconv_blocks: List[ConvBlock]
         @param ffnn_blocks: Optional list of Feed-Forward Neural Blocks
         @type ffnn_blocks: List[FFNNBlock]
         """
-        self.de_conv_blocks = de_conv_blocks
+        self.deconv_blocks = deconv_blocks
 
         # Record the number of input and output features from the first and last neural block respectively
-        self.in_features = de_conv_blocks[0].conv_block_config.in_channels
+        self.in_features = deconv_blocks[0].conv_block_config.in_channels
         self.out_features = ffnn_blocks[-1].out_features if ffnn_blocks is not None \
-            else de_conv_blocks[-1].conv_block_config.out_channels
+            else deconv_blocks[-1].conv_block_config.out_channels
 
         # Define the sequence of modules from the layout
-        de_conv_modules = [module for block in de_conv_blocks for module in block.modules]
+        de_conv_modules = [module for block in deconv_blocks for module in block.modules]
         if last_activation is not None:
             de_conv_modules[-1] = last_activation
 
@@ -54,7 +54,7 @@ class DeConvModel(NeuralModel, ABC):
         super(DeConvModel, self).__init__(model_id, nn.Sequential(*modules), execution)
 
     @classmethod
-    def build(cls, model_id: AnyStr, de_conv_blocks: List[DeConv2DBlock]) -> Self:
+    def build(cls, model_id: AnyStr, de_conv_blocks: List[DeConv2dBlock]) -> Self:
         """
         Create a pure de-convolutional neural network as a convolutional decoder for
         variational auto-encoder or generative adversarial network
@@ -90,7 +90,7 @@ class DeConvModel(NeuralModel, ABC):
         @rtype; Torch tensor
         """
         logger.info(x, 'Input Conv model')
-        x = self.model(x)
+        x = self.modules_seq(x)
         logger.info(x, 'Output Conv model')
         # If a full connected network is appended to the convolutional layers
         if self.ffnn_blocks is not None and len(self.ffnn_blocks) > 0:
@@ -109,13 +109,13 @@ class DeConvModel(NeuralModel, ABC):
     def _state_params(self) -> Dict[AnyStr, Any]:
         return {
             "model_id": self.model_id,
-            "input_size": self.de_conv_blocks[0].conv_block_config.in_channels,
+            "input_size": self.deconv_blocks[0].conv_block_config.in_channels,
             "output_size": self.ffnn_blocks[-1].out_features if self.ffnn_blocks is not None else -1,
             "dff_model_input_size": self.ffnn_blocks[0].in_features if self.ffnn_blocks is not None else -1
         }
 
     @staticmethod
-    def is_valid(de_conv_blocks: List[DeConv2DBlock], ffnn_blocks: List[FFNNBlock]) -> bool:
+    def is_valid(de_conv_blocks: List[DeConv2dBlock], ffnn_blocks: List[FFNNBlock]) -> bool:
         """
         Test if the layout/configuration of convolutional neural blocks and feed-forward neural blocks
         are valid
@@ -137,7 +137,7 @@ class DeConvModel(NeuralModel, ABC):
     """ ----------------------------   Private helper methods --------------------------- """
 
     @staticmethod
-    def __validate(neural_blocks: List[DeConv2DBlock]):
+    def __validate(neural_blocks: List[DeConv2dBlock]):
         assert len(neural_blocks) > 0, "Deep Feed Forward network needs at least one layer"
         for index in range(len(neural_blocks) - 1):
             assert neural_blocks[index + 1].in_channels == neural_blocks[index].out_channels, \

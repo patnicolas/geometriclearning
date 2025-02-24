@@ -102,7 +102,12 @@ class GraphDataLoader(object):
         graph.add_edges_from(samples)
         return graph
 
-    def draw_sample(self, first_node_index: int, last_node_index: int, node_color: AnyStr, node_size: int) -> None:
+    def draw_sample(self,
+                    first_node_index: int,
+                    last_node_index: int,
+                    node_color: AnyStr,
+                    node_size: int,
+                    label: AnyStr = None) -> int:
         """
         Draw a sample or subgraph of the graph associated with this loader.
         The sample of nodes to be drawn have the range [first_node_index, first_node_index+1, ..., last_node_index]
@@ -114,6 +119,10 @@ class GraphDataLoader(object):
         @type node_color: AnyStr
         @param node_size: Size of the nodes to be drawn
         @type node_size: int
+        @param label: Title or description for the plot
+        @type label: AnyStr
+        @return Number of nodes in the graph
+        @rtype int
         """
         import matplotlib.pyplot as plt
         import networkx as nx
@@ -127,13 +136,14 @@ class GraphDataLoader(object):
         plt.figure(figsize=(8, 8))
         pos = nx.spring_layout(graph, k=1)  # Spring layout for positioning nodes
         # Draw nodes and edges
-        nx.draw(graph, pos, node_size=node_size, node_color=node_color)
-        nx.draw_networkx_edges(graph, pos, arrowsize=40, alpha=0.5, edge_color="black")
+        nx.draw_networkx(graph, pos, node_size=node_size, node_color=node_color, with_labels=False)
+        nx.draw_networkx_edges(graph, pos, arrowsize=40, alpha=0.5, edge_color="grey")
 
         # Configure plot
-        plt.title("Flickr Dataset Visualization")
+        plt.title(label=label, loc='center', fontdict={'size': 16})
         plt.axis("off")
         plt.show()
+        return len(graph)
 
     """ ------------------------ Private Helper Methods ------------------------ """
 
@@ -154,14 +164,14 @@ class GraphDataLoader(object):
                                       drop_last=False,
                                       shuffle=True,
                                       input_nodes=self.data.train_mask)
-        eval_loader = NeighborLoader(self.data,
-                                     num_neighbors=num_neighbors,
-                                     batch_size=batch_size,
-                                     replace=replace,
-                                     drop_last=False,
-                                     shuffle=False,
-                                     input_nodes=self.data.val_mask)
-        return train_loader, eval_loader
+        val_loader = NeighborLoader(self.data,
+                                    num_neighbors=num_neighbors,
+                                    batch_size=batch_size,
+                                    replace=replace,
+                                    drop_last=False,
+                                    shuffle=False,
+                                    input_nodes=self.data.val_mask)
+        return train_loader, val_loader
 
     def __graph_saint_node_sampler(self) -> (DataLoader, DataLoader):
         batch_size = self.attributes_map['batch_size']
@@ -196,23 +206,29 @@ class GraphDataLoader(object):
         return train_loader, eval_loader
 
     def __graph_saint_random_walk(self, num_workers: int) -> (DataLoader, DataLoader):
+
+        # Dynamic configuration parameter for the loader
         walk_length = self.attributes_map['walk_length']
         batch_size = self.attributes_map['batch_size']
         num_steps = self.attributes_map['num_steps']
         sample_coverage = self.attributes_map['sample_coverage']
+
+        # Extraction of the loader for training data
         train_loader = GraphSAINTRandomWalkSampler(data=self.data,
                                                    batch_size=batch_size,
                                                    walk_length=walk_length,
                                                    num_steps=num_steps,
                                                    sample_coverage=sample_coverage,
                                                    shuffle=True)
-        eval_loader = GraphSAINTRandomWalkSampler(data=self.data,
-                                                  batch_size=batch_size,
-                                                  walk_length=walk_length,
-                                                  num_steps=num_steps,
-                                                  sample_coverage=sample_coverage,
-                                                  shuffle=False)
-        return train_loader, eval_loader
+
+        # Extraction of the loader for validation data
+        val_loader = GraphSAINTRandomWalkSampler(data=self.data,
+                                                 batch_size=batch_size,
+                                                 walk_length=walk_length,
+                                                 num_steps=num_steps,
+                                                 sample_coverage=sample_coverage,
+                                                 shuffle=False)
+        return train_loader, val_loader
 
     def __shadow_khop_sampler(self) -> (DataLoader, DataLoader):
         depth = self.attributes_map['depth']

@@ -12,7 +12,7 @@ class GNNBaseBlockTest(unittest.TestCase):
         karate_club_dataset = KarateClub()
         hidden_channels = 16
         conv = GCNConv(karate_club_dataset.num_node_features, out_channels = hidden_channels)
-        gcn_conv = GNNBaseBlock('K1', conv, activation=nn.ReLU(), batch_norm=None, drop_out=0.0)
+        gcn_conv = GNNBaseBlock('K1', conv, activation_module=nn.ReLU(), batch_norm_module=None, drop_out_module=0.0)
         print(repr(gcn_conv), flush=True)
         self.assertTrue(True)
 
@@ -25,9 +25,9 @@ class GNNBaseBlockTest(unittest.TestCase):
         conv = GCNConv(karate_club_dataset.num_node_features, out_channels=hidden_channels)
         gcn_conv = GNNBaseBlock('K2',
                                 conv,
-                                activation=nn.ReLU(),
-                                batch_norm=BatchNorm(hidden_channels),
-                                drop_out=0.2)
+                                activation_module=nn.ReLU(),
+                                batch_norm_module=BatchNorm(hidden_channels),
+                                drop_out_module=0.2)
         print(repr(gcn_conv), flush=True)
         self.assertTrue(True)
 

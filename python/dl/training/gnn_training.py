@@ -49,7 +49,7 @@ class GNNTraining(NeuralTraining):
               model_id: AnyStr,
               neural_model: nn.Module,
               train_loader: DataLoader,
-              eval_loader: DataLoader) -> None:
+              val_loader: DataLoader) -> None:
         """
         Train and evaluation of a neural network given a data loader for a training set, a
         data loader for the evaluation/test1 set and an encoder_model. The weights of the various linear modules
@@ -61,8 +61,8 @@ class GNNTraining(NeuralTraining):
         @type neural_model: nn_Module
         @param train_loader:  Data loader for the training set
         @type train_loader: torch_geometric.loader.DataLoader
-        @param eval_loader: Data loader for the evaluation set
-        @param eval_loader: torch_geometric.loader.DataLoader
+        @param val_loader: Data loader for the evaluation set
+        @param val_loader: torch_geometric.loader.DataLoader
         """
         torch.manual_seed(42)
         output_file_name = f'{model_id}: {self.plot_parameters[0].title}'
@@ -73,7 +73,7 @@ class GNNTraining(NeuralTraining):
             train_loss = self.__train(neural_model, epoch, train_loader)
 
             # Set mode and execute evaluation
-            eval_metrics = self.__eval(neural_model, epoch, eval_loader)
+            eval_metrics = self.__val(neural_model, epoch, val_loader)
             self.training_summary(epoch, train_loss, eval_metrics)
             self.exec_config.apply_monitor_memory()
 
@@ -117,7 +117,7 @@ class GNNTraining(NeuralTraining):
                 raise GNNException(str(e))
         return torch.tensor(total_loss / num_records)
 
-    def __eval(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, torch.Tensor]:
+    def __val(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, torch.Tensor]:
         total_loss = 0
         model.eval()
         metric_collector = {}

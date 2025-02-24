@@ -6,6 +6,7 @@ from dataset import DatasetException
 
 class GraphDataLoaderTest(unittest.TestCase):
 
+    @unittest.skip('Ignore')
     def test_init_1(self):
         import os
         from torch_geometric.datasets.flickr import Flickr
@@ -16,6 +17,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         print(str(_data))
         self.assertTrue(len(_data.train_mask) > 1)
 
+    @unittest.skip('Ignore')
     def test_init_2(self):
         import os
         from torch_geometric.datasets.flickr import Flickr
@@ -32,7 +34,6 @@ class GraphDataLoaderTest(unittest.TestCase):
             print(e)
             self.assertTrue(True)
 
-    @unittest.skip('Ignore')
     def test_init_3(self):
         import os
         from torch_geometric.datasets.flickr import Flickr

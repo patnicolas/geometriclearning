@@ -73,15 +73,15 @@ class GNNBaseModelTest(unittest.TestCase):
 
         hidden_channels = 256
         conv_1 = GraphConv(in_channels=num_node_features, out_channels=hidden_channels)
-        gcn_conv_1 = GNNBaseBlock(_id='K1',
-                                  message_passing=conv_1,
-                                  activation=nn.ReLU(),
-                                  batch_norm=BatchNorm(hidden_channels),
-                                  drop_out=0.2)
+        gcn_conv_1 = GNNBaseBlock(block_id='K1',
+                                  message_passing_module=conv_1,
+                                  activation_module=nn.ReLU(),
+                                  batch_norm_module=BatchNorm(hidden_channels),
+                                  drop_out_module=0.2)
         conv_2 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-        gcn_conv_2 = GNNBaseBlock(_id='K2', message_passing=conv_2, activation=nn.ReLU())
+        gcn_conv_2 = GNNBaseBlock(block_id='K2', message_passing_module=conv_2, activation_module=nn.ReLU())
         conv_3 = GraphConv(in_channels=hidden_channels, out_channels=num_classes)
-        gcn_conv_3 = GNNBaseBlock(_id='K3', message_passing=conv_3)
+        gcn_conv_3 = GNNBaseBlock(block_id='K3', message_passing_module=conv_3)
 
         return GNNBaseModel.build(model_id='Karate club test',
                                   gnn_blocks=[gcn_conv_1, gcn_conv_2, gcn_conv_3])

@@ -3,7 +3,7 @@ from dl.block.ffnn_block import FFNNBlock
 from dl.model.ffnn_model import FFNNModel
 from dl.model.vae_model import VAEModel
 from dl.model.conv_model import ConvModel
-from dl.block.conv.conv_2d_block import Conv2DBlock
+from dl.block.conv.conv_2d_block import Conv2DBlockB
 from dl.block.conv.conv_block_config import ConvBlockConfig
 from dataset.unlabeled_loader import UnlabeledLoader
 from dl.training.exec_config import ExecConfig
@@ -176,7 +176,7 @@ class VAETest(unittest.TestCase):
                 max_pooling_kernel=-1,
                 activation=nn.ReLU(),
                 bias=False)
-            conv_block_1 = Conv2DBlock( block_id='Conv1',
+            conv_block_1 = Conv2DBlockB(block_id='Conv1',
                                         conv_block_config=conv_2d_block_config)
             conv_2d_block_config = ConvBlockConfig(
                 in_channels=32,
@@ -188,7 +188,7 @@ class VAETest(unittest.TestCase):
                 max_pooling_kernel=-1,
                 activation=nn.ReLU(),
                 bias=False)
-            conv_block_2 = Conv2DBlock(block_id='Conv2', conv_block_config=conv_2d_block_config)
+            conv_block_2 = Conv2DBlockB(block_id='Conv2', conv_block_config=conv_2d_block_config)
             conv_model = ConvModel(model_id ='conv_MNIST_model', conv_blocks=[conv_block_1, conv_block_2])
             return VAEModel(model_id='VAE - Mnist',
                             encoder=conv_model,

@@ -14,7 +14,7 @@ class DenoisingVAEModelTest(unittest.TestCase):
         latent_size = 6
         vae_model = DenoisingVAEModel('vae_test', ffnn_model, latent_size)
         print(f'\nDenoising variational auto-encoder:\n{repr(vae_model)}')
-        modules = list(vae_model.model.modules())
+        modules = list(vae_model.modules_seq.modules())
         self.assertTrue(len(modules) == 12)
 
 

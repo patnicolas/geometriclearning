@@ -105,7 +105,7 @@ class GNNBaseModel(NeuralModel):
         try:
             network = NeuralTraining.build(hyper_parameters, metric_labels)
             train_dataset, test_dataset = self.load_data_source(data_source)
-            network.train(self.model_id, self.model, train_dataset, test_dataset)
+            network.train(self.model_id, self.modules_seq, train_dataset, test_dataset)
         except GNNException as e:
             logger.error(str(e))
             raise DLException(e)

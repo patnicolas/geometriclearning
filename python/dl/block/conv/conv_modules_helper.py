@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import torch.nn as nn
 from typing import List, Tuple, AnyStr
-from dl.block.conv.conv_block import ConvBlock
+from dl.block.conv.conv_block_b import ConvBlockB
 from dl import DLException
 from dataclasses import dataclass
 
@@ -74,7 +74,7 @@ class ConvModulesHelper(object):
             isinstance(module, nn.Sigmoid)
 
     @staticmethod
-    def get_conv_params(conv_block: ConvBlock, updated_activation: nn.Module) -> ConvParameters(int, int, int, bool, nn.Module):
+    def get_conv_params(conv_block: ConvBlockB, updated_activation: nn.Module) -> ConvParameters(int, int, int, bool, nn.Module):
         conv_modules = list(conv_block.modules)
         # Extract the various components of the convolutional neural block
         batch_norm, activation = ConvModulesHelper.extract_conv_modules(conv_modules)

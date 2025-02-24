@@ -22,8 +22,7 @@ class VAEModel(NeuralModel):
                  model_id: AnyStr,
                  encoder: NeuralModel,
                  latent_size: int,
-                 decoder_out_activation: Optional[nn.Module] = None,
-                 noise_func: Callable[[torch.Tensor], torch.Tensor] = None) -> None:
+                 decoder_out_activation: Optional[nn.Module] = None) -> None:
         """
         Constructor for the variational neural network
         @param model_id: Identifier for this model
@@ -32,8 +31,6 @@ class VAEModel(NeuralModel):
         @type encoder: NeuralModel
         @param latent_size: Size of the latent space
         @type latent_size: int
-        @param noise_func: Optional function to add noise to input data (features)
-        @param noise_func: Callable (noise_factor, input)
         """
         try:
             # Create a decoder as inverted from the encoder (i.e. Deconvolution)
@@ -41,10 +38,10 @@ class VAEModel(NeuralModel):
                 else encoder.transpose()
 
             # extract the Torch modules
-            modules = list(encoder.model.modules())
+            modules = list(encoder.modules_seq.modules())
 
             # Build the inversion for the de convolutional network
-            inverted_modules = list(decoder.model.modules())
+            inverted_modules = list(decoder.modules_seq.modules())
 
             # construct the variational layer
             flatten_variational_input = encoder.get_flatten_output_size()
@@ -52,10 +49,10 @@ class VAEModel(NeuralModel):
 
             # Build the Torch sequential module
             all_modules = modules + list(variational_block.modules) + inverted_modules
-            seq_module: torch.nn.Module = torch.nn.Sequential(*all_modules)
+            modules_seq: torch.nn.Module = torch.nn.Sequential(*all_modules)
 
             # Call base class
-            super(VAEModel, self).__init__(model_id, seq_module, noise_func)
+            super(VAEModel, self).__init__(model_id, modules_seq)
             # Initialize the internal model parameters
             self.encoder = encoder
             self.decoder = decoder
@@ -92,7 +89,7 @@ class VAEModel(NeuralModel):
         return self.encoder.get_in_features()
 
     def get_latent_features(self) -> int:
-        return self.variational_block.sampler_fc.in_features
+        return self.variational_block.sampler.in_features
 
     def get_out_features(self) -> int:
         """

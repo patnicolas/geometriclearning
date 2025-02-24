@@ -15,31 +15,30 @@ The block is composed of a list of nn.Module instances
 
 
 class FFNNBlock(NeuralBlock):
+
     def __init__(self,
                  block_id: Optional[AnyStr],
-                 modules: Tuple[nn.Module],
-                 activation: Optional[nn.Module] = None):
+                 modules: Tuple[nn.Module]):
         """
         Constructor for the Feed Forward Neural Network
         @param block_id: Identifier for this block
         @type block_id: str
         @param modules: Tuple of torch modules contained in this block
         @type modules: Tuple
-        @param activation: Optional activation is specified
-        @type activation: Torch module
         """
+        self.activation = [module for module in modules
+                           if module.__class__.__name__ in NeuralBlock.supported_activations]
         super(FFNNBlock, self).__init__(block_id, modules)
 
         # We get the number of input and output features from the first module of type Linear
         self.in_features = modules[0].in_features
         self.out_features = modules[0].out_features
-        self.activation = activation
 
     @classmethod
     def build(cls,
               block_id: AnyStr,
               layer: nn.Linear,
-              activation: nn.Module = None,
+              activation: Optional[nn.Module] = None,
               drop_out: float = 0.0):
         """
         Alternative constructor
@@ -60,18 +59,18 @@ class FFNNBlock(NeuralBlock):
         # Only if regularization is needed
         if drop_out > 0.0:
             modules.append(nn.Dropout(drop_out))
-        return cls(block_id, tuple(modules), activation)
+        return cls(block_id, tuple(modules))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return super().forward(x)
 
-    def transpose(self, extra: Optional[nn.Module] = None) -> Self:
+    def transpose(self, activation_update: Optional[nn.Module] = None) -> Self:
         """
         Transpose the layer size (in_feature <-> out_feature) and remove drop_out for decoder
         @return: Inverted feed forward neural network block
         @rtype: FFNNBlock
         """
-        activation_module = extra if extra is not None else self.modules[1]
+        activation_module = activation_update if activation_update is not None else self.modules[1]
         return FFNNBlock.build(block_id=self.block_id,
                                layer=nn.Linear(in_features=self.modules[0].out_features,
                                                out_features=self.modules[0].in_features,

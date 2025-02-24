@@ -2,7 +2,7 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from dl.block.neural_block import NeuralBlock
-from typing import AnyStr, List
+from typing import AnyStr, List, Optional
 import torch
 import torch.nn as nn
 from torch_geometric.nn.conv import MessagePassing
@@ -20,40 +20,44 @@ Implementation of a very simple Graph Convolutional Neural block which consists 
 
 class GNNBaseBlock(NeuralBlock):
     def __init__(self,
-                 _id: AnyStr,
-                 message_passing: MessagePassing,
-                 activation: nn.Module = None,
-                 batch_norm: BatchNorm = None,
-                 drop_out: float = 0.0) -> None:
+                 block_id: AnyStr,
+                 message_passing_module: MessagePassing,
+                 batch_norm_module: Optional[nn.Module] = None,
+                 activation_module: Optional[nn.Module] = None,
+                 graph_pooling_module: Optional[nn.Module] = None,
+                 drop_out_module: Optional[nn.Module] = None) -> None:
         """
-        Constructor for this simple Graph Neural block
-        @param _id: Identifier for the Graph neural block
-        @type _id: str
-        @param message_passing: Message passing operator (Conv,....)
-        @type message_passing: nn.conv.MessagePassing
-        @param activation: Activation function if defined
-        @type activation: nn.Module
-        @param batch_norm: 1-dimension batch norm
-        @type batch_norm: BatchNorm1d
-        @param drop_out: Drop out value is defined as 0.1 <= drop_out <= 0.9
-        @type drop_out: float
+        Constructor for the base Graph Neural block
+        @param block_id: Identifier for the Graph neural block
+        @type block_id: str
+        @param message_passing_module: Message passing operator (Conv,....)
+        @type message_passing_module: nn.conv.MessagePassing
+        @param batch_norm_module: Generic batch norm
+        @type batch_norm_module: BatchNorm subclass
+        @param activation_module: Activation function if defined
+        @type activation_module: nn.Module subclass
+        @param graph_pooling_module: Graph Pooling module
+        @type graph_pooling_module: nn.Module subclass
+        @param drop_out_module: Drop out for training
+        @type drop_out_module: nn.Module subclass
         """
-        assert drop_out == 0 or 0.1 <= drop_out < 0.9, f'Drop out is {drop_out} is out of range ]0.1, 0.9['
-        self.id = _id
+        modules: List[nn.Module] = [message_passing_module]
+        if batch_norm_module is not None:
+            modules.append(batch_norm_module)
+        if activation_module is not None:
+            modules.append(activation_module)
+        if graph_pooling_module is not None:
+            modules.append(graph_pooling_module)
+        if drop_out_module is not None:
+            modules.append(drop_out_module)
+        super(GNNBaseBlock, self).__init__(block_id, tuple(modules))
 
-        modules: List[nn.Module] = [message_passing]
-        if batch_norm is not None:
-            modules.append(batch_norm)
-        if drop_out > 0.0:
-            modules.append(nn.Dropout(drop_out))
-        if activation is not None:
-            modules.append(activation)
-
-        super(GNNBaseBlock, self).__init__(_id, tuple(modules))
-
-    def forward(self, x: torch.Tensor, edge_index: Adj) -> torch.Tensor:
+    def forward(self,
+                x: torch.Tensor,
+                edge_index: Adj) -> torch.Tensor:
         for idx, module in enumerate(self.modules):
-            x = module(x, edge_index) if idx == 0 else module(x)
+            x = module(x, edge_index) if idx == 0 \
+                else module(x)
         return x
 
     def __repr__(self) -> AnyStr:

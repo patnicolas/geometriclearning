@@ -9,7 +9,25 @@ from dl import VAEException
 
 
 class VariationalBlock(NeuralBlock):
-    def __init__(self,  hidden_dim: int, latent_size: int):
+    def __init__(self,  mu: nn.Linear, log_var: nn.Linear, sampler: nn.Linear):
+        """
+        Constructor for the variational Neural block of a variational auto-encoder
+        @param mu: Linear module for the mean of the Gaussian distribution
+        @type mu: nn.Linear
+        @param log_var: Linear module for the log of the variance of the Gaussian distribution
+        @type log_var: nn.Linear
+        @param sampler: Linear module for sampling the learned Gaussian distribution (Mean, variance)
+        @type sampler: nn.Linear
+
+        """
+        self.mu = mu
+        self.log_var = log_var
+        self.sampler = sampler
+        super(VariationalBlock, self).__init__(block_id='Variational',
+                                               modules=(mu, log_var, sampler))
+
+    @staticmethod
+    def build(cls, hidden_dim: int, latent_size: int) -> Self:
         """
         Constructor for the variational Neural block of a variational auto-encoder
         @param hidden_dim:  Number of hidden unit to the variational block
@@ -17,15 +35,10 @@ class VariationalBlock(NeuralBlock):
         @param latent_size:  Number of hidden unit for the latent space the variational block
         @type latent_size:  int
         """
-        mu: nn.Module = nn.Linear(in_features=hidden_dim, out_features=latent_size, bias=True)
-        log_var: nn.Module = nn.Linear(in_features=hidden_dim, out_features=latent_size, bias=True)
-        sampler_fc: nn.Module = nn.Linear(in_features=latent_size, out_features=hidden_dim, bias=True)
-        modules = [mu, log_var, sampler_fc]
-        super(VariationalBlock, self).__init__(block_id='Variational', modules=tuple(modules))
-
-        self.mu = mu
-        self.log_var = log_var
-        self.sampler_fc = sampler_fc
+        mu = nn.Linear(in_features=hidden_dim, out_features=latent_size, bias=True)
+        log_var = nn.Linear(in_features=hidden_dim, out_features=latent_size, bias=True)
+        sampler = nn.Linear(in_features=latent_size, out_features=hidden_dim, bias=True)
+        return cls(mu, log_var, sampler)
 
     def transpose(self, extra: Optional[nn.Module] = None) -> Self:
         raise VAEException('Cannot invert variational Neural block')
@@ -35,11 +48,11 @@ class VariationalBlock(NeuralBlock):
 
     def list_modules(self, index: int = 0) -> AnyStr:
         return (f'\n{index}: Mean-{str(self.mu)}\n{index+1}: LogVar-{str(self.log_var)}'
-                f'\n{index+2}: Sampler-{str(self.sampler_fc)}')
+                f'\n{index+2}: Sampler-{str(self.sampler)}')
 
     def __repr__(self) -> AnyStr:
         return f'\n      Id: {self.block_id}\n      Mean: {str(self.mu)}\n      logvar: {str(self.log_var)}\n' \
-               f'      Sampler: {str(self.sampler_fc)}'
+               f'      Sampler: {str(self.sampler)}'
 
     @classmethod
     def re_parameterize(cls, mu: torch.Tensor, log_var: torch.Tensor) -> torch.Tensor:
@@ -69,14 +82,13 @@ class VariationalBlock(NeuralBlock):
         # Compute the mean for the tensor
         x = VariationalBlock.__laplace_zero_tensor(x)
         mu = self.mu(x)
-        weight = self.mu.weight
         # Computes log (exp(sqr(std))
         log_var = self.log_var(x)
         z = VariationalBlock.re_parameterize(mu, log_var)
         if VariationalBlock.__is_z_nan(z):
             has_non_zeros = VariationalBlock.input_has_non_zeros(x)
             raise VAEException(f'VAE z is nan with x has non zeros? {has_non_zeros}')
-        return self.sampler_fc(z), mu, log_var
+        return self.sampler(z), mu, log_var
 
     @staticmethod
     def __is_z_nan(z: torch.Tensor) -> bool:

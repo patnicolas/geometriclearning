@@ -5,7 +5,6 @@ from torch import nn
 from typing import Tuple, AnyStr, Self
 from dl import ConvDataType
 from dl import ConvException
-import copy
 import logging
 logger = logging.getLogger('dl.block.ConvBlockConfig')
 

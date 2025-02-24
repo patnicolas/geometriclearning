@@ -1,7 +1,7 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-from typing import AnyStr
+from typing import AnyStr, Callable
 from dl.model.neural_model import NeuralModel
 from dl.model.vae_model import VAEModel
 import torch
@@ -20,7 +20,9 @@ class DenoisingVAEModel(VAEModel):
     def __init__(self,
                  model_id: AnyStr,
                  encoder: NeuralModel,
-                 latent_size: int) -> None:
+                 latent_size: int,
+                 noise_func: Callable[[torch.Tensor], torch.Tensor] = None
+                 ) -> None:
         """
         Constructor for the variational neural network
         @param model_id: Identifier for this model
@@ -29,5 +31,8 @@ class DenoisingVAEModel(VAEModel):
         @type encoder: NeuralModel
         @param latent_size: Size of the latent space
         @type latent_size: int
+        @param noise_func: Optional function to add noise to input data (features)
+        @param noise_func: Callable (noise_factor, input)
         """
-        super(DenoisingVAEModel, self).__init__(model_id, encoder, latent_size, noise_func)
+        self.noise_func = noise_func
+        super(DenoisingVAEModel, self).__init__(model_id, encoder, latent_size)
