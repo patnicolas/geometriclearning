@@ -1,7 +1,7 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-from typing import AnyStr, Self, Callable, Optional
+from typing import AnyStr, Self, Optional
 from dl.model.neural_model import NeuralModel
 from dl.block.variational_block import VariationalBlock
 from dl import ConvException, DLException, VAEException
@@ -21,7 +21,7 @@ class VAEModel(NeuralModel):
     def __init__(self,
                  model_id: AnyStr,
                  encoder: NeuralModel,
-                 latent_size: int,
+                 latent_dim: int,
                  decoder_out_activation: Optional[nn.Module] = None) -> None:
         """
         Constructor for the variational neural network
@@ -29,8 +29,8 @@ class VAEModel(NeuralModel):
         @type model_id: str
         @param encoder: Neural network encoder
         @type encoder: NeuralModel
-        @param latent_size: Size of the latent space
-        @type latent_size: int
+        @param latent_dim: Size of the latent space
+        @type latent_dim: int
         """
         try:
             # Create a decoder as inverted from the encoder (i.e. Deconvolution)
@@ -45,7 +45,7 @@ class VAEModel(NeuralModel):
 
             # construct the variational layer
             flatten_variational_input = encoder.get_flatten_output_size()
-            variational_block = VariationalBlock(flatten_variational_input, latent_size)
+            variational_block = VariationalBlock.build(flatten_variational_input, latent_dim)
 
             # Build the Torch sequential module
             all_modules = modules + list(variational_block.modules) + inverted_modules

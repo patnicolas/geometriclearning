@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from dl import GNNException
 from dataset import DatasetException
-from dl.block.ffnn_block import FFNNBlock
+from dl.block.mlp_block import MLPBlock
 from dl.training.hyper_params import HyperParams
 from dl.training.gnn_training import GNNTraining
 from dl.model.gnn_base_model import GNNBaseModel
@@ -578,9 +578,9 @@ class GNNTrainingTest(unittest.TestCase):
         conv_3 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
         gnn_block_3 = GNNBaseBlock(block_id='K3', message_passing_module=conv_3, activation_module=nn.ReLU(), drop_out_module=0.2)
 
-        ffnn_block = FFNNBlock.build(block_id='Output',
-                                     layer=nn.Linear(3*hidden_channels, num_classes),
-                                     activation=nn.LogSoftmax(dim=-1))
+        ffnn_block = MLPBlock.build(block_id='Output',
+                                    layer=nn.Linear(3*hidden_channels, num_classes),
+                                    activation=nn.LogSoftmax(dim=-1))
         return GNNBaseModel(model_id='Flickr',
                             gnn_blocks=[gnn_block_1, gnn_block_2, gnn_block_3],
                             ffnn_blocks=[ffnn_block])

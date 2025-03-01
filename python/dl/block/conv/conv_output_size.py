@@ -2,13 +2,14 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from typing import Tuple, List
+from dl.block.conv import ConvDataType
 
 
 class ConvOutputSize(object):
     def __init__(self,
-                 kernel_size: int | Tuple[int, int],
-                 stride: int | Tuple[int, int],
-                 padding: int | Tuple[int, int],
+                 kernel_size: ConvDataType,
+                 stride: ConvDataType,
+                 padding: ConvDataType,
                  max_pooling_kernel: int) -> None:
         """
         Constructor for the computation of the shape of the output for convolutional layer (kernel, stride, padding)
@@ -31,7 +32,7 @@ class ConvOutputSize(object):
         self.padding = padding
         self.max_pooling_kernel = max_pooling_kernel
 
-    def __call__(self, input_size: int | Tuple[int, int]) -> int | Tuple[int, int]:
+    def __call__(self, input_size: ConvDataType) -> ConvDataType:
         """
         Generic method to compute the output shape through a pair of convolutional and pooling layers
         given an input shape. The input shape can be an int for 1 dimension convolution or a tuple for
@@ -46,19 +47,19 @@ class ConvOutputSize(object):
 
     """ -----------------------------    Private helper methods ------------------------ """
 
-    def __layer_output_shapes(self, input_size: int | Tuple[int, int]) -> int | Tuple[int, int]:
+    def __layer_output_shapes(self, input_size: ConvDataType) -> ConvDataType:
         if isinstance(input_size, Tuple):
             return (self.__layer_output_shape(input_size=input_size[0], dim=0),
                     self.__layer_output_shape(input_size=input_size[1], dim=1))
         else:
             return self.__layer_output_shape(input_size=input_size, dim=0)
 
-    def __pooling_output_shapes(self, input_size: int | Tuple[int, int]) -> int | Tuple[int, int]:
+    def __pooling_output_shapes(self, input_size: ConvDataType) -> ConvDataType:
         if isinstance(input_size, Tuple):
-            return (self.__pooling_output_shape(input_size=input_size[0], dim=0),
-                    self.__pooling_output_shape(input_size=input_size[1], dim=1))
+            return (self.__pooling_output_shape(input_size=input_size[0]),
+                    self.__pooling_output_shape(input_size=input_size[1]))
         else:
-            return self.__pooling_output_shape(input_size=input_size, dim=0)
+            return self.__pooling_output_shape(input_size=input_size)
 
     def __layer_output_shape(self, input_size: int, dim: int) -> int:
         assert 0 <= dim <= 1, f'Dimension {dim} for computing output channel is out of bounds (0, 1)'
@@ -71,7 +72,7 @@ class ConvOutputSize(object):
         out_size = int(num / stride) + 1
         return out_size
 
-    def __pooling_output_shape(self, input_size: int, dim: int) -> int:
+    def __pooling_output_shape(self, input_size) -> int:
         out_size = int((input_size - self.max_pooling_kernel) + 1)
         return out_size
 

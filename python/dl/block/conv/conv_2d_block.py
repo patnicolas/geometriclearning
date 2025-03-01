@@ -3,6 +3,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from dl.block.conv.conv_block import ConvBlock
 from dl.block.conv.deconv_2d_block import DeConv2dBlock
+from dl.block.conv.conv_output_size import ConvOutputSize
 from typing import AnyStr, Tuple, Optional, Self, Dict, List
 import torch.nn as nn
 from dl.block.conv import Conv2DataType
@@ -58,7 +59,7 @@ class Conv2dBlock(ConvBlock):
             modules.append(drop_out_module)
 
         # validation
-        attributes = Conv2dBlock.__validate(modules) if self.deconvolution_enabled else None
+        attributes = Conv2dBlock.__validate(modules)
         super(Conv2dBlock, self).__init__(block_id, tuple(modules), attributes)
 
     @classmethod
@@ -140,6 +141,15 @@ class Conv2dBlock(ConvBlock):
     def get_attributes(self) -> AnyStr:
         return str(self.attributes)
 
+    def get_conv_output_size(self) -> ConvOutputSize:
+        conv_layer_module = self.attributes['conv_layer']
+        max_pool_module = self.attributes['max_pool']
+        return ConvOutputSize(
+            conv_layer_module.kernel_size,
+            conv_layer_module.stride,
+            conv_layer_module.padding,
+            max_pool_module.kernel_size)
+
     @staticmethod
     def __validate(modules: List[nn.Module]) -> Dict[AnyStr, nn.Module] :
         from dl.block.neural_block import NeuralBlock
@@ -158,7 +168,7 @@ class Conv2dBlock(ConvBlock):
                 case 'BatchNorm2d': attributes['batch_norm'] = module
                 case 'MaxPool2d':  attributes['max_pool'] = module
                 case 'Dropout2d': attributes['drop_out'] = module
-                case _: continue
+                case _: attributes['activation'] = module
         return attributes
 
 

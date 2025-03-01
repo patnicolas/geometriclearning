@@ -1,10 +1,10 @@
 import unittest
 import torch.nn as nn
 
-from dl.block.cnn.conv_2d_block import Conv2DBlock
-from dl.block.ffnn_block import FFNNBlock
-from dl.model.ffnn_model import FFNNModel
+from dl.block.mlp_block import MLPBlock
+from dl.model.mlp_model import MLPModel
 from dl.model.conv_model import ConvModel
+from dl.block.conv.conv_2d_block import Conv2dBlock
 from dl.model.vae_model import VAEModel
 from dl import VAEException, ConvException
 from dl.training.vae_training import VAETraining
@@ -15,19 +15,19 @@ class VAEModelTest(unittest.TestCase):
     @unittest.skip('Ignore')
     def test_init_1(self):
         try:
-            input_block = FFNNBlock.build(block_id='Input',
-                                          layer=nn.Linear(in_features=128, out_features=64, bias=False),
+            input_block = MLPBlock.build(block_id='Input',
+                                         layer=nn.Linear(in_features=128, out_features=64, bias=False),
+                                         activation=nn.ReLU())
+            hidden_block = MLPBlock.build(block_id='hidden',
+                                          layer=nn.Linear(in_features=64, out_features=32, bias=False),
                                           activation=nn.ReLU())
-            hidden_block = FFNNBlock.build(block_id='hidden',
-                                           layer=nn.Linear(in_features=64, out_features=32, bias=False),
-                                           activation=nn.ReLU())
-            output_block = FFNNBlock.build(block_id='output',
-                                           layer=nn.Linear(in_features=32, out_features=10, bias=False),
-                                           activation=nn.Sigmoid())
-            ffnn_model = FFNNModel(model_id='encoder', neural_blocks=[input_block, hidden_block, output_block ])
+            output_block = MLPBlock.build(block_id='output',
+                                          layer=nn.Linear(in_features=32, out_features=10, bias=False),
+                                          activation=nn.Sigmoid())
+            ffnn_model = MLPModel(model_id='encoder', neural_blocks=[input_block, hidden_block, output_block])
             print(str(ffnn_model))
             latent_size = 6
-            vae_model = VAEModel(model_id='vae_ffnn', encoder=ffnn_model, latent_size=latent_size, noise_func =None)
+            vae_model = VAEModel(model_id='vae_ffnn', encoder=ffnn_model, latent_dim=latent_size, noise_func =None)
             print(str(vae_model))
             self.assertTrue(True)
         except VAEException as e:
@@ -37,35 +37,35 @@ class VAEModelTest(unittest.TestCase):
     @unittest.skip('Ignore')
     def test_init_2(self):
         try:
-            conv_2d_block_1 = Conv2DBlock.build(block_id='conv_1',
-                                                in_channels=3,
-                                                out_channels=8,
-                                                kernel_size=(3, 3),
-                                                stride=(1, 1),
-                                                padding=(1, 1),
-                                                batch_norm=True,
-                                                max_pooling_kernel=2,
-                                                activation=nn.ReLU(),
-                                                bias=False,
-                                                drop_out=0.25)
-            conv_2d_block_2 = Conv2DBlock.build(block_id='conv_2',
-                                                in_channels=8,
-                                                out_channels=16,
-                                                kernel_size=(3, 3),
-                                                stride=(1, 1),
-                                                padding=(1, 1),
-                                                batch_norm=True,
-                                                max_pooling_kernel=2,
-                                                activation=nn.ReLU(),
-                                                bias=False,
-                                                drop_out=0.25)
+            conv_2d_block_1 = Conv2dBlock.build(block_id='conv_1',
+                                                 in_channels=3,
+                                                 out_channels=8,
+                                                 kernel_size=(3, 3),
+                                                 stride=(1, 1),
+                                                 padding=(1, 1),
+                                                 batch_norm=True,
+                                                 max_pooling_kernel=2,
+                                                 activation=nn.ReLU(),
+                                                 bias=False,
+                                                 drop_out=0.25)
+            conv_2d_block_2 = Conv2dBlock.build(block_id='conv_2',
+                                                 in_channels=8,
+                                                 out_channels=16,
+                                                 kernel_size=(3, 3),
+                                                 stride=(1, 1),
+                                                 padding=(1, 1),
+                                                 batch_norm=True,
+                                                 max_pooling_kernel=2,
+                                                 activation=nn.ReLU(),
+                                                 bias=False,
+                                                 drop_out=0.25)
             conv_model = ConvModel(model_id='MNIST',
                                    input_size=(28, 28),
                                    conv_blocks=[conv_2d_block_1, conv_2d_block_2],
-                                   ffnn_blocks=None)
+                                   mlp_blocks=None)
             print(repr(conv_model))
             latent_size = 6
-            vae_model = VAEModel(model_id='vae_ffnn', encoder=conv_model, latent_size=latent_size, noise_func=None)
+            vae_model = VAEModel(model_id='vae_ffnn', encoder=conv_model, latent_dim=latent_size, noise_func=None)
             print(repr(vae_model))
         except VAEException as e:
             print(f'ERROR: {str(e)}')
@@ -76,35 +76,37 @@ class VAEModelTest(unittest.TestCase):
         from dl.training.exec_config import ExecConfig
 
         try:
-            conv_2d_block_1 = Conv2DBlock.build(block_id='conv_1',
-                                                in_channels=3,
-                                                out_channels=8,
-                                                kernel_size=(3, 3),
-                                                stride=(1, 1),
-                                                padding=(0, 0),
-                                                batch_norm=True,
-                                                max_pooling_kernel=-1,
-                                                activation=nn.ReLU(),
-                                                bias=True,
-                                                drop_out=0.25)
-            conv_2d_block_2 = Conv2DBlock.build(block_id='conv_2',
-                                                in_channels=8,
-                                                out_channels=16,
-                                                kernel_size=(3, 3),
-                                                stride=(1, 1),
-                                                padding=(0, 0),
-                                                batch_norm=True,
-                                                max_pooling_kernel=-1,
-                                                activation=nn.ReLU(),
-                                                bias=True,
-                                                drop_out=0.25)
+            conv_2d_block_1 = Conv2dBlock.build(block_id='conv_1',
+                                                 in_channels=3,
+                                                 out_channels=8,
+                                                 kernel_size=(3, 3),
+                                                deconvolution_enabled=True,
+                                                 stride=(1, 1),
+                                                 padding=(0, 0),
+                                                 batch_norm=True,
+                                                 max_pooling_kernel=1,
+                                                 activation=nn.ReLU(),
+                                                 bias=True,
+                                                 drop_out=0.25)
+            conv_2d_block_2 = Conv2dBlock.build(block_id='conv_2',
+                                                 in_channels=8,
+                                                 out_channels=16,
+                                                 kernel_size=(3, 3),
+                                                deconvolution_enabled=True,
+                                                 stride=(1, 1),
+                                                 padding=(0, 0),
+                                                 batch_norm=True,
+                                                 max_pooling_kernel=1,
+                                                 activation=nn.ReLU(),
+                                                 bias=True,
+                                                 drop_out=0.25)
             conv_model = ConvModel(model_id='MNIST',
                                    input_size=(28, 28),
                                    conv_blocks=[conv_2d_block_1, conv_2d_block_2],
-                                   ffnn_blocks=None)
+                                   mlp_blocks=None)
             vae_model = VAEModel(model_id='VAE_MNIST',
                                  encoder=conv_model,
-                                 latent_size=16,
+                                 latent_dim=16,
                                  decoder_out_activation=nn.Sigmoid())
             print(repr(vae_model))
             mnist_loader = MNISTLoader(batch_size=8)

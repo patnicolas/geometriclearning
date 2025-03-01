@@ -4,7 +4,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from aiohttp.web_routedef import static
 
 from dl.model.neural_model import NeuralModel
-from dl.block.ffnn_block import FFNNBlock
+from dl.block.mlp_block import MLPBlock
 from dl.block.graph.gnn_base_block import GNNBaseBlock
 from dl.training.neural_training import NeuralTraining
 from dl.training.hyper_params import HyperParams
@@ -26,7 +26,7 @@ class GNNBaseModel(NeuralModel):
     def __init__(self,
                  model_id: AnyStr,
                  gnn_blocks: List[GNNBaseBlock],
-                 ffnn_blocks: Optional[List[FFNNBlock]] = None) -> None:
+                 ffnn_blocks: Optional[List[MLPBlock]] = None) -> None:
         """
         Constructor for this simple Graph convolutional neural network
         @param model_id: Identifier for this model
@@ -34,7 +34,7 @@ class GNNBaseModel(NeuralModel):
         @param gnn_blocks: List of Graph convolutional neural blocks
         @type gnn_blocks: List[ConvBlock]
         @param ffnn_blocks: List of Feed-Forward Neural Blocks
-        @type ffnn_blocks: List[FFNNBlock]
+        @type ffnn_blocks: List[MLPBlock]
         """
         self.gnn_blocks = gnn_blocks
 

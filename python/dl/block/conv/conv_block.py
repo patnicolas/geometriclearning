@@ -2,15 +2,13 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from torch import nn
-from typing import Tuple, Any, AnyStr, Optional, Dict
+from typing import Tuple, Any, AnyStr, Optional, Dict, List
 
 from dl import ConvException
 from dl.block.neural_block import NeuralBlock
 from dl.block.conv.conv_output_size import ConvOutputSize
 import logging
 logger = logging.getLogger('dl.block.ConvBlock')
-
-
 
 
 """
@@ -42,17 +40,17 @@ class ConvBlock(NeuralBlock):
         @type attributes: Dict
         """
         self.attributes = attributes
+
+        self.in_channels = modules[0].in_channels
+        self.out_channels = modules[0].out_channels
         super(ConvBlock, self).__init__(block_id, tuple(modules))
 
-    def transpose(self, extra: Optional[nn.Module] = None) -> Any:
-        raise ConvException('Cannot invert abstract Convolutional block')
 
-    def get_out_channels(self) -> int:
-        return self.conv_block_config.out_channels
+    def transpose(self, extra: Optional[nn.Module] = None) -> Any:
+        raise ConvException('Cannot transpose abstract Convolutional block')
 
     def get_conv_output_size(self) -> ConvOutputSize:
-        config = self.conv_block_config
-        return ConvOutputSize(config.kernel_size, config.stride, config.padding, config.max_pooling_kernel)
+        raise ConvException('Cannot transpose abstract Convolutional block')
 
     def __str__(self) -> AnyStr:
         modules_str = self.__repr__()

@@ -1,6 +1,6 @@
 import unittest
-from dl.block.ffnn_block import FFNNBlock
-from dl.model.ffnn_model import FFNNModel
+from dl.block.mlp_block import MLPBlock
+from dl.model.mlp_model import MLPModel
 from dl.model.vae_model import VAEModel
 from dl.model.conv_model import ConvModel
 from dl.block.conv.conv_2d_block import Conv2DBlockB
@@ -23,15 +23,15 @@ class VAETest(unittest.TestCase):
     def test_init(self):
         features = ['age', 'sex', 'chest pain type', 'cholesterol', 'fasting blood sugar', 'max heart rate',
                     'exercise angina', 'ST slope']
-        hidden_block = FFNNBlock.build(block_id='hidden',
-                                       layer=nn.Linear(in_features=len(features), out_features=4),
-                                       activation=nn.ReLU())
-        output_block = FFNNBlock.build(block_id='latent',
-                                       layer=nn.Linear(in_features=4, out_features=4),
-                                       activation=nn.ReLU())
+        hidden_block = MLPBlock.build(block_id='hidden',
+                                      layer=nn.Linear(in_features=len(features), out_features=4),
+                                      activation=nn.ReLU())
+        output_block = MLPBlock.build(block_id='latent',
+                                      layer=nn.Linear(in_features=4, out_features=4),
+                                      activation=nn.ReLU())
         vae_model = VAEModel(model_id='Autoencoder',
-                             encoder=FFNNModel(model_id='encoder', neural_blocks=[hidden_block, output_block]),
-                             latent_size=6)
+                             encoder=MLPModel(model_id='encoder', neural_blocks=[hidden_block, output_block]),
+                             latent_dim=6)
         print(vae_model)
 
     def test_train_1(self):
@@ -40,15 +40,15 @@ class VAETest(unittest.TestCase):
 
         features = ['age', 'sex', 'chest pain type', 'cholesterol', 'fasting blood sugar', 'max heart rate',
                     'exercise angina', 'ST slope']
-        hidden_block = FFNNBlock.build(block_id='hidden',
-                                       layer=nn.Linear(in_features=len(features), out_features=4),
-                                       activation=nn.ReLU())
-        output_block = FFNNBlock.build(block_id='latent',
-                                       layer=nn.Linear(in_features=4, out_features=4),
-                                       activation=nn.ReLU())
+        hidden_block = MLPBlock.build(block_id='hidden',
+                                      layer=nn.Linear(in_features=len(features), out_features=4),
+                                      activation=nn.ReLU())
+        output_block = MLPBlock.build(block_id='latent',
+                                      layer=nn.Linear(in_features=4, out_features=4),
+                                      activation=nn.ReLU())
         vae_model = VAEModel(model_id='Autoencoder',
-                             encoder=FFNNModel(model_id='encoder', neural_blocks=[hidden_block, output_block]),
-                             latent_size =4)
+                             encoder=MLPModel(model_id='encoder', neural_blocks=[hidden_block, output_block]),
+                             latent_dim=4)
         print(vae_model)
 
         filename = '/users/patricknicolas/dev/geometric_learning/data/heart_diseases.csv'
@@ -192,7 +192,7 @@ class VAETest(unittest.TestCase):
             conv_model = ConvModel(model_id ='conv_MNIST_model', conv_blocks=[conv_block_1, conv_block_2])
             return VAEModel(model_id='VAE - Mnist',
                             encoder=conv_model,
-                            latent_size=64,
+                            latent_dim=64,
                             decoder_out_activation=nn.Sigmoid())
         except ConvException as e:
             print(str(e))

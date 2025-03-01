@@ -5,7 +5,7 @@ import torch.nn as nn
 from typing import Self, Optional, AnyStr, Dict
 
 from dl.block.neural_block import NeuralBlock
-from dl import ConvException, Conv2DataType
+from dl import ConvException
 
 
 """    

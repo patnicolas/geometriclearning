@@ -3,11 +3,11 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from abc import ABC
 
-from dl.block.ffnn_block import FFNNBlock
+from dl.block.mlp_block import MLPBlock
 from dl.block.conv.conv_block import ConvBlock
 from dl.model.neural_model import NeuralModel
-from dl.model.ffnn_model import FFNNModel
-from dl.model.deconv_model import DeConvModel
+from dl.model.mlp_model import MLPModel
+from dl.model.deconv_2d_model import DeConv2dModel
 from dl.block.conv import ConvDataType
 from typing import List, AnyStr, Dict, Any, Self, Optional
 import torch
@@ -33,84 +33,61 @@ class ConvModel(NeuralModel, ABC):
                  model_id: AnyStr,
                  input_size: ConvDataType,
                  conv_blocks: List[ConvBlock],
-                 ffnn_blocks: Optional[List[FFNNBlock]] = None) -> None:
+                 mlp_blocks: Optional[List[MLPBlock]] = None) -> None:
         """
         Constructor for this convolutional neural network
         @param model_id: Identifier for this model
         @type model_id: Str
         @param conv_blocks: List of Convolutional Neural Blocks
         @type conv_blocks: List[ConvBlock]
-        @param ffnn_blocks: List of Feed-Forward Neural Blocks
-        @type ffnn_blocks: List[FFNNBlock]
+        @param mlp_blocks: List of Feed-Forward Neural Blocks
+        @type mlp_blocks: List[MLPBlock]
         """
-        ConvModel.is_valid(conv_blocks, ffnn_blocks, input_size)
-
         self.input_size = input_size
         self.conv_blocks = conv_blocks
 
-        # Record the number of input and output features from
-        # the first and last neural block respectively
-        self.in_features = conv_blocks[0].conv_block_config.in_channels
-        self.out_features = ffnn_blocks[-1].out_features if ffnn_blocks is not None \
-            else conv_blocks[-1].conv_block_config.out_channels
-
         # Define the sequence of modules from the layout
-        modules = [module for block in conv_blocks for module in block.modules]
+        modules = [module for block in conv_blocks
+                   for module in block.modules]
 
         # If fully connected layers are specified
-        if ffnn_blocks is not None:
-            ffnn_input_size = self.__linear_layer_input_size(conv_blocks[-1])
+        if mlp_blocks is not None:
+            mlp_input_size = self.__linear_layer_input_size(conv_blocks[-1])
             modules.append(nn.Flatten())
-
             # First fully connected module
-            linear_module_1 = nn.Linear(in_features=ffnn_input_size,
-                                        out_features=ffnn_blocks[0].out_features,
+            linear_module_1 = nn.Linear(in_features=mlp_input_size,
+                                        out_features=mlp_blocks[0].out_features,
                                         bias=False)
             # First fully connected block is built
-            linear_block = FFNNBlock.build(block_id=ffnn_blocks[0].block_id,
-                                           layer=linear_module_1,
-                                           activation=ffnn_blocks[0].activation)
-            self.ffnn_blocks = [linear_block]
+            linear_block = MLPBlock.build(block_id=mlp_blocks[0].block_id,
+                                          layer=linear_module_1,
+                                          activation=mlp_blocks[0].activation)
+            self.mlp_blocks = [linear_block]
 
             # If there are more than one fully connected layer
-            if len(ffnn_blocks) > 1:
-                [self.ffnn_blocks.append(ffnn_blocks[index])
-                 for index in range(1, len(ffnn_blocks))]
+            if len(mlp_blocks) > 1:
+                [self.mlp_blocks.append(mlp_blocks[index])
+                 for index in range(1, len(mlp_blocks))]
 
             # Generate the sequence of modules
-            [modules.append(module) for block in self.ffnn_blocks
+            [modules.append(module) for block in self.mlp_blocks
              for module in block.modules]
         else:
-            self.ffnn_blocks = None
+            self.mlp_blocks = None
 
         super(ConvModel, self).__init__(model_id, nn.Sequential(*modules))
 
-
-    @classmethod
-    def buildX(cls, model_id: AnyStr, conv_blocks: List[ConvBlock]) -> Self:
-        """
-        Create a pure convolutional neural network as a convolutional encoder for
-        variational auto-encoder or generative adversarial network
-        @param model_id: Identifier for the model
-        @type model_id: AnyStr
-        @param conv_blocks: List of convolutional blocks
-        @type conv_blocks: List[ConvBlock]
-        @return: Instance of decoder of type ConvModel
-        @rtype: ConvModel
-        """
-        return cls(model_id, conv_blocks=conv_blocks, ffnn_blocks=None)
-
-    def transpose(self, extra: nn.Module = None) -> DeConvModel:
+    def transpose(self, extra: nn.Module = None) -> DeConv2dModel:
         """
          Build a de-convolutional neural model from an existing convolutional nodel
          @param extra: Extra module to be added to the inverted neural structure
          @type extra: nn.Module
          @return: Instance of de convolutional model
-         @rtype: DeConvModel
+         @rtype: DeConv2dModel
          """
         de_conv_blocks = [conv_block.transpose() for conv_block in self.conv_blocks]
         de_conv_blocks.reverse()
-        return DeConvModel(model_id=f'de_{self.model_id}', deconv_blocks=de_conv_blocks, last_activation=extra)
+        return DeConv2dModel(model_id=f'de_{self.model_id}', deconv_blocks=de_conv_blocks)
 
     def get_in_features(self) -> int:
         """
@@ -118,7 +95,11 @@ class ConvModel(NeuralModel, ABC):
         @return: Number of input features
         @rtype: int
         """
-        return self.conv_blocks[0].conv_block_config.in_channels
+        return self.conv_blocks[0].in_channels
+
+    def get_out_features(self) -> int:
+        return self.mlp_blocks[-1].out_features if self.mlp_blocks is not None \
+            else self.conv_blocks[-1].out_channels
 
     def get_flatten_output_size(self) -> int:
         """
@@ -135,7 +116,7 @@ class ConvModel(NeuralModel, ABC):
         @return: True if at least one fully connected layer exists, False otherwise
         @rtype: bool
         """
-        return len(self.ffnn_blocks) > 0
+        return len(self.mlp_blocks) > 0
 
     @staticmethod
     def reshape(x: torch.Tensor, resize: int) -> torch.Tensor:
@@ -157,7 +138,8 @@ class ConvModel(NeuralModel, ABC):
         return f'\n{self.list_modules(0)}'
 
     def _state_params(self) -> Dict[AnyStr, Any]:
-        dff_model_input_size = self.ffnn_blocks[0].in_features if self.ffnn_blocks is not None else -1
+        dff_model_input_size = self.mlp_blocks[0].in_features \
+            if self.mlp_blocks is not None else -1
         return {
             "model_id": self.model_id,
             "input_size": self.input_size,
@@ -166,21 +148,21 @@ class ConvModel(NeuralModel, ABC):
         }
 
     @staticmethod
-    def is_valid(conv_blocks: List[ConvBlock], ffnn_blocks: List[FFNNBlock], input_size: ConvDataType) -> bool:
+    def is_valid(conv_blocks: List[ConvBlock], mlp_blocks: List[MLPBlock], input_size: ConvDataType) -> bool:
         """
         Test if the layout/configuration of convolutional neural blocks and feed-forward neural blocks
         are valid
         @param conv_blocks: List of Convolutional blocks which layout is to be evaluated
         @type conv_blocks: List[ConvBlock]
-        @param ffnn_blocks:  List of neural blocks which layout is to be evaluated
-        @type ffnn_blocks: List[FFNNBlock]
+        @param mlp_blocks:  List of neural blocks which layout is to be evaluated
+        @type mlp_blocks: List[MLPBlock]
         @param input_size: Input size as int (1D) or Tuple (2D)
         """
         try:
             assert conv_blocks, 'This convolutional model has not defined neural blocks'
             ConvModel.__validate(conv_blocks, input_size)
-            if not ffnn_blocks:
-                FFNNModel.is_valid(ffnn_blocks)
+            if not mlp_blocks:
+                MLPModel.is_valid(mlp_blocks)
             return True
         except AssertionError as e:
             logging.error(e)
@@ -193,7 +175,7 @@ class ConvModel(NeuralModel, ABC):
         conv_block_sizes = [conv_block.get_conv_output_size() for conv_block in self.conv_blocks]
         conv_model_output_sizes = SeqConvOutputSize(conv_block_sizes)
         conv_output_sizes = conv_model_output_sizes(input_size=self.input_size)
-        return last_conv_block.conv_block_config.out_channels * conv_output_sizes[0] * conv_output_sizes[1]
+        return last_conv_block.out_channels * conv_output_sizes[0] * conv_output_sizes[1]
 
     @staticmethod
     def __validate(neural_blocks: List[ConvBlock], input_size: ConvDataType):

@@ -1,7 +1,7 @@
 import unittest
 
-from dl.model.ffnn_model import FFNNModel
-from dl.block.ffnn_block import FFNNBlock
+from dl.model.mlp_model import MLPModel
+from dl.block.mlp_block import MLPBlock
 from dl.training.hyper_params import HyperParams
 from dl.training.training_summary import TrainingSummary
 from plots.plotter import PlotterParameters
@@ -16,17 +16,17 @@ class NeuralTrainingTest(unittest.TestCase):
 
     @unittest.skip('Ignored')
     def test_init(self):
-        input_block = FFNNBlock.build(
+        input_block = MLPBlock.build(
             block_id='../../../python/input',
             layer=nn.Linear(in_features=32, out_features=16),
             activation=nn.ReLU())
-        hidden_block = FFNNBlock.build(block_id='hidden',
-                                       layer=nn.Linear(in_features=16, out_features=4),
-                                       activation=nn.ReLU())
-        output_block = FFNNBlock.build(block_id='output',
-                                       layer=nn.Linear(in_features=4, out_features=1),
-                                       activation=None)
-        binary_classifier = FFNNModel(model_id='test1', neural_blocks=[input_block, hidden_block, output_block])
+        hidden_block = MLPBlock.build(block_id='hidden',
+                                      layer=nn.Linear(in_features=16, out_features=4),
+                                      activation=nn.ReLU())
+        output_block = MLPBlock.build(block_id='output',
+                                      layer=nn.Linear(in_features=4, out_features=1),
+                                      activation=None)
+        binary_classifier = MLPModel(model_id='test1', neural_blocks=[input_block, hidden_block, output_block])
         print(repr(binary_classifier))
         hyper_params = HyperParams(
             lr=0.001,
@@ -45,9 +45,9 @@ class NeuralTrainingTest(unittest.TestCase):
         from python.metric.metric import Metric
         from python.metric.built_in_metric import BuiltInMetric, MetricType
 
-        hidden_block = FFNNBlock.build('hidden', 5, 4, nn.ReLU())
-        output_block = FFNNBlock.build('output', 4, 1, nn.Sigmoid())
-        binary_classifier = FFNNModel('test1', [hidden_block, output_block])
+        hidden_block = MLPBlock.build('hidden', 5, 4, nn.ReLU())
+        output_block = MLPBlock.build('output', 4, 1, nn.Sigmoid())
+        binary_classifier = MLPModel('test1', [hidden_block, output_block])
         print(repr(binary_classifier))
         hyper_parameters = HyperParams(
             lr=0.001,
@@ -97,9 +97,9 @@ class NeuralTrainingTest(unittest.TestCase):
 
         features = ['age', 'sex', 'chest pain type', 'cholesterol', 'fasting blood sugar','max heart rate',
                     'exercise angina', 'ST slope']
-        hidden_block = FFNNBlock.build('hidden', len(features), 4, nn.ReLU())
-        output_block = FFNNBlock.build('output', 4, 1, nn.Sigmoid())
-        binary_classifier = FFNNModel('test1', [hidden_block, output_block])
+        hidden_block = MLPBlock.build('hidden', len(features), 4, nn.ReLU())
+        output_block = MLPBlock.build('output', 4, 1, nn.Sigmoid())
+        binary_classifier = MLPModel('test1', [hidden_block, output_block])
         print(repr(binary_classifier))
         hyper_parameters = HyperParams(
             lr=0.001,

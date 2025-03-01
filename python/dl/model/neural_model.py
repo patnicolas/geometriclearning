@@ -3,10 +3,11 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import torch
 import torch.nn as nn
-from abc import ABC
-from typing import AnyStr, Self, List, Callable
+from abc import ABC, abstractmethod
+from typing import AnyStr, Self, List, Dict, Any
+from dl.block.conv import ConvDataType
 from torch import Tensor
-from dl import DLException, ConvDataType
+from dl import DLException
 import logging
 
 
@@ -95,3 +96,15 @@ class NeuralModel(torch.nn.Module, ABC):
 
 
 
+class NeuralBuilder(ABC):
+    def __init__(self, model_id: AnyStr, keys: List[AnyStr]) -> None:
+        self.__attributes = dict.fromkeys(keys)
+        self.__attributes['model_id'] = model_id
+
+    def set(self, key: AnyStr, value: Any) -> Self:
+        self.__attributes[key] = value
+        return self
+
+    @abstractmethod
+    def build(self) -> Any:
+        raise DLException('Neural Builder is an abstract class')

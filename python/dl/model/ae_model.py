@@ -1,8 +1,9 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-from typing import AnyStr, Self
+from typing import AnyStr, Self, Any
 from dl.model.neural_model import NeuralModel
+import torch.nn as nn
 import torch
 import logging
 logger = logging.getLogger('dl.model.AEModel')
@@ -16,7 +17,11 @@ through inversion of the neural blocks it contains.
 
 class AEModel(NeuralModel):
 
-    def __init__(self, model_id: AnyStr, encoder: NeuralModel) -> None:
+    def __init__(self,
+                 model_id: AnyStr,
+                 encoder: NeuralModel,
+                 latent_block: Any = None,
+                 decoder_out_activation: nn.Module = None) -> None:
         """
         Constructor
         @param model_id: Identifier for this Auto-encoder
@@ -24,18 +29,21 @@ class AEModel(NeuralModel):
         @param encoder: Encoder neural model
         @type encoder: NeuralModel
         """
-        _decoder = encoder.transpose()
+        decoder = encoder.transpose(decoder_out_activation) if decoder_out_activation is not None \
+            else encoder.transpose()
+
+        self.encoder = encoder
+        self.decoder = decoder
 
         modules = list(encoder.get_model().modules())
-        inverted_modules = list(_decoder.get_model().modules())
-        all_modules = modules + inverted_modules
-        seq_module: torch.nn.Module = torch.nn.Sequential(*all_modules)
+        inverted_modules = list(decoder.get_model().modules())
+        all_modules = modules + inverted_modules if latent_block is None \
+            else  modules + latent_block+ inverted_modules
+        seq_module = torch.nn.Sequential(*all_modules)
         super(AEModel, self).__init__(model_id, seq_module)
-        self.encoder = encoder
-        self.decoder = _decoder
 
-    def __repr__(self):
-        return f'Model id: {self.model_id}\n *Encoder:  {repr(self.encoder)}\n *Decoder:  {repr(self.decoder)}'
+    def __str__(self):
+        return f'Model id: {self.model_id}\n *Encoder:  {str(self.encoder)}\n *Decoder:  {str(self.decoder)}'
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """

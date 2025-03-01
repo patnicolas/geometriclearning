@@ -1,7 +1,7 @@
 import unittest
 import torch.nn as nn
 from dl.block.cnn.deconv_2d_block import DeConvBlock
-from dl.model.deconv_model import DeConvModel
+from dl.model.deconv_2d_model import DeConv2dModel
 from dl import ConvException
 from typing import Tuple
 
@@ -18,7 +18,7 @@ class DeConvModelTest(unittest.TestCase):
         try:
             de_conv_block_1 = DeConvModelTest.__create_de_conv_block_2(in_channels, in_channels_2, kernel_size)
             de_conv_block_2 = DeConvModelTest.__create_de_conv_block_2(in_channels_2, out_channels, kernel_size_2)
-            de_conv_model = DeConvModel.build(model_id, [de_conv_block_1, de_conv_block_2])
+            de_conv_model = DeConv2dModel.build(model_id, [de_conv_block_1, de_conv_block_2])
             self.assertTrue(de_conv_model.out_channels == out_channels)
             print(repr(de_conv_model))
             assert True
@@ -35,7 +35,7 @@ class DeConvModelTest(unittest.TestCase):
         try:
             de_conv_block_1 = DeConvModelTest.__create_de_conv_block_2(in_channels, in_channels_2, kernel_size)
             de_conv_block_2 = DeConvModelTest.__create_de_conv_block_2(in_channels_2, out_channels, kernel_size_2)
-            de_conv_model = DeConvModel.build(model_id, [de_conv_block_1, de_conv_block_2])
+            de_conv_model = DeConv2dModel.build(model_id, [de_conv_block_1, de_conv_block_2])
             self.assertTrue(de_conv_model.out_channels == out_channels)
             print(repr(de_conv_model))
             assert False
@@ -51,7 +51,7 @@ class DeConvModelTest(unittest.TestCase):
         padding = (2, 2)
         input_size = (28, 28)
 
-        return DeConvBlock.build(
+        return DeConvBlock.buildX(
             2,
             in_channels,
             out_channels,

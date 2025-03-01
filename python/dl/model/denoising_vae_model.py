@@ -20,7 +20,7 @@ class DenoisingVAEModel(VAEModel):
     def __init__(self,
                  model_id: AnyStr,
                  encoder: NeuralModel,
-                 latent_size: int,
+                 latent_dim: int,
                  noise_func: Callable[[torch.Tensor], torch.Tensor] = None
                  ) -> None:
         """
@@ -29,10 +29,10 @@ class DenoisingVAEModel(VAEModel):
         @type model_id: str
         @param encoder: Neural network encoder
         @type encoder: NeuralModel
-        @param latent_size: Size of the latent space
-        @type latent_size: int
+        @param latent_dim: Size of the latent space
+        @type latent_dim: int
         @param noise_func: Optional function to add noise to input data (features)
         @param noise_func: Callable (noise_factor, input)
         """
         self.noise_func = noise_func
-        super(DenoisingVAEModel, self).__init__(model_id, encoder, latent_size)
+        super(DenoisingVAEModel, self).__init__(model_id, encoder, latent_dim)

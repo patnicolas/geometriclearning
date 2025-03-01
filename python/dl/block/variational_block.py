@@ -9,7 +9,7 @@ from dl import VAEException
 
 
 class VariationalBlock(NeuralBlock):
-    def __init__(self,  mu: nn.Linear, log_var: nn.Linear, sampler: nn.Linear):
+    def __init__(self,  mu: nn.Linear, log_var: nn.Linear, sampler: nn.Linear) -> None:
         """
         Constructor for the variational Neural block of a variational auto-encoder
         @param mu: Linear module for the mean of the Gaussian distribution
@@ -20,13 +20,13 @@ class VariationalBlock(NeuralBlock):
         @type sampler: nn.Linear
 
         """
+        modules = (mu, log_var, sampler)
+        super(VariationalBlock, self).__init__(block_id='Variational', modules=modules)
         self.mu = mu
         self.log_var = log_var
         self.sampler = sampler
-        super(VariationalBlock, self).__init__(block_id='Variational',
-                                               modules=(mu, log_var, sampler))
 
-    @staticmethod
+    @classmethod
     def build(cls, hidden_dim: int, latent_size: int) -> Self:
         """
         Constructor for the variational Neural block of a variational auto-encoder
