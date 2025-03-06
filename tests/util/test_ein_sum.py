@@ -5,7 +5,6 @@ from util.ein_sum import EinSum
 
 class EinSumTest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
     def test_dot(self):
         import torch
         a = np.array([1.0, 0.5, 2.0])
@@ -13,14 +12,14 @@ class EinSumTest(unittest.TestCase):
 
         # Implicit Einstein summation for dot product
         # c = SUM (a[i].b[i]
-        implicit_notation = np.einsum('i,i', a, b)
+        einsum_dot_product = np.einsum('i,i', a, b)
         # Explicit Einstein summation for dot product
-        explicit_notation = np.einsum('i,i->', a, b)
+        einsum_explicit_dot_product = np.einsum('i,i->', a, b)
         # Using Numpy method
         np_dot = np.dot(a, b)
-        print(f'\nDot product Einstein notation {explicit_notation}\nNumpy dot {np_dot}')
-        self.assertTrue(explicit_notation == np_dot)
-        self.assertTrue(implicit_notation == np_dot)
+        print(f'\neinsum dot product: {einsum_dot_product}\nNumpy dot product: {np_dot}')
+        self.assertTrue(einsum_dot_product == np_dot)
+        self.assertTrue(einsum_explicit_dot_product == np_dot)
 
         # Einsum notation for PyTorch
         einsum_notation = torch.einsum('i,i->',
@@ -29,6 +28,17 @@ class EinSumTest(unittest.TestCase):
         torch_dot = torch.dot(torch.Tensor(a), torch.Tensor(b))
         print(f'Einsum notation: {einsum_notation}\nTorch dot: {torch_dot}')
 
+    def test_dot_mismatch(self):
+        try:
+            a = np.array([1.0, 0.5, 2.0])
+            b = np.array([0.1, 2.0, 1.2, 1.6])
+            einsum_dot_product = np.einsum('i,i', a, b)
+            print(einsum_dot_product)
+            self.assertTrue(False)
+        except Exception as e:
+            print(f'Failed with {e}')
+            self.assertTrue(False)
+
     @unittest.skip('Ignore')
     def test_matrix_mul_numpy(self):
         a = np.array([[1.0, 0.5], [2.0, 1.5]])
@@ -36,15 +46,27 @@ class EinSumTest(unittest.TestCase):
 
         # Explicit declared the intermediate index k
         # c[i,j] = SUM (a[i,k].b[k,j])
-        explicit_notation = np.einsum('ij,jk->ik', a, b)
+        einsum_mul = np.einsum('ij,jk->ik', a, b)
 
         # Conventional Matrix and Numpy notation for multiplication
-        matrix_notation = a @ b
-        numpy_notation = np.matmul(a, b)
-        print(f'\nExplicit notation:\n{explicit_notation}\nMatrix notation:\n{matrix_notation}')
-        self.assertTrue(explicit_notation[0][0] == matrix_notation[0][0])
+        matrix_mul = a @ b
+        matrix_matmul = np.matmul(a, b)
+        print(f'\neinsum matrix multiplication:\n{einsum_mul}\nMatrix multiplication:'
+              f'\n{matrix_mul}\nNumpy matmul function:\n{matrix_matmul}')
+        self.assertTrue(einsum_mul[0][0] == matrix_mul[0][0])
+        self.assertTrue(einsum_mul[1][0] == matrix_matmul[1][0])
 
-    @unittest.skip('Ignore')
+    def test_matrix_mul_numpy_2(self):
+        a = np.array([[1.0, 0.5], [2.0, 1.5]])
+        b = np.array([[0.1, 2.0], [1.2, 0.5]])
+
+        # c = a @ b
+        c = np.einsum('ij,jk->ik', a, b)
+        # Transpose
+        d = np.einsum('ij->ji', c)
+        print(f'\na @ b:\n{c}\nc.T:\n{d}')
+        self.assertTrue(len(c) == len(d))
+
     def test_matrix_mul_torch(self):
         import torch
         a = torch.Tensor([[1.0, 0.5, 0.4],
@@ -56,34 +78,22 @@ class EinSumTest(unittest.TestCase):
 
         # Explicit declared the intermediate index k
         # c[i,j] = SUM (a[i,k].b[k,j])
-        einsum_notation = torch.einsum('ij,jk->ik', a, b)
+        einsum_matrix_mul = torch.einsum('ij,jk->ik', a, b)
 
         # Conventional torch function for multiplication
-        torch_function = torch.mm(a, b)
-        print(f'\nExplicit notation:\n{einsum_notation}\nMatrix notation:\n{torch_function}')
-        self.assertTrue(einsum_notation[0][0] == torch_function[0][0])
+        torch_matrix_mul = torch.mm(a, b)
+        print(f'\neinsum matrix multiplication:\n{einsum_matrix_mul}\nTorch mm:\n{torch_matrix_mul}')
+        self.assertTrue(einsum_matrix_mul[0][0] == torch_matrix_mul[0][0])
 
-    @unittest.skip('Ignore')
-    def test_matrix_el_mul(self):
-        a = np.array([[1.0, 0.5], [2.0, 1.5]])
-        b = np.array([[0.1, 2.0], [1.2, 0.5]])
-        ein_sum = EinSum(a, b)
-        output = ein_sum.matrix_el_sum()
-        output_matrix = a * b
-        ref_output = np.sum(output_matrix)
-        print(f'\nMatrix el. multiplication Einstein:\n{output}\Multiplication numpy:\n{ref_output}')
-        self.assertTrue(output == ref_output)
-
-    @unittest.skip('Ignore')
     def test_outer_product(self):
         a = np.array([1.0, 0.5, 2.0, 0.7, 0.9])
         b = np.array([0.1, 2.0, 1.2])
 
         # Explicit descriptor for outer product of two vectors
         # C[ij] = SUM a[i].b[j]
-        explicit_notation = np.einsum('i,j -> ij', a, b)
-        numpy_function = np.outer(a, b)
-        print(f'\nOuter Product Vector Einstein:\n{explicit_notation}\nOuter product numpy:\n{numpy_function}')
+        einsum_outer_product = np.einsum('i,j -> ij', a, b)
+        numpy_outer_product = np.outer(a, b)
+        print(f'\neinsum outer product:\n{einsum_outer_product}\nNumpy outer product:\n{numpy_outer_product}')
 
         a = np.array([[1.0, 0.5, 0.4],
                       [0.5, -0.3, 0.2],
@@ -93,15 +103,13 @@ class EinSumTest(unittest.TestCase):
 
         # Explicit descriptor for outer product of two matrices
         # C[ijkl] = SUM a[ij].b[kl]
-        explicit_notation = np.einsum('ij,kl -> ijkl', a, b)
+        einsum_outer_product = np.einsum('ij,kl -> ijkl', a, b)
 
         # Use the Numpy outer function after reshaping
-        outer_matrix_shape = explicit_notation.shape
-        numpy_function = np.outer(a, b).reshape(outer_matrix_shape)
-        print(f'\nOuter product Matrix Einstein:\n{explicit_notation}\nOuter product numpy:\n{numpy_function}')
+        outer_matrix_shape = einsum_outer_product.shape
+        numpy_outer_product = np.outer(a, b).reshape(outer_matrix_shape)
+        print(f'\neinsum outer product:\n{einsum_outer_product}\nNumpy outer product:\n{numpy_outer_product}')
 
-
-    @unittest.skip('Ignore')
     def test_transpose(self):
         from numpy import matrix
         import torch
@@ -109,37 +117,43 @@ class EinSumTest(unittest.TestCase):
         a = np.array([[1.0, 0.5, 0.4],
                       [0.5, -0.3, 0.2],
                       [-1.0, 0.4, -0.3]])
-
         # Explicit descriptor for the transpose of a matrix
         #  A[ji] = transpose(A[ij] )
-        np_einsum_transposed = np.einsum('ij->ji', a)
-
+        einsum_transposed = np.einsum('ij->ji', a)
         # Transpose using Numpy .T operator
-        np_transpose_operator = a.T
+        numpy_transpose_operator = a.T
 
         # Transpose using matrix transpose
         at = a.copy()
         matrix.transpose(at)
-        print(f'\nNumpy transpose Einsum:\n{np_einsum_transposed}\n'
-              f'Numpy Transpose operator:\n{np_transpose_operator}'
+        print(f'\nNumpy transpose Einsum:\n{einsum_transposed}\n'
+              f'Numpy Transpose operator:\n{numpy_transpose_operator}'
               f'Numpy transpose function:\n{at}')
 
-        self.assertTrue(np_einsum_transposed[0][1] == np_transpose_operator[0][1])
-        self.assertTrue(np_einsum_transposed[1][1] == at[1][1])
+        self.assertTrue(einsum_transposed[0][1] == numpy_transpose_operator[0][1])
+        self.assertTrue(einsum_transposed[1][1] == at[1][1])
 
         a_tensor = torch.tensor(a)
-        torch_einsum_transposed = torch.einsum('ij->ji', a_tensor)
+        einsum_transpose = torch.einsum('ij->ji', a_tensor)
         torch_transpose_operator = a_tensor.T
         at = a.copy()
         torch.transpose(torch.Tensor(at), 0, 1)
-        print(f'\nTorch transpose Einsum:\n{torch_einsum_transposed}\n'
-              f'Torch Transpose operator:\n{torch_transpose_operator}\n'
-              f'Torch transpose function:\n{at}')
+        print(f'\neinsum transpose (torch):\n{einsum_transpose}\n'
+              f'Transpose operator (torch):\n{torch_transpose_operator}\n'
+              f'Transpose function (torch):\n{at}')
 
+    def test_transpose_2(self):
+        a = np.array([[1.0, 0.5, 0.4],
+                      [0.5, -0.3, 0.2],
+                      [-1.0, 0.4, -0.3]])
+        #  Transpose
+        a_transpose = np.einsum('ij->ji', a)
+        # Transpose of transpose
+        a_a_transpose = np.einsum('ij->ji', a_transpose)
+        print(f'\nTranspose of transpose of:\n{a}\nis:\n{a_a_transpose}')
+        self.assertTrue(a[2][2] == a_a_transpose[2][2])
+        self.assertTrue(a[1][2] == a_a_transpose[1][2])
 
-
-
-    @unittest.skip('Ignore')
     def test_trace(self):
         a = np.array([[1.0, 0.5, 0.4],
                       [0.5, -0.3, 0.2],
@@ -147,18 +161,18 @@ class EinSumTest(unittest.TestCase):
 
         # Using the Einstein notation for trace
         # tr(a) = SUM a[ii]
-        Einstein_notation = np.einsum('ii ->', a)
+        einsum_trace = np.einsum('ii ->', a)
 
         # Using the trace method
-        numpy_function = np.trace(a)
-
+        numpy_trace = np.trace(a)
         # Manual validation
-        tr = sum([a[index, index] for index in range(len(a))])
+        manual_trace = sum([a[index, index] for index in range(len(a))])
+        print(f'\nTrace Einstein: {einsum_trace}\nTrace numpy: {numpy_trace}'
+              f'\nManual trace: {manual_trace}')
+        self.assertTrue(einsum_trace == numpy_trace)
+        self.assertTrue(einsum_trace == manual_trace)
 
-        print(f'\nTrace Einstein:\n{Einstein_notation}\nTrace numpy:\n{ref_output}')
-        self.assertTrue(Einstein_notation == numpy_function)
-
-
+    @unittest.skip('Ignore')
     def test_kalman_state_eq(self):
         import torch
         # Components of the Kalman State-Transition equation
@@ -179,12 +193,8 @@ class EinSumTest(unittest.TestCase):
                              torch.Tensor(B),
                              torch.Tensor(u))
         x_k_from_einsum = A_k_x + B_k_u + torch.Tensor(w)
-
-
         print(f'\nx[k] from matrix computation:\n{x_k_from_matrix}'
               f'\nx[k] from Torch einsum:\n{x_k_from_einsum}')
-       # self.assertTrue(x_k_from_einsum[0] == x_k_from_matrix[0])
-
 
     @unittest.skip('Ignore')
     def test_neural_linear(self):
@@ -209,6 +219,28 @@ class EinSumTest(unittest.TestCase):
               f'\nTorch einsum linear transform:\n{torch_einsum_y}'
               f'\nDirect linear transform:\n{y}')
 
+    @unittest.skip('Ignore')
+    def test_einsum_gradient(self):
+        import torch
+
+        # Define a simple function f(x) = x1^2 + x2^3
+        def my_f(x: torch.Tensor) -> torch.Tensor:
+            return x[0] ** 2 + x[1] ** 3 + 1
+
+        # Arbitrary input tensor
+        x = torch.tensor([2.0, 3.0], requires_grad=True)  # Enable gradient tracking
+
+        f = my_f(x)
+        # Compute gradient using backward
+        f.backward()
+
+        # Compute gradient explicitly using einsum
+        gradient_vec = torch.einsum('i->i', x.grad)  # Equivalent to identity mapping
+        print("Gradient using einsum:", gradient_vec)  # Output: tensor([4., 27.])
+
+        # Verification
+        grad = x.grad
+        print("Gradient using autograd:", grad)  # Output: tensor([4., 27.])
 
 
 
