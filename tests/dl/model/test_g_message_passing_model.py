@@ -1,7 +1,7 @@
 import unittest
 
 import os
-from dl.block.graph.gnn_base_block import GNNBaseBlock
+from dl.block.graph.g_message_passing_block import GMessagePassingBlock
 from dl.model.gnn_base_model import GNNBaseModel
 from dl.training.hyper_params import HyperParams
 from torch_geometric.nn import GraphConv
@@ -35,8 +35,6 @@ class GNNBaseModelTest(unittest.TestCase):
         print(sparse_tensor)
 
     def test_init_2(self):
-        batch_size = 4
-        walk_length = 6
         num_node_features = 24
         num_classes = 8
         gcn_model = GNNBaseModelTest.build(num_node_features, num_classes)
@@ -73,15 +71,15 @@ class GNNBaseModelTest(unittest.TestCase):
 
         hidden_channels = 256
         conv_1 = GraphConv(in_channels=num_node_features, out_channels=hidden_channels)
-        gcn_conv_1 = GNNBaseBlock(block_id='K1',
-                                  message_passing_module=conv_1,
-                                  activation_module=nn.ReLU(),
-                                  batch_norm_module=BatchNorm(hidden_channels),
-                                  drop_out_module=0.2)
+        gcn_conv_1 = GMessagePassingBlock(block_id='K1',
+                                          message_passing_module=conv_1,
+                                          activation_module=nn.ReLU(),
+                                          batch_norm_module=BatchNorm(hidden_channels),
+                                          drop_out_module=0.2)
         conv_2 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-        gcn_conv_2 = GNNBaseBlock(block_id='K2', message_passing_module=conv_2, activation_module=nn.ReLU())
+        gcn_conv_2 = GMessagePassingBlock(block_id='K2', message_passing_module=conv_2, activation_module=nn.ReLU())
         conv_3 = GraphConv(in_channels=hidden_channels, out_channels=num_classes)
-        gcn_conv_3 = GNNBaseBlock(block_id='K3', message_passing_module=conv_3)
+        gcn_conv_3 = GMessagePassingBlock(block_id='K3', message_passing_module=conv_3)
 
         return GNNBaseModel.build(model_id='Karate club test',
                                   gnn_blocks=[gcn_conv_1, gcn_conv_2, gcn_conv_3])

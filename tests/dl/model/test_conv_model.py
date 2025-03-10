@@ -35,13 +35,40 @@ class ConvModelTest(unittest.TestCase):
                                                 bias=False,
                                                 drop_out=0.2)
             num_classes = 10
-            ffnn_block_1 = MLPBlock.build(block_id='hidden',
-                                          layer=nn.Linear(in_features=0, out_features=num_classes, bias=False),
-                                          activation=nn.Softmax(dim=1))
+            mlp_block = MLPBlock(block_id='hidden',
+                                 layer_module=nn.Linear(in_features=0, out_features=num_classes, bias=False),
+                                 activation_module=nn.Softmax(dim=1))
             conv_model = ConvModel(model_id='MNIST',
                                    input_size=(28, 28),
                                    conv_blocks=[conv_2d_block_1, conv_2d_block_2],
-                                   mlp_blocks=[ffnn_block_1])
+                                   mlp_blocks=[mlp_block])
+            print(repr(conv_model))
+            self.assertTrue(True)
+        except ConvException as e:
+            print(str(e))
+            self.assertTrue(False)
+
+    def test_mnist_small_2(self):
+        from dl.model.conv_2d_model import Conv2dBuilder
+        try:
+            conv_builder = Conv2dBuilder('Built from blocks')
+
+            # Initialization for convolutional layer
+            conv_builder.set(key='input_size', value=(28, 28))
+            conv_builder.set(key='in_channels_list', value=[8, 16, 16, 1])
+            conv_builder.set(key='is_batch_norm', value=True)
+            conv_builder.set(key='kernel_size', value=(3, 3))
+            conv_builder.set(key='stride', value=(1, 1))
+            conv_builder.set(key='padding', value=(1, 1))
+            conv_builder.set(key='activation', value=nn.ReLU())
+            conv_builder.set(key='max_pool_kernel', value=2)
+            conv_builder.set(key='drop_out', value=0.2)
+
+            # Initialization for fully connected layer
+            conv_builder.set(key='in_features_list', value=[0, 64, 10])
+            conv_builder.set(key='output_activation', value=nn.Softmax(dim=1))
+
+            conv_model = conv_builder.build()
             print(repr(conv_model))
             self.assertTrue(True)
         except ConvException as e:

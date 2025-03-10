@@ -564,19 +564,19 @@ class GNNTrainingTest(unittest.TestCase):
     @staticmethod
     def build(num_node_features: int, num_classes: int) -> GNNBaseModel:
         from torch_geometric.nn import GraphConv
-        from dl.block.graph.gnn_base_block import GNNBaseBlock
+        from dl.block.graph.g_message_passing_block import GMessagePassingBlock
         from dl.model.gnn_base_model import GNNBaseModel
 
         hidden_channels = 256
         conv_1 = GraphConv(in_channels=num_node_features, out_channels=hidden_channels)
-        gnn_block_1 = GNNBaseBlock(block_id='K1',
-                                   message_passing_module=conv_1,
-                                   activation_module=nn.ReLU(),
-                                   drop_out_module=0.2)
+        gnn_block_1 = GMessagePassingBlock(block_id='K1',
+                                           message_passing_module=conv_1,
+                                           activation_module=nn.ReLU(),
+                                           drop_out_module=0.2)
         conv_2 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-        gnn_block_2 = GNNBaseBlock(block_id='K2', message_passing_module=conv_2, activation_module=nn.ReLU(), drop_out_module=0.2)
+        gnn_block_2 = GMessagePassingBlock(block_id='K2', message_passing_module=conv_2, activation_module=nn.ReLU(), drop_out_module=0.2)
         conv_3 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-        gnn_block_3 = GNNBaseBlock(block_id='K3', message_passing_module=conv_3, activation_module=nn.ReLU(), drop_out_module=0.2)
+        gnn_block_3 = GMessagePassingBlock(block_id='K3', message_passing_module=conv_3, activation_module=nn.ReLU(), drop_out_module=0.2)
 
         ffnn_block = MLPBlock.build(block_id='Output',
                                     layer=nn.Linear(3*hidden_channels, num_classes),

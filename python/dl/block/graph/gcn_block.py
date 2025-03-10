@@ -2,13 +2,13 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 
-from dl.block.graph.gnn_base_block import GNNBaseBlock
+from dl.block.graph.g_message_passing_block import GMessagePassingBlock
 from typing import AnyStr, Self, Optional
 import torch.nn as nn
 from torch_geometric.nn import BatchNorm, GCNConv
 
 
-class GCNBlock(GNNBaseBlock):
+class GCNBlock(GMessagePassingBlock):
     def __int__(self,
                 block_id: AnyStr,
                 gcn_layer: GCNConv,

@@ -17,8 +17,8 @@ logger = logging.getLogger('dl.model.NeuralModel')
 __all__ = ['NeuralModel']
 
 """
-Abstract base class for Neural network models. The sub-classes have to implement get_model,
-forward and save methods
+Abstract base class for Neural network models. The constructors of the sub-classes needs
+to defined the sequence of neural blocks.
 """
 
 
@@ -98,13 +98,14 @@ class NeuralModel(torch.nn.Module, ABC):
 
 class NeuralBuilder(ABC):
     def __init__(self, model_id: AnyStr, keys: List[AnyStr]) -> None:
-        self.__attributes = dict.fromkeys(keys)
-        self.__attributes['model_id'] = model_id
+        self._attributes = dict.fromkeys(keys)
+        self._attributes['model_id'] = model_id
 
+    # Add/update dynamically the torch module as value of attributes dict.
     def set(self, key: AnyStr, value: Any) -> Self:
-        self.__attributes[key] = value
+        self._attributes[key] = value
         return self
 
     @abstractmethod
-    def build(self) -> Any:
+    def build(self) -> NeuralModel:
         raise DLException('Neural Builder is an abstract class')

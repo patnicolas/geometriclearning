@@ -2,19 +2,21 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from dl.block.conv.conv_block import ConvBlock
-from typing import AnyStr, Tuple, Optional, Self, Dict
+from typing import AnyStr, Tuple, Optional, Self, Dict, List
 import torch.nn as nn
 from dl.block.conv import Conv3DataType
+from dl import ConvException
 
 
 class Conv3dBlock(ConvBlock):
+    valid_modules = ('Conv3d', 'MaxPool3d', 'BatchNorm3d', 'Dropout3d')
+
     def __init__(self,
                  block_id: AnyStr,
                  conv_layer_module: nn.Conv3d,
-                 max_pooling_module: nn.MaxPool3d,
-                 deconvolution_enabled: bool = False,
                  batch_norm_module: Optional[nn.BatchNorm3d] = None,
                  activation_module: Optional[nn.Module] = None,
+                 max_pooling_module: Optional[nn.MaxPool3d] = None,
                  drop_out_module: Optional[nn.Dropout3d] = None) -> None:
         """
         Constructor for a 3-dimension convolutional block
@@ -24,8 +26,6 @@ class Conv3dBlock(ConvBlock):
         @type conv_layer_module:  Conv3d
         @param max_pooling_module: Maximum pooling layer
         @type max_pooling_module: MaxPool3d
-        @param deconvolution_enabled: Flag to enable generation of deconvolution
-        @type deconvolution_enabled: bool
         @param batch_norm_module: Optional Batch Normalization module
         @type batch_norm_module: BatchNorm3d
         @param activation_module: Optional activation function/module
@@ -33,35 +33,22 @@ class Conv3dBlock(ConvBlock):
         @param drop_out_module: Optional drop out module for training
         @type drop_out_module: Dropout3d
         """
-        self.deconvolution_enabled = deconvolution_enabled
-        attributes: Dict[AnyStr, nn.Module] = {}
-
         # First define the 2D convolution
-        if deconvolution_enabled:
-            attributes['conv_layer'] = conv_layer_module
         modules = [conv_layer_module]
 
         # Add the batch normalization if defined
         if batch_norm_module is not None:
-            if deconvolution_enabled:
-                attributes['batch_norm'] = batch_norm_module
             modules.append(batch_norm_module)
-
         # Activation to be added if defined
         if activation_module is not None:
-            if deconvolution_enabled:
-                attributes['activation'] = activation_module
             modules.append(activation_module)
-
         # Added max pooling module
-        modules.append(max_pooling_module)
-
+        if max_pooling_module is not None:
+            modules.append(max_pooling_module)
         # Add drop out for training is defined
         if drop_out_module is not None:
-            if deconvolution_enabled:
-                attributes['drop_out'] = drop_out_module
             modules.append(drop_out_module)
-        super(Conv3dBlock, self).__init__(block_id, tuple(modules), attributes)
+        super(Conv3dBlock, self).__init__(block_id, modules)
 
     @classmethod
     def build(cls,
@@ -69,7 +56,6 @@ class Conv3dBlock(ConvBlock):
               in_channels: int,
               out_channels: int,
               kernel_size: Conv3DataType,
-              deconvolution_enabled: bool = False,
               stride: Conv3DataType = (1, 1, 1),
               padding: Conv3DataType = (0, 0, 0),
               batch_norm: bool = False,
@@ -87,8 +73,6 @@ class Conv3dBlock(ConvBlock):
         @type out_channels: int
         @param kernel_size: Size of the kernel (num_records) for 1D and (num_records, num_records) for 3D
         @type kernel_size: Tuple[int, int]
-        @param deconvolution_enabled: Enabled to transpose the block to create a deconvolutional neural block
-        #type deconvolution_enabled:: bool
         @param stride: Stride for convolution (st) for 1D, (st, st) for 2D
         @type stride: Tuple[int, int]
         @param padding: Padding for convolution (st) for 1D, (st, st) for 2D
@@ -118,8 +102,27 @@ class Conv3dBlock(ConvBlock):
 
         return cls(block_id,
                    conv_3d_module,
-                   max_pooling_module,
-                   deconvolution_enabled,
                    batch_norm_module,
                    activation,
+                   max_pooling_module,
                    drop_out_module)
+
+    def validate(self, attributes: Dict[AnyStr, nn.Module] = None) -> Dict[AnyStr, nn.Module]:
+        from dl.block.neural_block import NeuralBlock
+
+        self.attributes = attributes
+        for module in self.modules:
+            module_type = module.__class__.__name__
+            if (module_type not in NeuralBlock.supported_activations
+                    and module_type not in Conv3dBlock.valid_modules):
+                raise ConvException(f'Type of attribute {module_type} '
+                                    f'is not compatible with Conv3dBlock')
+
+            if self.attributes is not None:
+                match module_type:
+                    case 'Conv3d': self.attributes['conv_layer'] = module
+                    case 'BatchNorm3d': self.attributes['batch_norm'] = module
+                    case 'MaxPool3d':  self.attributes['max_pool'] = module
+                    case 'Dropout3d': self.attributes['drop_out'] = module
+                    case _: self.attributes['activation'] = module
+        return self.attributes

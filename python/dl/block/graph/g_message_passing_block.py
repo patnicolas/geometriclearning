@@ -7,7 +7,6 @@ import torch
 import torch.nn as nn
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.typing import Adj
-from torch_geometric.nn import BatchNorm
 
 """
 Implementation of a very simple Graph Convolutional Neural block which consists of 
@@ -18,7 +17,7 @@ Implementation of a very simple Graph Convolutional Neural block which consists 
 """
 
 
-class GNNBaseBlock(NeuralBlock):
+class GMessagePassingBlock(NeuralBlock):
     def __init__(self,
                  block_id: AnyStr,
                  message_passing_module: MessagePassing,
@@ -41,23 +40,31 @@ class GNNBaseBlock(NeuralBlock):
         @param drop_out_module: Drop out for training
         @type drop_out_module: nn.Module subclass
         """
+        # Need at a minimum a message passing module
         modules: List[nn.Module] = [message_passing_module]
+        # Optional batch normalization
         if batch_norm_module is not None:
             modules.append(batch_norm_module)
+        # Optional activation
         if activation_module is not None:
             modules.append(activation_module)
+        # Optional Graph pooling module
         if graph_pooling_module is not None:
             modules.append(graph_pooling_module)
         if drop_out_module is not None:
             modules.append(drop_out_module)
-        super(GNNBaseBlock, self).__init__(block_id, tuple(modules))
+        super(GMessagePassingBlock, self).__init__(block_id, modules)
 
     def forward(self,
                 x: torch.Tensor,
                 edge_index: Adj) -> torch.Tensor:
-        for idx, module in enumerate(self.modules):
-            x = module(x, edge_index) if idx == 0 \
-                else module(x)
+        # The adjacency data is used in the first module
+        conv_module = self.modules[0]
+        x = conv_module(x, edge_index)
+
+        # Process all the torch modules if defined
+        for module in self.modules[1:]:
+            x = module(x)
         return x
 
     def __repr__(self) -> AnyStr:

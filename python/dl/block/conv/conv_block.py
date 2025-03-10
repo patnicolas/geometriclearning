@@ -13,10 +13,6 @@ logger = logging.getLogger('dl.block.ConvBlock')
 
 """
 Generic convolutional neural block for 1 and 2 dimensions
- Components:
-    Convolution (kernel, Stride, padding)
-    Batch normalization (Optional)
-    Activation
 
 Formula to compute output_dim of a convolutional block given an in_channels
         output_dim = (in_channels + 2*padding - kernel_size)/stride + 1
@@ -25,26 +21,25 @@ Note: Spectral Normalized convolution is available only for 2D models
 
 
 class ConvBlock(NeuralBlock):
-    def __init__(self,
-                 block_id: Optional[AnyStr],
-                 modules: Tuple[nn.Module],
-                 attributes: Optional[Dict[AnyStr, nn.Module]] = None) -> None:
+    def __init__(self, block_id: Optional[AnyStr], modules: List[nn.Module]) -> None:
         """
         Constructor for the Generic Convolutional Neural block
         @param block_id: Identifier for the block
         @type block_id: str
         @param modules: Optional tuple/sequence of convolutional related modules
         @type modules: Tuple[nn.Module]
-        @param attributes: Optional dictionary of convolutional attributes used for building
-                            De convolutional blocks
-        @type attributes: Dict
         """
-        self.attributes = attributes
+        self.attributes = None
+        super(ConvBlock, self).__init__(block_id, modules)
 
-        self.in_channels = modules[0].in_channels
-        self.out_channels = modules[0].out_channels
-        super(ConvBlock, self).__init__(block_id, tuple(modules))
+    def get_in_channels(self) -> int:
+        return self.modules[0].in_channels
 
+    def get_out_channels(self) -> int:
+        return self.modules[0].out_channels
+
+    def is_deconvolution_enabled(self) -> bool:
+        return self.attributes is not None
 
     def transpose(self, extra: Optional[nn.Module] = None) -> Any:
         raise ConvException('Cannot transpose abstract Convolutional block')
@@ -59,11 +54,11 @@ class ConvBlock(NeuralBlock):
     def __repr__(self) -> AnyStr:
         return '\n'.join([f'{idx}: {str(module)}' for idx, module in enumerate(self.modules)])
 
-    def get_modules_weights(self) -> Tuple[Any]:
+    def get_modules_weights(self) -> List[Any]:
         """
         Get the weights for modules which contains them
         @returns: weight of convolutional neural_blocks
         @rtype: tuple
         """
-        return tuple([module.weight.data for module in self.modules \
-                      if type(module) == nn.Linear or type(module) == nn.Conv2d or type(module) == nn.Conv1d])
+        return [module.weight.data for module in self.modules
+                if type(module) is nn.Linear or type(module) is nn.Conv2d or type(module) is nn.Conv1d]

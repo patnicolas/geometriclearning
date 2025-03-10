@@ -4,6 +4,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from typing import AnyStr, List, Optional, Tuple
 
 from dl.model.conv_model import ConvModel
+from dl.model.mlp_model import MLPBuilder
 from dl.model.neural_model import NeuralBuilder
 from dl.block.conv import Conv2DataType
 from dl.block.conv.conv_2d_block import Conv2dBlock
@@ -28,54 +29,54 @@ class Conv2dBuilder(NeuralBuilder):
     def __init__(self, model_id: AnyStr) -> None:
         super(Conv2dBuilder, self).__init__(model_id, Conv2dBuilder.keys)
         # Provide default values that may be overwritten.
-        self.__attributes['stride'] = (1, 1)
-        self.__attributes['padding'] = (1, 1)
-        self.__attributes['is_batch_norm'] = True
-        self.__attributes['activation'] = nn.ReLU()
-        self.__attributes['bias'] = False
-        self.__attributes['drop_out'] = 0.0
+        self._attributes['stride'] = (1, 1)
+        self._attributes['padding'] = (1, 1)
+        self._attributes['is_batch_norm'] = True
+        self._attributes['activation'] = nn.ReLU()
+        self._attributes['bias'] = False
+        self._attributes['drop_out'] = 0.0
 
     def build(self) -> Conv2dModel:
         # Instantiate the model from the dictionary of
         # Configuration parameters
-        model_id = self.__attributes['model_id']
-        conv_blocks, mlp_blocks = Conv2dBuilder.__create_blocks()
+        model_id = self._attributes['model_id']
+        # Generate the convolutional neural blocks from the configuration attributes dictionary
+        conv_blocks = self.__create_conv_blocks()
+        # Generate the fully connected blocks from the configuration attributes dictionary
+        mlp_blocks = self.__create_mlp_blocks()
         # Validation
-        Conv2dBuilder.__validate(conv_blocks, mlp_blocks)
-        return Conv2dModel(model_id, conv_blocks, mlp_blocks)
+        Conv2dBuilder.__validate(conv_blocks, mlp_blocks, self._attributes['input_size'])
+        return Conv2dModel(model_id, self._attributes['input_size'], conv_blocks, mlp_blocks)
 
-    def __create_blocks(self) ->  (List[Conv2dBlock], List[MLPBlock]):
-        from dl.model.mlp_model import MLPModel
-
+    def __create_conv_blocks(self) -> List[Conv2dBlock]:
         conv_2d_blocks = []
-        in_channel = self.__attributes['in_channels_list'][0]
-        for idx in range(1, len(self.__attributes['in_channels_list'])):
+        in_channel = self._attributes['in_channels_list'][0]
+        for idx in range(1, len(self._attributes['in_channels_list'])):
             conv_block = Conv2dBlock.build(
-                block_id=f'{self.__attributes["model_id"]}-{idx}',
+                block_id=f'{self._attributes["model_id"]}-{idx}',
                 in_channels=in_channel,
-                out_channels=self.__attributes['in_channels_list'][idx],
-                kernel_size=self.__attributes['kernel_size'],
-                deconvolution_enabled=False,
-                stride=self.__attributes['stride'],
-                padding=self.__attributes['padding'],
-                batch_norm=self.__attributes['batch_norm'],
-                max_pooling_kernel=self.__attributes['max_pool_kernel'],
-                activation=self.__attributes['activation'],
-                bias=self.__attributes['bias'],
-                drop_out=self.__attributes['drop_out'])
+                out_channels=self._attributes['in_channels_list'][idx],
+                kernel_size=self._attributes['kernel_size'],
+                stride=self._attributes['stride'],
+                padding=self._attributes['padding'],
+                batch_norm=self._attributes['is_batch_norm'],
+                max_pooling_kernel=self._attributes['max_pool_kernel'],
+                activation=self._attributes['activation'],
+                bias=self._attributes['bias'],
+                drop_out=self._attributes['drop_out'])
             conv_2d_blocks.append(conv_block)
-            in_channel = self.__attributes['in_channels_list'][idx]
+            in_channel = self._attributes['in_channels_list'][idx]
+        return conv_2d_blocks
 
-        mlp_blocks = MLPModel.create_ffnn_blocks(
-            self.__attributes['model_id'],
-            self.__attributes['in_features_list'],
-            self.__attributes['activation'],
-            self.__attributes['drop_out'],
-            self.__attributes['output_activation']) \
-            if self.__attributes['in_features_list'] is not None \
-            else None
+    def __create_mlp_blocks(self) -> List[MLPBlock]:
+        mlp_builder = MLPBuilder('MLP Builder')
+        mlp_builder.set(key='in_features_list', value=self._attributes['in_features_list'])
+        mlp_builder.set(key='activation', value=self._attributes['activation'])
+        mlp_builder.set(key='drop_out', value=self._attributes['drop_out'])
+        mlp_builder.set(key='output_activation', value=self._attributes['output_activation'])
+        mlp_model = mlp_builder.build()
+        return mlp_model.neural_blocks
 
-        return conv_2d_blocks, mlp_blocks
 
     @staticmethod
     def __validate(conv_blocks: List[Conv2dBlock],
@@ -92,7 +93,7 @@ class Conv2dBuilder(NeuralBuilder):
         """
         from dl.model.mlp_model import MLPBuilder
         assert conv_blocks, 'This convolutional model has not defined neural blocks'
-        Conv2dBuilder.__validate_conv(conv_blocks, input_size)
+        Conv2dBuilder.validate_conv(conv_blocks, input_size)
         MLPBuilder.validate(mlp_blocks)
 
     """ ----------------------------   Private helper methods --------------------------- """
@@ -112,8 +113,8 @@ class Conv2dBuilder(NeuralBuilder):
 
         for index in range(len(neural_blocks) - 1):
             # 1. Validate the in-channel and out-channels
-            next_in_channels = neural_blocks[index + 1].in_channels
-            this_out_channels = neural_blocks[index].out_channels
+            next_in_channels = neural_blocks[index + 1].get_in_channels()
+            this_out_channels = neural_blocks[index].get_out_channels()
             assert next_in_channels == this_out_channels, \
                 f'Layer {index} input_tensor != layer {index + 1} output'
 
@@ -136,9 +137,9 @@ class Conv2dBuilder(NeuralBuilder):
 
     @staticmethod
     def __get_out_shape_dim(conv_block: Conv2dBlock, input_size: Conv2DataType, dim: int) -> int:
-        stride = conv_block.attributes['conv_layer'].stride[dim]
-        padding = conv_block.attributes['conv_layer'].padding[dim]
-        kernel_size = conv_block.attributes['conv_layer'].kernel_size[dim]
+        stride = conv_block.modules[0].stride[dim]
+        padding = conv_block.modules[0].padding[dim]
+        kernel_size = conv_block.modules[0].kernel_size[dim]
         num = (input_size[dim] + 2 * padding - kernel_size)
         return int(num / stride) + 1
 

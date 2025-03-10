@@ -45,29 +45,21 @@ class ConvModel(NeuralModel, ABC):
         """
         self.input_size = input_size
         self.conv_blocks = conv_blocks
+        self.mlp_blocks = mlp_blocks
 
         # Define the sequence of modules from the layout
-        modules = [module for block in conv_blocks
+        modules = [module for block in self.conv_blocks
                    for module in block.modules]
 
-        # If fully connected layers are specified
-        if mlp_blocks is not None:
-            mlp_input_size = self.__linear_layer_input_size(conv_blocks[-1])
+        # If fully connected, MLP layers are included ....
+        if self.mlp_blocks is not None:
             modules.append(nn.Flatten())
-            # First fully connected module
-            linear_module_1 = nn.Linear(in_features=mlp_input_size,
-                                        out_features=mlp_blocks[0].out_features,
-                                        bias=False)
-            # First fully connected block is built
-            linear_block = MLPBlock.build(block_id=mlp_blocks[0].block_id,
-                                          layer=linear_module_1,
-                                          activation=mlp_blocks[0].activation)
-            self.mlp_blocks = [linear_block]
-
-            # If there are more than one fully connected layer
-            if len(mlp_blocks) > 1:
-                [self.mlp_blocks.append(mlp_blocks[index])
-                 for index in range(1, len(mlp_blocks))]
+            # Compute the size of the 1 dimensional input to the first fully
+            # connected (Linear) layer
+            flatten_input_size = self.__linear_layer_input_size(conv_blocks[-1])
+            # Retrieve the first linear layer of the MLP sequence
+            first_linear_layer = self.mlp_blocks[0].modules[0]
+            first_linear_layer.in_features = flatten_input_size
 
             # Generate the sequence of modules
             [modules.append(module) for block in self.mlp_blocks
@@ -175,7 +167,7 @@ class ConvModel(NeuralModel, ABC):
         conv_block_sizes = [conv_block.get_conv_output_size() for conv_block in self.conv_blocks]
         conv_model_output_sizes = SeqConvOutputSize(conv_block_sizes)
         conv_output_sizes = conv_model_output_sizes(input_size=self.input_size)
-        return last_conv_block.out_channels * conv_output_sizes[0] * conv_output_sizes[1]
+        return last_conv_block.get_out_channels() * conv_output_sizes[0] * conv_output_sizes[1]
 
     @staticmethod
     def __validate(neural_blocks: List[ConvBlock], input_size: ConvDataType):
@@ -183,8 +175,8 @@ class ConvModel(NeuralModel, ABC):
 
         for index in range(len(neural_blocks) - 1):
             # Validate the in-channel and out-channels
-            next_in_channels = neural_blocks[index + 1].conv_block_config.in_channels
-            this_out_channels = neural_blocks[index].conv_block_config.out_channels
+            next_in_channels = neural_blocks[index + 1].get_in_channels()
+            this_out_channels = neural_blocks[index].get_out_channels()
             assert next_in_channels == this_out_channels, \
                 f'Layer {index} input_tensor != layer {index+1} output'
 

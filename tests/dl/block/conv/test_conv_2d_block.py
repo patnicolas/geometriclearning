@@ -5,6 +5,7 @@ import torch.nn as nn
 
 
 class Conv2dBlockTest(unittest.TestCase):
+
     def test_init_1(self):
         conv_layer_module = nn.Conv2d(in_channels=1,
                                       out_channels=32,
@@ -13,23 +14,40 @@ class Conv2dBlockTest(unittest.TestCase):
                                       padding=(1, 1),
                                       bias=False)
 
-        conv_2d_block = Conv2dBlock('My_conv_2d',
+        conv_2d_block = Conv2dBlock(block_id='My_conv_2d',
                                     conv_layer_module=conv_layer_module,
-                                    max_pooling_module= nn.MaxPool2d(kernel_size=2, stride=1, padding=0),
-                                    deconvolution_enabled=False,
                                     batch_norm_module=nn.BatchNorm2d(32),
                                     activation_module=nn.ReLU(),
+                                    max_pooling_module=nn.MaxPool2d(kernel_size=2, stride=1, padding=0),
                                     drop_out_module=nn.Dropout2d(0.2))
         print(str(conv_2d_block))
-        self.assertTrue(len(conv_2d_block.attributes) == 0)
+        attributes = {}
+        conv_2d_block.validate(attributes)
+        self.assertTrue(len(conv_2d_block.attributes) == 5)
+
+    def test_init_2(self):
+        conv_layer_module = nn.Conv2d(in_channels=1,
+                                      out_channels=32,
+                                      kernel_size=(3, 3),
+                                      stride=(1, 1),
+                                      padding=(1, 1),
+                                      bias=False)
+        conv_2d_block = Conv2dBlock(block_id='My_conv_2d',
+                                    conv_layer_module=conv_layer_module,
+                                    batch_norm_module=nn.BatchNorm2d(32),
+                                    activation_module=nn.ReLU(),
+                                    max_pooling_module=nn.MaxPool2d(kernel_size=2, stride=1, padding=0),
+                                    drop_out_module=nn.Dropout2d(0.2))
+        conv_2d_block.validate()
+        print(str(conv_2d_block))
+        self.assertTrue(conv_2d_block.attributes is None)
 
     @unittest.skip('Ignore')
-    def test_init_2(self):
+    def test_init_3(self):
         conv_2d_block = Conv2dBlock.build(block_id='My_conv_2d',
                                           in_channels=1,
                                           out_channels=32,
                                           kernel_size=(3, 3),
-                                          deconvolution_enabled=False,
                                           stride=(1, 1),
                                           padding=(0, 0),
                                           batch_norm=True,
@@ -46,7 +64,6 @@ class Conv2dBlockTest(unittest.TestCase):
                                           in_channels=1,
                                           out_channels=32,
                                           kernel_size=(3, 3),
-                                          deconvolution_enabled=True,
                                           stride=(1, 1),
                                           padding=(0, 0),
                                           batch_norm=True,

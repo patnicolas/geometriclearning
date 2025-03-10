@@ -39,7 +39,7 @@ class DeConv2DBlockTest(unittest.TestCase):
                                              conv_block_config=conv_block_config,
                                              activation=nn.Sigmoid())
             print(repr(de_conv_2d_block))
-            self.assertTrue(str(de_conv_2d_block.conv_block_config.activation) == 'Sigmoid()')
+            self.assertTrue(str(de_conv_2d_block.conv_block_config.activation_module) == 'Sigmoid()')
         except ConvException as e:
             print(str(e))
             self.assertTrue(False)

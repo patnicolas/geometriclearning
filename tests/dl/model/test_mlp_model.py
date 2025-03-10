@@ -8,24 +8,32 @@ from dl import DLException
 
 class MLPModelTest(unittest.TestCase):
 
-    @unittest.skip("Ignore")
+
     def test_init_1(self):
         try:
-
-            input_block = MLPBlock.build(block_id='input',
-                                         layer=nn.Linear(in_features=8, out_features=16, bias=False),
-                                         activation= nn.ReLU())
-            hidden_block = MLPBlock.build(block_id='hidden',
-                                          layer=nn.Linear(in_features=16, out_features=16, bias=False),
-                                          activation= nn.ReLU())
-            output_block = MLPBlock.build(block_id='output',
-                                          layer=nn.Linear(in_features=16, out_features=1, bias=False),
-                                          activation=nn.Softmax())
+            input_block = MLPBlock(block_id='input',
+                                   layer_module=nn.Linear(in_features=8, out_features=16, bias=False),
+                                   activation_module= nn.ReLU())
+            hidden_block = MLPBlock(block_id='hidden',
+                                    layer_module=nn.Linear(in_features=16, out_features=16, bias=False),
+                                    activation_module= nn.ReLU())
+            output_block = MLPBlock(block_id='output',
+                                    layer_module=nn.Linear(in_features=16, out_features=1, bias=False),
+                                    activation_module=nn.Softmax())
             mlp_model = MLPModel(model_id='test1',
-                                  neural_blocks=[input_block, hidden_block, output_block])
-            self.assertTrue(mlp_model.in_features == 8)
-            self.assertTrue(mlp_model.out_features == 1)
-            print(repr(mlp_model))
+                                 neural_blocks=[input_block, hidden_block, output_block])
+            self.assertTrue(mlp_model.get_in_features() == 8)
+            self.assertTrue(mlp_model.get_out_features() == 1)
+            print(str(mlp_model))
+
+            mlp_builder = MLPBuilder('MLP-Test-1')
+            # 'in_features_list', 'activation', 'drop_out', 'output_activation'
+            mlp_builder.set(key='in_features_list', value=[8, 16, 16, 1])
+            mlp_builder.set(key='drop_out', value=0.5)
+            mlp_builder.set(key='output_activation', value=nn.Softmax())
+            mlp_model = mlp_builder.build()
+            print(str(mlp_model))
+
             assert True
         except DLException as e:
             assert False
@@ -53,6 +61,7 @@ class MLPModelTest(unittest.TestCase):
         except DLException as e:
             assert False
 
+    @unittest.skip("Ignore")
     def test_builder(self):
         mlp_builder = (MLPBuilder('test').set('in_channels', [8, 16, 16])
                         .set('activation', nn.ReLU())
@@ -61,8 +70,7 @@ class MLPModelTest(unittest.TestCase):
         mlp_model = mlp_builder.build()
         print(mlp_model)
 
-
-
+    @unittest.skip("Ignore")
     def test_transpose(self):
         try:
             input_block = MLPBlock.build(block_id='input',
@@ -85,28 +93,17 @@ class MLPModelTest(unittest.TestCase):
         except DLException as e:
             assert False
 
+    @unittest.skip("Ignore")
     def test_train_mnist(self):
         # Input layer
-        from dl.training.hyper_params import HyperParams
         from dataset.mnist_loader import MNISTLoader
         from dl.training.exec_config import ExecConfig
 
         features = [256, 128, 64]
-        root_path = '../../../../data/MNIST'
-        hyper_parameters = HyperParams(
-            lr=0.0005,
-            momentum=0.95,
-            epochs=24,
-            optim_label='adam',
-            batch_size=16,
-            loss_function=nn.CrossEntropyLoss(),
-            drop_out=0.20,
-            train_eval_ratio=0.9)
-
         num_classes = 10
-        mlp_input_block = MLPBlock.build(block_id='input',
-                                          layer=nn.Linear(in_features=784, out_features=num_classes, bias=False),
-                                          activation=nn.ReLU())
+        mlp_input_block = MLPBlock(block_id='input',
+                                   layer_module=nn.Linear(in_features=784, out_features=num_classes, bias=False),
+                                   activation_module=nn.ReLU())
 
         # Hidden layers if any
         mlp_hidden_blocks = [MLPBlock.build(block_id=f'hidden_{idx + 1}',

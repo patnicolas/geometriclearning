@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from torch import nn
 import torch
-from typing import Self, AnyStr, Optional, Tuple
+from typing import Self, AnyStr, Optional
 from dl.block.neural_block import NeuralBlock
 
 """
@@ -16,50 +16,63 @@ The block is composed of a list of nn.Module instances
 
 class MLPBlock(NeuralBlock):
     def __init__(self,
-                 block_id: Optional[AnyStr],
-                 modules: Tuple[nn.Module]):
+                 block_id: AnyStr,
+                 layer_module: nn.Linear,
+                 activation_module: Optional[nn.Module] = None,
+                 dropout_module: Optional[nn.Dropout] = None) -> None:
         """
-        Constructor for the Feed Forward Neural Network
+        Constructor for the Multi-layer Perceptron
         @param block_id: Identifier for this block
         @type block_id: str
-        @param modules: Tuple of torch modules contained in this block
-        @type modules: Tuple
+        @param layer_module: Linear layer module y = X.W + b
+        @type layer_module: nn.Linear
+        @param activation_module: Optional activation module (ReLU, Sigmoid, Softmax,)
+        @type activation_module: nn.Module
+        @param dropout_module: Optional dropout module for regularization during training
+        @type dropout_module: nn.Dropout
         """
-        self.activation = [module for module in modules
-                           if module.__class__.__name__
-                           in NeuralBlock.supported_activations]
+        # A MLP block should contain at least a fully connected layer
+        modules = [layer_module]
+        # Add activation module if defined
+        if activation_module is not None:
+            modules.append(activation_module)
+        # Add drop out module if specified
+        if dropout_module is not None:
+            modules.append(dropout_module)
         super(MLPBlock, self).__init__(block_id, modules)
+        self.activation_module = activation_module
 
-        # We get the number of input and output features from the first module of type Linear
-        self.in_features = modules[0].in_features
-        self.out_features = modules[0].out_features
+    def get_in_features(self) -> int:
+        return self.modules[0].in_features
+
+    def get_out_features(self) -> int:
+        return self.modules[0].out_features
 
     @classmethod
     def build(cls,
               block_id: AnyStr,
-              layer: nn.Linear,
-              activation: Optional[nn.Module] = None,
-              drop_out: float = 0.0):
+              in_features: int,
+              out_features: int,
+              activation_module: Optional[nn.Module] = None,
+              dropout_p: float = 0.0):
         """
         Alternative constructor
         @param block_id  Optional identifier for the Neural block
         @type block_id str
-        @param layer: Linear module
-        @type layer: nn.Linear
-        @param activation: Activation function
-        @type activation: nn.Module
-        @param drop_out: Drop out factor for training purpose
-        @type drop_out: float
+        @param in_features: Number of input features in the Linear transformation
+        @type in_features: int
+        @param out_features: Number of output features in the Linear transformation
+        @type out_features: int
+        @param activation_module: Optional activation function
+        @type activation_module: nn.Module
+        @param dropout_p: Drop out ratio for regularization in training
+        @type dropout_p: float
         """
-        # Starts a build the list of modules
-        modules = [layer]
-        if activation is not None:
-            modules.append(activation)
-
-        # Only if regularization is needed
-        if drop_out > 0.0:
-            modules.append(nn.Dropout(drop_out))
-        return cls(block_id, tuple(modules))
+        dropout_module = nn.Dropout(dropout_p) if dropout_p > 0.0 else None
+        return cls(block_id=block_id,
+                   layer_module=nn.Linear(in_features, out_features),
+                   activation_module=activation_module,
+                   dropout_module=dropout_module)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return super().forward(x)
@@ -71,14 +84,11 @@ class MLPBlock(NeuralBlock):
         @rtype: MLPBlock
         """
         activation_module = activation_update if activation_update is not None else self.modules[1]
-        return MLPBlock.build(block_id=self.block_id,
-                              layer=nn.Linear(in_features=self.modules[0].out_features,
-                                               out_features=self.modules[0].in_features,
+        return MLPBlock(block_id=self.block_id,
+                        layer_module=nn.Linear(in_features=self.get_out_features(),
+                                               out_features=self.get_in_features(),
                                                bias=False),
-                              activation=activation_module)
-
-    def __repr__(self) -> AnyStr:
-        return f'   {super().__repr__()}\n         Num. input: {self.in_features}, Num. output: {self.out_features}'
+                        activation_module=activation_module)
 
     def reset_parameters(self):
         self.linear.reset_parameters()

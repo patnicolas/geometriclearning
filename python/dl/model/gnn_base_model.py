@@ -1,11 +1,9 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-from aiohttp.web_routedef import static
-
 from dl.model.neural_model import NeuralModel
 from dl.block.mlp_block import MLPBlock
-from dl.block.graph.gnn_base_block import GNNBaseBlock
+from dl.block.graph.g_message_passing_block import GMessagePassingBlock
 from dl.training.neural_training import NeuralTraining
 from dl.training.hyper_params import HyperParams
 from dl import DLException, GNNException
@@ -25,7 +23,7 @@ class GNNBaseModel(NeuralModel):
 
     def __init__(self,
                  model_id: AnyStr,
-                 gnn_blocks: List[GNNBaseBlock],
+                 gnn_blocks: List[GMessagePassingBlock],
                  ffnn_blocks: Optional[List[MLPBlock]] = None) -> None:
         """
         Constructor for this simple Graph convolutional neural network
@@ -38,16 +36,19 @@ class GNNBaseModel(NeuralModel):
         """
         self.gnn_blocks = gnn_blocks
 
-        modules: List[nn.Module] = [module for block in gnn_blocks for module in block.modules]
+        modules: List[nn.Module] = [module for block in gnn_blocks
+                                    for module in block.modules]
         # If fully connected are provided as CNN
         if ffnn_blocks is not None:
             self.ffnn_blocks = ffnn_blocks
+            # Flatten
             modules.append(nn.Flatten())
+            # Generate
             [modules.append(module) for block in ffnn_blocks for module in block.modules]
         super(GNNBaseModel, self).__init__(model_id, nn.Sequential(*modules))
 
     @classmethod
-    def build(cls, model_id: AnyStr, gnn_blocks: List[GNNBaseBlock]) -> Self:
+    def build(cls, model_id: AnyStr, gnn_blocks: List[GMessagePassingBlock]) -> Self:
         """
         Create a pure graph neural network
         @param model_id: Identifier for the model

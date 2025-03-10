@@ -2,9 +2,24 @@ import unittest
 from torch.utils.data import Dataset
 from dataset.graph_data_loader import GraphDataLoader
 from dataset import DatasetException
+from torch_geometric.data import Data
+import torch
 
 
 class GraphDataLoaderTest(unittest.TestCase):
+
+    def test_data(self):
+        # Define the vertex-edge structure
+        graph_descriptor = [[0, 0, 1, 1, 2],    # Source nodes/vertices
+                            [1, 3, 2, 4, 3]]    # Target nodes/vertices
+        edge_index_values = torch.tensor(data=graph_descriptor, dtype=torch.long)
+        # Define the value or weight of each node
+        node_values = torch.tensor([-4, 2, -3, 7, -1], dtype=torch.float)
+        graph_data = Data(x=node_values.T, edge_index=edge_index_values)
+
+        print(graph_data)
+        # Request validation of the graph parameters
+        graph_data.validate(raise_on_error=True)
 
     @unittest.skip('Ignore')
     def test_init_1(self):
@@ -34,6 +49,7 @@ class GraphDataLoaderTest(unittest.TestCase):
             print(e)
             self.assertTrue(True)
 
+    @unittest.skip('Ignore')
     def test_init_3(self):
         import os
         from torch_geometric.datasets.flickr import Flickr
