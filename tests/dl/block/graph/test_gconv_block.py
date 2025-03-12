@@ -1,7 +1,7 @@
 
 import unittest
-from torch_geometric.nn import GraphConv
-from torch_geometric.nn import BatchNorm
+from torch_geometric.nn import GraphConv, BatchNorm
+from torch_geometric.nn.pool import TopKPooling
 from dl.block.graph.gconv_block import GConvBlock
 import torch.nn as nn
 
@@ -15,8 +15,8 @@ class GConvBlockTest(unittest.TestCase):
                                  gconv_layer=gconv_layer,
                                  batch_norm_module=BatchNorm(hidden_channels),
                                  activation_module=nn.ReLU(),
-                                 pooling_module=nn.TopKPooling(hidden_channels, ratio=0.4),
-                                 drop_out_p=nn.Dropout(0.2))
+                                 pooling_module=TopKPooling(hidden_channels, ratio=0.4),
+                                 dropout_module=nn.Dropout(0.2))
         self.assertTrue(len(gconv_block.modules) == 4)
         print(f'\n{gconv_block}')
 

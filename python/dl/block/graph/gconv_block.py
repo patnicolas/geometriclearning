@@ -16,7 +16,7 @@ class GConvBlock(nn.Module):
                  batch_norm_module: Optional[BatchNorm] = None,
                  activation_module: Optional[nn.Module] = None,
                  pooling_module: Optional[SAGPooling | TopKPooling] = None,
-                 drop_out_module: Optional[nn.Dropout] = None) -> None:
+                 dropout_module: Optional[nn.Dropout] = None) -> None:
 
         super(GConvBlock, self).__init__()
         self.block_id = block_id
@@ -30,8 +30,8 @@ class GConvBlock(nn.Module):
             modules.append(activation_module)
         if pooling_module is not None:
             modules.append(pooling_module)
-        if drop_out_module is not None:
-            modules.append(drop_out_module)
+        if dropout_module is not None:
+            modules.append(dropout_module)
         self.modules = modules
 
     """

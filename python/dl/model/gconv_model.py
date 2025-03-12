@@ -61,15 +61,15 @@ class GConvModel(nn.Module):
         x = data.x
 
         # Step 2: Process forward the convolutional layers
-        output = []
         # Create and collect the output of each GNN layer
+        aggr = []
         for gconv_block in self.gconv_blocks:
             # Implicit invoke forward method for the block
             x = gconv_block(x, data.edge_index)
-            output.append(x)
+            aggr.append(x)
 
-        # Step 3: Concatenate the output of each convolutional layer
-        x = torch.cat(output, dim=-1)
+        # Step 3: Concatenate the output of the convolutional layers
+        x = torch.cat(aggr, dim=-1)
 
         # Step 4: Process the fully connected, MLP layers
         for mlp_block in self.mlp_blocks:
@@ -78,5 +78,5 @@ class GConvModel(nn.Module):
         return x
 
     def __str__(self) -> AnyStr:
-        return '\n'.join([str(module) for module in self.modules])
+        return '\n'.join([f'{idx}: {str(module)}' for idx, module in enumerate(self.modules)])
 

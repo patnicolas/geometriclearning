@@ -10,11 +10,11 @@ class GraphDataLoaderTest(unittest.TestCase):
 
     def test_data(self):
         # Define the vertex-edge structure
-        graph_descriptor = [[0, 0, 1, 1, 2],    # Source nodes/vertices
-                            [1, 3, 2, 4, 3]]    # Target nodes/vertices
+        graph_descriptor = [[0, 0, 0, 0, 1],    # Source nodes/vertices
+                            [1, 2, 3, 5, 4]]    # Target nodes/vertices
         edge_index_values = torch.tensor(data=graph_descriptor, dtype=torch.long)
         # Define the value or weight of each node
-        node_values = torch.tensor([-4, 2, -3, 7, -1], dtype=torch.float)
+        node_values = torch.tensor(data=[1, 2, 3, 7, -1, -2], dtype=torch.float)
         graph_data = Data(x=node_values.T, edge_index=edge_index_values)
 
         print(graph_data)

@@ -27,7 +27,7 @@ class GMessagePassingBlockTest(unittest.TestCase):
                                         conv,
                                         activation_module=nn.ReLU(),
                                         batch_norm_module=BatchNorm(hidden_channels),
-                                        drop_out_module=0.2)
+                                        dropout_module=0.2)
         print(repr(gcn_conv), flush=True)
         self.assertTrue(True)
 
