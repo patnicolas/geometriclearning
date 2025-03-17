@@ -24,6 +24,7 @@ class MLPModel(NeuralModel):
         @param neural_blocks: List of Neural blocks
         @type neural_blocks:
         """
+        assert len(neural_blocks) > 1, 'Cannot create a MLP model without neural blocks'
         self.neural_blocks = neural_blocks
 
         # Define the sequence of modules from the layout of neural blocks
@@ -65,7 +66,7 @@ class MLPModel(NeuralModel):
         return self.neural_blocks[-1].in_features
 
     def __str__(self) -> AnyStr:
-        return f'\nModel: {self.model_id}\nModules:\n{self.list_modules(0)}'
+        return f'\nModel: {self.model_id}\nModules:{self.__repr__()}'
 
     def __repr__(self) -> AnyStr:
         return f'\n{self.list_modules(0)}'
@@ -74,16 +75,38 @@ class MLPModel(NeuralModel):
         raise NotImplementedError('NeuralModel.save is an abstract method')
 
 
+"""
+    Builder for the Multi-layer Perceptron (MLP) model.
+    The MLP model is built from a dictionary of configuration parameters for which 
+    the keys are predefined. The model is iteratively created by call to method set 
+    defined in the base class NeuralBuilder
+    The constructor define defaults value for activation (nn.ReLU()) and drop_out (no dropout)
+"""
+
+
 class MLPBuilder(NeuralBuilder):
     keys = ['in_features_list', 'activation', 'drop_out', 'output_activation']
 
     def __init__(self, model_id: AnyStr) -> None:
+        """
+        Constructor for the builder using default set of keys (name of configuration
+        parameters) and default value for activation module and no dropput
+        @param model_id: Identifier for the model
+        @type model_id: AnyStr
+        """
         super(MLPBuilder, self).__init__(model_id, MLPBuilder.keys)
         # Default configuration parameters that can be overwritten
         self._attributes['activation'] = nn.ReLU()
         self._attributes['drop_out'] = 0.0
 
     def build(self) -> MLPModel:
+        """
+        Build the MLP model from a dictionary of configuration parameters in two steps:
+        1- Generate the MLP neural blocks from the configuration
+        2- Validate the model
+        @return: Multi-layer perceptron
+        @rtype: MLP model
+        """
         # Instantiate the model from the dictionary of
         # Configuration parameters
         mlp_blocks = self.__create_blocks()
@@ -91,6 +114,17 @@ class MLPBuilder(NeuralBuilder):
         MLPBuilder.validate(mlp_blocks)
         return MLPModel(self._attributes['model_id'], mlp_blocks)
 
+    @staticmethod
+    def validate(mlp_blocks: List[MLPBlock]) -> None:
+        assert len(mlp_blocks) > 0, "MLP needs at least one layer"
+
+        # Check consistency of number of input and output features
+        for index in range(len(mlp_blocks) - 1):
+            assert (mlp_blocks[index + 1].get_in_features() ==
+                    mlp_blocks[index].get_out_features()), \
+                f'Layer {index} input_tensor != layer {index + 1} output'
+
+    """  ---------------  Private Helper Methods ------------- """
     def __create_blocks(self) -> List[MLPBlock]:
         mlp_blocks = []
         in_features_list = self._attributes['in_features_list']
@@ -117,13 +151,5 @@ class MLPBuilder(NeuralBuilder):
             in_feature = in_features_list[idx]
         return mlp_blocks
 
-    @staticmethod
-    def validate(mlp_blocks: List[MLPBlock]) -> None:
-        assert len(mlp_blocks) > 0, "MLP needs at least one layer"
-        # Check consistency of number of input and output features
-        for index in range(len(mlp_blocks) - 1):
-            assert (mlp_blocks[index + 1].get_in_features() ==
-                    mlp_blocks[index].get_out_features()), \
-                f'Layer {index} input_tensor != layer {index + 1} output'
 
 
