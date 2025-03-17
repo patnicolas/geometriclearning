@@ -29,7 +29,7 @@ class HypersphereSpace(GeometricSpace):
         dim = 2
         super(HypersphereSpace, self).__init__(dim, intrinsic)
         GeometricSpace.manifold_type = 'Hypersphere'
-        coordinates_type = 'intrinsic' if intrinsic else 'extrinsic'
+
         # 1. Instantiate the Hypersphere
         self.space = Hypersphere(dim=self.dimension, equip=equip)
         # 2. Generated the default metric
@@ -152,6 +152,7 @@ class HypersphereSpace(GeometricSpace):
 
         fig = plt.figure(figsize=(10, 10))
         ax = fig.add_subplot(111, projection="3d")
+        ax.set_facecolor('#F2F9FE')
 
         # Walk through the list of data point on the manifold
         for manifold_pt in manifold_points:
@@ -160,7 +161,7 @@ class HypersphereSpace(GeometricSpace):
                 ax=ax,
                 space="S2",
                 s=100,
-                alpha=0.8,
+                alpha=1.0,
                 label=manifold_pt.id)
 
             # If the tangent vector has to be extracted and computed

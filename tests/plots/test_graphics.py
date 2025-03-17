@@ -4,6 +4,49 @@ import random
 
 class GraphicsTest(unittest.TestCase):
 
+    def test_plot_sphere(self):
+        import numpy as np
+        import matplotlib.pyplot as plt
+        from mpl_toolkits.mplot3d import Axes3D
+
+        # Define the number of points for smoothness
+        num_points = 300  # Increase for a smoother sphere
+
+        # Define the spherical angles
+        theta = np.linspace(0, 2 * np.pi, num_points)  # Azimuthal angle
+        phi = np.linspace(0, np.pi, num_points)  # Elevation angle
+
+        # Convert to meshgrid
+        theta, phi = np.meshgrid(theta, phi)
+
+        # Define the sphere's radius
+        r = 1
+
+        # Convert spherical coordinates to Cartesian coordinates
+        X = r * np.sin(phi) * np.cos(theta)
+        Y = r * np.sin(phi) * np.sin(theta)
+        Z = r * np.cos(phi)
+
+        # Create a figure and 3D axis
+        fig = plt.figure(figsize=(10, 10))
+        ax = fig.add_subplot(111, projection='3d')
+
+        # Plot the surface with a colormap and smooth shading
+        ax.plot_surface(X, Y, Z, color='#edf5ff', edgecolor='k', linewidth=0.3, alpha=0.9)
+
+        # Improve visualization
+        ax.set_box_aspect([1, 1, 1])  # Equal aspect ratio
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_zticks([])
+        ax.grid(False)  # Hide grid lines
+        ax.set_axis_off()  # Hide axes
+
+        # Show the plot
+        plt.show()
+
+
+    @unittest.skip('Ignore')
     def test_drop_out_visualization(self):
         import numpy as np
         import matplotlib.pyplot as plt
@@ -38,6 +81,7 @@ class GraphicsTest(unittest.TestCase):
         plt.show()
         self.assertTrue(True)
 
+    @unittest.skip('Ignore')
     def test_batch_norm_visualization(self):
         import numpy as np
         import matplotlib.pyplot as plt
@@ -64,6 +108,7 @@ class GraphicsTest(unittest.TestCase):
         plt.show()
         self.assertTrue(True)
 
+    @unittest.skip('Ignore')
     def test_activation_visualization(self):
         import numpy as np
         import matplotlib.pyplot as plt
@@ -90,6 +135,7 @@ class GraphicsTest(unittest.TestCase):
         plt.show()
         self.assertTrue(True)
 
+    @unittest.skip('Ignore')
     def test_activation_visualization_wireframe(self):
         import numpy as np
         import matplotlib.pyplot as plt

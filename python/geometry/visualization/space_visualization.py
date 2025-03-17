@@ -9,7 +9,7 @@ import numpy as np
 import geomstats.visualization as visualization
 from dataclasses import dataclass
 from geometry.manifold_point import ManifoldPoint
-from geometry.geometric_exception import GeometricException
+from geometry import GeometricException
 
 
 @dataclass
@@ -38,8 +38,6 @@ class SpaceVisualization(object):
         plt.show()
 
     def plot_3d(self, data_points: np.array, space: AnyStr = None) -> NoReturn:
-        from geometric_space import GeometricSpace
-
         if space is not None:
             if space == 'S2':
                 visualization.plot(data_points, ax=self.ax, space=space, label=self.label, s=80)

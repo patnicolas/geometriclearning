@@ -38,15 +38,16 @@ class HyperspherePlot(ManifoldPlot):
                 space="S2",
                 color='black',
                 s=120,
-                alpha=0.8,
+                alpha=1.0,
                 label=f'data {idx}')
 
         if extra_components is not None:
             for idx, component in enumerate(extra_components):
-                ax = visualization.plot(component, space="S2", ax=ax, s=20, alpha=0.8, label=f'Component {idx}')
+                ax = visualization.plot(component, space="S2", ax=ax, s=20, alpha=1.0, label=f'Component {idx}')
 
         # If the mean is included
         if self.mean is not None:
-            ax = visualization.plot(self.mean, space="S2", color="red", ax=ax, s=400, alpha=0.8, label="Centroid")
+            ax = visualization.plot(self.mean, space="S2", color="red", ax=ax, s=300, alpha=1.0, label="Centroid")
         ManifoldPlot._create_legend(title ='Principal Geodesic components on Hypersphere', ax=ax)
+
         plt.show()

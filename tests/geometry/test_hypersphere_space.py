@@ -30,7 +30,7 @@ class TestGeometricSpace(unittest.TestCase):
         filename = '../../../data/hypersphere_data_1.txt'
         data = GeometricSpace.load_csv(filename)
         manifold = HypersphereSpace(True)
-        samples = manifold.sample(3)
+        samples = manifold.sample(8)
         manifold_points = [
             ManifoldPoint(
                 id=f'data{index}',
@@ -44,18 +44,20 @@ class TestGeometricSpace(unittest.TestCase):
             print(f'Tangent vector: {vec} End point: {end_point}')
         manifold.show_manifold(manifold_points)
 
-    @unittest.skip('ignore')
+    # @unittest.skip('ignore')
     def test_show_tangent_vector_geodesics(self):
         manifold = HypersphereSpace(True)
-        samples = manifold.sample(2)
-        manifold_points = [
-            ManifoldPoint(
-                id=f'data{index}',
-                location=sample,
-                tgt_vector=[0.5, 0.3, 0.5],
-                geodesic=True) for index, sample in enumerate(samples)
-        ]
-        manifold.show_manifold(manifold_points)
+
+        for _ in range(4):
+            samples = manifold.sample(2)
+            manifold_points = [
+                ManifoldPoint(
+                    id=f'data{index}',
+                    location=sample,
+                    tgt_vector=[0.5, 0.3, 0.5],
+                    geodesic=True) for index, sample in enumerate(samples)
+            ]
+            manifold.show_manifold(manifold_points)
 
     @unittest.skip('ignore')
     def test_euclidean_mean(self):
