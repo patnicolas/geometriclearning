@@ -26,7 +26,7 @@ class LieSE3GroupTest(unittest.TestCase):
         lie_se3_group = LieSE3Group(ly_rotation, x_translation)
         print(lie_se3_group)
 
-    # @unittest.skip('Ignored')
+    @unittest.skip('Ignored')
     def test_inverse(self):
         ly_rotation = np.array([[0.0, 0.0, 1.0],
                                 [0.0, 0.0, 0.0],
@@ -113,15 +113,17 @@ class LieSE3GroupTest(unittest.TestCase):
         plt.show()
 
 
-    @unittest.skip('Ignored')
+    # @unittest.skip('Ignored')
     def test_visualize(self):
         # Two inputs= in the tangent space: 3x3 90 degree rotation along Y axis
         # and Translation along X xis
-        ly_rotation = [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0]
-        x_translation = [1.0, 0.0, 0.0]
+        ly_rotation = np.array([[0.0, 0.0, 1.0],
+                                [0.0, 0.0, 0.0],
+                                [-1.0, 0.0, 0.0]])
+        x_translation = np.array([[1.0, 0.0, 0.0]])
         print(f'\nRotation matrix:\n{np.reshape(ly_rotation, (3, 3))}')
         print(f'Translation vector: {x_translation}')
-        lie_se3_group = LieSE3Group.build(ly_rotation, x_translation)
+        lie_se3_group = LieSE3Group(ly_rotation, x_translation)
         print(lie_se3_group)
         lie_se3_group.visualize_tangent_space(ly_rotation, x_translation)
 

@@ -162,4 +162,28 @@ class GraphicsTest(unittest.TestCase):
         plt.show()
         self.assertTrue(True)
 
+    def test_manim_1(self):
+        from manim import *
+
+        class GraphAnimation(Scene):
+            def construct(self):
+                # Define the vertices and edges of the graph
+                vertices = ["A", "B", "C", "D"]
+                edges = [("A", "B"), ("B", "C"), ("C", "D"), ("D", "A")]
+
+                # Create the graph object
+                graph = Graph(vertices, edges, layout="circular")
+
+                # Animate drawing the graph
+                self.play(Create(graph))
+                self.wait(1)
+
+                # Highlight a node
+                self.play(graph[v := "B"].animate.set_color(RED))
+                self.wait(1)
+
+                # Highlight an edge
+                self.play(graph.edges[("B", "C")].animate.set_color(YELLOW))
+                self.wait(2)
+
 
