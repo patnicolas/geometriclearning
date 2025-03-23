@@ -9,7 +9,7 @@ class LieSE3GroupTest(unittest.TestCase):
     def test_build_from_numpy(self):
         rot_matrix = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, -1.0], [0.0, 1.0, 0.0]])
         trans_matrix = np.array([[1.0, 3.0, 2.0]])
-        lie_se3_group = LieSE3Group.build_from_numpy(rot_matrix, trans_matrix)
+        lie_se3_group = LieSE3Group(rot_matrix, trans_matrix)
         print(lie_se3_group)
 
     @unittest.skip('Ignored')
@@ -111,7 +111,6 @@ class LieSE3GroupTest(unittest.TestCase):
         plt.title(f'Composed SE3 element\n{se3_group_z.group_element}')
         plt.colorbar()
         plt.show()
-
 
     # @unittest.skip('Ignored')
     def test_visualize(self):

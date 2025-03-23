@@ -4,6 +4,19 @@ import random
 
 class GraphicsTest(unittest.TestCase):
 
+    def test1(self):
+        x = [1, 2, 3]
+        y = [1, 2, 3]
+
+        a = 'Hello'
+        b = 'Hello'
+        print('\n')
+        print(x is y)
+        print(x == y)
+        print(a is b)
+        print(a == b)
+
+    @unittest.skip('Ignore')
     def test_plot_sphere(self):
         import numpy as np
         import matplotlib.pyplot as plt
@@ -161,29 +174,3 @@ class GraphicsTest(unittest.TestCase):
         plt.title("3D Heatmap (Wireframe)")
         plt.show()
         self.assertTrue(True)
-
-    def test_manim_1(self):
-        from manim import *
-
-        class GraphAnimation(Scene):
-            def construct(self):
-                # Define the vertices and edges of the graph
-                vertices = ["A", "B", "C", "D"]
-                edges = [("A", "B"), ("B", "C"), ("C", "D"), ("D", "A")]
-
-                # Create the graph object
-                graph = Graph(vertices, edges, layout="circular")
-
-                # Animate drawing the graph
-                self.play(Create(graph))
-                self.wait(1)
-
-                # Highlight a node
-                self.play(graph[v := "B"].animate.set_color(RED))
-                self.wait(1)
-
-                # Highlight an edge
-                self.play(graph.edges[("B", "C")].animate.set_color(YELLOW))
-                self.wait(2)
-
-
