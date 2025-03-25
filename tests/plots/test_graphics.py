@@ -4,18 +4,6 @@ import random
 
 class GraphicsTest(unittest.TestCase):
 
-    def test1(self):
-        x = [1, 2, 3]
-        y = [1, 2, 3]
-
-        a = 'Hello'
-        b = 'Hello'
-        print('\n')
-        print(x is y)
-        print(x == y)
-        print(a is b)
-        print(a == b)
-
     @unittest.skip('Ignore')
     def test_plot_sphere(self):
         import numpy as np
