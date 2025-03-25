@@ -16,6 +16,7 @@ Examples:
 
 """
 
+
 class PyGDatasets(object):
     def __init__(self, name: AnyStr) -> None:
         """
@@ -26,6 +27,11 @@ class PyGDatasets(object):
         self.name = name
 
     def __call__(self) -> Dataset:
+        """
+        Method to load and extract data set from any supported source
+        @return data set from PyTorch Geometric livrary
+        @ttype torch.util.Dataset
+        """
         match self.name:
             case 'Cora' | 'PubMed' | 'CiteSeer':
                 return self.__load_planetoid()

@@ -1,5 +1,5 @@
 import unittest
-from dataset.pyg_datasets import PyGDatasets
+from dataset.graph.pyg_datasets import PyGDatasets
 from typing import AnyStr
 
 class PyGDatasetsTest(unittest.TestCase):

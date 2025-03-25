@@ -5,7 +5,7 @@ from dl.model.vae_model import VAEModel
 from dl.model.conv_model import ConvModel
 from dl.block.conv.conv_2d_block import Conv2DBlockB
 from dl.block.conv.conv_block_config import ConvBlockConfig
-from dataset.unlabeled_loader import UnlabeledLoader
+from dataset.tensor.unlabeled_loader import UnlabeledLoader
 from dl.training.exec_config import ExecConfig
 from dl.training.vae_training import VAETraining
 from dl.training.hyper_params import HyperParams

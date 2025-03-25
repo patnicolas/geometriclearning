@@ -233,7 +233,7 @@ class ConvModelTest(unittest.TestCase):
 
     @unittest.skip('Ignore')
     def test_mnist_train(self):
-        from dataset.mnist_loader import MNISTLoader
+        from dataset.tensor.mnist_loader import MNISTLoader
         from dl.training.exec_config import ExecConfig
 
         try:
@@ -280,7 +280,7 @@ class ConvModelTest(unittest.TestCase):
 
     @unittest.skip('Ignore')
     def test_caltech101_train(self):
-        from dataset.caltech101_loader import Caltech101Loader
+        from dataset.tensor.caltech101_loader import Caltech101Loader
         from dl.training.exec_config import ExecConfig
 
         try:

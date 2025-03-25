@@ -1,5 +1,5 @@
 import unittest
-from dataset.unlabeled_loader import UnlabeledLoader
+from dataset.tensor.unlabeled_loader import UnlabeledLoader
 from dataset.unlabeled_dataset import UnlabeledDataset
 import torch
 import numpy as np

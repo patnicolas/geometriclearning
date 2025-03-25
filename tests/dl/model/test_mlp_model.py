@@ -102,7 +102,7 @@ class MLPModelTest(unittest.TestCase):
     @unittest.skip("Ignore")
     def test_train_mnist(self):
         # Input layer
-        from dataset.mnist_loader import MNISTLoader
+        from dataset.tensor.mnist_loader import MNISTLoader
         from dl.training.exec_config import ExecConfig
 
         features = [256, 128, 64]

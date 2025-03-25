@@ -7,7 +7,7 @@ from dl.training.training_summary import TrainingSummary
 from plots.plotter import PlotterParameters
 from dl.training.neural_training import NeuralTraining
 from metric.metric import Metric
-from dataset.labeled_loader import LabeledLoader
+from dataset.tensor.labeled_loader import LabeledLoader
 from torch import nn
 import numpy as np
 

@@ -72,7 +72,7 @@ class VAEModelTest(unittest.TestCase):
             self.assertTrue(True)
 
     def test_mnist_train(self):
-        from dataset.mnist_loader import MNISTLoader
+        from dataset.tensor.mnist_loader import MNISTLoader
         from dl.training.exec_config import ExecConfig
 
         try:

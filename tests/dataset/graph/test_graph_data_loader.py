@@ -1,7 +1,6 @@
 import unittest
 from torch.utils.data import Dataset
-from dataset.graph_data_loader import GraphDataLoader
-from dataset import DatasetException
+from dataset.graph.graph_data_loader import GraphDataLoader
 from torch_geometric.data import Data
 import torch
 
@@ -45,7 +44,7 @@ class GraphDataLoaderTest(unittest.TestCase):
             with ZipFile(BytesIO(zurl.read())) as zfile:
                 zfile.extractall('.')
 
-        ratings = pd.read_csv('ml-100k/u.data', sep='\t', names=['user_id', 'movie_id', 'rating', 'unix_timestamp'])
+        ratings = pd.read_csv('../ml-100k/u.data', sep='\t', names=['user_id', 'movie_id', 'rating', 'unix_timestamp'])
         print(f'Rating Movie lense\n{ratings}')
 
 

@@ -1,5 +1,4 @@
 import unittest
-from dataclasses import dataclass
 
 from dl import GNNException
 from dataset import DatasetException
@@ -7,7 +6,7 @@ from dl.block.mlp_block import MLPBlock
 from dl.training.hyper_params import HyperParams
 from dl.training.gnn_training import GNNTraining
 from dl.model.gnn_base_model import GNNBaseModel
-from dataset.graph_data_loader import GraphDataLoader
+from dataset.graph.graph_data_loader import GraphDataLoader
 from dl.training.training_summary import TrainingSummary
 from metric.metric import Metric
 import torch.nn as nn
