@@ -1,30 +1,24 @@
 import unittest
 
-from dl.model.gnn_base_model import GNNBaseModel
-
 from dl.block.graph.gconv_block import GConvBlock
 from dl.block.mlp_block import MLPBlock
 from dl.model.gconv_model import GConvModel
 from torch_geometric.nn import GraphConv, BatchNorm
 from torch_geometric.nn.pool import TopKPooling
-from torch.utils.data import Dataset
 import torch.nn as nn
 
 
 class GConvModelTest(unittest.TestCase):
 
     def test_init_1(self):
-        import os
-        from torch_geometric.datasets.flickr import Flickr
         import torch_geometric
+        from dataset.graph.pyg_datasets import PyGDatasets
 
         hidden_channels = 256
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        path = os.path.join(dir_path, '..', 'data', 'Flickr')
-        _dataset: Dataset = Flickr(path)
-        _data: torch_geometric.data.data.Data = _dataset[0]
+        pyg_dataset = PyGDatasets('Flickr')
+        _data: torch_geometric.data.data.Data = pyg_dataset()[0]
 
-        conv_1 = GraphConv(in_channels=_dataset.num_node_features, out_channels=hidden_channels)
+        conv_1 = GraphConv(in_channels=_data.num_node_features, out_channels=hidden_channels)
         gconv_block_1 = GConvBlock(block_id='Conv 24-256',
                                    gconv_layer=conv_1,
                                    batch_norm_module=BatchNorm(hidden_channels),

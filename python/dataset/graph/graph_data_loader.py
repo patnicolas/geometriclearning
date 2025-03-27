@@ -1,12 +1,13 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
+from sympy import andre
 from torch_geometric.data import Data
 from torch.utils.data import DataLoader
 from torch_geometric.loader import (NeighborLoader, RandomNodeLoader, GraphSAINTRandomWalkSampler,
                                     GraphSAINTNodeSampler, GraphSAINTEdgeSampler, ShaDowKHopSampler,
                                     ClusterData, ClusterLoader)
-from typing import Dict, AnyStr, Any
+from typing import Dict, AnyStr, Any, Self
 from networkx import Graph
 from dataset import DatasetException
 __all__ = ['GraphDataLoader']
@@ -34,43 +35,44 @@ ClusterLoader
 
 
 class GraphDataLoader(object):
+    loader_sampler_dict = {
+        'NeighborLoader': lambda loader: loader.__neighbors_loader(),
+        'RandomNodeLoader': lambda loader: loader.__random_node_loader(),
+        'GraphSAINTNodeSampler': lambda loader: loader.__graph_saint_node_sampler(),
+        'GraphSAINTEdgeSampler': lambda loader: loader.__graph_saint_edge_sampler(),
+        'ShaDowKHopSampler': lambda loader: loader.__shadow_khop_sampler(),
+        'GraphSAINTRandomWalkSampler': lambda loader: loader.__graph_saint_random_walk(),
+        'ClusterLoader': lambda loader: loader.__cluster_loader(),
+    }
+
     def __init__(self,
                  loader_attributes: Dict[AnyStr, Any],
-                 data: Data) -> None:
+                 dataset_name: AnyStr) -> None:
         """
         Constructor for the Generic Graph Data Loader
         @param loader_attributes: Map for attributes for a given Data loader
         @type loader_attributes: Dict[AnyStr, Any]
-        @param data: Data with features, labels, and masks for training and evaluation
-        @type data: torch_geometric.data.Data
+        @param dataset_name: Name of the data set
+        @type dataset_name: AnyStr
         """
+        from dataset.graph.pyg_datasets import PyGDatasets
+        # Validate the attributes against the type of loader-sampler
         GraphDataLoader.__validate(loader_attributes)
-        self.data = data
+        # Load directly from the dataset
+        pyg_datasets = PyGDatasets(dataset_name)
+        dataset = pyg_datasets()
+        self.data = dataset[0]
         self.attributes_map = loader_attributes
 
-    def __call__(self, num_workers: int) -> (DataLoader, DataLoader):
+    def __call__(self) -> (DataLoader, DataLoader):
         """
         Generate the data loader for both training and evaluation set
         @return: A pair of training loader and evaluation loader
         @rtype: Tuple[DataLoader, DataLoader]
         """
-        match self.attributes_map['id']:
-            case 'NeighborLoader':
-                return self.__neighbors_loader()
-            case 'RandomNodeLoader':
-                return self.__random_node_loader()
-            case 'GraphSAINTNodeSampler':
-                return self.__graph_saint_node_sampler()
-            case 'GraphSAINTEdgeSampler':
-                return self.__graph_saint_edge_sampler()
-            case 'ShaDowKHopSampler':
-                return self.__shadow_khop_sampler()
-            case 'GraphSAINTRandomWalkSampler':
-                return self.__graph_saint_random_walk(num_workers)
-            case 'ClusterLoader':
-                return self.__cluster_loader()
-            case _:
-                raise DatasetException(f'Graph data loader {self.attributes_map["id"]} is not supported')
+        sampler_name = self.attributes_map['id']
+        loader_sampler = GraphDataLoader.loader_sampler_dict[sampler_name]
+        return loader_sampler(self)
 
     def __str__(self) -> AnyStr:
         return f'\nAttributes: {str(self.attributes_map)}\nData: {self.data}'
@@ -148,21 +150,35 @@ class GraphDataLoader(object):
     """ ------------------------ Private Helper Methods ------------------------ """
 
     def __random_node_loader(self) -> (DataLoader, DataLoader):
+        # Collect the attributes
         num_parts = self.attributes_map['num_parts']
-        train_loader = RandomNodeLoader(self.data, num_parts=num_parts, shuffle=True)
-        eval_loader = RandomNodeLoader(self.data, num_parts=num_parts, shuffle=False)
+        num_workers = self.attributes_map['num_workers'] if 'num_workers' in self.attributes_map \
+            else 1
+
+        # Use multiple workers for training, non-default batch size and shuffling
+        train_loader = RandomNodeLoader(self.data,
+                                        num_parts=num_parts,
+                                        shuffle=True,
+                                        num_workers=num_workers)
+
+        # We use a single GPU for evaluation with default batch size
+        eval_loader = RandomNodeLoader(self.data,
+                                       num_parts=num_parts,
+                                       shuffle=False)
         return train_loader, eval_loader
 
     def __neighbors_loader(self) -> (DataLoader, DataLoader):
         num_neighbors = self.attributes_map['num_neighbors']
         batch_size = self.attributes_map['batch_size']
         replace = self.attributes_map['replace']
+        num_workers = self.attributes_map['num_workers']
         train_loader = NeighborLoader(self.data,
                                       num_neighbors=num_neighbors,
                                       batch_size=batch_size,
                                       replace=replace,
                                       drop_last=False,
                                       shuffle=True,
+                                      num_workers=num_workers,
                                       input_nodes=self.data.train_mask)
         val_loader = NeighborLoader(self.data,
                                     num_neighbors=num_neighbors,
@@ -205,13 +221,14 @@ class GraphDataLoader(object):
                                             shuffle=False)
         return train_loader, eval_loader
 
-    def __graph_saint_random_walk(self, num_workers: int) -> (DataLoader, DataLoader):
+    def __graph_saint_random_walk(self) -> (DataLoader, DataLoader):
 
         # Dynamic configuration parameter for the loader
         walk_length = self.attributes_map['walk_length']
         batch_size = self.attributes_map['batch_size']
         num_steps = self.attributes_map['num_steps']
         sample_coverage = self.attributes_map['sample_coverage']
+        num_workers = self.attributes_map['num_workers']
 
         # Extraction of the loader for training data
         train_loader = GraphSAINTRandomWalkSampler(data=self.data,
@@ -219,6 +236,7 @@ class GraphDataLoader(object):
                                                    walk_length=walk_length,
                                                    num_steps=num_steps,
                                                    sample_coverage=sample_coverage,
+                                                   num_workers=num_workers,
                                                    shuffle=True)
 
         # Extraction of the loader for validation data
@@ -227,6 +245,7 @@ class GraphDataLoader(object):
                                                  walk_length=walk_length,
                                                  num_steps=num_steps,
                                                  sample_coverage=sample_coverage,
+                                                 num_workers=num_workers,
                                                  shuffle=False)
         return train_loader, val_loader
 
@@ -234,17 +253,20 @@ class GraphDataLoader(object):
         depth = self.attributes_map['depth']
         num_neighbors = self.attributes_map['num_neighbors']
         batch_size = self.attributes_map['batch_size']
+        num_workers = self.attributes_map['num_workers']
         train_loader = ShaDowKHopSampler(data=self.data,
                                          depth=depth,
                                          num_neighbors=num_neighbors,
                                          node_idx=self.data.train_mask,
                                          batch_size=batch_size,
+                                         num_workers=num_workers,
                                          shuffle=True)
         eval_loader = ShaDowKHopSampler(data=self.data,
                                         depth=depth,
                                         num_neighbors=num_neighbors,
                                         node_idx=self.data.val_mask,
                                         batch_size=batch_size,
+                                        num_workers=num_workers,
                                         shuffle=False)
         return train_loader, eval_loader
 
@@ -273,10 +295,13 @@ class GraphDataLoader(object):
                 case 'NeighborLoader':
                     is_valid = ('num_neighbors' in attributes_map and
                                 'batch_size' in attributes_map and
+                                'num_workers' in attributes_map and
                                 'replace' in attributes_map)
 
                 case 'RandomNodeLoader':
-                    is_valid = 'num_parts' in attributes_map
+                    is_valid = ('num_parts' in attributes_map and
+                                'batch_size' in attributes_map and
+                                'num_workers' in attributes_map)
 
                 case 'GraphSAINTNodeSampler' | 'GraphSAINTEdgeSampler':
                     is_valid = ('batch_size' in attributes_map and

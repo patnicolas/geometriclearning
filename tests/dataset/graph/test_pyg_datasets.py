@@ -4,12 +4,16 @@ from typing import AnyStr
 
 class PyGDatasetsTest(unittest.TestCase):
 
+    def test_1(self):
+        PyGDatasetsTest.__load_show_data('CiteSeer')
+
+    """
     def test_molecule_net(self):
         PyGDatasetsTest.__load_show_data('MUV')
         PyGDatasetsTest.__load_show_data('HIV')
         self.assertTrue(True)
 
-    """
+
     def test_amazon_computers(self):
         PyGDatasetsTest.__load_show_data('Computers')
         self.assertTrue(True)

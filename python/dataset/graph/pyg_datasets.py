@@ -2,7 +2,7 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from torch.utils.data import Dataset
-from typing import AnyStr
+from typing import AnyStr, Optional
 from dataset import DatasetException
 
 """
@@ -18,6 +18,28 @@ Examples:
 
 
 class PyGDatasets(object):
+    dataset_dict = {
+        'Cora': lambda pyg: pyg.__load_planetoid(),
+        'PubMed': lambda pyg: pyg.__load_planetoid(),
+        'CiteSeer': lambda pyg: pyg.__load_planetoid(),
+        'Facebook': lambda pyg: pyg.__load_facebook(),
+        'Flickr': lambda pyg: pyg.__load_flickr(),
+        'Wikipedia': lambda pyg: pyg.__load_wikipedia(),
+        'PROTEINS': lambda pyg: pyg.__load_tu_dataset(),
+        'ENZYMES': lambda pyg: pyg.__load_tu_dataset(),
+        'COLLAB': lambda pyg: pyg.__load_tu_dataset(),
+        'REDDIT-BINARY': lambda pyg: pyg.__load_tu_dataset(),
+        'KarateClub': lambda pyg: pyg.__load_karate_club(),
+        'AmazonProducts': lambda pyg: pyg.__load_amazon_products(),
+        'Computers': lambda pyg: pyg.__load_amazon(),
+        'Photo': lambda pyg: pyg.__load_amazon(),
+        'Yelp': lambda pyg: pyg.__load_yelp(),
+        'HIV': lambda pyg: pyg.__load_molecule_net(),
+        'MUV': lambda pyg: pyg.__load_molecule_net(),
+        'PCBA': lambda pyg: pyg.__load_molecule_net(),
+        'ToxCast': lambda pyg: pyg.__load_molecule_net(),
+    }
+
     def __init__(self, name: AnyStr) -> None:
         """
         Constructor for the interface to PyTorch Geometric dataset
@@ -26,35 +48,17 @@ class PyGDatasets(object):
         """
         self.name = name
 
-    def __call__(self) -> Dataset:
+    def __call__(self) -> Optional[Dataset]:
         """
         Method to load and extract data set from any supported source
-        @return data set from PyTorch Geometric livrary
+        @return data set from PyTorch Geometric library
         @ttype torch.util.Dataset
         """
-        match self.name:
-            case 'Cora' | 'PubMed' | 'CiteSeer':
-                return self.__load_planetoid()
-            case 'Facebook':
-                return self.__load_facebook()
-            case 'Flickr':
-                return self.__load_flickr()
-            case 'Wikipedia':
-                return self.__load_wikipedia()
-            case 'PROTEINS' | 'ENZYMES' | 'COLLAB' | 'REDDIT-BINARY':
-                return self.__load_tu_dataset()
-            case 'KarateClub':
-                return self.__load_karate_club()
-            case 'AmazonProducts':
-                return self.__load_amazon_products()
-            case 'Computers' | 'Photo':
-                return self.__load_amazon()
-            case 'Yelp':
-                return self.__load_yelp()
-            case 'HIV' | 'MUV' | 'PCBA' | 'ToxCast':
-                return self.__load_molecule_net()
-            case _:
-                raise DatasetException(f'{self.name} data set is not supported')
+        try:
+            func = PyGDatasets.dataset_dict[self.name]
+            return func(self)
+        except KeyError as err:
+            raise DatasetException(f'Dataset {self.name} not supported {err}')
 
     """ ------------------   Private helper methods --------------------- """
     def __load_molecule_net(self):

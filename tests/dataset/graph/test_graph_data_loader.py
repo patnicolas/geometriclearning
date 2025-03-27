@@ -22,50 +22,64 @@ class GraphDataLoaderTest(unittest.TestCase):
         self.assertTrue(graph_data.validate(raise_on_error=True))
 
     @unittest.skip('Ignore')
-    def test_init_Flickr(self):
-        import os
-        from torch_geometric.datasets.flickr import Flickr
-
-        path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
-        _dataset: Dataset = Flickr(path)
-        _data = _dataset[0]
-        print(str(_data))
-        self.assertTrue(len(_data.train_mask) > 1)
-
-    @unittest.skip('Ignore')
-    def test_init_movie_lens(self):
-        from io import BytesIO
-        import pandas as pd
-        from urllib.request import urlopen
-        from zipfile import ZipFile
-
-        url = 'https://files.grouplens.org/datasets/movielens/ml-100k.zip'
-        with urlopen(url) as zurl:
-            with ZipFile(BytesIO(zurl.read())) as zfile:
-                zfile.extractall('.')
-
-        ratings = pd.read_csv('../ml-100k/u.data', sep='\t', names=['user_id', 'movie_id', 'rating', 'unix_timestamp'])
-        print(f'Rating Movie lense\n{ratings}')
-
-
-
-    @unittest.skip('Ignore')
-    def test_call_1(self):
-        import os
-        from torch_geometric.datasets.flickr import Flickr
-        import torch_geometric
-
-        path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
-        _dataset: Dataset = Flickr(path)
-        _data: torch_geometric.data.data.Data = _dataset[0]
-
+    def test_random_node_flickr(self):
+        dataset_name = 'Flickr'
+        # 1. Initialize the loader
         graph_data_loader = GraphDataLoader(
-            loader_attributes={'id': 'NeighborLoader', 'num_neighbors': [3, 2], 'batch_size': 4, 'replace': True},
-            data=_data)
-        print(f'Number of data points: {len(graph_data_loader)}')
+            loader_attributes={
+                'id': 'RandomNodeLoader',
+                'num_parts': 256,
+                'batch_size': 32,
+                'num_workers': 2
+            },
+            dataset_name=dataset_name)
 
+        # 2. Extract the loader for training and validation sets
         train_data_loader, test_data_loader = graph_data_loader()
-        result = [f'{idx}: {str(batch)}' for idx, batch in enumerate(train_data_loader) if idx < 5]
+        result = [f'{idx}: {str(batch)}'
+                  for idx, batch in enumerate(train_data_loader) if idx < 3]
+        print('\n'.join(result))
+        self.assertTrue(True)
+
+    @unittest.skip('Ignore')
+    def test_neighbor_node_flickr(self):
+        dataset_name = 'Flickr'
+        # 1. Initialize the loader
+        graph_data_loader = GraphDataLoader(
+            loader_attributes={
+                'id': 'NeighborLoader',
+                'num_neighbors': [4, 2],
+                'replace': True,
+                'batch_size': 64,
+                'num_workers': 4
+            },
+            dataset_name=dataset_name)
+
+        # 2. Extract the loader for training and validation sets
+        train_data_loader, test_data_loader = graph_data_loader()
+        result = [f'{idx}: {str(batch)}'
+                  for idx, batch in enumerate(train_data_loader) if idx < 3]
+        print('\n'.join(result))
+        self.assertTrue(True)
+
+
+    def test_neighbor_node_cora(self):
+        dataset_name = 'Cora'
+        # 1. Initialize the loader
+        graph_data_loader = GraphDataLoader(
+            loader_attributes={
+                'id': 'NeighborLoader',
+                'num_neighbors': [5, 2],
+                'replace': True,
+                'batch_size': 128,
+                'num_workers': 1
+            },
+            dataset_name=dataset_name)
+
+        # 2. Extract the loader for training and validation sets
+        train_data_loader, test_data_loader = graph_data_loader()
+        result = [f'{idx}: {str(batch)}'
+                  for idx, batch in enumerate(train_data_loader) if idx < 3]
         print('\n'.join(result))
         self.assertTrue(True)
 
