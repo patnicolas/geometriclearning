@@ -18,7 +18,7 @@ Examples:
 
 
 class PyGDatasets(object):
-    base_dir = '../../../'
+    base_dir = '../../data'
     dataset_dict = {
         'Cora': lambda pyg: pyg.__load_planetoid(),
         'PubMed': lambda pyg: pyg.__load_planetoid(),

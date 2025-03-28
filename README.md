@@ -1,7 +1,7 @@
 # Geometric Learning
 Classes and methods for Geometric Learning and related topics.
 
-#### Patrick Nicolas - Last update 11.01.2024
+#### Patrick Nicolas - Last update 03.28.2025
 
 ![Banner](images/GeometricLearning.png)
 
@@ -16,7 +16,7 @@ __Euclidean space__, created from a collection of maps (or charts) called an atl
    
 ![Manifold](images/Manifold_Tgt_Space.png)
 
-The directory __geometry__ contains the defintion and implementation the various elements of smooth manifolds using __Geomstats__ module.
+The directory __geometry__ contains the definition and implementation the various elements of smooth manifolds using __Geomstats__ module.
 - __Covariant__ and __contravariant__ vectors and tensors
 - __Intrinsic__ and __Extrinsic__ coordinates
 - Riemannian metric tensor
@@ -87,7 +87,7 @@ The directory __control__ contains the implementation of __Kalman__ filters.
 
 # Reusable Neural Components Design
 ## Neural Blocks
-Block is defined as a logical grouping of neural components, implemented as Pytorch __Module__. All these components are assembled into a sequential set of torch modules.   
+A __block__ is defined as a logical grouping of neural components, implemented as Pytorch __Module__. All these components are assembled into a sequential set of torch modules.   
 ```
 class NeuralBlock(nn.Module):
     def __init__(self, block_id: Optional[AnyStr], modules: Tuple[nn.Module]):
@@ -95,123 +95,174 @@ class NeuralBlock(nn.Module):
         self.modules = modules
         self.block_id = block_id
 ```
-    
-For instance, a Convolutional block may include a convolutional layer, kernel, batch normalization and possibly a drop-out components of type __Module__.
+
+### Multi-layer Perceptron Block
+A MLP block a __fully-connected layer__, an activation function, and possibly a drop-out component.     
+![MLP Block](images/MLP_Block.png)    
+.     
 ```
-class ConvBlock(NeuralBlock):
-    def __init__(self, _id: AnyStr, conv_block_builder: ConvBlockBuilder) -> None:
-        self.id = _id
-        self.conv_block_builder = conv_block_builder
-        modules = self.conv_block_builder()
-        super(ConvBlock, self).__init__(_id, tuple(modules))
-```
-Convolutional neural block are assembled through a __builder__.
-```
-class ConvBlockBuilder(object):
+class MLPBlock(NeuralBlock):
     def __init__(self,
-                 in_channels: int,
-                 out_channels: int,
-                 input_size: int | Tuple[int, int],
-                 kernel_size: int | Tuple[int, int],
-                 stride: int | Tuple[int, int],
-                 padding: int | Tuple[int, int],
-                 batch_norm: bool,
-                 max_pooling_kernel: int,
-                 activation: nn.Module,
-                 bias: bool):
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.input_size = input_size
-        self.kernel_size = kernel_size
-        self.stride = stride
-        self.padding = padding
-        self.batch_norm = batch_norm
-        self.max_pooling_kernel = max_pooling_kernel
-        self.activation = activation
-        self.bias = bias
-        
-     def __call__(self) -> Tuple[nn.Module]:
-        modules = []
-        # First define the 2D convolution
-        conv_module = nn.Conv2d(
-            self.in_channels,
-            self.out_channels,
-            kernel_size=self.kernel_size,
-            stride=self.stride,
-            padding=self.padding,
-            bias=self.bias)
-        modules.append(conv_module)
-
-        # Add the batch normalization
-        if self.batch_norm:
-            modules.append(nn.BatchNorm2d(self.out_channels))
-        # Activation to be added if needed
-        if self.activation is not None:
-            modules.append(self.activation)
-
-        # Added max pooling module
-        if self.max_pooling_kernel > 0:
-            modules.append(nn.MaxPool2d(kernel_size=self.max_pooling_kernel, stride=1, padding=0))
-        modules_list: List[nn.Module] = modules
-        return tuple(modules_list)
+                 block_id: AnyStr,
+                 layer_module: nn.Linear,
+                 activation_module: Optional[nn.Module] = None,
+                 dropout_module: Optional[nn.Dropout] = None) -> None:
+        # A MLP block should contain at least a fully connected layer
+        modules = [layer_module]
+        # Add activation module if defined
+        if activation_module is not None:
+            modules.append(activation_module)
+        # Add drop out module if specified
+        if dropout_module is not None:
+            modules.append(dropout_module)
+        super(MLPBlock, self).__init__(block_id, modules)
+        self.activation_module = activation_module
 ```
-A Neural block can be __inverted__. A convolutional block can be automatically converted into a de-convolutional block.      
-![ReusableNeuralBlocks](images/Convolution_Mirror.png)
     
+### Convolutional Network Block
+
+A Convolutional block may include a __convolutional layer__, kernel, batch normalization and possibly a drop-out components of type __Module__.     
+![Convolutional Block](images/Conv_Block.png)   
+
+```
+class Conv2dBlock(ConvBlock):
+    valid_modules = ('Conv2d', 'MaxPool2d', 'BatchNorm2d', 'Dropout2d')
+
+    def __init__(self,
+                 block_id: AnyStr,
+                 conv_layer_module: nn.Conv2d,
+                 batch_norm_module: Optional[nn.BatchNorm2d] = None,
+                 activation_module: Optional[nn.Module] = None,
+                 max_pooling_module: Optional[nn.MaxPool2d] = None,
+                 drop_out_module: Optional[nn.Dropout2d] = None) -> None:
+        # The 2-dimensional convolutional layer has to be defined
+        modules = [conv_layer_module]
+
+        # Add a batch normalization is provided
+        if batch_norm_module is not None:
+            modules.append(batch_norm_module)
+        # Add an activation function is required
+        if activation_module is not None:
+            modules.append(activation_module)
+        # Add a mandatory max pooling module
+        if max_pooling_module is not None:
+            modules.append(max_pooling_module)
+        # Add a Drop out regularization for training if provided
+        if drop_out_module is not None:
+            modules.append(drop_out_module)
+        super(Conv2dBlock, self).__init__(block_id, modules)
+```
+
 The current hierarchy of neural blocks is defined as:
-![NeuralBlock](images/Neural_Block_Hierarchy.png)
+![Neural Blocks Class Hierarchy](images/Neural_Block_Hierarchy.jpg)   
 
 ## Neural Models
 Neural models are dynamic sequence of neural blocks that are assembled and converted into a sequence of torch __Module__ instances.   
 The Base class for Neural model is defined as     
 ```
 class NeuralModel(torch.nn.Module, ABC):
-    def __init__(self, model_id: AnyStr, model: torch.nn.Module):
+    def __init__(self, model_id: AnyStr, modules_seq: nn.Module) -> None:
         super(NeuralModel, self).__init__()
         self.model_id = model_id
-        self.model = model
+        self.modules_seq = modules_seq
         
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)
 ```
 Each model inherits from __NeuralModel__ (i.e. Convolutional neural network type : __ConvModel__)
 
+### MLP Model Builder
+A Multi-layer Perceptron generated from reusable neural blocks
+    
+![MLP Network Model](images/MLP_Network.png)   
 ```
-class ConvModel(NeuralModel, ABC):
+class MLPModel(NeuralModel):
+    def __init__(self, model_id: AnyStr, neural_blocks: List[MLPBlock]) -> None:
+        self.neural_blocks = neural_blocks
+        # Define the sequence of modules from the layout of neural blocks
+        modules = [module for block in neural_blocks
+                   for module in block.modules]
+        super(MLPModel, self).__init__(model_id, nn.Sequential(*modules))
+```
+    
+   
+and it associated builder pattern.   
+![MLP Builder](images/MLP_Builder.png)    
+with implementation....
+```
+class MLPBuilder(NeuralBuilder):
+    keys = ['in_features_list', 'activation', 'drop_out', 'output_activation']
+
+    def __init__(self, model_id: AnyStr) -> None:
+        super(MLPBuilder, self).__init__(model_id, MLPBuilder.keys)
+        # Default configuration parameters that can be overwritten
+        self._attributes['activation'] = nn.ReLU()
+        self._attributes['drop_out'] = 0.0
+
+    def build(self) -> MLPModel:
+        # Instantiate the model from the dictionary of Configuration parameters
+        mlp_blocks = self.__create_blocks()
+        # Validation
+        MLPBuilder.validate(mlp_blocks)
+        return MLPModel(self._attributes['model_id'], mlp_blocks)
+```
+
+### Convolutional Model Builder
+A convolutional neural network is generated from reusable neural blocks using the __Builder recursive pattern__.     
+![Convolutional Network](images/Conv_Network.png)
+```
+class Conv2dModel(ConvModel):
     def __init__(self,
                  model_id: AnyStr,
-                 conv_blocks: List[ConvBlock],
-                 ffnn_blocks: Optional[List[FFNNBlock]] = None):
-        ConvModel.is_valid(conv_blocks, ffnn_blocks)
-        
-        self.conv_blocks = conv_blocks
-        self.in_features = conv_blocks[0].conv_block_builder.in_channels
-        self.out_features = ffnn_blocks[-1].out_features
- 
-        # 1. Assemble the convolutional modules
-        modules: List[nn.Module] = [module for block in conv_blocks for module in block.modules]
-        
-        # 2. Assemble the fully connected modules if necessary
-        if ffnn_blocks is not None:
-            self.ffnn_blocks = ffnn_blocks
-            modules.append(nn.Flatten())
-            [modules.append(module) for block in ffnn_blocks for module in block.modules]
-        super(ConvModel, self).__init__(model_id, nn.Sequential(*modules))
+                 input_size: Conv2DataType,
+                 conv_blocks: List[Conv2dBlock],
+                 mlp_blocks: Optional[List[MLPBlock]] = None) -> None:
+        super(Conv2dModel, self).__init__(model_id, input_size, conv_blocks, mlp_blocks)
 ```
-The current class hierarchy for Neural models is defined as:   
+    
+    
+with its builder:
+```
+class Conv2dBuilder(NeuralBuilder):
+    keys = ['input_size', 'in_channels_list', 'kernel_size', 'stride',
+            'padding', 'is_batch_norm', 'max_pool_kernel', 'activation',
+            'in_features_list', 'output_activation', 'bias', 'drop_out']
 
-![NeuralModel](images/Neural_Model_Hierarchy.png)
+    def __init__(self, model_id: AnyStr) -> None:
+        super(Conv2dBuilder, self).__init__(model_id, Conv2dBuilder.keys)
+        # Provide default values that may be overwritten.
+        self._attributes['stride'] = (1, 1)
+        self._attributes['padding'] = (1, 1)
+        self._attributes['is_batch_norm'] = True
+        self._attributes['activation'] = nn.ReLU()
+        self._attributes['bias'] = False
+        self._attributes['drop_out'] = 0.0
+
+    def build(self) -> Conv2dModel:
+        # Instantiate the model from the dictionary of Configuration parameters
+        model_id = self._attributes['model_id']
+        # Generate the convolutional neural blocks from the configuration attributes dictionary
+        conv_blocks = self.__create_conv_blocks()
+        # Generate the fully connected blocks from the configuration attributes dictionary
+        mlp_blocks = self.__create_mlp_blocks()
+        # Validation
+        Conv2dBuilder.__validate(conv_blocks, mlp_blocks, self._attributes['input_size'])
+        return Conv2dModel(model_id, self._attributes['input_size'], conv_blocks, mlp_blocks)
+```
+The current class hierarchy for Neural models is defined as:    
+![Neural Class Hierarchy](images/Neural_Model_Hierarchy.webp)
+
 
 ## Environment
 
 | Library         | Version |
 |:----------------|:--------|
-| Python          | 3.12.3  |
+| Python          | 3.12.9  |
 | SymPy           | 1.12    |
 | Numpy           | 2.1.3   |
 | Pydantic        | 2.4.1   |
 | Shap            | 0.43.0  |
-| torch           | 2.5.1   |
+| torch           | 2.6.0   |
 | torchVision     | 0.20.1  |
 | torch-geometric | 2.6.1   |
 | torch_sparse    | 0.6.18  |
@@ -221,7 +272,7 @@ The current class hierarchy for Neural models is defined as:
 | Geomstats       | 2.8.0   |
 | Jax | 0.4.34  |
 | PyTest | 8.3.3   |
-| matplotlib | 3.9.2   |
+| matplotlib | 3.10.0  |
 
 
 

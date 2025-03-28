@@ -135,7 +135,6 @@ class GraphDataLoaderTest(unittest.TestCase):
                 'keep_inter_cluster_edges': True
             },
             dataset_name=dataset_name)
-
         # 2. Extract the loader for training and validation sets
         train_data_loader, test_data_loader = graph_data_loader()
         result = [f'{idx}: {str(batch)}'

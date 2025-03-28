@@ -13,7 +13,6 @@ class PyGDatasetsTest(unittest.TestCase):
         PyGDatasetsTest.__load_show_data('HIV')
         self.assertTrue(True)
 
-
     def test_amazon_computers(self):
         PyGDatasetsTest.__load_show_data('Computers')
         self.assertTrue(True)
