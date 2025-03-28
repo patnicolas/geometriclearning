@@ -18,6 +18,7 @@ Examples:
 
 
 class PyGDatasets(object):
+    base_dir = '../../../'
     dataset_dict = {
         'Cora': lambda pyg: pyg.__load_planetoid(),
         'PubMed': lambda pyg: pyg.__load_planetoid(),
@@ -63,22 +64,22 @@ class PyGDatasets(object):
     """ ------------------   Private helper methods --------------------- """
     def __load_molecule_net(self):
         from torch_geometric.datasets import MoleculeNet
-        molecule_net = MoleculeNet(root='.', name=self.name)
+        molecule_net = MoleculeNet(root=PyGDatasets.base_dir, name=self.name)
         return molecule_net
 
     def __load_amazon(self):
         from torch_geometric.datasets import Amazon
-        amazon_dataset = Amazon(root=',', name=self.name)
+        amazon_dataset = Amazon(root=PyGDatasets.base_dir, name=self.name)
         return amazon_dataset
 
     def __load_yelp(self):
         from torch_geometric.datasets import Yelp
-        yelp_dataset = Yelp('.')
+        yelp_dataset = Yelp(PyGDatasets.base_dir)
         return yelp_dataset
 
     def __load_amazon_products(self) -> Dataset:
         from torch_geometric.datasets import AmazonProducts
-        amazon_products_dataset = AmazonProducts(root='.')
+        amazon_products_dataset = AmazonProducts(root=PyGDatasets.base_dir)
         return amazon_products_dataset
 
     def __load_karate_club(self) -> Dataset:
@@ -87,30 +88,31 @@ class PyGDatasets(object):
 
     def __load_tu_dataset(self) -> Dataset:
         from torch_geometric.datasets import TUDataset
-        tmp_dir = f'/tmp/{self.name}'
-        dataset = TUDataset(root=tmp_dir, name=self.name)
+        dataset = TUDataset(root=PyGDatasets.base_dir, name=self.name)
         return dataset.shuffle()
 
     def __load_wikipedia(self) -> Dataset:
         from torch_geometric.datasets import WikipediaNetwork
         import torch_geometric.transforms as T
-        _dataset = WikipediaNetwork(root=".", name="chameleon", transform=T.RandomNodeSplit(num_val=200, num_test=500))
+        _dataset = WikipediaNetwork(root=PyGDatasets.base_dir,
+                                    name="chameleon",
+                                    transform=T.RandomNodeSplit(num_val=200, num_test=500))
         return _dataset
 
     def __load_flickr(self) -> Dataset:
         import os
         from torch_geometric.datasets.flickr import Flickr
 
-        path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
+        path = os.path.join(os.path.dirname(os.path.realpath(__file__)), PyGDatasets.base_dir, 'data', 'Flickr')
         _dataset: Dataset = Flickr(path)
         return _dataset
 
     def __load_planetoid(self) -> Dataset:
         from torch_geometric.datasets import Planetoid
-        _dataset = Planetoid(root=".", name=self.name)
+        _dataset = Planetoid(root=PyGDatasets.base_dir, name=self.name)
         return _dataset
 
     def __load_facebook(self) -> Dataset:
         from torch_geometric.datasets import FacebookPagePage
-        _dataset: Dataset = FacebookPagePage(root=".")
+        _dataset: Dataset = FacebookPagePage(root=PyGDatasets.base_dir)
         return _dataset

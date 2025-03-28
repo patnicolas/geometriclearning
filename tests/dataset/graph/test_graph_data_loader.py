@@ -1,5 +1,4 @@
 import unittest
-from torch.utils.data import Dataset
 from dataset.graph.graph_data_loader import GraphDataLoader
 from torch_geometric.data import Data
 import torch
@@ -33,7 +32,6 @@ class GraphDataLoaderTest(unittest.TestCase):
                 'num_workers': 2
             },
             dataset_name=dataset_name)
-
         # 2. Extract the loader for training and validation sets
         train_data_loader, test_data_loader = graph_data_loader()
         result = [f'{idx}: {str(batch)}'
@@ -62,9 +60,31 @@ class GraphDataLoaderTest(unittest.TestCase):
         print('\n'.join(result))
         self.assertTrue(True)
 
-
-    def test_neighbor_node_cora(self):
+    @unittest.skip('Ignore')
+    def test_graph_SAINT_random_walk_cora(self):
         dataset_name = 'Cora'
+        # 1. Initialize the loader
+        graph_data_loader = GraphDataLoader(
+            loader_attributes={
+                'id': 'GraphSAINTRandomWalkSampler',
+                'walk_length': 6,
+                'sample_coverage': 64,
+                'num_steps': 3,
+                'batch_size': 4,
+                'num_workers': 1
+            },
+            dataset_name=dataset_name)
+
+        # 2. Extract the loader for training and validation sets
+        train_data_loader, test_data_loader = graph_data_loader()
+        result = [f'{idx}: {str(batch)}'
+                  for idx, batch in enumerate(train_data_loader) if idx < 3]
+        print('\n'.join(result))
+        self.assertTrue(True)
+
+    @unittest.skip('Ignore')
+    def test_neighbor_node_facebook(self):
+        dataset_name = 'Facebook'
         # 1. Initialize the loader
         graph_data_loader = GraphDataLoader(
             loader_attributes={
@@ -73,6 +93,46 @@ class GraphDataLoaderTest(unittest.TestCase):
                 'replace': True,
                 'batch_size': 128,
                 'num_workers': 1
+            },
+            dataset_name=dataset_name)
+
+        # 2. Extract the loader for training and validation sets
+        train_data_loader, test_data_loader = graph_data_loader()
+        result = [f'{idx}: {str(batch)}'
+                  for idx, batch in enumerate(train_data_loader) if idx < 3]
+        print('\n'.join(result))
+        self.assertTrue(True)
+
+    @unittest.skip('Ignore')
+    def test_graph_SAINT_node_karate_club(self):
+        dataset_name = 'KarateClub'
+        # 1. Initialize the loader
+        graph_data_loader = GraphDataLoader(
+            loader_attributes={
+                'id': 'GraphSAINTNodeSampler',
+                'sample_coverage': 32,
+                'num_steps': 4,
+                'batch_size': 128
+            },
+            dataset_name=dataset_name)
+
+        # 2. Extract the loader for training and validation sets
+        train_data_loader, test_data_loader = graph_data_loader()
+        result = [f'{idx}: {str(batch)}'
+                  for idx, batch in enumerate(train_data_loader) if idx < 3]
+        print('\n'.join(result))
+        self.assertTrue(True)
+
+    def test_cluster_proteins(self):
+        dataset_name = 'PROTEINS'
+        # 1. Initialize the loader
+        graph_data_loader = GraphDataLoader(
+            loader_attributes={
+                'id': 'ClusterLoader',
+                'num_parts': 128,
+                'recursive': True,
+                'batch_size': 128,
+                'keep_inter_cluster_edges': True
             },
             dataset_name=dataset_name)
 

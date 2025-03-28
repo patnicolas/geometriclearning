@@ -1,13 +1,12 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-from sympy import andre
-from torch_geometric.data import Data
+
 from torch.utils.data import DataLoader
 from torch_geometric.loader import (NeighborLoader, RandomNodeLoader, GraphSAINTRandomWalkSampler,
                                     GraphSAINTNodeSampler, GraphSAINTEdgeSampler, ShaDowKHopSampler,
                                     ClusterData, ClusterLoader)
-from typing import Dict, AnyStr, Any, Self
+from typing import Dict, AnyStr, Any
 from networkx import Graph
 from dataset import DatasetException
 __all__ = ['GraphDataLoader']
@@ -35,6 +34,7 @@ ClusterLoader
 
 
 class GraphDataLoader(object):
+    # Static definition of the sampling method dictionary
     loader_sampler_dict = {
         'NeighborLoader': lambda loader: loader.__neighbors_loader(),
         'RandomNodeLoader': lambda loader: loader.__random_node_loader(),
@@ -279,6 +279,7 @@ class GraphDataLoader(object):
                                    num_parts=num_parts,
                                    recursive=recursive,
                                    keep_inter_cluster_edges=keep_inter_cluster_edges)
+
         train_loader = ClusterLoader(data=cluster_data,
                                      batch_size=batch_size,
                                      shuffle=True)
@@ -312,7 +313,8 @@ class GraphDataLoader(object):
                     is_valid = ('walk_length' in attributes_map and
                                 'batch_size' in attributes_map and
                                 'num_steps' in attributes_map and
-                                'sample_coverage' in attributes_map)
+                                'sample_coverage' in attributes_map and
+                                'num_workers' in attributes_map)
 
                 case 'ShaDowKHopSampler':
                     is_valid = ('depth' in attributes_map and

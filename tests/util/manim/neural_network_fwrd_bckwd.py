@@ -2,13 +2,6 @@ from manim import *
 
 class NeuralNetworkFwrdBckwd(Scene):
     def construct(self):
-        # === LAYER DEFINITIONS ===
-        input_size = 784
-        hidden_1_size = 256
-        hidden_2_size = 128
-        hidden_3_size = 64
-        output_size = 10
-
         visible_input = 48
         visible_hidden_1 = 32
         visible_hidden_2 = 16
