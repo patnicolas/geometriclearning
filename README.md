@@ -154,11 +154,45 @@ class Conv2dBlock(ConvBlock):
             modules.append(drop_out_module)
         super(Conv2dBlock, self).__init__(block_id, modules)
 ```
+### Graph Neural Block
 
+![Graph Block](images/GNN_Block.png)    
+    
+    
+```
+class GConvBlock(nn.Module):
+    def __init__(self,
+                 block_id: AnyStr,
+                 gconv_layer: GraphConv,
+                 batch_norm_module: Optional[BatchNorm] = None,
+                 activation_module: Optional[nn.Module] = None,
+                 pooling_module: Optional[SAGPooling | TopKPooling] = None,
+                 dropout_module: Optional[nn.Dropout] = None) -> None:
+
+        super(GConvBlock, self).__init__()
+        self.block_id = block_id
+        # Iteratively build the sequence of Torch Module according
+        # to the order of the arguments of the constructor
+        modules: List[nn.Module] = [gconv_layer]
+        if batch_norm_module is not None:
+            modules.append(batch_norm_module)
+        if activation_module is not None:
+            modules.append(activation_module)
+        if pooling_module is not None:
+            modules.append(pooling_module)
+        if dropout_module is not None:
+            modules.append(dropout_module)
+        self.modules = modules
+```
+    
+### Neural Blocks Class Hierarchy
+    
 The current hierarchy of neural blocks is defined as:     
       
 ![Neural Blocks Class Hierarchy](images/Neural_Block_Hierarchy.jpg)   
+   
 
+    
 ## Neural Models
 Neural models are dynamic sequence of neural blocks that are assembled and converted into a sequence of torch __Module__ instances.   
 The Base class for Neural model is defined as     
@@ -192,7 +226,8 @@ class MLPModel(NeuralModel):
 and it associated builder pattern.   
     
 ![MLP Builder](images/MLP_Builder.png)    
-with implementation....
+      
+with implementation....     
 ```
 class MLPBuilder(NeuralBuilder):
     keys = ['in_features_list', 'activation', 'drop_out', 'output_activation']
@@ -226,7 +261,7 @@ class Conv2dModel(ConvModel):
 ```
     
     
-with its builder:
+with its builder:    
 ```
 class Conv2dBuilder(NeuralBuilder):
     keys = ['input_size', 'in_channels_list', 'kernel_size', 'stride',
@@ -254,6 +289,39 @@ class Conv2dBuilder(NeuralBuilder):
         Conv2dBuilder.__validate(conv_blocks, mlp_blocks, self._attributes['input_size'])
         return Conv2dModel(model_id, self._attributes['input_size'], conv_blocks, mlp_blocks)
 ```
+   
+    
+### Graph Neural Network Builder 
+    
+![Graph Neural Model Builder](images/GNN_Builder.png)     
+       
+```
+class GConvModel(nn.Module):
+    def __init__(self,
+                 model_id: AnyStr,
+                 gconv_blocks: List[GConvBlock],
+                 mlp_blocks: Optional[List[MLPBlock]] = None) -> None:
+        super(GConvModel, self).__init__()
+
+        self.model_id = model_id
+        self.gconv_blocks = gconv_blocks
+        # Extract the torch modules for the convolutional blocks
+        # in the appropriate order
+        modules: List[nn.Module] = [module for block in gconv_blocks
+                                    for module in block.modules]
+        # If fully connected are provided as CNN
+        if mlp_blocks is not None:
+            self.mlp_blocks = mlp_blocks
+            # Flatten the output from the last convolutional layer
+            modules.append(nn.Flatten())
+            # Extract the relevant modules from the fully connected blocks
+            [modules.append(module) for block in mlp_blocks for module in block.modules]
+        self.modules = modules
+```
+    
+
+### Neural Models Class Hierarchy
+
 The current class hierarchy for Neural models is defined as:    
     
 ![Neural Class Hierarchy](images/Neural_Model_Hierarchy.png)
