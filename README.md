@@ -351,14 +351,17 @@ The current class hierarchy for Neural models is defined as:
 
 
 # References
--[Deep learning with reusable neural blocks](http://patricknicolas.blogspot.com/2023/03/building-bert-with-reusable-neural.html)    
--[Geometric Learning in Python - Basic](https://patricknicolas.blogspot.com/2024/02/introduction-to-differential-geometry.html)    
--[Differentiable Manifolds](https://patricknicolas.blogspot.com/2024/03/geometric-learning-in-python-manifolds.html)    
--[Differential Operators in Python](https://patricknicolas.blogspot.com/2023/12/explore-differential-operators-in-python.html)    
--[Intrinsic Representation](https://patricknicolas.blogspot.com/2024/03/geometric-learning-in-python-coordinates.html)   
--[Vector and Covector Fields](https://patricknicolas.blogspot.com/2024/04/geometric-learning-in-python-vector.html)    
--[Vector Operators](https://patricknicolas.blogspot.com/2024/04/geometric-learning-in-python-vector_3.html)   
--[Non-linear Functional Data Analysis](https://patricknicolas.blogspot.com/2024/04/geometric-learning-in-python-functional.html)   
--[Riemann Metric and Connection](https://patricknicolas.blogspot.com/2024/04/geometric-learning-in-python-riemann.html)   
--[Riemann Curvature Tensor](https://patricknicolas.blogspot.com/2024/04/geometric-learning-in-python-riemann_18.html)   
-
+-[Introduction to Geometric Deep Learning](https://patricknicolas.substack.com/p/introduction-to-geometric-deep-learning)
+-[Riemannian Manifolds: Foundational Concepts](https://patricknicolas.substack.com/p/riemannian-manifolds-1-foundation)
+-[Riemannian Manifolds: Hands-on with Hypersphere](https://patricknicolas.substack.com/p/riemannian-manifolds-2-hands-on-with)
+-[Reusable Neural Blocks in PyTorch & PyG](https://patricknicolas.substack.com/p/reusable-neural-blocks-in-pytorch)
+-[Modular Deep Learning Models with Neural Blocks](https://patricknicolas.substack.com/p/modular-deep-learning-models-with)
+-[Taming PyTorch Geometric for Graph Neural Networks](https://patricknicolas.substack.com/p/taming-pytorch-geometric-for-graph)
+-[Practical Introduction to Lie Groups in Python](https://patricknicolas.substack.com/p/practical-introduction-to-lie-groups)
+-[Demystifying Graph Sampling & Walk Methods](https://patricknicolas.substack.com/p/demystifying-graph-sampling-and-walk)
+-[Modeling Graph Neural Networks with PyTorch](https://www.linkedin.com/pulse/modeling-graph-neural-networks-pyg-patrick-nicolas-ii61c)
+-[Fréchet Centroid on Manifolds in Python](https://www.linkedin.com/pulse/fr%C3%A9chet-centroid-manifolds-python-patrick-nicolas-bwflc)
+-[Visualization of Graph Neural Networks](https://www.linkedin.com/pulse/visualization-graph-neural-networks-patrick-nicolas-3atnc)
+-[Limitations of the Linear Kalman Filter](https://www.linkedin.com/pulse/limitations-linear-kalman-filter-patrick-nicolas-bqptc)
+-[Introduction to SO3 Lie Group in Python](https://www.linkedin.com/pulse/operations-so3-lie-group-python-patrick-nicolas-wifmc)
+-[Introduction to SE3 Lie Groups in Python](https://www.linkedin.com/pulse/introduction-se3-lie-groups-python-patrick-nicolas-dcixc)
