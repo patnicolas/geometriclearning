@@ -97,7 +97,8 @@ class NeuralBlock(nn.Module):
 ```
 
 ### Multi-layer Perceptron Block
-A MLP block a __fully-connected layer__, an activation function, and possibly a drop-out component.     
+A MLP block a __fully-connected layer__, an activation function, and possibly a drop-out component.    
+     
 ![MLP Block](images/MLP_Block.png)    
 .     
 ```
@@ -122,6 +123,7 @@ class MLPBlock(NeuralBlock):
 ### Convolutional Network Block
 
 A Convolutional block may include a __convolutional layer__, kernel, batch normalization and possibly a drop-out components of type __Module__.     
+     
 ![Convolutional Block](images/Conv_Block.png)   
 
 ```
@@ -153,7 +155,8 @@ class Conv2dBlock(ConvBlock):
         super(Conv2dBlock, self).__init__(block_id, modules)
 ```
 
-The current hierarchy of neural blocks is defined as:
+The current hierarchy of neural blocks is defined as:     
+      
 ![Neural Blocks Class Hierarchy](images/Neural_Block_Hierarchy.jpg)   
 
 ## Neural Models
@@ -187,6 +190,7 @@ class MLPModel(NeuralModel):
     
    
 and it associated builder pattern.   
+    
 ![MLP Builder](images/MLP_Builder.png)    
 with implementation....
 ```
@@ -208,7 +212,8 @@ class MLPBuilder(NeuralBuilder):
 ```
 
 ### Convolutional Model Builder
-A convolutional neural network is generated from reusable neural blocks using the __Builder recursive pattern__.     
+A convolutional neural network is generated from reusable neural blocks using the __Builder recursive pattern__.    
+     
 ![Convolutional Network](images/Conv_Network.png)
 ```
 class Conv2dModel(ConvModel):
@@ -250,7 +255,8 @@ class Conv2dBuilder(NeuralBuilder):
         return Conv2dModel(model_id, self._attributes['input_size'], conv_blocks, mlp_blocks)
 ```
 The current class hierarchy for Neural models is defined as:    
-![Neural Class Hierarchy](images/Neural_Model_Hierarchy.webp)
+    
+![Neural Class Hierarchy](images/Neural_Model_Hierarchy.png)
 
 
 ## Environment
