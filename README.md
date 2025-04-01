@@ -348,6 +348,8 @@ The current class hierarchy for Neural models is defined as:
 | PyTest | 8.3.3   |
 | matplotlib | 3.10.0  |
 
+# Modules
+![Modules Navigation Map](images/Geometric_Learning_Modules_Diagram.png)   
 
 
 # References
