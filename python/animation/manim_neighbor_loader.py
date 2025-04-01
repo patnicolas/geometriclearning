@@ -1,92 +1,152 @@
 from manim import *
 
+from typing import AnyStr, Set, Dict, List
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from dataset.graph.graph_data_loader import GraphDataLoader
-from typing import Dict, AnyStr, List
 
 
-class ManimNeighborLoader(Scene):
+class ManimNeighborLoader(ThreeDScene):
     def construct(self):
-        # Step 1: Create a loder
-        dataset_name = 'Flickr'
-        # 1.1 Initialize the loader
-        graph_data_loader = GraphDataLoader(
-            loader_attributes={
-                'id': 'NeighborLoader',
-                'num_neighbors': [8, 4, 2],
-                'replace': True,
-                'batch_size': 16,
-                'num_workers': 1
-            },
-            dataset_name=dataset_name,
-            num_subgraph_nodes=2048)
-        print(graph_data_loader.data)
+        # ------------  Helper functions ---------------------
 
-        # 1.2 Extract the loader for training and validation sets
-        train_data_loader, test_data_loader = graph_data_loader()
-        batch = next(iter(train_data_loader))
+        # Manage step by step information
+        def gcn_step(text: AnyStr, prev_vm_object: SVGMobject, first: bool = False) -> SVGMobject:
+            vm_object = MathTex(text, font_size=30)
+            vm_object.set_color("YELLOW")
+            offset = 0.7 if first else 0.2
+            vm_object = vm_object.next_to(prev_vm_object, DOWN, buff=offset)
+            vm_object.align_to(prev_vm_object, LEFT)
+            self.play(Write(vm_object), run_time=0.3)
+            self.wait(0.2)
+            return vm_object
 
-        # Step 2: Create nodes and edges
-        def create_nodes(neighbor_ids: List[AnyStr]) -> Dict[int, VGroup]:
+        # Retrieve batch of nodes and edges
+        def get_batch(dataset_name: AnyStr) -> np.array:
+            # 1.1 Initialize the loader
+            graph_data_loader = GraphDataLoader(
+                loader_attributes={
+                    'id': 'NeighborLoader',
+                    'num_neighbors': [8, 4, 2],
+                    'replace': True,
+                    'batch_size': 18,
+                    'num_workers': 1
+                },
+                dataset_name=dataset_name,
+                num_subgraph_nodes=2048,
+                start_index=70429
+            )
+            train_data_loader, test_data_loader = graph_data_loader()
+            return next(iter(train_data_loader))
+
+        # Create graph nodes
+        def create_nodes(hop: Set, scene: VGroup, ctr_dot: Dot) -> Dict:
             node_objs = {}
-            center_node = 0
-            for i, nid in enumerate(neighbor_ids):
-                angle = i * TAU / len(neighbor_ids)
-                x = 3 * np.cos(angle)
-                y = 3 * np.sin(angle)
-                dot = Dot(point=np.array([x, y, 0]), radius=0.15, color=GRAY)
+            center_label = Text('0', font_size=16).next_to(ctr_dot, DOWN)
+            node_objs[0] = VGroup(ctr_dot, center_label)
+
+            scene.add(node_objs[0])
+            node_objs[0].shift(RIGHT * 2)
+
+            angle_step = TAU / len(hop)
+            for i, nid in enumerate(hop):
+                angle = i * angle_step
+                pos = 3 * np.array([np.cos(angle), np.sin(angle), 0])
+                dot = Dot(pos, radius=0.15, color=BLUE)
                 label = Text(str(nid), font_size=16).next_to(dot, DOWN)
                 node_objs[nid] = VGroup(dot, label)
 
-            center_dot = Dot(point=ORIGIN, radius=0.15, color=YELLOW)
-            center_label = Text(str(center_node), font_size=16).next_to(center_dot, DOWN)
-            node_objs[center_node] = VGroup(center_dot, center_label)
+                scene.add(node_objs[nid])
+                node_objs[nid].shift(RIGHT * 2)
             return node_objs
 
-        def create_edges(node_objs: Dict[int, VGroup]) -> List[Line]:
-            edges = []
-            for src, dst in graph_data_loader.data.edge_index.t().tolist():
-                if src in node_objs and dst in node_objs:
-                    start = node_objs[src][0].get_center()
-                    end = node_objs[dst][0].get_center()
-                    edges.append(Line(start, end, stroke_width=2, color=BLUE))
-            return edges
+        # Create Graph edges
+        def create_edges(node_objs: Dict, hop_1: Set, scene: VGroup) -> List[VMobject]:
+            # Step 3: Draw edges from neighbors to center
+            edge_objs = []
+            for nid in hop_1:
+                edge = Line(
+                    node_objs[nid][0].get_center(),
+                    node_objs[0][0].get_center(),
+                    color=GRAY,
+                    stroke_width=2
+                )
+                scene.add(edge)
+                edge_objs.append(edge)
+            return edge_objs
 
-        print('Create nodes')
-        node_objects = create_nodes(batch.n_id.tolist())
-        edge_objects = create_edges(node_objects)
+        def display_title(font_sz: int, rt: float) -> SVGMobject:
+            title = Tex('Graph Convolutional Neural Network', font_size=font_sz)
+            title.to_edge(UL)
+            self.play(Write(title), run_time=rt)
+
+            author = Tex('Patrick Nicolas', font_size=font_sz)
+            author.to_edge(UR)
+            self.play(Write(author), run_time=rt)
+            return title
+
+
+        # --------------------------   Execution ----------------------
+        batch = get_batch('Flickr')
+        neighbor_ids = batch.n_id.tolist()
+        hop_1 = set(neighbor_ids)
+        hop_1.discard(0)
+
+        entire_scene = VGroup()
+        center_dot = Dot(ORIGIN, radius=0.15, color=YELLOW)
+        node_objs = create_nodes(hop_1, entire_scene, center_dot)
+
+        title = display_title(font_sz=36, rt=0.7)
+
+        nodes_creation_label = gcn_step(
+            r'Sample \ Flickr \ graph \ nodes \ by \ index',
+            prev_vm_object=title,
+            first=True)
+        # Step 1: Show input graph node
+        self.play(FadeIn(node_objs[0]))
+        self.wait(0.2)
+
+        # Step 2: Show 1-hop neighbors
+        for nid in hop_1:
+            self.play(FadeIn(node_objs[nid]), run_time=0.1)
+        self.wait(0.2)
+
+        # Create and display edges
+        edge_objs = create_edges(node_objs, hop_1, entire_scene)
+        edges_creation_label = gcn_step(text=r'Load \ graph \ edges', prev_vm_object=nodes_creation_label)
+        self.play(*[Create(e) for e in edge_objs])
+
+        matmul = gcn_step(text=r"Message \ passing: \ \  W \cdot h_u^{(l)}", prev_vm_object=edges_creation_label)
+
+        # Step 4: Simulate aggregation (e.g., GCN layer)
+        aggregate_arrows = [
+            Arrow(
+                start=node_objs[nid][0].get_center(),
+                end=node_objs[0][0].get_center(),
+                color=GREEN,
+                buff=0.7,
+                stroke_width=8
+            )
+            for nid in hop_1
+        ]
+        [entire_scene.add(a) for a in aggregate_arrows]
+        self.play(*[GrowArrow(a) for a in aggregate_arrows])
+        self.wait(0.2)
+
+        sum_symbol = gcn_step(
+            text=r"Aggregation: \ s= \sum_{u \in \mathcal{N}(v)} W \cdot h_u^{(l)}",
+            prev_vm_object=matmul
+        )
+
+        self.play(Rotate(entire_scene, angle=2*PI, axis=UP, about_point=ORIGIN, run_time=3))
+
+        sum_sigma_symbol = gcn_step(text="Activation: \ \ \sigma (s)", prev_vm_object=sum_symbol)
+        # Step 5: Show updated feature at center node (e.g., color change)
+        self.play(center_dot.animate.set_color(RED).scale(2.5))
+        gcn_step(
+            text=r"h_v^{(l+1)} = \sigma \left( \sum_{u \in \mathcal{N}(v)} W \cdot h_u^{(l)} \right)",
+            prev_vm_object=sum_sigma_symbol
+        )
         self.wait(1)
 
-        # Step 3: Animate hops and edges
-        def animate_hops(node_objs: Dict[int, VGroup]) -> None:
-            self.play(FadeIn(node_objs[0]))
-            hop_0 = set(batch.n_id[0: batch.batch_size].tolist())
-            hop_1 = set(batch.n_id[batch.batch_size * 1: batch.batch_size * 2].tolist())
-            hop_2 = set(batch.n_id[batch.batch_size * 2:].tolist())
-            for nid in hop_0:
-                self.play(FadeIn(node_objs[nid]), run_time=0.1)
-            self.wait(2.0)
-            # Animate first-hop neighbors
-            for nid in hop_1:
-                self.play(FadeIn(node_objs[nid]), run_time=0.1)
-            self.wait(2.0)
-            # Animate second-hop neighbors
-            for nid in hop_2:
-                self.play(FadeIn(node_objs[nid]), run_time=0.2)
-            self.wait(1)
-
-        def animate_edges(edges: List[Line]) -> None:
-            self.play(*[Create(edge) for edge in edges], run_time=2)
-
-        animate_hops(node_objects)
-        animate_edges(edge_objects)
-
-        self.wait(2)
-
-
-if __name__ == '__main__':
-    r = ManimNeighborLoader()
-    r.construct()

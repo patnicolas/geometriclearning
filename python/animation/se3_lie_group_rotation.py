@@ -1,5 +1,4 @@
-from animation import *
-import numpy as np
+from manim import *
 
 
 class SE3LieGroupRotation(ThreeDScene):
