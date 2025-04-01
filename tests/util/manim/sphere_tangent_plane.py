@@ -1,5 +1,6 @@
-from manim import *
+from animation import *
 import numpy as np
+from manim import *
 
 
 class SphereTangentPlane(ThreeDScene):
@@ -71,7 +72,7 @@ class SphereTangentPlane(ThreeDScene):
         tangent_plane = always_redraw(lambda: get_tangent_plane(moving_dot.get_center()))
         self.add(tangent_plane)
 
-        # Tangent vector setup (aligned with direction of motion)
+        # Object 3: Tangent vector setup (aligned with direction of motion)
         def get_tangent_vector():
             t = tracker.get_value()
             pos = geodesic_func(t)
@@ -85,6 +86,7 @@ class SphereTangentPlane(ThreeDScene):
             )
             return arrow
 
+        # Object 4: Normal vector
         def get_normal_vector():
             t = tracker.get_value()
             pos = geodesic_func(t)
@@ -115,8 +117,8 @@ class SphereTangentPlane(ThreeDScene):
         self.play(Unwrite(title))
         self.remove(moving_dot)
         self.play(Unwrite(moving_dot))
-        self.wait(0.5)
         self.add_fixed_in_frame_mobjects(title_2)
+
         # Rotate the entire group
         bundle = VGroup(sphere, tangent_arrow, normal_arrow, tangent_plane, geodesic)
         self.play(Rotate(bundle, angle=PI, axis=RIGHT, run_time=8))
@@ -124,4 +126,6 @@ class SphereTangentPlane(ThreeDScene):
         self.remove(normal_arrow)
         self.remove(tangent_arrow)
         self.wait(1)
+
+
 

@@ -1,4 +1,4 @@
-from manim import *
+from animation import *
 import networkx as nx
 
 class NetworkXScene(Scene):

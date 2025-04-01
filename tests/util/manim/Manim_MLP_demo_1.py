@@ -1,4 +1,4 @@
-from manim import *
+from animation import *
 import numpy as np
 
 

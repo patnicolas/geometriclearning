@@ -3,8 +3,22 @@ from dataset.graph.graph_data_loader import GraphDataLoader
 from torch_geometric.data import Data
 import torch
 
+modules = ['torch', 'torch_sparse', 'torch_cluster', 'torch_scatter', 'torch_spline_conv']
+from util import check_modules_availability
+check_modules_availability(modules)
+
 
 class GraphDataLoaderTest(unittest.TestCase):
+
+    @unittest.skip('Ignore')
+    def test_torch_sparse(self):
+        import torch
+        import torch_sparse
+
+        row = torch.tensor([0, 1, 1])
+        col = torch.tensor([1, 0, 2])
+        edge_index = torch.stack([row, col], dim=0)
+        print(edge_index)
 
     @unittest.skip('Ignore')
     def test_graph_data(self):
@@ -39,6 +53,28 @@ class GraphDataLoaderTest(unittest.TestCase):
         print('\n'.join(result))
         self.assertTrue(True)
 
+    #@unittest.skip('Ignore')
+    def test_random_node_flickr_2(self):
+        dataset_name = 'Flickr'
+        # 1. Initialize the loader
+        graph_data_loader = GraphDataLoader(
+            loader_attributes={
+                'id': 'RandomNodeLoader',
+                'num_parts': 64,
+                'batch_size': 32,
+                'num_workers': 2
+            },
+            dataset_name=dataset_name,
+            num_subgraph_nodes=1024
+         )
+        # 2. Extract the loader for training and validation sets
+        train_data_loader, test_data_loader = graph_data_loader()
+        result = [f'{idx}: {str(batch)}'
+                  for idx, batch in enumerate(train_data_loader) if idx < 3]
+        print('\nTrain data')
+        print('\n'.join(result))
+        self.assertTrue(True)
+
     @unittest.skip('Ignore')
     def test_neighbor_node_flickr(self):
         dataset_name = 'Flickr'
@@ -48,10 +84,11 @@ class GraphDataLoaderTest(unittest.TestCase):
                 'id': 'NeighborLoader',
                 'num_neighbors': [4, 2],
                 'replace': True,
-                'batch_size': 64,
-                'num_workers': 4
+                'batch_size': 8,
+                'num_workers': 1
             },
-            dataset_name=dataset_name)
+            dataset_name=dataset_name,
+            num_subgraph_nodes=64)
 
         # 2. Extract the loader for training and validation sets
         train_data_loader, test_data_loader = graph_data_loader()
@@ -91,10 +128,11 @@ class GraphDataLoaderTest(unittest.TestCase):
                 'id': 'NeighborLoader',
                 'num_neighbors': [5, 2],
                 'replace': True,
-                'batch_size': 128,
+                'batch_size': 8,
                 'num_workers': 1
             },
-            dataset_name=dataset_name)
+            dataset_name=dataset_name,
+            num_subgraph_nodes=64)
 
         # 2. Extract the loader for training and validation sets
         train_data_loader, test_data_loader = graph_data_loader()
@@ -123,6 +161,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         print('\n'.join(result))
         self.assertTrue(True)
 
+    @unittest.skip('Ignore')
     def test_cluster_proteins(self):
         dataset_name = 'PROTEINS'
         # 1. Initialize the loader

@@ -1,5 +1,6 @@
-from manim import *
+from animation import *
 import numpy as np
+from manim import *
 
 
 class SO3LieGroupOnSphere(ThreeDScene):

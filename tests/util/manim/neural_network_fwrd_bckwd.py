@@ -1,4 +1,4 @@
-from manim import *
+from animation import *
 
 class NeuralNetworkFwrdBckwd(Scene):
     def construct(self):

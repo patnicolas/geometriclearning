@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from manim import *
+from animation import *
 from typing import List, AnyStr
 
 

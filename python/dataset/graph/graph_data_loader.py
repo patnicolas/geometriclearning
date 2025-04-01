@@ -3,11 +3,11 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 
 from torch.utils.data import DataLoader
+from torch_geometric.data import Data
 from torch_geometric.loader import (NeighborLoader, RandomNodeLoader, GraphSAINTRandomWalkSampler,
                                     GraphSAINTNodeSampler, GraphSAINTEdgeSampler, ShaDowKHopSampler,
                                     ClusterData, ClusterLoader)
-from typing import Dict, AnyStr, Any
-from networkx import Graph
+from typing import Dict, AnyStr, Any, Optional
 from dataset import DatasetException
 __all__ = ['GraphDataLoader']
 
@@ -47,13 +47,18 @@ class GraphDataLoader(object):
 
     def __init__(self,
                  loader_attributes: Dict[AnyStr, Any],
-                 dataset_name: AnyStr) -> None:
+                 dataset_name: AnyStr,
+                 num_subgraph_nodes: Optional[int] = -1,
+                 start_index: Optional[int] = -1) -> None:
         """
         Constructor for the Generic Graph Data Loader
         @param loader_attributes: Map for attributes for a given Data loader
         @type loader_attributes: Dict[AnyStr, Any]
         @param dataset_name: Name of the data set
         @type dataset_name: AnyStr
+        @param num_subgraph_nodes: Num of indices of nodes in the range [random_index, random_index+num_random_indices]
+                                   The entire graph is loaded if value is -1
+        @type dataset_name: int
         """
         from dataset.graph.pyg_datasets import PyGDatasets
         # Validate the attributes against the type of loader-sampler
@@ -61,7 +66,9 @@ class GraphDataLoader(object):
         # Load directly from the dataset
         pyg_datasets = PyGDatasets(dataset_name)
         dataset = pyg_datasets()
-        self.data = dataset[0]
+        # Load a subgraph is specified
+        self.data: Data = GraphDataLoader.__extract_subgraph(dataset[0], num_subgraph_nodes, start_index) \
+            if num_subgraph_nodes > 0 else dataset[0]
         self.attributes_map = loader_attributes
 
     def __call__(self) -> (DataLoader, DataLoader):
@@ -79,73 +86,6 @@ class GraphDataLoader(object):
 
     def __len__(self) -> int:
         return len(self.data.x)
-
-    def to_networkx(self, first_node_index: int, last_node_index: int) -> Graph:
-        """
-        Generate a graphic representation of the graph defined in this loader
-        @param first_node_index: Index of the first node of the graph to be drawn
-        @type first_node_index: int
-        @param last_node_index: Index of the last node of the graph to be drawn
-        @type last_node_index: int
-        @return: Instance of Networkx graph
-        @rtype: networkx.Graph
-        """
-        import numpy as np
-        import networkx as nx
-
-        # Create NetworkX graph from edge index
-        edge_index = self.data.edge_index.numpy()
-        transposed = edge_index.T
-        # Sample the edges of the graph
-        condition = ((transposed[:, 0] >= first_node_index) & (transposed[:, 0] <= last_node_index))
-        samples = transposed[np.where(condition)]
-        # Create a NetworkX graph
-        graph = nx.Graph()
-        graph.add_edges_from(samples)
-        return graph
-
-    def draw_sample(self,
-                    first_node_index: int,
-                    last_node_index: int,
-                    node_color: AnyStr,
-                    node_size: int,
-                    label: AnyStr = None) -> int:
-        """
-        Draw a sample or subgraph of the graph associated with this loader.
-        The sample of nodes to be drawn have the range [first_node_index, first_node_index+1, ..., last_node_index]
-        @param first_node_index: Index of the first node of the graph to be drawn
-        @type first_node_index: int
-        @param last_node_index: Index of the last node of the graph to be drawn
-        @type last_node_index: int
-        @param node_color: Color of the node to be dranw
-        @type node_color: AnyStr
-        @param node_size: Size of the nodes to be drawn
-        @type node_size: int
-        @param label: Title or description for the plot
-        @type label: AnyStr
-        @return Number of nodes in the graph
-        @rtype int
-        """
-        import matplotlib.pyplot as plt
-        import networkx as nx
-
-        assert 0 < first_node_index < last_node_index, \
-            f'Cannot draw sample with node index in range [{first_node_index}, {last_node_index}]'
-        assert 20 < node_size < 512, f'Cannot draw sample with a node size {node_size}'
-
-        graph = self.to_networkx(first_node_index, last_node_index)
-        # Plot the graph using matplotlib
-        plt.figure(figsize=(8, 8))
-        pos = nx.spring_layout(graph, k=1)  # Spring layout for positioning nodes
-        # Draw nodes and edges
-        nx.draw_networkx(graph, pos, node_size=node_size, node_color=node_color, with_labels=False)
-        nx.draw_networkx_edges(graph, pos, arrowsize=40, alpha=0.5, edge_color="grey")
-
-        # Configure plot
-        plt.title(label=label, loc='center', fontdict={'size': 16})
-        plt.axis("off")
-        plt.show()
-        return len(graph)
 
     """ ------------------------ Private Helper Methods ------------------------ """
 
@@ -172,7 +112,7 @@ class GraphDataLoader(object):
         batch_size = self.attributes_map['batch_size']
         replace = self.attributes_map['replace']
         num_workers = self.attributes_map['num_workers']
-        train_loader = NeighborLoader(self.data,
+        train_loader = NeighborLoader(data=self.data,
                                       num_neighbors=num_neighbors,
                                       batch_size=batch_size,
                                       replace=replace,
@@ -180,7 +120,7 @@ class GraphDataLoader(object):
                                       shuffle=True,
                                       num_workers=num_workers,
                                       input_nodes=self.data.train_mask)
-        val_loader = NeighborLoader(self.data,
+        val_loader = NeighborLoader(data=self.data,
                                     num_neighbors=num_neighbors,
                                     batch_size=batch_size,
                                     replace=replace,
@@ -287,6 +227,42 @@ class GraphDataLoader(object):
                                     batch_size=batch_size,
                                     shuffle=False)
         return train_loader, eval_loader
+
+    @staticmethod
+    def __extract_subgraph(data: Data, num_random_indices: int, start_index: int) -> Data:
+        assert num_random_indices > 0, f'Number of random indices {num_random_indices} should be >0'
+        import torch
+        import random
+        from torch_geometric.utils import subgraph
+
+        dataset_len = len(data.x)
+
+        # Select the starting index as a random value
+        start_index = random.randint(0, dataset_len-num_random_indices-1) if start_index == -1 else start_index
+        print(f'Start index: {start_index}')
+
+        # Collect the indices of the selected node for the subgraph
+        subset = torch.arange(start_index, start_index+num_random_indices)
+        edge_index, edge_attr = subgraph(subset=subset,
+                                         edge_index=data.edge_index,
+                                         edge_attr=data.edge_attr if 'edge_attr' in data else None,
+                                         relabel_nodes=True)
+        x_sub = data.x[subset]
+        y_sub = data.y[subset] if 'y' in data else None
+
+        # Remap the various mask if necessary
+        train_mask = data.train_mask[subset] if 'train_mask' in data else None
+        val_mask = data.val_mask[subset] if 'val_mask' in data else None
+        test_mask = data.test_mask[subset] if 'test_mask' in data else None
+
+        # Finally, create the new subgraph as a Data object
+        return Data(x=x_sub,
+                    edge_index=edge_index,
+                    edge_attr=edge_attr,
+                    y=y_sub,
+                    train_mask=train_mask,
+                    val_mask=val_mask,
+                    test_mask=test_mask)
 
     @staticmethod
     def __validate(attributes_map: Dict[AnyStr, Any]) -> None:

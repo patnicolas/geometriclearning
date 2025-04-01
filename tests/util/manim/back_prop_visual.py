@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from manim import *
+from animation import *
 
 class BackPropVisual(Scene):
     def construct(self):

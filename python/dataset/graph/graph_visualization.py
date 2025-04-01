@@ -23,7 +23,6 @@ class SubgraphExtractor:
     last_node_index: int
 
 
-
 class GraphVisualization(object):
     def __init__(self, subgraph_extractor: SubgraphExtractor, data: Data) -> None:
         """

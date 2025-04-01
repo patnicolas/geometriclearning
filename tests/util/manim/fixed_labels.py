@@ -1,4 +1,4 @@
-from manim import *
+from animation import *
 
 class FixedLabels(ThreeDScene):
     def construct(self):
