@@ -12,25 +12,26 @@ class NeuralEdgeVGroup(VGroup):
                  *args,
                  **kwargs) -> None:
         VGroup.__init__(self, *args, **kwargs)
-        self.layers = layers
-        self.edge_groups = self.__add_edges()
+        self.edge_groups = NeuralEdgeVGroup.__add_edges(layers)
 
     """ -------------------------   Private helper methods -------------------"""
 
-    def __add_edges(self) -> VGroup:
+    @staticmethod
+    def __add_edges(layers: List[int]) -> VGroup:
         from itertools import product
         edge_groups = VGroup()
-        for l1, l2 in zip(self.layers[:-1], self.layers[1:]):
+        for l1, l2 in zip(layers[:-1], layers[1:]):
             edge_group = VGroup()
             for n1, n2 in product(l1.neurons, l2.neurons):
-                edge = self.__get_edge(n1, n2)
+                edge = NeuralEdgeVGroup.__get_edge(n1, n2)
                 edge_group.add(edge)
                 n1.edges_out.add(edge)
                 n2.edges_in.add(edge)
             edge_groups.add(edge_group)
         return edge_groups
 
-    def __get_edge(self, neuron1, neuron2) -> VMobject:
+    @staticmethod
+    def __get_edge(neuron1, neuron2) -> VMobject:
         if NeuralConfig['arrow']:
             return Arrow(
                 neuron1.get_center(),

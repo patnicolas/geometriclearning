@@ -7,31 +7,26 @@ from neural_config import NeuralConfig
 
 
 class NeuralLayerVGroup(VGroup):
-
     def __init__(self,
                  layer_sizes: List[int],
                  *args,
                  **kwargs) -> None:
         VGroup.__init__(self, *args, **kwargs)
-        self.layer_sizes = layer_sizes
-        self.layers = self.__add_neurons()
+        self.layers = NeuralLayerVGroup.__add_neurons(layer_sizes)
 
+    """ ------------------------------  Private Helper Methods ---------------  """
 
-    def __add_neurons(self) -> VGroup:
+    @staticmethod
+    def __add_neurons(layer_sizes: List[int]) -> VGroup:
         layers = VGroup(*[
-            self.__get_layer(size, index)
-            for index, size in enumerate(self.layer_sizes)
+            NeuralLayerVGroup.__get_layer(layer_sizes, size, index)
+            for index, size in enumerate(layer_sizes)
         ])
         layers.arrange_submobjects(RIGHT, buff=NeuralConfig['layer_to_layer_buff'])
         return layers
 
-
-    def __get_nn_fill_color(self, index: int) -> VMobject:
-        if index == -1 or index == len(self.layer_sizes) - 1:
-            return NeuralConfig['output_neuron_color']
-        return NeuralConfig['input_neuron_color'] if index == 0 else NeuralConfig['hidden_layer_neuron_color']
-
-    def __get_layer(self, size: int, index: int) -> VGroup:
+    @staticmethod
+    def __get_layer(layer_sizes: List[int], size: int, index: int) -> VGroup:
         layer = VGroup()
         n_neurons = size
         if n_neurons > NeuralConfig['max_shown_neurons']:
@@ -40,7 +35,7 @@ class NeuralLayerVGroup(VGroup):
         neurons = VGroup(*[
             Circle(
                 radius=NeuralConfig['neuron_radius'],
-                stroke_color=self.__get_nn_fill_color(index),
+                stroke_color=NeuralLayerVGroup.__get_nn_fill_color(layer_sizes, index),
                 stroke_width=NeuralConfig['neuron_stroke_width'],
                 fill_color=GREY,
                 fill_opacity=NeuralConfig['neuron_fill_opacity'],
@@ -56,7 +51,7 @@ class NeuralLayerVGroup(VGroup):
         layer.neurons = neurons
         layer.add(neurons)
 
-        text = MathTex(rf"{{{self.layer_sizes[index]}}} \ units", font_size=32)
+        text = MathTex(rf"{{{layer_sizes[index]}}} \ units", font_size=32)
         text.next_to(neurons[-1], DOWN, buff=0.5)
         layer.add(text)
 
@@ -78,3 +73,9 @@ class NeuralLayerVGroup(VGroup):
                 layer.brace_label = brace_label
                 layer.add(brace, brace_label)
         return layer
+
+    @staticmethod
+    def __get_nn_fill_color(layer_sizes: List[int], index: int,) -> VMobject:
+        if index == -1 or index == len(layer_sizes) - 1:
+            return NeuralConfig['output_neuron_color']
+        return NeuralConfig['input_neuron_color'] if index == 0 else NeuralConfig['hidden_layer_neuron_color']

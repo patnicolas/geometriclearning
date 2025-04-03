@@ -2,8 +2,9 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from manim import *
-from typing import Any, Dict, List
+from typing import List
 from neural_config import NeuralConfig
+
 
 class NeuralLabelVGroup(VGroup):
     def __init__(self,
@@ -12,11 +13,18 @@ class NeuralLabelVGroup(VGroup):
                  *args,
                  **kwargs) -> None:
         VGroup.__init__(self, *args, **kwargs)
-        self.labels = VGroup(*[self.__label_inputs(layers, layer_sizes), self.__label_outputs(layers)])
+        self.labels = NeuralLabelVGroup.__add_labels(layers, layer_sizes)
 
-        # Labels each input neuron with a char l or a LaTeX character
+    """ ------------------------------  Private Helper Methods ---------------  """
 
-    def __label_inputs(self, layers:  List[VMobject], layer_sizes: List[int]) -> VGroup:
+    @staticmethod
+    def __add_labels(layers:  List[VMobject], layer_sizes: List[int]) -> VGroup:
+        return VGroup(
+            *[NeuralLabelVGroup.__label_inputs(layers, layer_sizes), NeuralLabelVGroup.__label_outputs(layers)]
+        )
+
+    @staticmethod
+    def __label_inputs(layers:  List[VMobject], layer_sizes: List[int]) -> VGroup:
         input_labels = VGroup()
         overflow = layer_sizes[0] > NeuralConfig['max_shown_neurons']
         half_display_point = NeuralConfig['max_shown_neurons'] // 2
@@ -30,9 +38,8 @@ class NeuralLabelVGroup(VGroup):
             input_labels.add(label)
         return input_labels
 
-        # Labels each output neuron with a char l or a LaTeX character
-
-    def __label_outputs(self, layers:  List[VMobject]):
+    @staticmethod
+    def __label_outputs(layers:  List[VMobject]):
         output_labels = VGroup()
         for n, neuron in enumerate(layers[-1].neurons):
             index = n + 1
@@ -41,9 +48,10 @@ class NeuralLabelVGroup(VGroup):
             output_labels.add(label)
         return output_labels
 
-    def __label_outputs_text(self, outputs) -> VGroup:
+    @staticmethod
+    def __label_outputs_text(layers:  List[VMobject], outputs) -> VGroup:
         output_text = VGroup()
-        for n, neuron in enumerate(self.layers[-1].neurons):
+        for n, neuron in enumerate(layers[-1].neurons):
             label = Text(outputs[n])
             label.set_height(0.75 * neuron.get_height())
             label.move_to(neuron)
