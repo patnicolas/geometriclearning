@@ -8,6 +8,8 @@ from plots.plotter import PlotterParameters
 from dl.training.neural_training import NeuralTraining
 from metric.metric import Metric
 from dataset.tensor.labeled_loader import LabeledLoader
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
 from torch import nn
 import numpy as np
 
@@ -16,16 +18,15 @@ class NeuralTrainingTest(unittest.TestCase):
 
     @unittest.skip('Ignored')
     def test_init(self):
-        input_block = MLPBlock.build(
-            block_id='../../../python/input',
-            layer=nn.Linear(in_features=32, out_features=16),
-            activation=nn.ReLU())
-        hidden_block = MLPBlock.build(block_id='hidden',
-                                      layer=nn.Linear(in_features=16, out_features=4),
-                                      activation=nn.ReLU())
-        output_block = MLPBlock.build(block_id='output',
-                                      layer=nn.Linear(in_features=4, out_features=1),
-                                      activation=None)
+        input_block = MLPBlock(block_id='../../../python/input',
+                               layer_module=nn.Linear(in_features=32, out_features=16),
+                               activation_module=nn.ReLU())
+        hidden_block = MLPBlock(block_id='hidden',
+                                layer_module=nn.Linear(in_features=16, out_features=4),
+                                activation_module=nn.ReLU())
+        output_block = MLPBlock(block_id='output',
+                                layer_module=nn.Linear(in_features=4, out_features=1),
+                                activation_module=None)
         binary_classifier = MLPModel(model_id='test1', neural_blocks=[input_block, hidden_block, output_block])
         print(repr(binary_classifier))
         hyper_params = HyperParams(
@@ -42,12 +43,18 @@ class NeuralTrainingTest(unittest.TestCase):
 
 
     def test_train_wages(self):
-        from python.metric.metric import Metric
-        from python.metric.built_in_metric import BuiltInMetric, MetricType
+        from metric.metric import Metric
+        from metric.built_in_metric import BuiltInMetric, MetricType
 
-        hidden_block = MLPBlock.build('hidden', 5, 4, nn.ReLU())
-        output_block = MLPBlock.build('output', 4, 1, nn.Sigmoid())
-        binary_classifier = MLPModel('test1', [hidden_block, output_block])
+        hidden_block = MLPBlock.build(block_id='hidden',
+                                      in_features=5,
+                                      out_features=4,
+                                      activation_module=nn.ReLU())
+        output_block = MLPBlock.build(block_id='output',
+                                      in_features=4,
+                                      out_features=41,
+                                      activation_module=nn.Sigmoid())
+        binary_classifier = MLPModel(model_id='test1', neural_blocks=[hidden_block, output_block])
         print(repr(binary_classifier))
         hyper_parameters = HyperParams(
             lr=0.001,
@@ -63,19 +70,20 @@ class NeuralTrainingTest(unittest.TestCase):
         early_stopping_enabled = True
         training_summary = TrainingSummary(patience, min_diff_loss, early_stopping_enabled)
         metric_labels = {
-            Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, is_weighted=True),
-            Metric.precision_label: BuiltInMetric(MetricType.Precision, is_weighted=True)
+            Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, encoding_len=-1, is_weighted=True),
+            Metric.precision_label: BuiltInMetric(MetricType.Precision, encoding_len=-1, is_weighted=True)
         }
         parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                       for label, _ in metric_labels.items()]
+
         network = NeuralTraining(
-            binary_classifier,
             hyper_parameters,
             training_summary,
             metric_labels,
+            None,
             parameters)
         filename = '../../../data/misc/wages_cleaned.csv'
-        df = LabeledDataset.data_frame(filename)
+        df = pd.DataFrame(filename)
         df = df[['Reputation', 'Age', 'Caps', 'Apps', 'Salary']]
         print(df)
         average_salary = df['Salary'].mean()
@@ -87,19 +95,22 @@ class NeuralTrainingTest(unittest.TestCase):
         train_loader, eval_loader = dataset_loader.from_dataframes(
             df[['Reputation', 'Age', 'Caps', 'Apps', 'Salary']],
             df['Top_player'],
-            min_max_scaler)
+            MinMaxScaler())
         network(train_loader, eval_loader)
 
     @unittest.skip('Ignored')
     def test_train_eval_heart_diseases(self):
-        from python.metric.metric import Metric
-        from python.metric.built_in_metric import BuiltInMetric, MetricType
+        from metric.metric import Metric
+        from metric.built_in_metric import BuiltInMetric, MetricType
 
         features = ['age', 'sex', 'chest pain type', 'cholesterol', 'fasting blood sugar','max heart rate',
                     'exercise angina', 'ST slope']
-        hidden_block = MLPBlock.build('hidden', len(features), 4, nn.ReLU())
-        output_block = MLPBlock.build('output', 4, 1, nn.Sigmoid())
-        binary_classifier = MLPModel('test1', [hidden_block, output_block])
+        hidden_block = MLPBlock.build(block_id='hidden',
+                                      in_features=len(features),
+                                      out_features=4,
+                                      activation_module=nn.ReLU())
+        output_block = MLPBlock.build(block_id='output', in_features=4, out_features=1, activation_module=nn.Sigmoid())
+        binary_classifier = MLPModel(model_id='test1', neural_blocks=[hidden_block, output_block])
         print(repr(binary_classifier))
         hyper_parameters = HyperParams(
             lr=0.001,
@@ -115,9 +126,9 @@ class NeuralTrainingTest(unittest.TestCase):
         early_stopping_enabled = True
         training_summary = TrainingSummary(patience, min_diff_loss, early_stopping_enabled)
         metric_labels = {
-            Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, True),
-            Metric.precision_label: BuiltInMetric(MetricType.Precision, True),
-            Metric.recall_label: BuiltInMetric(MetricType.Recall, True)
+            Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, encoding_len=-1, is_weighted=True),
+            Metric.precision_label: BuiltInMetric(MetricType.Precision, encoding_len=-1, is_weighted=True),
+            Metric.recall_label: BuiltInMetric(MetricType.Recall, encoding_len=-1, is_weighted=True)
         }
         parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                       for label, _ in metric_labels.items()]

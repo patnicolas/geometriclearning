@@ -1,6 +1,4 @@
-from peewee import NotSupportedError
-
-_author__ = "Patrick Nicolas"
+__author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import torch

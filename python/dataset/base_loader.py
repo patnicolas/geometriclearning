@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from torch.utils.data import DataLoader, Dataset, random_split
 from dl.training.exec_config import ExecConfig
-from typing import AnyStr
+from typing import AnyStr, Optional
 from dataset import DatasetException
 import abc
 from abc import ABC
@@ -24,7 +24,9 @@ class BaseLoader(ABC):
         self.batch_size = batch_size
         self.num_samples = num_samples
 
-    def loaders_from_path(self, root_path: AnyStr, exec_config: ExecConfig) -> (DataLoader, DataLoader):
+    def loaders_from_path(self,
+                          root_path: AnyStr,
+                          exec_config: ExecConfig = ExecConfig.default()) -> (DataLoader, DataLoader):
         """
         Create Torch loaders for training and evaluation data set from either the local file or default HTTP server
         @param root_path: Relative path for the local data set
@@ -40,7 +42,7 @@ class BaseLoader(ABC):
     def loaders_from_datasets(self,
                               train_dataset: Dataset,
                               eval_dataset: Dataset,
-                              exec_config: ExecConfig) -> (DataLoader, DataLoader):
+                              exec_config: ExecConfig = ExecConfig.default()) -> (DataLoader, DataLoader):
         """
         Create Torch loaders for training and evaluation data set from the training and evaluation data sets
         @param train_dataset: Training torch data set

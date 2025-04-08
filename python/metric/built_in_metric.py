@@ -17,6 +17,8 @@ class BuiltInMetric(Metric):
         Constructor for the accuracy metrics
         @param metric_type: Metric type (Accuracy,....)
         @type metric_type: Enumeration MetricType
+        @param encoding_len: Length for the encoding (OneHot encoding)
+        @type encoding_len: iny
         @param is_weighted: Specify is the precision or recall is to be weighted
         @type is_weighted: bool
         """
