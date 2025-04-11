@@ -16,7 +16,8 @@ class GConvModelTest(unittest.TestCase):
 
         hidden_channels = 256
         pyg_dataset = PyGDatasets('Flickr')
-        _data: torch_geometric.data.data.Data = pyg_dataset()[0]
+        _dataset = pyg_dataset()
+        _data: torch_geometric.data.Data = _dataset[0]
 
         conv_1 = GraphConv(in_channels=_data.num_node_features, out_channels=hidden_channels)
         gconv_block_1 = GConvBlock(block_id='Conv 24-256',
@@ -44,3 +45,6 @@ class GConvModelTest(unittest.TestCase):
                                  gconv_blocks=[gconv_block_1, gconv_block_2, gconv_block_3],
                                  mlp_blocks=[mlp_block])
         print(f'\n{gconv_model}')
+        params = list(gconv_model.parameters())
+        print(f'\nParameters:\n{params}')
+        self.assertTrue(len(params) == 17)

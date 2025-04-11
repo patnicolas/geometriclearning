@@ -22,7 +22,7 @@ class GNNTrainingTest(unittest.TestCase):
     import torch
     torch.set_default_dtype(torch.float32)
 
-    @unittest.skip('Ignore')
+    # @unittest.skip('Ignore')
     def test_train_random_walk_loader(self):
         from torch_geometric.datasets.flickr import Flickr
 
@@ -56,7 +56,7 @@ class GNNTrainingTest(unittest.TestCase):
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
             graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
-            train_loader, eval_loader = graph_data_loader(num_workers=4)
+            train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
             accuracy_list = network.training_summary.metrics['Accuracy']

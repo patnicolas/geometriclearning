@@ -74,10 +74,18 @@ class HyperParams(object):
         @param modules: torch module to be initializes
         @type modules: List
         """
-        def is_layer_module(m: nn.Module) -> bool:
-            return isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d) or isinstance(m, nn.Conv1d)
+        import torch_geometric
 
-        match self.weight_initialization :
+        def is_layer_module(m: nn.Module) -> bool:
+            return isinstance(m, (nn.Linear,
+                                  nn.Conv2d,
+                                  nn.Conv1d,
+                                  torch_geometric.nn.GraphConv,
+                                  torch_geometric.nn.GCNConv,
+                                  torch_geometric.nn.Linear)
+                              )
+
+        match self.weight_initialization:
             case 'normal':
                 [nn.init.normal_(module.weight) for module in modules if is_layer_module(module)]
             case 'xavier':
@@ -100,19 +108,25 @@ class HyperParams(object):
         @return: Appropriate Torch optimizer
         @rtype: torch.optim.Optimizer
         """
-        optimizer = None
         match self.optim_label:
             case HyperParams.optim_adam_label:
-                optimizer = optim.Adam(model.parameters(), self.learning_rate)
+                optimizer = optim.Adam(params=model.parameters(),
+                                       lr=self.learning_rate,
+                                       betas=(self.momentum, 0.998))
             case HyperParams.optim_nesterov_label:
-                optimizer = optim.SGD(model.parameters(), lr=self.learning_rate, momentum=self.momentum, nesterov=True)
+                optimizer = optim.SGD(model.parameters(),
+                                      lr=self.learning_rate,
+                                      momentum=self.momentum,
+                                      nesterov=True)
             case _:
                 logger.warn(f'Type of optimization {self.optim_label} not supported: reverted to SGD')
-                optimizer = optim.SGD(model.parameters(), lr=self.learning_rate, momentum=self.momentum, nesterov=False)
+                optimizer = optim.SGD(model.parameters(),
+                                      lr=self.learning_rate,
+                                      momentum=self.momentum,
+                                      nesterov=False)
         # Set the gradient values of the selected optimizer to 0.0
         optimizer.zero_grad()
         return optimizer
-
 
     def __repr__(self) -> str:
         return f'   Learning rate: {self.learning_rate}\n   Momentum: {self.momentum}' \
@@ -157,7 +171,7 @@ class HyperParams(object):
         assert 1e-6 <= lr <= 0.1, f'Learning rate {lr} should be [1e-6, 0.1]'
         assert 2 <= epochs <= 2048, f'Number of epochs {epochs} should be [3, 2048]'
         assert 0.4 <= momentum <= 0.999, f'Context stride {momentum} should be [0.5, 0.999]'
-        assert 1 <= batch_size <= 256, f'Size of batch {batch_size} should be [2, 256]'
+        assert 1 <= batch_size <= 1024, f'Size of batch {batch_size} should be [2, 1024]'
         assert 0.5 < train_eval_ratio < 0.98, f'Train eval ratio {train_eval_ratio} is out of range ]0.5, 9.98['
         assert 0.0 <= drop_out <= 1.0, f'Drop out {drop_out} should be [0, 1]'
 

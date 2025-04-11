@@ -13,7 +13,6 @@ Examples:
         pyg_dataset = PyGDatasets('Cora')
         _dataset = pyg_dataset()
         data = _dataset[0]
-
 """
 
 
@@ -104,7 +103,7 @@ class PyGDatasets(object):
         from torch_geometric.datasets.flickr import Flickr
 
         path = os.path.join(os.path.dirname(os.path.realpath(__file__)), PyGDatasets.base_dir, 'data', 'Flickr')
-        _dataset: Dataset = Flickr(path)
+        _dataset: Flickr = Flickr(path)
         return _dataset
 
     def __load_planetoid(self) -> Dataset:

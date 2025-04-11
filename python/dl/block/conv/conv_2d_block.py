@@ -42,23 +42,25 @@ class Conv2dBlock(ConvBlock):
         @param drop_out_module: Optional drop out module for training
         @type drop_out_module: Dropout2d
         """
+        super(Conv2dBlock, self).__init__(block_id)
 
         # The 2-dimensional convolutional layer has to be defined
-        modules = [conv_layer_module]
+        modules_list = nn.ModuleList()
+        modules_list.append(conv_layer_module)
 
         # Add a batch normalization is provided
         if batch_norm_module is not None:
-            modules.append(batch_norm_module)
+            modules_list.append(batch_norm_module)
         # Add an activation function is required
         if activation_module is not None:
-            modules.append(activation_module)
+            modules_list.append(activation_module)
         # Add a mandatory max pooling module
         if max_pooling_module is not None:
-            modules.append(max_pooling_module)
+            modules_list.append(max_pooling_module)
         # Add a Drop out regularization for training if provided
         if drop_out_module is not None:
-            modules.append(drop_out_module)
-        super(Conv2dBlock, self).__init__(block_id, modules)
+            modules_list.append(drop_out_module)
+        self.modules_list = modules_list
 
     @classmethod
     def build(cls,
@@ -136,8 +138,8 @@ class Conv2dBlock(ConvBlock):
         return str(self.attributes)
 
     def get_conv_output_size(self) -> ConvOutputSize:
-        conv_layer_module = self.modules[0]
-        max_pool_module = self.modules[3]
+        conv_layer_module = self.modules_list[0]
+        max_pool_module = self.modules_list[3]
         return ConvOutputSize(
             conv_layer_module.kernel_size,
             conv_layer_module.stride,
@@ -148,7 +150,7 @@ class Conv2dBlock(ConvBlock):
         from dl.block.neural_block import NeuralBlock
 
         self.attributes = attributes
-        for module in self.modules:
+        for module in list(self.modules_list):
             module_type = module.__class__.__name__
             if (module_type not in NeuralBlock.supported_activations
                     and module_type not in Conv2dBlock.valid_modules):

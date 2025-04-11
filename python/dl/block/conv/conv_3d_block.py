@@ -33,22 +33,25 @@ class Conv3dBlock(ConvBlock):
         @param drop_out_module: Optional drop out module for training
         @type drop_out_module: Dropout3d
         """
-        # First define the 2D convolution
-        modules = [conv_layer_module]
+        super(Conv3dBlock, self).__init__(block_id)
+
+        # The 3-dimensional convolutional layer has to be registered
+        modules_list = nn.ModuleList()
+        modules_list.append(conv_layer_module)
 
         # Add the batch normalization if defined
         if batch_norm_module is not None:
-            modules.append(batch_norm_module)
+            modules_list.append(batch_norm_module)
         # Activation to be added if defined
         if activation_module is not None:
-            modules.append(activation_module)
+            modules_list.append(activation_module)
         # Added max pooling module
         if max_pooling_module is not None:
-            modules.append(max_pooling_module)
+            modules_list.append(max_pooling_module)
         # Add drop out for training is defined
         if drop_out_module is not None:
-            modules.append(drop_out_module)
-        super(Conv3dBlock, self).__init__(block_id, modules)
+            modules_list.append(drop_out_module)
+
 
     @classmethod
     def build(cls,
@@ -111,7 +114,7 @@ class Conv3dBlock(ConvBlock):
         from dl.block.neural_block import NeuralBlock
 
         self.attributes = attributes
-        for module in self.modules:
+        for module in list(self.modules_list):
             module_type = module.__class__.__name__
             if (module_type not in NeuralBlock.supported_activations
                     and module_type not in Conv3dBlock.valid_modules):

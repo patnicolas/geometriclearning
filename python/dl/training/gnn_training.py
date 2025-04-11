@@ -21,7 +21,7 @@ class GNNTraining(NeuralTraining):
                  hyper_params: HyperParams,
                  training_summary: TrainingSummary,
                  metrics: Dict[AnyStr, Metric],
-                 exec_config: ExecConfig,
+                 exec_config: ExecConfig = ExecConfig.default(),
                  plot_parameters: Optional[List[PlotterParameters]] = None):
         """
         Default constructor for this variational auto-encoder
@@ -49,7 +49,8 @@ class GNNTraining(NeuralTraining):
               model_id: AnyStr,
               neural_model: nn.Module,
               train_loader: DataLoader,
-              val_loader: DataLoader) -> None:
+              val_loader: DataLoader,
+              val_enabled: bool = True) -> None:
         """
         Train and evaluation of a neural network given a data loader for a training set, a
         data loader for the evaluation/test1 set and an encoder_model. The weights of the various linear modules
@@ -63,9 +64,15 @@ class GNNTraining(NeuralTraining):
         @type train_loader: torch_geometric.loader.DataLoader
         @param val_loader: Data loader for the evaluation set
         @param val_loader: torch_geometric.loader.DataLoader
+        @param val_enabled: Enable validation
+        @param val_enabled: bool
         """
         torch.manual_seed(42)
-        output_file_name = f'{model_id}: {self.plot_parameters[0].title}'
+
+        # Force a conversion to 32-bits
+        neural_model = neural_model.float()
+        output_file_name = f'{model_id}: {self.plot_parameters[0].title}' if self.plot_parameters is not None \
+            else model_id
 
         # Train and evaluation process
         for epoch in range(self.hyper_params.epochs):
@@ -73,8 +80,9 @@ class GNNTraining(NeuralTraining):
             train_loss = self.__train(neural_model, epoch, train_loader)
 
             # Set mode and execute evaluation
-            eval_metrics = self.__val(neural_model, epoch, val_loader)
-            self.training_summary(epoch, train_loss, eval_metrics)
+            if val_enabled:
+                eval_metrics = self.__val(neural_model, epoch, val_loader)
+                self.training_summary(epoch, train_loss, eval_metrics)
             self.exec_config.apply_monitor_memory()
 
         # Generate summary
@@ -86,34 +94,30 @@ class GNNTraining(NeuralTraining):
     def __train(self, neural_model: nn.Module, epoch: int, train_loader: DataLoader) -> torch.Tensor:
         neural_model.train()
         total_loss = 0.0
-        idx = 0
         optimizer = self.hyper_params.optimizer(neural_model)
         num_records = len(train_loader)
         model = neural_model.to(self.target_device)
 
-        for data in train_loader:
+        for idx, data in enumerate(train_loader):
             try:
-                # Forward pass
-                data = data.to(self.target_device)
+                # Force a conversion to float 32 if necessary
+                if data.x.dtype == torch.float64:
+                    data.x = data.x.float()
 
+                # Move data to the GPU
+                data = data.to(self.target_device)
                 predicted = model(data)  # Call forward - prediction
-                raw_loss = self.hyper_params.loss_function(predicted, data.y)
+                raw_loss = self.hyper_params.loss_function(predicted[data.train_mask], data.y[data.train_mask])
 
                 # Set back propagation
                 raw_loss.backward(retain_graph=True)
-                total_loss += raw_loss.item()
-                print(f'Total loss: {total_loss}')
+                loss = raw_loss.item()
+                total_loss += loss
 
                 # Monitoring and caching for performance
                 self.exec_config.apply_batch_optimization(idx, optimizer)
                 idx += 1
-            except RuntimeError as e:
-                raise GNNException(str(e))
-            except ValueError as e:
-                raise GNNException(str(e))
-            except KeyError as e:
-                raise GNNException(str(e))
-            except AttributeError as e:
+            except (RuntimeError | AttributeError | ValueError | Exception) as e:
                 raise GNNException(str(e))
         return torch.tensor(total_loss / num_records)
 
@@ -127,13 +131,15 @@ class GNNTraining(NeuralTraining):
             count = 0
             for data in eval_loader:
                 try:
-                    # Add noise if the mode is defined
+                    # Force a conversion to float 32 if necessary
+                    if data.x.dtype == torch.float64:
+                        data.x = data.x.float()
 
                     data = data.to(self.target_device)
                     predicted = model(data)  # Call forward - prediction
-                    raw_loss = self.hyper_params.loss_function(predicted, data.y)
+                    raw_loss = self.hyper_params.loss_function(predicted[data.val_mask], data.y[data.val_mask])
 
-                    # Transfer prediction and labels to CPU for metrics
+                    # Transfer prediction and labels to CPU for computing metrics
                     np_predicted = predicted.cpu().numpy()
                     np_labels = data.y.cpu().numpy()
 
@@ -145,13 +151,7 @@ class GNNTraining(NeuralTraining):
                     # Compute and accumulate the loss
                     total_loss += raw_loss.item()
                     count += 1
-                except RuntimeError as e:
-                    raise GNNException(str(e))
-                except AttributeError as e:
-                    raise GNNException(str(e))
-                except ValueError as e:
-                    raise GNNException(str(e))
-                except Exception as e:
+                except (RuntimeError | AttributeError| ValueError| Exception) as e:
                     raise GNNException(str(e))
 
         eval_loss = total_loss / count

@@ -31,22 +31,32 @@ class MLPBlock(NeuralBlock):
         @param dropout_module: Optional dropout module for regularization during training
         @type dropout_module: nn.Dropout
         """
+        super(MLPBlock, self).__init__(block_id)
+
         # A MLP block should contain at least a fully connected layer
-        modules = [layer_module]
+        modules_list = nn.ModuleList()
+        modules_list.append(layer_module)
         # Add activation module if defined
         if activation_module is not None:
-            modules.append(activation_module)
+            modules_list.append(activation_module)
         # Add drop out module if specified
         if dropout_module is not None:
-            modules.append(dropout_module)
-        super(MLPBlock, self).__init__(block_id, modules)
+            modules_list.append(dropout_module)
+
+        self.modules_list = modules_list
+        self.block_id = block_id
         self.activation_module = activation_module
 
     def get_in_features(self) -> int:
-        return self.modules[0].in_features
+        return self.modules_list[0].in_features
 
     def get_out_features(self) -> int:
-        return self.modules[0].out_features
+        return self.modules_list[0].out_features
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        for module in self.modules_list:
+            x = module(x)
+        return x
 
     @classmethod
     def build(cls,
@@ -74,9 +84,6 @@ class MLPBlock(NeuralBlock):
                    activation_module=activation_module,
                    dropout_module=dropout_module)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return super().forward(x)
-
     def transpose(self, activation_update: Optional[nn.Module] = None) -> Self:
         """
         Transpose the layer size (in_feature <-> out_feature) and remove drop_out for decoder
@@ -92,3 +99,6 @@ class MLPBlock(NeuralBlock):
 
     def reset_parameters(self):
         self.linear.reset_parameters()
+
+    def __repr__(self):
+        return '\n'.join([f'{idx}: {str(module)}' for idx, module in enumerate(list(self.modules_list))])

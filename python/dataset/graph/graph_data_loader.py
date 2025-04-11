@@ -7,7 +7,7 @@ from torch_geometric.data import Data
 from torch_geometric.loader import (NeighborLoader, RandomNodeLoader, GraphSAINTRandomWalkSampler,
                                     GraphSAINTNodeSampler, GraphSAINTEdgeSampler, ShaDowKHopSampler,
                                     ClusterData, ClusterLoader)
-from typing import Dict, AnyStr, Any, Optional
+from typing import Dict, AnyStr, Any, Optional, List, Self
 from dataset import DatasetException
 __all__ = ['GraphDataLoader']
 
@@ -46,8 +46,8 @@ class GraphDataLoader(object):
     }
 
     def __init__(self,
-                 loader_attributes: Dict[AnyStr, Any],
                  dataset_name: AnyStr,
+                 loader_attributes: Dict[AnyStr, Any],
                  num_subgraph_nodes: Optional[int] = -1,
                  start_index: Optional[int] = -1) -> None:
         """
@@ -58,9 +58,12 @@ class GraphDataLoader(object):
         @type dataset_name: AnyStr
         @param num_subgraph_nodes: Num of indices of nodes in the range [random_index, random_index+num_random_indices]
                                    The entire graph is loaded if value is -1
-        @type dataset_name: int
+        @type num_subgraph_nodes: int
+        @param start_index: Index of the first node to be sample from the original graph
+        @type start_index int
         """
         from dataset.graph.pyg_datasets import PyGDatasets
+
         # Validate the attributes against the type of loader-sampler
         GraphDataLoader.__validate(loader_attributes)
         # Load directly from the dataset
@@ -70,6 +73,15 @@ class GraphDataLoader(object):
         self.data: Data = GraphDataLoader.__extract_subgraph(dataset[0], num_subgraph_nodes, start_index) \
             if num_subgraph_nodes > 0 else dataset[0]
         self.attributes_map = loader_attributes
+
+    @classmethod
+    def build_neighbor_loader(cls, dataset_name: AnyStr, n_neighbors: List[int], b_size: int, num_workers: int) -> Self:
+        attrs = {'id': 'NeighborLoader',
+                 'num_neighbors': n_neighbors,
+                 'batch_size': b_size,
+                 'replace': True,
+                 'num_workers': num_workers }
+        return cls(dataset_name, attrs)
 
     def __call__(self) -> (DataLoader, DataLoader):
         """
@@ -111,7 +123,8 @@ class GraphDataLoader(object):
         num_neighbors = self.attributes_map['num_neighbors']
         batch_size = self.attributes_map['batch_size']
         replace = self.attributes_map['replace']
-        num_workers = self.attributes_map['num_workers']
+        num_workers = self.attributes_map['num_workers'] if 'num_workers' in self.attributes_map \
+            else 1
         train_loader = NeighborLoader(data=self.data,
                                       num_neighbors=num_neighbors,
                                       batch_size=batch_size,

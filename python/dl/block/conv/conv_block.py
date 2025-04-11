@@ -21,16 +21,14 @@ Note: Spectral Normalized convolution is available only for 2D models
 
 
 class ConvBlock(NeuralBlock):
-    def __init__(self, block_id: Optional[AnyStr], modules: List[nn.Module]) -> None:
+    def __init__(self, block_id: Optional[AnyStr]) -> None:
         """
         Constructor for the Generic Convolutional Neural block
         @param block_id: Identifier for the block
         @type block_id: str
-        @param modules: Optional tuple/sequence of convolutional related modules
-        @type modules: Tuple[nn.Module]
         """
         self.attributes = None
-        super(ConvBlock, self).__init__(block_id, modules)
+        super(ConvBlock, self).__init__(block_id)
 
     def get_in_channels(self) -> int:
         return self.modules[0].in_channels

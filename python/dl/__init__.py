@@ -1,10 +1,9 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-from typing import Tuple
 
 
-class DLException(Exception):
+class DLException(BaseException):
     def __init__(self, *args, **kwargs):
         super(DLException, self).__init__(args, kwargs)
 

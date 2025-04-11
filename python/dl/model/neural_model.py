@@ -95,7 +95,6 @@ class NeuralModel(torch.nn.Module, ABC):
         raise NotImplementedError('NeuralModel.save is an abstract method')
 
 
-
 class NeuralBuilder(ABC):
     def __init__(self, model_id: AnyStr, keys: List[AnyStr]) -> None:
         self._attributes = dict.fromkeys(keys)

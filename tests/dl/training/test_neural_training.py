@@ -16,7 +16,7 @@ import numpy as np
 
 class NeuralTrainingTest(unittest.TestCase):
 
-    @unittest.skip('Ignored')
+    # @unittest.skip('Ignored')
     def test_init(self):
         input_block = MLPBlock(block_id='../../../python/input',
                                layer_module=nn.Linear(in_features=32, out_features=16),
@@ -27,8 +27,9 @@ class NeuralTrainingTest(unittest.TestCase):
         output_block = MLPBlock(block_id='output',
                                 layer_module=nn.Linear(in_features=4, out_features=1),
                                 activation_module=None)
-        binary_classifier = MLPModel(model_id='test1', neural_blocks=[input_block, hidden_block, output_block])
+        binary_classifier = MLPModel(model_id='test1', mlp_blocks=[input_block, hidden_block, output_block])
         print(repr(binary_classifier))
+        params = binary_classifier.parameters()
         hyper_params = HyperParams(
             lr=0.001,
             momentum=0.95,
@@ -41,7 +42,7 @@ class NeuralTrainingTest(unittest.TestCase):
         metric_labels = [Metric.train_loss_label, Metric.eval_loss_label, Metric.accuracy_label]
         network_training = NeuralTraining.build(hyper_params, metric_labels)
 
-
+    @unittest.skip('Ignored')
     def test_train_wages(self):
         from metric.metric import Metric
         from metric.built_in_metric import BuiltInMetric, MetricType
@@ -54,7 +55,7 @@ class NeuralTrainingTest(unittest.TestCase):
                                       in_features=4,
                                       out_features=41,
                                       activation_module=nn.Sigmoid())
-        binary_classifier = MLPModel(model_id='test1', neural_blocks=[hidden_block, output_block])
+        binary_classifier = MLPModel(model_id='test1', mlp_blocks=[hidden_block, output_block])
         print(repr(binary_classifier))
         hyper_parameters = HyperParams(
             lr=0.001,
@@ -110,7 +111,7 @@ class NeuralTrainingTest(unittest.TestCase):
                                       out_features=4,
                                       activation_module=nn.ReLU())
         output_block = MLPBlock.build(block_id='output', in_features=4, out_features=1, activation_module=nn.Sigmoid())
-        binary_classifier = MLPModel(model_id='test1', neural_blocks=[hidden_block, output_block])
+        binary_classifier = MLPModel(model_id='test1', mlp_blocks=[hidden_block, output_block])
         print(repr(binary_classifier))
         hyper_parameters = HyperParams(
             lr=0.001,

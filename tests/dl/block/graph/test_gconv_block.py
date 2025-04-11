@@ -17,7 +17,8 @@ class GConvBlockTest(unittest.TestCase):
                                  activation_module=nn.ReLU(),
                                  pooling_module=TopKPooling(hidden_channels, ratio=0.4),
                                  dropout_module=nn.Dropout(0.2))
-        self.assertTrue(len(gconv_block.modules) == 4)
+        modules = list(gconv_block.modules_list)
+        self.assertTrue(len(modules) == 5)
         print(f'\n{gconv_block}')
 
     def test_init_2(self):
@@ -27,7 +28,8 @@ class GConvBlockTest(unittest.TestCase):
         gconv_block = GConvBlock(block_id='GConv-block',
                                  gconv_layer=gconv_layer,
                                  batch_norm_module=BatchNorm(hidden_channels))
-        self.assertTrue(len(gconv_block.modules) == 2)
+        modules = list(gconv_block.modules_list)
+        self.assertTrue(len(modules) == 2)
         print(f'\n{gconv_block}')
 
 

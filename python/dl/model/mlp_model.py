@@ -16,20 +16,19 @@ Class builder for a feed-forward neural network model using feed-forward neural 
 
 
 class MLPModel(NeuralModel):
-    def __init__(self, model_id: AnyStr, neural_blocks: List[MLPBlock]) -> None:
+    def __init__(self, model_id: AnyStr, mlp_blocks: List[MLPBlock]) -> None:
         """
         Constructor for the Feed Forward Neural Network model as a set of Neural blocks
         @param model_id: Identifier for the model
         @type model_id: AnyStr
-        @param neural_blocks: List of Neural blocks
-        @type neural_blocks:
+        @param mlp_blocks: List of Neural blocks
+        @type mlp_blocks:
         """
-        assert len(neural_blocks) > 1, 'Cannot create a MLP model without neural blocks'
-        self.neural_blocks = neural_blocks
+        assert len(mlp_blocks) > 1, 'Cannot create a MLP model without neural blocks'
+        self.neural_blocks = mlp_blocks
 
         # Define the sequence of modules from the layout of neural blocks
-        modules = [module for block in neural_blocks
-                   for module in block.modules]
+        modules = [module for block in mlp_blocks for module in block.modules_list]
         super(MLPModel, self).__init__(model_id, nn.Sequential(*modules))
 
     def transpose(self, output_activation: nn.Module = None) -> Self:
@@ -41,7 +40,7 @@ class MLPModel(NeuralModel):
         neural_blocks = [block.transpose(output_activation)
                          for block in self.neural_blocks[::-1]]
         return MLPModel(model_id=f'_{self.model_id}',
-                        neural_blocks=neural_blocks)
+                        mlp_blocks=neural_blocks)
 
     def get_in_features(self) -> int:
         """

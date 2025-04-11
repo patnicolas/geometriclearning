@@ -24,7 +24,7 @@ class VAEModelTest(unittest.TestCase):
             output_block = MLPBlock.build(block_id='output',
                                           layer=nn.Linear(in_features=32, out_features=10, bias=False),
                                           activation=nn.Sigmoid())
-            ffnn_model = MLPModel(model_id='encoder', neural_blocks=[input_block, hidden_block, output_block])
+            ffnn_model = MLPModel(model_id='encoder', mlp_blocks=[input_block, hidden_block, output_block])
             print(str(ffnn_model))
             latent_size = 6
             vae_model = VAEModel(model_id='vae_ffnn', encoder=ffnn_model, latent_dim=latent_size, noise_func =None)

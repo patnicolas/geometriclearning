@@ -17,6 +17,6 @@ def min_max_scaler(x: torch.Tensor) -> torch.Tensor:
         return x
 
 
-class DatasetException(Exception):
+class DatasetException(BaseException):
     def __init__(self, *args, **kwargs):  # real signature unknown
         super(DatasetException, self).__init__(args, kwargs)

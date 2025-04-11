@@ -1,6 +1,9 @@
+__author__ = "Patrick Nicolas"
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
+
 from manim import *
 import numpy as np
-from typing import List
+
 
 
 class ConvVGroup(VGroup):
@@ -12,12 +15,8 @@ class ConvVGroup(VGroup):
 
         receptive_fields = ConvVGroup.__add_receptive_fields(self, grid_lines)
         self.add(receptive_fields)
-        conv_layer_vgroup = VGroup(self)
-        conv_layer_vgroup.shift(LEFT*shift)
-        conv_layer_vgroup.scale(scale)
-        self.conv_group = conv_layer_vgroup
-
-        #self.play(Rotate(conv_layer_vgroup, angle=0.38 * PI, axis=UP))
+        self.shift(LEFT*shift)
+        self.scale(scale)
 
     @staticmethod
     def __add_receptive_fields(conf_vgroup: VGroup, grid: VGroup) -> VGroup:

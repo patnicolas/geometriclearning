@@ -12,18 +12,20 @@ class MLPModelTest(unittest.TestCase):
         try:
             input_block = MLPBlock(block_id='input',
                                    layer_module=nn.Linear(in_features=8, out_features=16, bias=False),
-                                   activation_module= nn.ReLU())
+                                   activation_module=nn.ReLU())
             hidden_block = MLPBlock(block_id='hidden',
                                     layer_module=nn.Linear(in_features=16, out_features=16, bias=False),
-                                    activation_module= nn.ReLU())
+                                    activation_module=nn.ReLU())
             output_block = MLPBlock(block_id='output',
                                     layer_module=nn.Linear(in_features=16, out_features=1, bias=False),
                                     activation_module=nn.Softmax())
             mlp_model = MLPModel(model_id='test1',
-                                 neural_blocks=[input_block, hidden_block, output_block])
+                                 mlp_blocks=[input_block, hidden_block, output_block])
             self.assertTrue(mlp_model.get_in_features() == 8)
             self.assertTrue(mlp_model.get_out_features() == 1)
-            print(str(mlp_model))
+            params = list(mlp_model.parameters())
+            print(f'Parameters:\n{params}')
+            self.assertTrue(len(params) == 4)
 
             mlp_builder = MLPBuilder('MLP-Test-1')
             # 'in_features_list', 'activation', 'drop_out', 'output_activation'
@@ -32,9 +34,9 @@ class MLPModelTest(unittest.TestCase):
             mlp_builder.set(key='output_activation', value=nn.Softmax())
             mlp_model = mlp_builder.build()
             print(str(mlp_model))
-
             assert True
         except DLException as e:
+            print(e)
             assert False
 
     @unittest.skip("Ignore")
@@ -56,7 +58,7 @@ class MLPModelTest(unittest.TestCase):
                                           activation_module=nn.Softmax())
 
             mlp_model = MLPModel(model_id='test1',
-                                 neural_blocks=[input_block, hidden_block, output_block])
+                                 mlp_blocks=[input_block, hidden_block, output_block])
             self.assertTrue(mlp_model.get_in_features() == 8)
             self.assertTrue(mlp_model.get_out_features() == 1)
             print(repr(mlp_model))
@@ -91,7 +93,7 @@ class MLPModelTest(unittest.TestCase):
                                           out_features=1,
                                           activation_module=nn.Softmax())
             mlp_model = MLPModel(model_id='test1',
-                                 neural_blocks=[input_block, hidden_block, output_block])
+                                 mlp_blocks=[input_block, hidden_block, output_block])
             mlp_model_transposed = mlp_model.transpose(output_activation=None)
             self.assertTrue(mlp_model_transposed.in_features == 1)
             self.assertTrue(mlp_model_transposed.out_features == 8)
@@ -126,7 +128,7 @@ class MLPModelTest(unittest.TestCase):
 
         # Define the model and layout for the Feed Forward Neural Network
         mlp_model = MLPModel(model_id='MNIST-ML)',
-                             neural_blocks=[mlp_input_block] + mlp_hidden_blocks + [mlp_output_block])
+                             mlp_blocks=[mlp_input_block] + mlp_hidden_blocks + [mlp_output_block])
         mnist_loader = MNISTLoader(batch_size=128)
         train_loader, eval_loader = mnist_loader.loaders_from_path(root_path='../../../data/MNIST',
                                                                    exec_config=ExecConfig.default())

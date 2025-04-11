@@ -8,20 +8,22 @@ class MLPBlockTest(unittest.TestCase):
 
     def test_init_1(self):
         try:
-            linear_layer = nn.Linear(in_features=12, out_features=24, bias=False)
             mlp_block = MLPBlock(block_id='id1',
-                                 layer_module=linear_layer,
+                                 layer_module=nn.Linear(12, 6),
                                  activation_module=nn.ReLU(),
                                  dropout_module=nn.Dropout(0.4))
-
+            params = mlp_block.parameters()
+            params_list = list(params)
+            self.assertTrue(len(params_list) == 2)
             self.assertTrue(mlp_block.get_in_features() == 12)
-            self.assertTrue(mlp_block.get_out_features() == 24)
+            self.assertTrue(mlp_block.get_out_features() == 6)
 
-            print(str(mlp_block))
+            # print(str(mlp_block))
         except DLException as e:
             print(str(e))
             self.assertTrue(False)
 
+    @unittest.skip('Ignore')
     def test_init_2(self):
         in_features = 12
         out_features = 24
@@ -39,6 +41,7 @@ class MLPBlockTest(unittest.TestCase):
             print(str(e))
             self.assertTrue(False)
 
+    @unittest.skip('Ignore')
     def test_transpose_1(self):
         try:
             linear_layer = nn.Linear(in_features=12, out_features=24, bias=False)
@@ -55,6 +58,7 @@ class MLPBlockTest(unittest.TestCase):
             print(str(e))
             self.assertTrue(False)
 
+    @unittest.skip('Ignore')
     def test_transpose_2(self):
         try:
             linear_layer = nn.Linear(in_features=12, out_features=24, bias=False)

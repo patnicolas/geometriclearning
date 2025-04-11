@@ -93,7 +93,6 @@ class Plotter(object):
 
         plt.title(label=plot_title, y=6.0, fontdict={'family': 'sans-serif', 'size': 20})
         fig.savefig(f"{Plotter.test_images_folder}/plot_{plot_title}.png")
-        # plt.show()
 
     @staticmethod
     def plot(values: List[List[float]], labels: List[AnyStr], plotter_parameters: PlotterParameters) -> NoReturn:
@@ -119,7 +118,7 @@ class Plotter(object):
 
         plt.title(
             plotter_parameters.title,
-            fontdict = {'family': 'sans-serif', 'size': 22, 'weight': 'bold'}
+            fontdict={'family': 'sans-serif', 'size': 22, 'weight': 'bold'}
         )
         plt.xlabel(
             plotter_parameters.x_label,

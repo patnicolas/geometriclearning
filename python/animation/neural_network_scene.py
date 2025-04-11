@@ -13,17 +13,20 @@ class NeuralNetworkScene(ThreeDScene):
     def construct(self):
         tracker = ValueTracker(0)
 
-        conv_group1 = ConvVGroup(4.5, 0.85)
-        conv_group2 = ConvVGroup(3.5, 0.70)
-        conv_group3 = ConvVGroup(2.5, 0.65)
-        layer_sizes = [128, 64, 20, 8]
+        conv_group1 = ConvVGroup(4.5, 0.95)
+        conv_group2 = ConvVGroup(3.0, 0.75)
+        conv_group3 = ConvVGroup(1.8, 0.55)
+        layer_sizes = [512, 64, 20, 8]
         num_edge_groups = len(layer_sizes) - 1
         num_edges_per_layer = NeuralNetworkScene.get_num_edges_per_layer(layer_sizes)
-        mlp_group = MLPVGroup(layer_sizes, shift=2.0, scale=0.6)
+        mlp_group = MLPVGroup(layer_sizes, shift=2.0, scale=0.5)
         lines = [line for line in mlp_group.get_family() if isinstance(line, Line)]
-        self.play(Rotate(conv_group1, angle=0.44 * PI, axis=UP))
-        self.play(Rotate(conv_group2, angle=0.44 * PI, axis=UP))
-        self.play(Rotate(conv_group3, angle=0.44 * PI, axis=UP))
+        self.play(Rotate(conv_group1, angle=0.5 * PI, axis=UP))
+        self.play(Rotate(conv_group2, angle=0.5 * PI, axis=UP))
+        self.play(Rotate(conv_group3, angle=0.5 * PI, axis=UP))
+        conv_group1_text = Tex('Image 48x48', font_size=34)
+        conv_group1_text.next_to(conv_group1, DOWN, buff=0.4).shift(LEFT)
+        self.play(Write(conv_group1_text))
 
         self.play(Write(mlp_group, run_time=0.2, lag_ratio=0.4))
 

@@ -48,26 +48,25 @@ class BuiltInMetric(Metric):
         if self.encoding_len > 0:
             labeled = np.eye(self.encoding_len)[labeled]
 
-        _predicted, _labeled = (np.argmax(predicted, axis=1), np.argmax(labeled, axis=1)) if len(predicted.shape) == 2 \
-            else (predicted, labeled)
-
+        _predicted = np.argmax(predicted, axis=len(predicted.shape)-1) if len(predicted.shape) == 2 else predicted
+        _labeled = np.argmax(labeled, axis=len(labeled.shape)-1) if len(labeled.shape) == 2 else labeled
         match self.metric_type:
             case MetricType.Accuracy:
-                return accuracy_score(_labeled, _predicted, normalize=True, sample_weight="weighted") \
+                return accuracy_score(_labeled, _predicted, normalize=True, sample_weight=None) \
                     if self.is_weighted \
                     else accuracy_score(_labeled, _predicted, normalize=True)
 
             case MetricType.Precision:
-                return precision_score(_labeled, _predicted, average="weighted") if self.is_weighted \
-                        else precision_score(_labeled, _predicted, average='macro')
+                return precision_score(_labeled, _predicted, average=None, zero_division=1.0) if self.is_weighted \
+                        else precision_score(_labeled, _predicted, average='macro', zero_division=1.0)
 
             case MetricType.Recall:
-                return recall_score(_labeled, _predicted, average="weighted") if self.is_weighted \
-                        else precision_score(_labeled, _predicted, average='macro')
+                return recall_score(_labeled, _predicted, average=None, zero_division=1.0) if self.is_weighted \
+                        else precision_score(_labeled, _predicted, average='macro', zero_division=1.0)
 
             case MetricType.F1:
-                return f1_score(_labeled, _predicted, average="weighted") if self.is_weighted \
-                        else precision_score(_labeled, _predicted, average=None)
+                return f1_score(_labeled, _predicted, average=None, zero_division=1.0) if self.is_weighted \
+                        else precision_score(_labeled, _predicted, average=None, zero_division=1.0)
 
             case _:
                 raise MetricException(f'Metric type {self.metric_type} is not supported')

@@ -30,7 +30,7 @@ class VAETest(unittest.TestCase):
                                       layer=nn.Linear(in_features=4, out_features=4),
                                       activation=nn.ReLU())
         vae_model = VAEModel(model_id='Autoencoder',
-                             encoder=MLPModel(model_id='encoder', neural_blocks=[hidden_block, output_block]),
+                             encoder=MLPModel(model_id='encoder', mlp_blocks=[hidden_block, output_block]),
                              latent_dim=6)
         print(vae_model)
 
@@ -47,7 +47,7 @@ class VAETest(unittest.TestCase):
                                       layer=nn.Linear(in_features=4, out_features=4),
                                       activation=nn.ReLU())
         vae_model = VAEModel(model_id='Autoencoder',
-                             encoder=MLPModel(model_id='encoder', neural_blocks=[hidden_block, output_block]),
+                             encoder=MLPModel(model_id='encoder', mlp_blocks=[hidden_block, output_block]),
                              latent_dim=4)
         print(vae_model)
 
