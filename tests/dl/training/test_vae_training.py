@@ -9,7 +9,7 @@ from dataset.tensor.unlabeled_loader import UnlabeledLoader
 from dl.training.exec_config import ExecConfig
 from dl.training.vae_training import VAETraining
 from dl.training.hyper_params import HyperParams
-from dl.training.training_summary import TrainingSummary
+from dl.training.training_monitor import TrainingMonitor
 from metric.metric import Metric, MetricType
 from metric.built_in_metric import BuiltInMetric
 from dl import ConvException, VAEException
@@ -69,7 +69,7 @@ class VAETest(unittest.TestCase):
             drop_out=0.0,
             train_eval_ratio=0.9)
 
-        training_summary = TrainingSummary(patience=2, min_diff_loss=-0.001, early_stopping_enabled=True)
+        training_summary = TrainingMonitor(patience=2, min_diff_loss=-0.001, early_stopping_enabled=True)
         metric_labels = {
             Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, True)
         }
@@ -92,13 +92,13 @@ class VAETest(unittest.TestCase):
                 loss_function=nn.MSELoss(),
                 drop_out=0.0,
                 train_eval_ratio=0.9)
-            training_summary = TrainingSummary(patience=2, min_diff_loss=-0.001, early_stopping_enabled=True)
+            training_summary = TrainingMonitor(patience=2, min_diff_loss=-0.001, early_stopping_enabled=True)
             metric_labels = {
                 Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, True)
             }
             vae_training = VAETraining(hyper_params=hyper_parameters,
                                        training_summary=training_summary,
-                                       metrics=metric_labels,
+                                       metrics_attributes=metric_labels,
                                        exec_config=ExecConfig.default('mps'),
                                        plot_parameters=None)
             train_dataset, eval_dataset = VAETest.load_dataset(root_path= '../../../../data/MNIST',

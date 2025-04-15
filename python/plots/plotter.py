@@ -4,7 +4,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 import numpy as np
 from matplotlib import pyplot as plt
 from datetime import datetime
-from typing import List, AnyStr, NoReturn, Tuple, Optional, Dict
+from typing import List, AnyStr, Tuple, Optional, Dict, Any, Self
 from dataclasses import dataclass
 import torch
 
@@ -40,11 +40,23 @@ class PlotterParameters:
     @type time_str: str
     """
 
-    def __repr__(self):
+    def __repr__(self) -> AnyStr:
         return f"{self.__class__.__name__}()"
+
+    def __str__(self) -> AnyStr:
+        return f'   Title:   {self.title}\n   X label: {self.x_label}\n   Y label: {self.y_label}'
+
+    @classmethod
+    def build(cls, attributes: Dict[AnyStr, Any]) -> Self:
+        count = attributes['count']
+        x_label = attributes.get('x_label', 'X')
+        y_label = attributes.get('y_label', 'Y')
+        title = attributes.get('title', '')
+        return cls(count, x_label, y_label, title)
 
 
 class Plotter(object):
+    plot_parameters_label = 'plot_parameters'
     test_images_folder = '../../output_images'
     markers = ['-', '--', '-.', '--', '^', '-']
     colors = ['blue', 'green', 'red', 'orange', 'black', 'grey']
@@ -59,7 +71,7 @@ class Plotter(object):
         plt.show()
 
     @staticmethod
-    def single_plot(values1: List[float], plotter_parameters: PlotterParameters) -> NoReturn:
+    def single_plot(values1: List[float], plotter_parameters: PlotterParameters) -> None:
         fig, axes = plt.subplots()
         x = np.arange(0, len(values1), 1)
         y = np.asarray(values1)
@@ -70,9 +82,9 @@ class Plotter(object):
         plt.show()
 
     @staticmethod
-    def multi_plot(dict_values: Dict[AnyStr, List[torch.Tensor]],
+    def multi_plot(dict_values: Dict[AnyStr, List[np.array]],
                    plotter_params_list: List[PlotterParameters],
-                   plot_title: Optional[AnyStr]) -> NoReturn:
+                   plot_title: Optional[AnyStr]) -> None:
         """
         Generic 1, 2, or 3 sub-plots with one variable value
         @param dict_values: Dictionary of array of floating values
@@ -95,7 +107,7 @@ class Plotter(object):
         fig.savefig(f"{Plotter.test_images_folder}/plot_{plot_title}.png")
 
     @staticmethod
-    def plot(values: List[List[float]], labels: List[AnyStr], plotter_parameters: PlotterParameters) -> NoReturn:
+    def plot(values: List[List[float]], labels: List[AnyStr], plotter_parameters: PlotterParameters) -> None:
         """
         Display values from multiple variables  on a single plot
         @param values: List of array of values
@@ -138,7 +150,9 @@ class Plotter(object):
     """ ------------ Helper private methods --------------- """
 
     @staticmethod
-    def __two_plot(values1: List[float], values2: List[float], plotter_parameters_list: List[PlotterParameters]) -> NoReturn:
+    def __two_plot(values1: List[float],
+                   values2: List[float],
+                   plotter_parameters_list: List[PlotterParameters]) -> None:
         assert len(plotter_parameters_list) == 2, f'Number of plots {plotter_parameters_list.count} should be 2'
         assert len(values1) == len(values2), f'Number of values1 {len(values1)} != number values2 {len(values2)}'
 
@@ -154,7 +168,7 @@ class Plotter(object):
             values1: List[float],
             values2: List[float],
             values3: List[float],
-            plotter_parameters_list: List[PlotterParameters]) -> NoReturn:
+            plotter_parameters_list: List[PlotterParameters]) -> None:
         assert len(plotter_parameters_list) == 3, f'Number of plots {plotter_parameters_list.count} should be 3'
         assert len(values1) == len(values2), f'Size of features {len(values1)} should be == Size labels {len(values2)}'
         assert len(values1) == len(values3), f'Size of features {len(values1)} should be == Size z {len(values3)}'
@@ -173,7 +187,7 @@ class Plotter(object):
             torch_values: List[torch.Tensor],
             axes,
             index: int,
-            last_plot: bool) -> NoReturn:
+            last_plot: bool) -> None:
         values = [value.cpu().float() for value in torch_values]
         y = np.asarray(values)
         axes[index].plot(x, y)

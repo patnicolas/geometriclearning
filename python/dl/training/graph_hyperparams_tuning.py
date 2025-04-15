@@ -15,7 +15,7 @@ from dl.block.mlp_block import MLPBlock
 from dl.model.gconv_model import GConvModel
 import torch
 from torch_geometric.data import Data
-from dl.training.training_summary import TrainingSummary
+from dl.training.training_monitor import TrainingMonitor
 from plots.plotter import PlotterParameters
 from dl.training.hyper_params import HyperParams
 from metric.metric import Metric
@@ -80,14 +80,14 @@ def define_model(trial) -> (GConvModel, torch.Tensor):
     return gconv_model, class_weights
 
 def training_env(trail, model: GConvModel, class_weights: torch.Tensor) -> \
-            (Dict[AnyStr, BuiltInMetric], TrainingSummary, List[PlotterParameters], HyperParams):
+            (Dict[AnyStr, BuiltInMetric], TrainingMonitor, List[PlotterParameters], HyperParams):
     metric_labels = {
         Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, encoding_len=-1, is_weighted=True),
         Metric.precision_label: BuiltInMetric(MetricType.Precision, encoding_len=-1, is_weighted=True),
         Metric.recall_label: BuiltInMetric(MetricType.Recall, encoding_len=-1, is_weighted=True)
     }
     num_classes = model.mlp_blocks[-1].get_out_features()
-    training_summary = TrainingSummary(patience=2, min_diff_loss=-0.002, early_stopping_enabled=True)
+    training_summary = TrainingMonitor(patience=2, min_diff_loss=-0.002, early_stopping_enabled=True)
     parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                   for label, _ in metric_labels.items()]
 
@@ -127,7 +127,7 @@ def objective(trial) -> float:
 
     network = GNNTraining(hyper_params=hyper_params,
                           training_summary=training_summary,
-                          metrics=metrics)
+                          metrics_attributes=metrics)
     num_neighbors_1 = trial.suggest_categorical('num_neighbors_1', [4, 8, 12, 24])
     num_hops = trial.suggest_categorical('num_hops', [2, 3])
     batch_size = trial.suggest_categorical('batch_size', [128, 512])

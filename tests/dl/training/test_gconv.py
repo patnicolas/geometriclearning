@@ -4,7 +4,7 @@ from dataset import DatasetException
 from dataset.graph.graph_data_loader import GraphDataLoader
 from dl.training.gnn_training import GNNTraining
 from dl.training.exec_config import ExecConfig
-from dl.training.training_summary import TrainingSummary
+from dl.training.training_monitor import TrainingMonitor
 from plots.plotter import PlotterParameters
 from dl import GNNException, DLException, TrainingException
 from dl.model.gconv_model import GConvModel
@@ -88,7 +88,7 @@ class GConvTest(unittest.TestCase):
                 Metric.recall_label: BuiltInMetric(MetricType.Recall, encoding_len=-1, is_weighted=True)
             }
             num_classes = flickr_model.mlp_blocks[-1].get_out_features()
-            training_summary = TrainingSummary(patience=2, min_diff_loss=-0.002, early_stopping_enabled=True)
+            training_summary = TrainingMonitor(patience=2, min_diff_loss=-0.002, early_stopping_enabled=True)
             parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                           for label, _ in metric_labels.items()]
 
@@ -116,7 +116,7 @@ class GConvTest(unittest.TestCase):
 
             network = GNNTraining(hyper_params=hyper_parameters,
                                   training_summary=training_summary,
-                                  metrics=metric_labels,
+                                  metrics_attributes=metric_labels,
                                   exec_config=ExecConfig.default(),
                                   plot_parameters=parameters)
             network.train(model_id='Graph Conv Flickr',

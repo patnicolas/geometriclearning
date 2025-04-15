@@ -3,12 +3,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from dl.training.neural_training import NeuralTraining
 from dl.training.hyper_params import HyperParams
-from dl.training.training_summary import TrainingSummary
 from dl import GNNException
+from metric.performance_metrics import PerformanceMetrics
 from plots.plotter import PlotterParameters
-from metric.metric import Metric
+from metric.metric_type import MetricType
+from metric.built_in_metric import BuiltInMetric
 from dl.training.exec_config import ExecConfig
-from typing import Dict, AnyStr, Optional, List
+from dl.training.early_stopping import EarlyStopping
+from typing import Dict, AnyStr, Optional, List, Any, Self
 import torch.nn as nn
 import torch
 import torch_geometric
@@ -20,31 +22,55 @@ class GNNTraining(NeuralTraining):
 
     def __init__(self,
                  hyper_params: HyperParams,
-                 training_summary: TrainingSummary,
-                 metrics: Dict[AnyStr, Metric],
+                 metrics_attributes: Dict[MetricType, BuiltInMetric],
+                 early_stopping: Optional[EarlyStopping] = None,
                  exec_config: ExecConfig = ExecConfig.default(),
                  plot_parameters: Optional[List[PlotterParameters]] = None):
         """
         Default constructor for this variational auto-encoder
         @param hyper_params:  Hyper-parameters for training and optimizatoin
         @type hyper_params: HyperParams
-        @param training_summary: Training monitoring
-        @type training_summary: TrainingSummary
-        @param metrics: Dictionary of metrics and values
-        @type metrics: Dictionary
+        @param early_stopping: Early stopping conditions
+        @type early_stopping: EarlyStopping
+        @param metrics_attributes: Dictionary of metrics and values
+        @type metrics_attributes: Dictionary
         @param exec_config: Configuration for optimization of execution of training
         @type exec_config: ExecConfig
         @param plot_parameters: Optional plotting parameters
         @type plot_parameters: List[PlotterParameters]
         """
         super(GNNTraining, self).__init__(hyper_params,
-                                          training_summary,
-                                          metrics,
+                                          metrics_attributes,
+                                          early_stopping,
                                           exec_config,
                                           plot_parameters)
 
-    def __repr__(self) -> str:
-        return repr(self.hyper_params)
+    @classmethod
+    def build(cls, training_attributes: Dict[AnyStr, Any]) -> Self:
+        hyper_params = HyperParams.build(training_attributes)
+        metric_attributes = PerformanceMetrics.build(training_attributes)
+        early_stopping = EarlyStopping.build(training_attributes)
+        plot_parameter_attrs = training_attributes['plot_parameters']
+        plot_parameters = [PlotterParameters(0,
+                                             plot_param['x_label'],
+                                             plot_param['y_label'],
+                                             plot_param['title'])for plot_param in plot_parameter_attrs]
+        return cls(hyper_params=hyper_params,
+                   metrics_attributes=metric_attributes.metrics,
+                   early_stopping=early_stopping,
+                   plot_parameters=plot_parameters)
+
+    def __str__(self) -> str:
+        metrics_str = '\n'.join([f'   {str(v)}' for _, v in self.performance_metrics.metrics.items()])
+        plotter_str = '\n'.join([str(plot_param) for plot_param in self.plot_parameters]
+                                if self.plot_parameters is not None else 'None')
+
+        return (f'\nHyper-parameters:\n{repr(self.hyper_params)}'
+                f'\nPerformance Metrics\n{metrics_str}'
+                f'\nEarly stop condition{self.early_stopping}'
+                f'\nPlotting\n{plotter_str}')
+
+
 
     def train(self,
               model_id: AnyStr,
@@ -78,25 +104,23 @@ class GNNTraining(NeuralTraining):
         # Train and evaluation process
         for epoch in range(self.hyper_params.epochs):
             # Set training mode and execute training
-            train_loss = self.__train(neural_model, epoch, train_loader)
+            self.__train(neural_model, epoch, train_loader)
 
             # Set mode and execute evaluation
             if val_enabled:
-                eval_metrics = self.__val(neural_model, epoch, val_loader)
-                self.training_summary(epoch, train_loss, eval_metrics)
+                self.__val(neural_model, epoch, val_loader)
             self.exec_config.apply_monitor_memory()
 
         # Generate summary
-        self.training_summary.summary(output_file_name)
+        self.performance_metrics.summary(output_file_name)
         print(f"\nMPS usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
 
     """ -----------------------------  Private helper methods ------------------------------  """
 
-    def __train(self, neural_model: nn.Module, epoch: int, train_loader: DataLoader) -> torch.Tensor:
+    def __train(self, neural_model: nn.Module, epoch: int, train_loader: DataLoader) -> None:
         neural_model.train()
         total_loss = 0.0
         optimizer = self.hyper_params.optimizer(neural_model)
-        num_records = len(train_loader)
         model = neural_model.to(self.target_device)
 
         for idx, data in tqdm(enumerate(train_loader), total=len(train_loader)):
@@ -120,12 +144,11 @@ class GNNTraining(NeuralTraining):
                 idx += 1
             except (RuntimeError | AttributeError | ValueError | Exception) as e:
                 raise GNNException(str(e))
-        return torch.tensor(total_loss / num_records)
 
-    def __val(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, torch.Tensor]:
+    def __val(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> None:
+        import numpy as np
         total_loss = 0
         model.eval()
-        metric_collector = {}
 
         # No need for computing gradient for evaluation (NO back-propagation)
         with torch.no_grad():
@@ -145,9 +168,7 @@ class GNNTraining(NeuralTraining):
                     np_labels = data.y.cpu().numpy()
 
                     # Update the metrics
-                    for key, metric in self.metrics.items():
-                        value = metric(np_predicted, np_labels)
-                        metric_collector[key] = value
+                    self.performance_metrics.update_performance_values(np_predicted, np_labels)
 
                     # Compute and accumulate the loss
                     total_loss += raw_loss.item()
@@ -156,5 +177,4 @@ class GNNTraining(NeuralTraining):
                     raise GNNException(str(e))
 
         eval_loss = total_loss / count
-        metric_collector[Metric.eval_loss_label] = torch.tensor(eval_loss)
-        return metric_collector
+        self.performance_metrics.update_metric(MetricType.EvalLoss, np.array(eval_loss))

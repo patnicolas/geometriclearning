@@ -4,7 +4,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 import torch
 from torch import optim
 from torch import nn
-from typing import AnyStr, Optional, List
+from typing import AnyStr, Optional, List, Dict, Any, Self
 from dataset import DatasetException
 import logging
 
@@ -62,6 +62,39 @@ class HyperParams(object):
         self.optim_label = optim_label
         self.drop_out = drop_out
         torch.manual_seed(42)
+
+    @classmethod
+    def build(cls, attributes: Dict[AnyStr, Any]) -> Self:
+        """
+        Alternative constructor that relies on dictionary of attributes
+        @param attributes: Dictionary of attributes of hyper-parameters
+        @type attributes: Dict[AnyStr, Any]
+        @return: Instance of this class, HyperParam
+        @rtype: HyperParam
+        """
+        assert len(attributes), 'Attributes for hyper parameters are undefined'
+
+        learning_rate = attributes.get('learning_rate', 0.001)
+        epochs = attributes.get('epochs', 24)
+        batch_size = attributes.get('batch_size', 64)
+        loss_function = attributes.get('loss_function', nn.CrossEntropyLoss())
+        momentum = attributes.get('momentum', 0.98)
+        encoding_len = attributes.get('encoding_len', -1)
+        train_eval_ratio = attributes.get('train_eval_ratio', 0.9)
+        weight_initialization = attributes.get('weight_initialization', 'xavier')
+        optim_label = attributes.get('optim_label', 'adam')
+        drop_out =  attributes.get('drop_out', 0.0)
+
+        return cls(learning_rate,
+                   momentum,
+                   epochs,
+                   optim_label,
+                   batch_size,
+                   loss_function,
+                   drop_out,
+                   train_eval_ratio,
+                   encoding_len,
+                   weight_initialization)
 
     @staticmethod
     def test_conversion(label_conversion_func) -> torch.Tensor:
@@ -129,10 +162,10 @@ class HyperParams(object):
         return optimizer
 
     def __repr__(self) -> str:
-        return f'   Learning rate: {self.learning_rate}\n   Momentum: {self.momentum}' \
-               f'\n   Number of epochs: {self.epochs}\n   Batch size: {self.batch_size}'\
-                f'\n   Optimizer: {self.optim_label}\n   Loss function: {repr(self.loss_function)}'\
-                f'\n   Drop out rate: {self.drop_out}\n   Train-eval split ratio: {self.train_eval_ratio}'
+        return f'   Learning rate:      {self.learning_rate}\n   Momentum:           {self.momentum}' \
+               f'\n   Number of epochs:   {self.epochs}\n   Batch size:         {self.batch_size}'\
+               f'\n   Optimizer:          {self.optim_label}\n   Loss function:      {repr(self.loss_function)}'\
+               f'\n   Drop out rate:      {self.drop_out}\n   Train split ratio:  {self.train_eval_ratio}'
 
     def get_label(self) -> str:
         return f'lr.{self.learning_rate}-bs.{self.batch_size}'

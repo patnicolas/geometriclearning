@@ -28,15 +28,14 @@ class LossFunctionPlot(object):
         return NumberPlane(x_range=[0, self.max_x],
                            y_range=[0, self.max_y],
                            y_length=5,
-                           x_length=5,
+                           x_length=4.5,
                            background_line_style=background_line_style).add_coordinates().shift(RIGHT*4)
 
     def get_graph(self) -> (ParametricFunction, MathTex):
         plane = self.get_plane()
         graph = plane.plot(function=self.loss, x_range=[0, self.max_x], color=YELLOW, colorscale_axis=2)
-        graph_lab = MathTex(self.func_label).next_to(graph, UP, buff=0.15).set_color(WHITE).scale(0.8)
+        graph_lab = MathTex(self.func_label).next_to(graph, UP, buff=0.1).set_color(WHITE).scale(0.82)
         return plane, graph, graph_lab
-
 
 
 class DynamicPlotScene(Scene):
@@ -63,3 +62,4 @@ class DynamicPlotScene(Scene):
 if __name__ == '__main__':
     scene = DynamicPlotScene()
     scene.construct()
+

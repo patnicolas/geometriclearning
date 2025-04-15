@@ -3,11 +3,12 @@ import unittest
 from dl.model.mlp_model import MLPModel
 from dl.block.mlp_block import MLPBlock
 from dl.training.hyper_params import HyperParams
-from dl.training.training_summary import TrainingSummary
+from dl.training.training_monitor import TrainingMonitor
 from plots.plotter import PlotterParameters
 from dl.training.neural_training import NeuralTraining
-from metric.metric import Metric
 from dataset.tensor.labeled_loader import LabeledLoader
+from metric.metric_type import MetricType
+from metric.built_in_metric import BuiltInMetric
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from torch import nn
@@ -39,8 +40,12 @@ class NeuralTrainingTest(unittest.TestCase):
             loss_function=nn.CrossEntropyLoss(),
             drop_out=0.2,
             train_eval_ratio=0.9)
-        metric_labels = [Metric.train_loss_label, Metric.eval_loss_label, Metric.accuracy_label]
-        network_training = NeuralTraining.build(hyper_params, metric_labels)
+
+        metrics_attributes = {MetricType.Accuracy: BuiltInMetric(metric_type=MetricType.Accuracy),
+                              MetricType.Precision: BuiltInMetric(metric_type=MetricType.Precision)}
+        network_training = NeuralTraining(hyper_params, metrics_attributes)
+        print(str(network_training))
+
 
     @unittest.skip('Ignored')
     def test_train_wages(self):
@@ -66,23 +71,20 @@ class NeuralTrainingTest(unittest.TestCase):
             loss_function=nn.BCELoss(),
             drop_out=0.0,
             train_eval_ratio=0.9)
-        patience = 2
-        min_diff_loss = -0.002
-        early_stopping_enabled = True
-        training_summary = TrainingSummary(patience, min_diff_loss, early_stopping_enabled)
-        metric_labels = {
-            Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, encoding_len=-1, is_weighted=True),
-            Metric.precision_label: BuiltInMetric(MetricType.Precision, encoding_len=-1, is_weighted=True)
+
+        metric_attributes = {
+            MetricType.Accuracy: BuiltInMetric(MetricType.Accuracy, encoding_len=-1, is_weighted=True),
+            MetricType.Precision: BuiltInMetric(MetricType.Precision, encoding_len=-1, is_weighted=True)
         }
-        parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
-                      for label, _ in metric_labels.items()]
+        parameters = [PlotterParameters(0, x_label='x', y_label='y', title=k.value, fig_size=(11, 7))
+                      for k, _ in metric_attributes.items()]
 
         network = NeuralTraining(
-            hyper_parameters,
-            training_summary,
-            metric_labels,
-            None,
-            parameters)
+            hyper_params=hyper_parameters,
+            metrics_attributes=metric_attributes,
+            early_stopping=None,
+            exec_config=None,
+            plot_parameters=parameters)
         filename = '../../../data/misc/wages_cleaned.csv'
         df = pd.DataFrame(filename)
         df = df[['Reputation', 'Age', 'Caps', 'Apps', 'Salary']]
@@ -125,7 +127,7 @@ class NeuralTrainingTest(unittest.TestCase):
         patience = 2
         min_diff_loss = -0.001
         early_stopping_enabled = True
-        training_summary = TrainingSummary(patience, min_diff_loss, early_stopping_enabled)
+        training_summary = TrainingMonitor(patience, min_diff_loss, early_stopping_enabled)
         metric_labels = {
             Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, encoding_len=-1, is_weighted=True),
             Metric.precision_label: BuiltInMetric(MetricType.Precision, encoding_len=-1, is_weighted=True),

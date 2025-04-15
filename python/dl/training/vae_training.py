@@ -6,7 +6,7 @@ from abc import ABC
 import torch.nn as nn
 from dl.training.neural_training import NeuralTraining
 from dl.training.hyper_params import HyperParams
-from dl.training.training_summary import TrainingSummary
+from dl.training.training_monitor import TrainingMonitor
 from plots.plotter import PlotterParameters
 from metric.metric import Metric
 from metric.built_in_metric import create_metric_dict
@@ -38,8 +38,8 @@ class VAETraining(NeuralTraining, ABC):
 
     def __init__(self,
                  hyper_params: HyperParams,
-                 training_summary: TrainingSummary,
-                 metrics: Dict[AnyStr, Metric],
+                 training_summary: TrainingMonitor,
+                 metrics_attributes: Dict[AnyStr, Metric],
                  exec_config: ExecConfig,
                  plot_parameters: Optional[List[PlotterParameters]] = None):
         """
@@ -47,9 +47,9 @@ class VAETraining(NeuralTraining, ABC):
         @param hyper_params:  Hyper-parameters for training and optimizatoin
         @type hyper_params: HyperParams
         @param training_summary: Training monitoring
-        @type training_summary: TrainingSummary
-        @param metrics: Dictionary of metrics and values
-        @type metrics: Dictionary
+        @type training_summary: TrainingMonitor
+        @param metrics_attributes: Dictionary of metrics and values
+        @type metrics_attributes: Dictionary
         @param exec_config: Configuration for optimization of execution of training
         @type exec_config: ExecConfig
         @param plot_parameters: Optional plotting parameters
@@ -57,7 +57,7 @@ class VAETraining(NeuralTraining, ABC):
         """
         super(VAETraining, self).__init__(hyper_params,
                                           training_summary,
-                                          metrics,
+                                          metrics_attributes,
                                           exec_config,
                                           plot_parameters)
 
@@ -78,8 +78,8 @@ class VAETraining(NeuralTraining, ABC):
         plot_parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                            for label, _ in metrics_dict.items()]
         return cls(hyper_params=hyper_params,
-                   training_summary=TrainingSummary(patience=2, min_diff_loss=-0.001, early_stopping_enabled=True),
-                   metrics=metrics_dict,
+                   training_summary=TrainingMonitor(patience=2, min_diff_loss=-0.001, early_stopping_enabled=True),
+                   metrics_attributes=metrics_dict,
                    exec_config=ExecConfig.default(),
                    plot_parameters=plot_parameters)
 

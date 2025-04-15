@@ -3,15 +3,17 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import torch
 from torch.utils.data import DataLoader
-from abc import abstractmethod
 from typing import AnyStr, Dict, Self, List, Optional
 from dl.training.exec_config import ExecConfig
 from dl import TrainingException, ValidationException
 from dl.training.hyper_params import HyperParams
-from dl.training.training_summary import TrainingSummary
+from metric.built_in_metric import BuiltInMetric
 from plots.plotter import PlotterParameters
 from metric.metric import Metric
-from metric.built_in_metric import create_metric_dict
+from metric.metric_type import MetricType
+from metric.performance_metrics import PerformanceMetrics
+from dl.training.early_stopping import EarlyStopping
+import numpy as np
 import torch.nn as nn
 import logging
 logger = logging.getLogger('dl.NeuralNet')
@@ -31,18 +33,18 @@ logger = logging.getLogger('dl.NeuralNet')
 class NeuralTraining(object):
     def __init__(self,
                  hyper_params: HyperParams,
-                 training_summary: TrainingSummary,
-                 metrics: Dict[AnyStr, Metric],
+                 metrics_attributes: Dict[MetricType, BuiltInMetric],
+                 early_stopping: Optional[EarlyStopping] = None,
                  exec_config: Optional[ExecConfig] = None,
                  plot_parameters: Optional[List[PlotterParameters]] = None) -> None:
         """
         Constructor for the training and execution of any neural network.
         @param hyper_params: Hyper-parameters associated with the training of th emodel
         @type hyper_params: HyperParams
-        @param training_summary: Dynamic condition for early stop in training
-        @type training_summary: TrainingSummary
-        @param metrics: Dictionary of metric {metric_name: build_in_metric instance}
-        @type metrics: Dict[AnyStr, Metric]
+        @param metrics_attributes: Dictionary of metric {metric_name: build_in_metric instance}
+        @type metrics_attributes: Dict[AnyStr, Metric]
+        @param early_stopping: Optional early stopping conditions
+        @type early_stopping: EarlyStopping
         @param exec_config: Configuration for optimization of execution of training
         @type exec_config: ExecConfig
         @param plot_parameters: Parameters for plotting metrics, training and test losses
@@ -50,42 +52,10 @@ class NeuralTraining(object):
         """
         self.hyper_params = hyper_params
         _, self.target_device = exec_config.apply_device()
-
-        self.training_summary = training_summary
+        self.early_stopping = early_stopping
         self.plot_parameters = plot_parameters
         self.exec_config = exec_config
-        self.metrics: Dict[AnyStr, Metric] = metrics
-
-    @classmethod
-    def build(cls,
-              hyper_params: HyperParams,
-              metric_labels: List[AnyStr],
-              title_attribute: Optional[AnyStr] = None) -> Self:
-        """
-        Simplified constructor for the training and execution of any neural network.
-        @param hyper_params: Hyperparameters associated with the training of th emodel
-        @type hyper_params: HyperParams
-        @param metric_labels: Labels for metric to be used
-        @type metric_labels: List[str]
-        @param title_attribute: Optional comments or attributes to be added to the title for display
-        @type title_attribute: AnyStr
-        """
-
-        # Create metrics
-        metrics_dict = create_metric_dict(metric_labels, hyper_params.encoding_len)
-        # Initialize the plotting parameters
-        plot_parameters = [PlotterParameters(0,
-                                             x_label='x',
-                                             y_label='y',
-                                             title='Plot' if title_attribute is None else title_attribute,
-                                             fig_size=(11, 8))
-                           for label, _ in metrics_dict.items()]
-
-        return cls(hyper_params=hyper_params,
-                   training_summary=TrainingSummary(patience=2, min_diff_loss=-0.001, early_stopping_enabled=True),
-                   metrics=metrics_dict,
-                   exec_config=ExecConfig.default(),
-                   plot_parameters=plot_parameters)
+        self.performance_metrics = PerformanceMetrics(metrics_attributes)
 
     def train(self,
               model_id: AnyStr,
@@ -113,15 +83,14 @@ class NeuralTraining(object):
         # Train and evaluation process
         for epoch in range(self.hyper_params.epochs):
             # Set training mode and execute training
-            train_loss = self.__train(neural_model, epoch, train_loader)
+            self.__train(neural_model, epoch, train_loader)
 
             # Set mode and execute evaluation
-            eval_metrics = self.__val(neural_model, epoch, eval_loader)
-            self.training_summary(epoch, train_loss, eval_metrics)
+            self.__val(neural_model, epoch, eval_loader)
             self.exec_config.apply_monitor_memory()
 
         # Generate summary
-        self.training_summary.summary(output_file_name)
+        self.performance_metrics.summary(output_file_name)
         print(f"\nMPS usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
 
     def __repr__(self) -> str:
@@ -129,7 +98,7 @@ class NeuralTraining(object):
 
     """ ------------------------------------   Private methods --------------------------------- """
 
-    def __train(self, neural_model: nn.Module, epoch: int, train_loader: DataLoader) -> float:
+    def __train(self, neural_model: nn.Module, epoch: int, train_loader: DataLoader) -> None:
         total_loss = 0.0
 
         # Initialize the gradient for the optimizer
@@ -167,14 +136,14 @@ class NeuralTraining(object):
             except ValueError as e:
                 raise TrainingException(f'{str(e)}, features: {str(features)}')
             except Exception as e:
-                 raise TrainingException(str(e))
-            return total_loss / len(train_loader)
+                raise TrainingException(str(e))
+            average_loss = total_loss / len(train_loader)
+            self.performance_metrics.update_metric(MetricType.TrainLoss, np.array(average_loss))
 
-    def __val(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
+    def __val(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> None:
         total_loss = 0
         model.eval()
         loss_func = self.hyper_params.loss_function
-        metric_collector = {}
 
         _, torch_device = self.exec_config.apply_device()
 
@@ -197,9 +166,7 @@ class NeuralTraining(object):
                     np_labels = labels.cpu().numpy()
 
                     # Update the metrics
-                    for key, metric in self.metrics.items():
-                        value = metric(np_predicted, np_labels)
-                        metric_collector[key] = value
+                    self.performance_metrics.update_performance_values(np_predicted, np_labels)
 
                     # Compute and accumulate the loss
                     loss = loss_func(predicted, labels)
@@ -215,6 +182,5 @@ class NeuralTraining(object):
                     raise ValidationException(str(e))
 
         eval_loss = total_loss / count
-        metric_collector[Metric.eval_loss_label] = eval_loss
-        return metric_collector
+        self.performance_metrics.update_metric(MetricType.EvalLoss, np.array(eval_loss))
 

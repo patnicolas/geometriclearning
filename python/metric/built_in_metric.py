@@ -12,7 +12,7 @@ logger = logging.getLogger('metric.BuiltInMetric')
 
 
 class BuiltInMetric(Metric):
-    def __init__(self, metric_type: MetricType, encoding_len: int, is_weighted: bool = False):
+    def __init__(self, metric_type: MetricType, encoding_len: int = -1, is_weighted: bool = False):
         """
         Constructor for the accuracy metrics
         @param metric_type: Metric type (Accuracy,....)
@@ -27,8 +27,8 @@ class BuiltInMetric(Metric):
         self.metric_type = metric_type
         self.encoding_len = encoding_len
 
-    def __repr__(self) -> AnyStr:
-        return f'Metric: {self.metric_type} weighted: {self.is_weighted} Encoded: {self.encoding_len}'
+    def __str__(self) -> AnyStr:
+        return f'{self.metric_type.value}, Weighted: {self.is_weighted}, Encoding length: {self.encoding_len}'
 
     def from_numpy(self, predicted: np.array, labeled: np.array) -> np.array:
         """
@@ -63,11 +63,11 @@ class BuiltInMetric(Metric):
 
             case MetricType.Recall:
                 return recall_score(_labeled, _predicted, average=None, zero_division=1.0) if self.is_weighted \
-                        else precision_score(_labeled, _predicted, average='macro', zero_division=1.0)
+                        else recall_score(_labeled, _predicted, average='macro', zero_division=1.0)
 
             case MetricType.F1:
                 return f1_score(_labeled, _predicted, average=None, zero_division=1.0) if self.is_weighted \
-                        else precision_score(_labeled, _predicted, average=None, zero_division=1.0)
+                        else f1_score(_labeled, _predicted, average=None, zero_division=1.0)
 
             case _:
                 raise MetricException(f'Metric type {self.metric_type} is not supported')
@@ -113,43 +113,3 @@ class BuiltInMetric(Metric):
         # Need transfer prediction and labels to CPU for using numpy
         np_metric = self.from_numpy(predicted, labels)
         return torch.tensor(np_metric)
-
-
-def create_metric_dict(metric_labels: List[AnyStr],
-                       encoding_len: int,
-                       is_weighted: bool = False) -> Dict[AnyStr, BuiltInMetric]:
-    """
-    Generate dynamically the metric dictionary {label : BuiltInMetric } from length of encoding and list of metric labels
-    @param metric_labels: List of labels of metrics to be collected during training
-    @type metric_labels: List
-    @param encoding_len: Length of encoding for all the metrics
-    @type encoding_len: int
-    @param is_weighted: Specify if features or classes are weighted in the computation of metric
-    @type is_weighted: bool
-    @return Dictionary of metrics
-    @rtype Dict
-    """
-    metrics = {}
-    assert metric_labels is not None and len(metric_labels) > 0
-
-    for metric_label in metric_labels:
-        match metric_label:
-            case Metric.accuracy_label:
-                metrics[Metric.accuracy_label] = BuiltInMetric(MetricType.Accuracy,
-                                                               encoding_len=encoding_len,
-                                                               is_weighted=is_weighted)
-            case Metric.precision_label:
-                metrics[Metric.precision_label] = BuiltInMetric(MetricType.Precision,
-                                                                encoding_len=encoding_len,
-                                                                is_weighted=is_weighted)
-            case Metric.recall_label:
-                metrics[Metric.recall_label] = BuiltInMetric(MetricType.Recall,
-                                                             encoding_len=encoding_len,
-                                                             is_weighted=is_weighted)
-            case Metric.f1_label:
-                metrics[Metric.f1_label] = BuiltInMetric(MetricType.F1,
-                                                         encoding_len=encoding_len,
-                                                         is_weighted=is_weighted)
-            case _:
-                logger.warning(f'Metric {metric_label} is not supported')
-    return metrics

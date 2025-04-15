@@ -7,8 +7,8 @@ from dl.training.hyper_params import HyperParams
 from dl.training.gnn_training import GNNTraining
 from dl.model.gnn_base_model import GNNBaseModel
 from dataset.graph.graph_data_loader import GraphDataLoader
-from dl.training.training_summary import TrainingSummary
-from metric.metric import Metric
+from metric.metric_type import MetricType
+from metric.built_in_metric import BuiltInMetric
 import torch.nn as nn
 import os
 from typing import Dict, Any, AnyStr
@@ -22,7 +22,39 @@ class GNNTrainingTest(unittest.TestCase):
     import torch
     torch.set_default_dtype(torch.float32)
 
-    # @unittest.skip('Ignore')
+    def test_build(self):
+        training_attributes = {
+            'learning_rate': 0.001,
+            'batch_size': 64,
+            'loss_function': nn.CrossEntropyLoss(),
+            'momentum': 0.98,
+            'encoding_len': -1,
+            'train_eval_ratio': 0.9,
+            'weight_initialization': 'xavier',
+            'optim_label': 'adam',
+            'drop_out': 0.0,
+            'patience': 2,
+            'min_diff_loss': 0.02,
+            'Accuracy': False,
+            'Precision': True,
+            'Recall': True,
+            'plot_parameters': [
+                {
+                    'title': 'Accuracy',
+                    'x_label': 'x1',
+                    'y_label': 'accuracy'
+                },
+                {
+                    'title': 'Precision',
+                    'x_label': 'epochs',
+                    'y_label': 'precision'
+                }
+            ]
+        }
+        gnn_training = GNNTraining.build(training_attributes)
+        print(gnn_training)
+
+    @unittest.skip('Ignore')
     def test_train_random_walk_loader(self):
         from torch_geometric.datasets.flickr import Flickr
 
@@ -30,7 +62,13 @@ class GNNTrainingTest(unittest.TestCase):
             path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
             _dataset = Flickr(path)
             _data = _dataset[0]
-            metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
+
+            metric_labels = {
+                MetricType.Accuracy: BuiltInMetric(MetricType.Accuracy, encoding_len=-1, is_weighted=True),
+                MetricType.Precision: BuiltInMetric(MetricType.Precision, encoding_len=-1, is_weighted=True),
+                MetricType.Recall: BuiltInMetric(MetricType.Recall, encoding_len=-1, is_weighted=True)
+            }
+
             hyper_parameters = HyperParams(
                 lr=0.0005,
                 momentum=0.90,
@@ -49,17 +87,15 @@ class GNNTrainingTest(unittest.TestCase):
                 'batch_size': 4096,
                 'sample_coverage': 128
             }
-            network = GNNTraining.build(hyper_params=hyper_parameters,
-                                        metric_labels=metric_labels,
-                                        title_attribute=show(attrs))
+            network = GNNTraining(hyper_params=hyper_parameters, metrics_attributes=metric_labels)
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
-            graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
+            graph_data_loader = GraphDataLoader(dataset_name='Flickr', loader_attributes=attrs)
             train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.training_summary.metrics['Accuracy']
+            accuracy_list = network.performance_metrics.performance_values[MetricType.Accuracy]
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GNNException as e:
@@ -71,6 +107,7 @@ class GNNTrainingTest(unittest.TestCase):
         except Exception as e:
             print(f'Error: {str(e)}')
             self.assertTrue(False)
+
 
     @unittest.skip('Ignore')
     def test_train_neighbor_loader_1(self):
@@ -492,15 +529,12 @@ class GNNTrainingTest(unittest.TestCase):
                 'sample_coverage': 100,
                 'batch_size': 1024
             }
-            graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
-            num_nodes = graph_data_loader.draw_sample(
-                first_node_index=10,
-                last_node_index=15,
-                node_color='orange',
-                node_size=22,
-                label=f'Flickr - GraphSAINTNodeSampler\nnum_steps:256,batch_size:1024,range:[10,28]')
-            print(f'Number of nodes {num_nodes}')
-            self.assertTrue(num_nodes > 0)
+            graph_data_loader = GraphDataLoader(dataset_name='Flickr',
+                                                loader_attributes=attrs,
+                                                num_subgraph_nodes=24,
+                                                start_index=6)
+            print(f'Number of nodes {_data.num_nodes}')
+            self.assertTrue(_data.num_nodes > 0)
         except DatasetException as e:
             print(str(e))
             self.assertTrue(False)
@@ -511,15 +545,15 @@ class GNNTrainingTest(unittest.TestCase):
 
         try:
             file_neighbor_loader = 'Flickr: NeighborLoader,neighbors:[6, 4],batch:1024'
-            neighbor_loader_dict = TrainingSummary.load_summary(TrainingSummary.output_folder, file_neighbor_loader)
+            neighbor_loader_dict = TrainingMonitor.load_summary(TrainingMonitor.output_folder, file_neighbor_loader)
             accuracy_neighbor = [float(x) for x in neighbor_loader_dict['Accuracy']]
 
             file_random_loader = 'Flickr: RandomNodeLoader,num_parts=256'
-            random_loader_dict = TrainingSummary.load_summary(TrainingSummary.output_folder, file_random_loader)
+            random_loader_dict = TrainingMonitor.load_summary(TrainingMonitor.output_folder, file_random_loader)
             accuracy_random = [float(x) for x in random_loader_dict['Accuracy']]
 
             file_graph_saint_random_walk_loader = 'GraphSAINTRandomWalkSampler,walk_length:3,steps:12,batch:4096'
-            graph_saint_random_walk_dict = TrainingSummary.load_summary(TrainingSummary.output_folder,
+            graph_saint_random_walk_dict = TrainingMonitor.load_summary(TrainingMonitor.output_folder,
                                                                         file_graph_saint_random_walk_loader)
             accuracy_graph_saint_random_walk = [float(x) for x in graph_saint_random_walk_dict['Accuracy']]
             plotter_params = PlotterParameters(0,
@@ -540,15 +574,15 @@ class GNNTrainingTest(unittest.TestCase):
         from plots.plotter import PlotterParameters, Plotter
 
         file_neighbor_loader = 'Flickr: NeighborLoader,neighbors:[6, 4],batch:1024'
-        neighbor_loader_dict = TrainingSummary.load_summary(TrainingSummary.output_folder, file_neighbor_loader)
+        neighbor_loader_dict = TrainingMonitor.load_summary(TrainingMonitor.output_folder, file_neighbor_loader)
         precision_neighbor = [float(x) for x in neighbor_loader_dict['Precision']]
 
         file_random_loader = 'Flickr: RandomNodeLoader,num_parts=256'
-        random_loader_dict = TrainingSummary.load_summary(TrainingSummary.output_folder, file_random_loader)
+        random_loader_dict = TrainingMonitor.load_summary(TrainingMonitor.output_folder, file_random_loader)
         precision_random = [float(x) for x in random_loader_dict['Precision']]
 
         file_graph_saint_random_walk_loader = 'Flickr: GraphSAINTRandomWalkSampler,walk_length:3,steps:12,batch:4096'
-        graph_saint_random_walk_dict = TrainingSummary.load_summary(TrainingSummary.output_folder,
+        graph_saint_random_walk_dict = TrainingMonitor.load_summary(TrainingMonitor.output_folder,
                                                                     file_graph_saint_random_walk_loader)
         precision_graph_saint_random_walk = [float(x) for x in graph_saint_random_walk_dict['Precision']]
         plotter_params = PlotterParameters(0,
