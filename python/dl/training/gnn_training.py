@@ -13,6 +13,7 @@ import torch.nn as nn
 import torch
 import torch_geometric
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 
 class GNNTraining(NeuralTraining):
@@ -98,7 +99,7 @@ class GNNTraining(NeuralTraining):
         num_records = len(train_loader)
         model = neural_model.to(self.target_device)
 
-        for idx, data in enumerate(train_loader):
+        for idx, data in tqdm(enumerate(train_loader), total=len(train_loader)):
             try:
                 # Force a conversion to float 32 if necessary
                 if data.x.dtype == torch.float64:
@@ -129,7 +130,7 @@ class GNNTraining(NeuralTraining):
         # No need for computing gradient for evaluation (NO back-propagation)
         with torch.no_grad():
             count = 0
-            for data in eval_loader:
+            for data in tqdm(eval_loader):
                 try:
                     # Force a conversion to float 32 if necessary
                     if data.x.dtype == torch.float64:

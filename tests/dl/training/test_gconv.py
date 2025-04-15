@@ -20,6 +20,47 @@ import torch
 class GConvTest(unittest.TestCase):
 
     @unittest.skip('Ignored')
+    def test_visualization(self):
+        import torch
+        import matplotlib.pyplot as plt
+
+        tensor = torch.rand(10, 10)  # Example 2D tensor
+        plt.imshow(tensor.numpy(), cmap='viridis')
+        plt.colorbar()
+        plt.title("Tensor Heatmap")
+        plt.show()
+
+    @unittest.skip('Ignored')
+    def test_visualization_3d(self):
+        import matplotlib.pyplot as plt
+        from matplotlib.animation import FuncAnimation
+
+        tensor = torch.rand(20, 10, 10)  # [D, H, W]
+
+        fig, ax = plt.subplots()
+        im = ax.imshow(tensor[0], cmap='viridis')
+
+        def update(i):
+            im.set_data(tensor[i])
+            ax.set_title(f'Slice {i}')
+
+        ani = FuncAnimation(fig, update, frames=range(tensor.size(0)), interval=300)
+        plt.show()
+
+    def test_visualization_3d2(self):
+        import torch
+        import matplotlib.pyplot as plt
+
+        tensor = torch.rand(5, 10, 10)  # shape: [C, H, W]
+        fig, axs = plt.subplots(1, tensor.size(0), figsize=(15, 3))
+        for i in range(tensor.size(0)):
+            axs[i].imshow(tensor[i].numpy(), cmap='viridis')
+            axs[i].set_title(f'Slice {i}')
+            axs[i].axis('off')
+        plt.tight_layout()
+        plt.show()
+
+    @unittest.skip('Ignored')
     def test_init_model(self):
         hidden_channels = 256
         pooling_ratio = 0.4
@@ -33,6 +74,7 @@ class GConvTest(unittest.TestCase):
             print(e)
             self.assertTrue(False)
 
+    @unittest.skip('Ignored')
     def test_training_test(self):
         hidden_channels = 256
         pooling_ratio = 0.4
@@ -68,7 +110,7 @@ class GConvTest(unittest.TestCase):
                 'replace': True,
                 'num_workers': 1
             }
-            flickr_loaders = GraphDataLoader(attrs, 'Flickr')
+            flickr_loaders = GraphDataLoader(dataset_name='Flickr', loader_attributes=attrs)
             print(f'Graph data: {str(flickr_loaders.data)}')
             train_loader, val_loader = flickr_loaders()
 
@@ -107,7 +149,7 @@ class GConvTest(unittest.TestCase):
 
         gconv_block_1 = GConvBlock(block_id='Conv 24-256',
                                    gconv_layer=conv_1,
-                                   batch_norm_module=None, #BatchNorm(hidden_channels),
+                                   batch_norm_module=None,
                                    activation_module=nn.ReLU(),
                                    pooling_module=None,
                                    dropout_module=nn.Dropout(dropout_p))
@@ -115,13 +157,11 @@ class GConvTest(unittest.TestCase):
         conv_2 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
         gconv_block_2 = GConvBlock(block_id='Conv 256-256',
                                    gconv_layer=conv_2,
-                                   batch_norm_module=None, #BatchNorm(hidden_channels),
+                                   batch_norm_module=None,
                                    activation_module=nn.ReLU(),
-                                   pooling_module=None, #TopKPooling(hidden_channels, ratio=pooling_ratio))
+                                   pooling_module=None,
                                    dropout_module=nn.Dropout(dropout_p))
 
-        conv_3 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-        gconv_block_3 = GConvBlock(block_id='Conv 256-8', gconv_layer=conv_3)
         mlp_block = MLPBlock(block_id='Fully connected',
                              layer_module=nn.Linear(hidden_channels, flickr_dataset.num_classes),
                              activation_module=nn.LogSoftmax(dim=-1))

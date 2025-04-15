@@ -1,3 +1,5 @@
+__author__ = "Patrick Nicolas"
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import optuna
 from optuna.trial import TrialState
@@ -92,7 +94,7 @@ def training_env(trail, model: GConvModel, class_weights: torch.Tensor) -> \
     lr = trail.suggest_categorical('lr', [0.01, 0.002, 0.0005])
     hyper_parameters = HyperParams(lr=lr,
                                    momentum=0.90,
-                                   epochs=2,
+                                   epochs=64,
                                    optim_label='adam',
                                    batch_size=512,
                                    loss_function=nn.NLLLoss(weight=class_weights.to('mps')),

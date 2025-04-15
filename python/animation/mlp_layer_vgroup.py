@@ -63,7 +63,7 @@ class MLPLayerVGroup(VGroup):
             if overflow and n >= half_display_point:
                 index += len(neurons) - NeuralConfig['max_shown_neurons']
 
-            label = MathTex(rf"{{x}}_{{{index}}}", font_size=48)
+            label = MathTex(rf"{{x}}_{{{index}}}", font_size=60)
             label.next_to(neuron, LEFT, buff=0.2)
             input_labels.add(label)
         return input_labels
@@ -73,7 +73,7 @@ class MLPLayerVGroup(VGroup):
         output_labels = VGroup()
         for n, neuron in enumerate(neurons):
             index = n + 1
-            label = MathTex(rf"\hat{{y}}_{{{index}}}", font_size=48)
+            label = MathTex(rf"\hat{{y}}_{{{index}}}", font_size=60)
             label.next_to(neuron, RIGHT, buff=0.2)
             output_labels.add(label)
         return output_labels
@@ -99,12 +99,9 @@ class MLPLayerVGroup(VGroup):
             neuron.edges_in = VGroup()
             neuron.edges_out = VGroup()
 
-        text1 = MathTex(rf"{{{size}}} \ units", font_size=36)
-        text1.next_to(neurons[-1], DOWN, buff=0.6)
         activation = "Softmax" if layer_type == LayerType.OUTPUT else "ReLU"
-        text2 = Tex(activation, font_size=36)
-        text2.next_to(text1, DOWN, buff=0.4)
-        text = VGroup(*[text1, text2])
+        text = MathTex(rf'\textbf{{{size}}} \ units \\ \textbf{{{activation}', font_size=48)
+        text.next_to(neurons[-1], DOWN, buff=0.6)
 
         if size > n_neurons:
             dots = Tex("\\vdots")

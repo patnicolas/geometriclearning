@@ -50,6 +50,7 @@ class BuiltInMetric(Metric):
 
         _predicted = np.argmax(predicted, axis=len(predicted.shape)-1) if len(predicted.shape) == 2 else predicted
         _labeled = np.argmax(labeled, axis=len(labeled.shape)-1) if len(labeled.shape) == 2 else labeled
+
         match self.metric_type:
             case MetricType.Accuracy:
                 return accuracy_score(_labeled, _predicted, normalize=True, sample_weight=None) \

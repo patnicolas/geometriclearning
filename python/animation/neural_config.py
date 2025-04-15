@@ -4,7 +4,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from manim import *
 
 NeuralConfig = {
-    "neuron_radius": 0.35,
+    "neuron_radius": 0.38,
     "neuron_to_neuron_buff": MED_SMALL_BUFF,
     "layer_to_layer_buff": 2.0,
     "output_neuron_color": RED,

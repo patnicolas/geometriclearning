@@ -9,3 +9,4 @@ class MetricType(Enum):
     Precision = 1
     Recall = 2
     F1 = 3
+    AuROC = 4

@@ -72,7 +72,7 @@ class TrainingSummary(object):
             @rtype: Boolean
         """
         # Step 1. Apply early stopping criteria
-        loss_value = eval_metrics[Metric.eval_loss_label]
+        loss_value = eval_metrics.get(Metric.eval_loss_label, 'Eval_loss')
         print(f'Loss value: {loss_value}')
         # is_early_stopping = self.__evaluate(torch.Tensor(loss_value))
         # Step 2: Record training, evaluation losses and metric

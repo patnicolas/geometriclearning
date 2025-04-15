@@ -57,7 +57,7 @@ class EvalGConv(object):
     """ --------------------------  Private Helper Methods -----------------------  """
 
     def __loaders(self):
-        flickr_loaders = GraphDataLoader(self.attrs, 'Flickr')
+        flickr_loaders = GraphDataLoader(dataset_name='Flickr', loader_attributes=self.attrs)
         print(f'Graph data: {str(flickr_loaders.data)}')
         train_loader, val_loader = flickr_loaders()
         return train_loader, val_loader
