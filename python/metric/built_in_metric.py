@@ -58,15 +58,15 @@ class BuiltInMetric(Metric):
                     else accuracy_score(_labeled, _predicted, normalize=True)
 
             case MetricType.Precision:
-                return precision_score(_labeled, _predicted, average=None, zero_division=1.0) if self.is_weighted \
+                return precision_score(_labeled, _predicted, average='macro', zero_division=1.0) if self.is_weighted \
                         else precision_score(_labeled, _predicted, average='macro', zero_division=1.0)
 
             case MetricType.Recall:
-                return recall_score(_labeled, _predicted, average=None, zero_division=1.0) if self.is_weighted \
+                return recall_score(_labeled, _predicted, average='macro', zero_division=1.0) if self.is_weighted \
                         else recall_score(_labeled, _predicted, average='macro', zero_division=1.0)
 
             case MetricType.F1:
-                return f1_score(_labeled, _predicted, average=None, zero_division=1.0) if self.is_weighted \
+                return f1_score(_labeled, _predicted, average='macro', zero_division=1.0) if self.is_weighted \
                         else f1_score(_labeled, _predicted, average=None, zero_division=1.0)
 
             case _:

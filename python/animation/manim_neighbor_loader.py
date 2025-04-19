@@ -88,7 +88,7 @@ class ManimNeighborLoader(ThreeDScene):
     def get_batch(self, dataset_name: AnyStr) -> np.array:
         # 1.1 Initialize the loader
         graph_data_loader = GraphDataLoader(
-            loader_attributes={
+            sampling_attributes={
                 'id': 'NeighborLoader',
                 'num_neighbors': [8, 4, 2],
                 'replace': True,

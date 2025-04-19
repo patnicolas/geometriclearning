@@ -110,7 +110,7 @@ class GConvTest(unittest.TestCase):
                 'replace': True,
                 'num_workers': 1
             }
-            flickr_loaders = GraphDataLoader(dataset_name='Flickr', loader_attributes=attrs)
+            flickr_loaders = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
             print(f'Graph data: {str(flickr_loaders.data)}')
             train_loader, val_loader = flickr_loaders()
 

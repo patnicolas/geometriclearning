@@ -113,11 +113,11 @@ class VAETraining(NeuralTraining, ABC):
 
         for epoch in tqdm(range(self.hyper_params.epochs)):
             # Set training mode and execute training
-            train_loss = self.__train(neural_model, epoch, train_loader)
+            train_loss = self.__train_epoch(neural_model, epoch, train_loader)
             print(f'Training loss: {train_loss}', flush=True)
 
             # Set mode and execute evaluation
-            eval_metrics = self.__val(neural_model, epoch, eval_loader)
+            eval_metrics = self.__val_epoch(neural_model, epoch, eval_loader)
             self.training_summary(epoch, train_loss, eval_metrics)
 
         # Generate summary
@@ -131,7 +131,7 @@ class VAETraining(NeuralTraining, ABC):
 
     """ -----------------------  Private class and object methods -------------------- """
 
-    def __train(self, neural_model: nn.Module, epoch: int, train_loader: DataLoader) -> float:
+    def __train_epoch(self, neural_model: nn.Module, epoch: int, train_loader: DataLoader) -> float:
         neural_model.train()
         total_loss = 0
 
@@ -178,7 +178,7 @@ class VAETraining(NeuralTraining, ABC):
 
         return total_loss / num_records
 
-    def __val(self, neural_model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
+    def __val_epoch(self, neural_model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
         neural_model.eval()
         total_loss = 0
         mu, log_var = neural_model.get_mu_log_var()

@@ -19,7 +19,7 @@ class PerformanceMetrics(object):
     output_path = '../../'
     output_filename = 'output'
     output_folder = os.path.join(output_path, output_filename)
-    valid_metrics = ['Accuracy', 'Precision', 'Recall', 'F1', 'TrainLoss', 'EvalLoss']
+    valid_metrics = ['Accuracy', 'Precision', 'Recall', 'F1']
 
     def __init__(self, metrics: Dict[MetricType, BuiltInMetric]) -> None:
         self.metrics: Dict[MetricType, BuiltInMetric] = metrics
@@ -34,9 +34,12 @@ class PerformanceMetrics(object):
     @classmethod
     def build(cls, attributes: Dict[AnyStr, bool]) -> Self:
         metrics = {}
-        for k, v in attributes.items():
-            if k in PerformanceMetrics.valid_metrics:
-                metrics[k] = BuiltInMetric(metric_type=MetricType.get_metric_type(k), encoding_len=-1, is_weighted=v)
+        is_weighted = attributes['class_weights'] is not None
+        metrics_list = attributes['metrics_list']
+        if len(metrics_list) > 0:
+            for metric_label in metrics_list:
+                metric_type = MetricType.get_metric_type(metric_label)
+                metrics[metric_type] = BuiltInMetric(metric_type=metric_type, is_weighted=is_weighted)
         return cls(metrics)
 
     def __len__(self) -> int:
@@ -72,7 +75,6 @@ class PerformanceMetrics(object):
         for key, metric in self.metrics.items():
             value = metric(np_predicted, np_label)
             self.update_metric(key, value)
-        print(self.__str__())
 
     def update_metric(self, key: MetricType, np_value: np.array) -> None:
         if key in self.performance_values:
@@ -82,7 +84,6 @@ class PerformanceMetrics(object):
         else:
             values = [np_value]
             self.performance_values[key] = values
-
 
     def update_metrics(self, new_values: Dict[MetricType, torch.Tensor]) -> bool:
         """
@@ -100,27 +101,24 @@ class PerformanceMetrics(object):
                 self.performance_values[key] = values
         return len(self.performance_values.items()) > 0
 
-    def summary(self, output_filename: Optional[AnyStr] = None) -> None:
+    def summary(self, output_filename: AnyStr) -> None:
         """
         Plots for the various metrics and stored metrics into torch local file
         @param output_filename: Relative name of file containing the summary of metrics and losses
         @type output_filename: str
         """
-        for idx, k in enumerate(self.performance_values.keys()):
-            print(k)
-
-            # Save the statistics in PyTorch format
-        if output_filename is not None:
-            self.__save_summary(output_filename)
+        # Save the statistics in PyTorch format
+        #if output_filename is not None:
+        #    self.__save_summary(output_filename)
 
         parameters = [PlotterParameters(count=0,
-                                        x_label='Iteration',
+                                        x_label='Epochs',
                                         y_label=k.value,
                                         title=f'{k} Plot',
-                                        fig_size=(12, 8)) for idx, k in enumerate(self.metrics.keys())]
+                                        fig_size=(10, 6)) for idx, k in enumerate(self.performance_values.keys())]
         # Plot statistics
-        values = {k.value: v for k, v in self.performance_values}
-        Plotter.multi_plot(values, parameters, output_filename)
+        attribute_values = {k.value: v for k, v in self.performance_values.items()}
+        Plotter.multi_plot(attribute_values, parameters, output_filename)
 
     """ -------------------------------  Private Helper Methods --------------------------  """
 
@@ -129,6 +127,7 @@ class PerformanceMetrics(object):
         for k, lst in self.performance_values.items():
             stacked_tensor = torch.stack(lst)
             summary_dict[k] = stacked_tensor
+        print(f'Save summary {str(summary_dict)}')
         torch.save(summary_dict, f"{PerformanceMetrics.output_folder}/{output_filename}.pth")
 
     def __record(self, epoch: int, metrics: Dict[MetricType, torch.Tensor]):

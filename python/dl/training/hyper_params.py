@@ -34,7 +34,8 @@ class HyperParams(object):
                  drop_out: float,
                  train_eval_ratio: float = default_train_eval_ratio,
                  encoding_len: int = -1,
-                 weight_initialization: Optional[AnyStr] = 'xavier'):
+                 weight_initialization: Optional[AnyStr] = 'xavier',
+                 class_weights: Optional[torch.Tensor] = None):
         """
             Constructor
             @param lr: Learning rate for the selected optimizer
@@ -61,6 +62,7 @@ class HyperParams(object):
         self.weight_initialization = weight_initialization
         self.optim_label = optim_label
         self.drop_out = drop_out
+        self.class_weights = class_weights
         torch.manual_seed(42)
 
     @classmethod
@@ -83,7 +85,8 @@ class HyperParams(object):
         train_eval_ratio = attributes.get('train_eval_ratio', 0.9)
         weight_initialization = attributes.get('weight_initialization', 'xavier')
         optim_label = attributes.get('optim_label', 'adam')
-        drop_out =  attributes.get('drop_out', 0.0)
+        drop_out = attributes.get('drop_out', 0.0)
+        class_weights = attributes['class_weights'] if 'class_weights' in attributes else None
 
         return cls(learning_rate,
                    momentum,
@@ -94,7 +97,8 @@ class HyperParams(object):
                    drop_out,
                    train_eval_ratio,
                    encoding_len,
-                   weight_initialization)
+                   weight_initialization,
+                   class_weights)
 
     @staticmethod
     def test_conversion(label_conversion_func) -> torch.Tensor:
@@ -204,7 +208,7 @@ class HyperParams(object):
         assert 1e-6 <= lr <= 0.1, f'Learning rate {lr} should be [1e-6, 0.1]'
         assert 2 <= epochs <= 2048, f'Number of epochs {epochs} should be [3, 2048]'
         assert 0.4 <= momentum <= 0.999, f'Context stride {momentum} should be [0.5, 0.999]'
-        assert 1 <= batch_size <= 1024, f'Size of batch {batch_size} should be [2, 1024]'
+        assert 1 <= batch_size <= 2048, f'Size of batch {batch_size} should be [2, 1024]'
         assert 0.5 < train_eval_ratio < 0.98, f'Train eval ratio {train_eval_ratio} is out of range ]0.5, 9.98['
         assert 0.0 <= drop_out <= 1.0, f'Drop out {drop_out} should be [0, 1]'
 

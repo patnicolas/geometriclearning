@@ -83,10 +83,10 @@ class NeuralTraining(object):
         # Train and evaluation process
         for epoch in range(self.hyper_params.epochs):
             # Set training mode and execute training
-            self.__train(neural_model, epoch, train_loader)
+            self.__train_epoch(neural_model, epoch, train_loader)
 
             # Set mode and execute evaluation
-            self.__val(neural_model, epoch, eval_loader)
+            self.__val_epoch(neural_model, epoch, eval_loader)
             self.exec_config.apply_monitor_memory()
 
         # Generate summary
@@ -98,7 +98,7 @@ class NeuralTraining(object):
 
     """ ------------------------------------   Private methods --------------------------------- """
 
-    def __train(self, neural_model: nn.Module, epoch: int, train_loader: DataLoader) -> None:
+    def __train_epoch(self, neural_model: nn.Module, epoch: int, train_loader: DataLoader) -> None:
         total_loss = 0.0
 
         # Initialize the gradient for the optimizer
@@ -140,7 +140,7 @@ class NeuralTraining(object):
             average_loss = total_loss / len(train_loader)
             self.performance_metrics.update_metric(MetricType.TrainLoss, np.array(average_loss))
 
-    def __val(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> None:
+    def __val_epoch(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> None:
         total_loss = 0
         model.eval()
         loss_func = self.hyper_params.loss_function

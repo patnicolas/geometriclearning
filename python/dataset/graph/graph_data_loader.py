@@ -7,6 +7,7 @@ from torch_geometric.data import Data
 from torch_geometric.loader import (NeighborLoader, RandomNodeLoader, GraphSAINTRandomWalkSampler,
                                     GraphSAINTNodeSampler, GraphSAINTEdgeSampler, ShaDowKHopSampler,
                                     ClusterData, ClusterLoader)
+import torch
 from typing import Dict, AnyStr, Any, Optional, List, Self
 from dataset import DatasetException
 __all__ = ['GraphDataLoader']
@@ -47,13 +48,13 @@ class GraphDataLoader(object):
 
     def __init__(self,
                  dataset_name: AnyStr,
-                 loader_attributes: Dict[AnyStr, Any],
+                 sampling_attributes: Dict[AnyStr, Any],
                  num_subgraph_nodes: Optional[int] = -1,
                  start_index: Optional[int] = -1) -> None:
         """
         Constructor for the Generic Graph Data Loader
-        @param loader_attributes: Map for attributes for a given Data loader
-        @type loader_attributes: Dict[AnyStr, Any]
+        @param sampling_attributes: Map for attributes for a given Data loader
+        @type sampling_attributes: Dict[AnyStr, Any]
         @param dataset_name: Name of the data set
         @type dataset_name: AnyStr
         @param num_subgraph_nodes: Num of indices of nodes in the range [random_index, random_index+num_random_indices]
@@ -65,14 +66,15 @@ class GraphDataLoader(object):
         from dataset.graph.pyg_datasets import PyGDatasets
 
         # Validate the attributes against the type of loader-sampler
-        GraphDataLoader.__validate(loader_attributes)
+        GraphDataLoader.__validate(sampling_attributes)
         # Load directly from the dataset
         pyg_datasets = PyGDatasets(dataset_name)
         dataset = pyg_datasets()
         # Load a subgraph is specified
         self.data: Data = GraphDataLoader.__extract_subgraph(dataset[0], num_subgraph_nodes, start_index) \
             if num_subgraph_nodes > 0 else dataset[0]
-        self.attributes_map = loader_attributes
+        self.attributes_map = sampling_attributes
+
 
     @classmethod
     def build_neighbor_loader(cls, dataset_name: AnyStr, n_neighbors: List[int], b_size: int, num_workers: int) -> Self:
@@ -98,6 +100,13 @@ class GraphDataLoader(object):
 
     def __len__(self) -> int:
         return len(self.data.x)
+
+    @staticmethod
+    def distribution(data: Data) -> torch.Tensor:
+        class_distribution = data.y[data.train_mask]
+        raw_distribution = torch.bincount(class_distribution)
+        total_sum = raw_distribution.sum()
+        return raw_distribution / total_sum
 
     """ ------------------------ Private Helper Methods ------------------------ """
 

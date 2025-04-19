@@ -37,16 +37,18 @@ class EvalGConv(object):
         self.batch_size = attrs['batch_size']
         self.attrs = attrs
 
-    def train(self):
+    def start_training(self):
         flickr_model, class_weights = self.__flickr_model()
-        metrics, training_summary, plot_parameters, hyper_params = self.__training_env(flickr_model, class_weights)
+        metrics, plot_parameters, hyper_params = self.__training_env(flickr_model, class_weights)
+        num_neighbors_str = '-'.join([str(n) for n in self.attrs['num_neighbors']])
+        title = f"{self.dataset_name}_neighbors_sampling_{num_neighbors_str}"
 
         network = GNNTraining(hyper_params=hyper_params,
                               metrics_attributes=metrics,
                               exec_config=ExecConfig.default(),
                               plot_parameters=plot_parameters)
         train_loader, val_loader = self.__loaders()
-        network.train(model_id=f'Graph Conv {self.dataset_name}',
+        network.train(model_id=title,
                       neural_model=flickr_model,
                       train_loader=train_loader,
                       val_loader=val_loader)
@@ -54,7 +56,7 @@ class EvalGConv(object):
     """ --------------------------  Private Helper Methods -----------------------  """
 
     def __loaders(self):
-        flickr_loaders = GraphDataLoader(dataset_name='Flickr', loader_attributes=self.attrs)
+        flickr_loaders = GraphDataLoader(dataset_name='Flickr', sampling_attributes=self.attrs)
         print(f'Graph data: {str(flickr_loaders.data)}')
         train_loader, val_loader = flickr_loaders()
         return train_loader, val_loader
@@ -63,31 +65,34 @@ class EvalGConv(object):
     def __distribution(data: Data) -> torch.Tensor:
         class_distribution = data.y[data.train_mask]
         raw_distribution = torch.bincount(class_distribution)
-        total_sum = raw_distribution.sum()
-        distribution = raw_distribution/total_sum
+        raw_weights = 1.0/raw_distribution
+        total_sum = raw_weights.sum()
+        distribution = raw_weights/total_sum
         return distribution
 
-    def __training_env(self, model: GConvModel, class_weights: torch.Tensor) -> \
+    def __training_env(self, model: GConvModel, class_weights: torch.Tensor = None) -> \
             (Dict[AnyStr, BuiltInMetric], List[PlotterParameters], HyperParams):
         metric_labels = {
             MetricType.Accuracy: BuiltInMetric(MetricType.Accuracy, encoding_len=-1, is_weighted=True),
             MetricType.Precision: BuiltInMetric(MetricType.Precision, encoding_len=-1, is_weighted=True),
-            MetricType.Recall: BuiltInMetric(MetricType.Recall, encoding_len=-1, is_weighted=True)
+            MetricType.Recall: BuiltInMetric(MetricType.Recall, encoding_len=-1, is_weighted=True),
+            MetricType.F1: BuiltInMetric(MetricType.F1, encoding_len=-1, is_weighted=True)
         }
         num_classes = model.mlp_blocks[-1].get_out_features()
         parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label.value, fig_size=(11, 7))
                       for label, _ in metric_labels.items()]
-
-        hyper_parameters = HyperParams(
-            lr=self.lr,
-            momentum=0.90,
-            epochs=self.epochs,
-            optim_label='adam',
-            batch_size=self.batch_size,
-            loss_function=nn.NLLLoss(weight=class_weights.to('mps')),
-            drop_out=0.2,
-            train_eval_ratio=0.9,
-            encoding_len=num_classes)
+        parameters.append(PlotterParameters(0, x_label='x', y_label='y', title='TrainLoss', fig_size=(11, 7)))
+        parameters.append(PlotterParameters(0, x_label='x', y_label='y', title='EvalLoss', fig_size=(11, 7)))
+        loss_func = nn.NLLLoss(weight=class_weights.to('mps')) if class_weights is not None else nn.NLLLoss()
+        hyper_parameters = HyperParams(lr=self.lr,
+                                       momentum=0.90,
+                                       epochs=self.epochs,
+                                       optim_label='adam',
+                                       batch_size=self.batch_size,
+                                       loss_function=loss_func,
+                                       drop_out=self.dropout_p,
+                                       train_eval_ratio=0.9,
+                                       encoding_len=num_classes)
         return metric_labels, parameters, hyper_parameters
 
     def __flickr_model(self) -> (GConvModel, torch.Tensor):
@@ -130,18 +135,26 @@ class EvalGConv(object):
 
 
 if __name__ == '__main__':
-    eval_gconv = EvalGConv(dataset_name="Flickr",
-                           hidden_channels=384,
-                           dropout_p=0.2,
-                           pooling_ratio=-1,
-                           lr=0.001,
-                           epochs=96,
-                           attrs={
-                               'id': 'NeighborLoader',
-                               'num_neighbors': [12, 6],
-                               'batch_size': 512,
-                               'replace': True,
-                               'num_workers': 1
-                           })
-    eval_gconv.train()
+    learning_rate = 0.0005
+    batch_size = 64
+    dropout_p = 0.2
+    num_neighbors = [
+        [12, 6, 3], [16, 8, 4], [8]
+    ]
+    for i in range(len(num_neighbors)):
+        eval_gconv = EvalGConv(dataset_name="Flickr",
+                               hidden_channels=384,
+                               dropout_p=dropout_p,
+                               pooling_ratio=-1,
+                               lr=learning_rate,
+                               epochs=32,
+                               attrs={
+                                   'id': 'NeighborLoader',
+                                   'num_neighbors': num_neighbors[i],
+                                   'batch_size': batch_size,
+                                   'replace': True,
+                                   'num_workers': 1
+                               })
+        eval_gconv.start_training()
+
 

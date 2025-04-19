@@ -39,7 +39,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         dataset_name = 'Flickr'
         # 1. Initialize the loader
         graph_data_loader = GraphDataLoader(
-            loader_attributes={
+            sampling_attributes={
                 'id': 'RandomNodeLoader',
                 'num_parts': 256,
                 'batch_size': 32,
@@ -58,7 +58,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         dataset_name = 'Flickr'
         # 1. Initialize the loader
         graph_data_loader = GraphDataLoader(
-            loader_attributes={
+            sampling_attributes={
                 'id': 'RandomNodeLoader',
                 'num_parts': 64,
                 'batch_size': 32,
@@ -80,7 +80,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         dataset_name = 'Flickr'
         # 1. Initialize the loader
         graph_data_loader = GraphDataLoader(
-            loader_attributes={
+            sampling_attributes={
                 'id': 'NeighborLoader',
                 'num_neighbors': [4, 2],
                 'replace': True,
@@ -102,7 +102,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         dataset_name = 'Cora'
         # 1. Initialize the loader
         graph_data_loader = GraphDataLoader(
-            loader_attributes={
+            sampling_attributes={
                 'id': 'GraphSAINTRandomWalkSampler',
                 'walk_length': 6,
                 'sample_coverage': 64,
@@ -124,7 +124,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         dataset_name = 'Facebook'
         # 1. Initialize the loader
         graph_data_loader = GraphDataLoader(
-            loader_attributes={
+            sampling_attributes={
                 'id': 'NeighborLoader',
                 'num_neighbors': [5, 2],
                 'replace': True,
@@ -146,7 +146,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         dataset_name = 'KarateClub'
         # 1. Initialize the loader
         graph_data_loader = GraphDataLoader(
-            loader_attributes={
+            sampling_attributes={
                 'id': 'GraphSAINTNodeSampler',
                 'sample_coverage': 32,
                 'num_steps': 4,
@@ -166,7 +166,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         dataset_name = 'PROTEINS'
         # 1. Initialize the loader
         graph_data_loader = GraphDataLoader(
-            loader_attributes={
+            sampling_attributes={
                 'id': 'ClusterLoader',
                 'num_parts': 128,
                 'recursive': True,

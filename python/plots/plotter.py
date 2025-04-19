@@ -82,9 +82,9 @@ class Plotter(object):
         plt.show()
 
     @staticmethod
-    def multi_plot(dict_values: Dict[AnyStr, List[np.array]],
+    def multi_plot(dict_values: Dict[AnyStr, List[float]],
                    plotter_params_list: List[PlotterParameters],
-                   plot_title: Optional[AnyStr]) -> None:
+                   plot_title: AnyStr) -> None:
         """
         Generic 1, 2, or 3 sub-plots with one variable value
         @param dict_values: Dictionary of array of floating values
@@ -95,15 +95,32 @@ class Plotter(object):
         @type plot_title: str
         """
         num_points = Plotter.__validate_params(dict_values, plotter_params_list)
-        fig, axes = plt.subplots(ncols=1, nrows=len(dict_values), figsize=plotter_params_list[0].fig_size)
+        num_dict_values = len(dict_values)
+        num_rows = num_dict_values // 2 if num_dict_values % 2 == 0 else (num_dict_values // 2) + 1
+        fig, axes = plt.subplots(ncols=2, nrows=num_rows, figsize=plotter_params_list[0].fig_size)
         x = np.arange(0, num_points, 1)
-        num_plots = len(dict_values)
-        for plot_index in range(num_plots):
-            key = plotter_params_list[plot_index].y_label
-            y = dict_values[key]
-            Plotter.__axis_plot(x, plotter_params_list[plot_index], y, axes, plot_index, plot_index == num_plots-1)
 
-        plt.title(label=plot_title, y=6.0, fontdict={'family': 'sans-serif', 'size': 20})
+        plot_index = 0
+        for col_index in range(2):
+            for row_index in range(num_rows):
+                if plot_index < num_dict_values:
+                    key = plotter_params_list[plot_index].y_label
+                    y = dict_values[key]
+                    x_lim = len(y)
+                    y_max = max(y)
+                    y_lim = 1.0 if y_max <= 1.0 else y_max
+                    Plotter.__multi_axis_plot(x,
+                                              plotter_params_list[plot_index],
+                                              y,
+                                              axes,
+                                              (row_index, col_index),
+                                              (x_lim, y_lim))
+                plot_index += 1
+
+        font_style = {'family': 'sans-serif', 'size': 16}
+        fig.suptitle(plot_title, **font_style)
+        plt.tight_layout()
+        # plt.show()
         fig.savefig(f"{Plotter.test_images_folder}/plot_{plot_title}.png")
 
     @staticmethod
@@ -177,34 +194,65 @@ class Plotter(object):
         x = np.arange(0, len(values1), 1)
         for i in range(3):
             Plotter.__axis_plot(x, plotter_parameters_list[i], [torch.Tensor(x) for x in values1], axes, i)
-        fig.savefig(f"{Plotter.test_images_folder}/plot-{Plotter.time_str()}.png")
+        # fig.savefig(f"{Plotter.test_images_folder}/plot-{Plotter.time_str()}.png")
         plt.show()
+
+    @staticmethod
+    def __multi_axis_plot(
+            x: np.array,
+            plotter_param: PlotterParameters,
+            values: List[float],
+            axes,
+            index: (int, int),
+            limits: (int, int)) -> None:
+        y = np.asarray(values)
+        limit_y, delta_x, delta_y = Plotter.arrange_y(limits)
+        axes[index[0]][index[1]].set_facecolor('black')
+        axes[index[0]][index[1]].set_xlim(1, limits[0]-1)
+        axes[index[0]][index[1]].set_ylim(0, limit_y)
+        axes[index[0]][index[1]].set_xticks(np.arange(0, limits[0], delta_x))
+        axes[index[0]][index[1]].set_yticks(np.arange(0,  limit_y, delta_y))
+        axes[index[0]][index[1]].plot(x, y, color='yellow')
+        axes[index[0]][index[1]].set(xlabel=plotter_param.x_label, ylabel=plotter_param.y_label, title='')
+        axes[index[0]][index[1]].xaxis.label.set_fontsize(10)
+        axes[index[0]][index[1]].tick_params(axis='x', labelsize=10, labelrotation=0)
+        axes[index[0]][index[1]].yaxis.label.set_fontsize(12)
+        axes[index[0]][index[1]].yaxis.label.set_fontweight('bold')
+        axes[index[0]][index[1]].yaxis.label.set_color('black')
+        axes[index[0]][index[1]].tick_params(axis='y', labelsize=10)
+        axes[index[0]][index[1]].grid(which='major', color='lightgray', linestyle='-', linewidth=0.7)
+
+    @staticmethod
+    def arrange_y(limits: (int, int)) -> (float, float, float):
+        y_int_max = int(limits[1]-0.01)+1
+        delta_y = 0.2*y_int_max
+        delta_x = int(limits[0]*0.1+1)
+        return y_int_max,  delta_x, delta_y
 
     @staticmethod
     def __axis_plot(
             x: np.array,
             plotter_param: PlotterParameters,
-            torch_values: List[torch.Tensor],
+            values: List[float],
             axes,
             index: int,
             last_plot: bool) -> None:
-        values = [value.cpu().float() for value in torch_values]
         y = np.asarray(values)
         axes[index].plot(x, y)
-        axes[index].set(xlabel=plotter_param.x_label,ylabel=plotter_param.y_label,title='')
+        axes[index].set(xlabel=plotter_param.x_label, ylabel=plotter_param.y_label, title='')
         if last_plot:
-            axes[index].xaxis.label.set_fontsize(16)
-            axes[index].tick_params(axis='x', labelsize=14, labelrotation=0)
+            axes[index].xaxis.label.set_fontsize(10)
+            axes[index].tick_params(axis='x', labelsize=12, labelrotation=0)
         else:
-            axes[index].xaxis.label.set_fontsize(1)
+            axes[index].xaxis.label.set_fontsize(10)
             axes[index].tick_params(axis='x', labelsize=1, labelrotation=0)
-        axes[index].yaxis.label.set_fontsize(16)
-        axes[index].tick_params(axis='y', labelsize=14)
+        axes[index].yaxis.label.set_fontsize(12)
+        axes[index].tick_params(axis='y', labelsize=12)
         axes[index].grid()
 
     @staticmethod
     def __validate_params(
-            dict_values: Dict[AnyStr, List[torch.Tensor]],
+            dict_values: Dict[AnyStr, List[float]],
             plotter_params_list: List[PlotterParameters]) -> int:
         num_plots = len(dict_values)
         assert len(plotter_params_list) == num_plots, f'Number of plots {len(plotter_params_list)} should be {num_plots}'

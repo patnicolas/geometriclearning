@@ -60,6 +60,7 @@ class PyGDatasets(object):
         except KeyError as err:
             raise DatasetException(f'Dataset {self.name} not supported {err}')
 
+
     """ ------------------   Private helper methods --------------------- """
     def __load_molecule_net(self):
         from torch_geometric.datasets import MoleculeNet

@@ -33,6 +33,7 @@ class GNNTrainingTest(unittest.TestCase):
             'weight_initialization': 'xavier',
             'optim_label': 'adam',
             'drop_out': 0.0,
+            'class_weights': None,
             'patience': 2,
             'min_diff_loss': 0.02,
             'Accuracy': False,
@@ -91,7 +92,7 @@ class GNNTrainingTest(unittest.TestCase):
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
-            graph_data_loader = GraphDataLoader(dataset_name='Flickr', loader_attributes=attrs)
+            graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
             train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
@@ -140,7 +141,7 @@ class GNNTrainingTest(unittest.TestCase):
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
-            graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
+            graph_data_loader = GraphDataLoader(sampling_attributes=attrs, data=_data)
             train_loader, eval_loader = graph_data_loader(num_workers=4)
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
@@ -188,7 +189,7 @@ class GNNTrainingTest(unittest.TestCase):
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
-            graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
+            graph_data_loader = GraphDataLoader(sampling_attributes=attrs, data=_data)
             train_loader, eval_loader = graph_data_loader(num_workers=4)
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
@@ -234,7 +235,7 @@ class GNNTrainingTest(unittest.TestCase):
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
-            graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
+            graph_data_loader = GraphDataLoader(sampling_attributes=attrs, data=_data)
             train_loader, eval_loader = graph_data_loader(num_workers=4)
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
@@ -280,7 +281,7 @@ class GNNTrainingTest(unittest.TestCase):
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
-            graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
+            graph_data_loader = GraphDataLoader(sampling_attributes=attrs, data=_data)
             train_loader, eval_loader = graph_data_loader(num_workers=4)
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
@@ -328,7 +329,7 @@ class GNNTrainingTest(unittest.TestCase):
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
-            graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
+            graph_data_loader = GraphDataLoader(sampling_attributes=attrs, data=_data)
             train_loader, eval_loader = graph_data_loader(num_workers=4)
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
@@ -376,7 +377,7 @@ class GNNTrainingTest(unittest.TestCase):
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
-            graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
+            graph_data_loader = GraphDataLoader(sampling_attributes=attrs, data=_data)
             train_loader, eval_loader = graph_data_loader(num_workers=4)
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
@@ -425,7 +426,7 @@ class GNNTrainingTest(unittest.TestCase):
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
-            graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
+            graph_data_loader = GraphDataLoader(sampling_attributes=attrs, data=_data)
             train_loader, eval_loader = graph_data_loader(num_workers=4)
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
@@ -474,7 +475,7 @@ class GNNTrainingTest(unittest.TestCase):
 
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
-            graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
+            graph_data_loader = GraphDataLoader(sampling_attributes=attrs, data=_data)
             train_loader, eval_loader = graph_data_loader(num_workers=4)
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
@@ -505,7 +506,7 @@ class GNNTrainingTest(unittest.TestCase):
                 'batch_size': 2048,
                 'keep_inter_cluster_edges': False
             }
-            graph_data_loader = GraphDataLoader(loader_attributes=attrs, data=_data)
+            graph_data_loader = GraphDataLoader(sampling_attributes=attrs, data=_data)
             graph_data_loader.draw_sample(
                 first_node_index=10,
                 last_node_index=26,
@@ -530,7 +531,7 @@ class GNNTrainingTest(unittest.TestCase):
                 'batch_size': 1024
             }
             graph_data_loader = GraphDataLoader(dataset_name='Flickr',
-                                                loader_attributes=attrs,
+                                                sampling_attributes=attrs,
                                                 num_subgraph_nodes=24,
                                                 start_index=6)
             print(f'Number of nodes {_data.num_nodes}')

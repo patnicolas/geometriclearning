@@ -15,13 +15,11 @@ from dl.block.mlp_block import MLPBlock
 from dl.model.gconv_model import GConvModel
 import torch
 from torch_geometric.data import Data
-from dl.training.training_monitor import TrainingMonitor
 from plots.plotter import PlotterParameters
 from dl.training.hyper_params import HyperParams
-from metric.metric import Metric
 from metric.built_in_metric import BuiltInMetric
 from metric.metric_type import MetricType
-from typing import AnyStr, Dict, List
+from typing import Dict, List, AnyStr, Any
 from dl.training.gnn_training import GNNTraining
 from torch.utils.data import DataLoader
 
@@ -72,27 +70,18 @@ def flickr_model(dataset_name, hidden_channels, pooling_ratio, dropout_p) -> (GC
                       mlp_blocks=[mlp_block]), distribution(_data)
 
 
-def define_model(trial) -> (GConvModel, torch.Tensor):
-    gconv_model, class_weights = flickr_model(dataset_name='Flickr',
-                                              hidden_channels=512,
-                                              pooling_ratio=-1,
-                                              dropout_p=0.2)
-    return gconv_model, class_weights
-
-def training_env(trail, model: GConvModel, class_weights: torch.Tensor) -> \
-            (Dict[AnyStr, BuiltInMetric], TrainingMonitor, List[PlotterParameters], HyperParams):
+def training_env(trail, model: GConvModel, class_weights: torch.Tensor) -> GNNTraining:
     metric_labels = {
-        Metric.accuracy_label: BuiltInMetric(MetricType.Accuracy, encoding_len=-1, is_weighted=True),
-        Metric.precision_label: BuiltInMetric(MetricType.Precision, encoding_len=-1, is_weighted=True),
-        Metric.recall_label: BuiltInMetric(MetricType.Recall, encoding_len=-1, is_weighted=True)
+        MetricType.Accuracy: BuiltInMetric(MetricType.Accuracy, encoding_len=-1, is_weighted=True),
+        MetricType.Precision: BuiltInMetric(MetricType.Precision, encoding_len=-1, is_weighted=True),
+        MetricType.Recall: BuiltInMetric(MetricType.Recall, encoding_len=-1, is_weighted=True)
     }
     num_classes = model.mlp_blocks[-1].get_out_features()
-    training_summary = TrainingMonitor(patience=2, min_diff_loss=-0.002, early_stopping_enabled=True)
-    parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
+    parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label.value, fig_size=(11, 7))
                   for label, _ in metric_labels.items()]
 
-    lr = trail.suggest_categorical('lr', [0.01, 0.002, 0.0005])
-    hyper_parameters = HyperParams(lr=lr,
+    # lr = trail.suggest_categorical('lr', [0.01, 0.002, 0.0005])
+    hyper_parameters = HyperParams(lr=0.02,
                                    momentum=0.90,
                                    epochs=64,
                                    optim_label='adam',
@@ -101,42 +90,54 @@ def training_env(trail, model: GConvModel, class_weights: torch.Tensor) -> \
                                    drop_out=0.2,
                                    train_eval_ratio=0.9,
                                    encoding_len=num_classes)
-    return metric_labels, training_summary, parameters, hyper_parameters
+    # return metric_labels, parameters, hyper_parameters
+    return GNNTraining(hyper_params=hyper_parameters, metrics_attributes=metric_labels, plot_parameters=parameters)
 
-def loaders(num_neighbors: int, num_hops: int, batch_size: int) -> (DataLoader, DataLoader):
-    flickr_loaders = GraphDataLoader.build_neighbor_loader(
-        dataset_name='Flickr',
-        n_neighbors=neighbor_list(num_neighbors, num_hops),
-        b_size=batch_size,
-        num_workers=4)
+def loaders(graph_attributes: Dict[AnyStr, Any]) -> (DataLoader, DataLoader):
+    flickr_loaders = GraphDataLoader(dataset_name='Flickr', sampling_attributes=graph_attributes)
     print(f'Graph data: {str(flickr_loaders.data)}')
     train_loader, val_loader = flickr_loaders()
     return train_loader, val_loader
 
-def neighbor_list(num_neighbors_1: int, num_hops: int) -> List[int]:
-    if num_hops > 2:
-        return [num_neighbors_1, num_neighbors_1 // 2, num_neighbors_1 // 4]
-    elif num_hops > 1:
-        return [num_neighbors_1, num_neighbors_1 // 2]
-    else:
-        return [num_neighbors_1]
-
-def objective(trial) -> float:
-    _model, class_weights = define_model(trial)
-    metrics, training_summary, _, hyper_params = training_env(trial, _model, class_weights)
-
-    network = GNNTraining(hyper_params=hyper_params,
-                          training_summary=training_summary,
-                          metrics_attributes=metrics)
-    num_neighbors_1 = trial.suggest_categorical('num_neighbors_1', [4, 8, 12, 24])
+def init_parameters_optimizer(trial) -> Dict[AnyStr, Any]:
+    num_neighbors_hop_1 = trial.suggest_categorical('num_neighbors_1', [4, 8, 12, 24])
     num_hops = trial.suggest_categorical('num_hops', [2, 3])
     batch_size = trial.suggest_categorical('batch_size', [128, 512])
-    train_loader, val_loader = loaders(num_neighbors_1, num_hops, batch_size)
-    output_id = f'Flickr_n_{num_neighbors_1}_h_{num_hops}_b_{batch_size}_lr_{hyper_params.learning_rate}'
+
+    def neighbor_list(num_neighbors_1: int, num_hops: int) -> List[int]:
+        if num_hops > 2:
+            return [num_neighbors_1, num_neighbors_1 // 2, num_neighbors_1 // 4]
+        elif num_hops > 1:
+            return [num_neighbors_1, num_neighbors_1 // 2]
+        else:
+            return [num_neighbors_1]
+
+    return {
+        'id': 'NeighborLoader',
+        'num_neighbors': neighbor_list(num_neighbors_hop_1, num_hops),
+        'replace': True,
+        'batch_size': batch_size,
+        'num_workers': 1
+    }
+
+
+def objective(trial) -> float:
+    _model, class_weights = flickr_model(dataset_name='Flickr',
+                                         hidden_channels=512,
+                                         pooling_ratio=-1,
+                                         dropout_p=0.2)
+    network = training_env(trial, _model, class_weights)
+
+    sampling_attributes = init_parameters_optimizer(trial)
+    num_neighbors_str = '_'.join([str(count_neighbor) for count_neighbor in sampling_attributes['num_neighbors']])
+    batch_size = sampling_attributes['batch_size']
+    output_id = f'Flickr_n_{num_neighbors_str}_b_{batch_size}'
+    train_loader, val_loader = loaders(sampling_attributes)
+
     network.train(output_id, _model, train_loader, val_loader)
-    accuracy = float(training_summary.metrics[Metric.accuracy_label][-1])
+    accuracy_history = network.performance_metrics.performance_values.get([MetricType.Accuracy], [-1.0])
     print('Accuracy')
-    return accuracy
+    return accuracy_history[-1]
 
 
 if __name__ == "__main__":
