@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from torch import nn
 import torch
-from typing import Self, AnyStr, Optional
+from typing import Self, AnyStr, Optional, Any, Dict
 from dl.block.neural_block import NeuralBlock
 
 """
@@ -47,6 +47,31 @@ class MLPBlock(NeuralBlock):
         self.block_id = block_id
         self.activation_module = activation_module
 
+    @classmethod
+    def build(cls, block_attributes: Dict[AnyStr, Any]) -> Self:
+        """
+           block_attributes = {
+            'block_id': 'MyMLP',
+            'in_features': in_features,
+            'out_features': out_features,
+            'activation': nn.ReLU(),
+            'dropout': 0.3
+        }
+        @param block_attributes: Dictionary of attributes as described above
+        @type block_attributes: Dictionary [AnyStr, Any]
+        @return: instance of MLPBlock
+        @rtype: MLPBlock
+        """
+        block_id = block_attributes['block_id']
+        in_features_attribute = block_attributes['in_features']
+        out_features_attributes = block_attributes['out_features']
+        activation_attribute = block_attributes['activation']
+        dropout_attribute = block_attributes['dropout']
+        return cls(block_id,
+                   nn.Linear(in_features_attribute, out_features_attributes),
+                   activation_attribute,
+                   nn.Dropout(dropout_attribute) if dropout_attribute > 0 else None)
+
     def get_in_features(self) -> int:
         return self.modules_list[0].in_features
 
@@ -59,14 +84,14 @@ class MLPBlock(NeuralBlock):
         return x
 
     @classmethod
-    def build(cls,
-              block_id: AnyStr,
-              in_features: int,
-              out_features: int,
-              activation_module: Optional[nn.Module] = None,
-              dropout_p: float = 0.0):
+    def build_from_params(cls,
+                          block_id: AnyStr,
+                          in_features: int,
+                          out_features: int,
+                          activation_module: Optional[nn.Module] = None,
+                          dropout_p: float = 0.0):
         """
-        Alternative constructor
+        Alternative constructor using descriptive parameters
         @param block_id  Optional identifier for the Neural block
         @type block_id str
         @param in_features: Number of input features in the Linear transformation

@@ -49,7 +49,7 @@ class ConvModel(NeuralModel, ABC):
 
         # Define the sequence of modules from the layout
         modules = [module for block in self.conv_blocks
-                   for module in block.modules]
+                   for module in block.modules_list]
 
         # If fully connected, MLP layers are included ....
         if self.mlp_blocks is not None:
@@ -58,12 +58,12 @@ class ConvModel(NeuralModel, ABC):
             # connected (Linear) layer
             flatten_input_size = self.__linear_layer_input_size(conv_blocks[-1])
             # Retrieve the first linear layer of the MLP sequence
-            first_linear_layer = self.mlp_blocks[0].modules[0]
+            first_linear_layer = self.mlp_blocks[0].modules_list[0]
             first_linear_layer.in_features = flatten_input_size
 
             # Generate the sequence of modules
             [modules.append(module) for block in self.mlp_blocks
-             for module in block.modules]
+             for module in block.modules_list]
         else:
             self.mlp_blocks = None
 

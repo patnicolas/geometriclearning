@@ -25,12 +25,14 @@ class MLPModelTest(unittest.TestCase):
             self.assertTrue(mlp_model.get_out_features() == 1)
             params = list(mlp_model.parameters())
             print(f'Parameters:\n{params}')
-            self.assertTrue(len(params) == 4)
+            self.assertTrue(len(params) == 3)
 
-            mlp_builder = MLPBuilder('MLP-Test-1')
+            mlp_builder = MLPBuilder({})
             # 'in_features_list', 'activation', 'drop_out', 'output_activation'
+            mlp_builder.set(key='model_id', value='my_model')
             mlp_builder.set(key='in_features_list', value=[8, 16, 16, 1])
             mlp_builder.set(key='drop_out', value=0.5)
+            mlp_builder.set(key='activation', value=nn.ReLU())
             mlp_builder.set(key='output_activation', value=nn.Softmax())
             mlp_model = mlp_builder.build()
             print(str(mlp_model))
@@ -42,20 +44,20 @@ class MLPModelTest(unittest.TestCase):
     @unittest.skip("Ignore")
     def test_init_2(self):
         try:
-            input_block = MLPBlock.build(block_id='input',
-                                         in_features=8,
-                                         out_features=16,
-                                         activation_module= nn.ReLU(),
-                                         dropout_p=0.3)
-            hidden_block = MLPBlock.build(block_id='hidden',
-                                          in_features=16,
-                                          out_features=16,
-                                          activation_module= nn.ReLU(),
-                                          dropout_p=0.3)
-            output_block = MLPBlock.build(block_id='output',
-                                          in_features=16,
-                                          out_features=1,
-                                          activation_module=nn.Softmax())
+            input_block = MLPBlock.build_from_params(block_id='input',
+                                                     in_features=8,
+                                                     out_features=16,
+                                                     activation_module= nn.ReLU(),
+                                                     dropout_p=0.3)
+            hidden_block = MLPBlock.build_from_params(block_id='hidden',
+                                                      in_features=16,
+                                                      out_features=16,
+                                                      activation_module= nn.ReLU(),
+                                                      dropout_p=0.3)
+            output_block = MLPBlock.build_from_params(block_id='output',
+                                                      in_features=16,
+                                                      out_features=1,
+                                                      activation_module=nn.Softmax())
 
             mlp_model = MLPModel(model_id='test1',
                                  mlp_blocks=[input_block, hidden_block, output_block])
@@ -66,32 +68,36 @@ class MLPModelTest(unittest.TestCase):
         except DLException as e:
             assert False
 
-    @unittest.skip("Ignore")
+    # @unittest.skip("Ignore")
     def test_builder(self):
-        mlp_builder = (MLPBuilder('test').set('in_channels', [8, 16, 16])
-                        .set('activation', nn.ReLU())
-                        .set('drop_out', 0.3)
-                        .set('output_activation', nn.Softmax()))
+        model_attributes = {
+            'model_id': 'my_mlp',
+            'in_features_list': [8, 1, 16],
+            'activation': nn.ReLU(),
+            'drop_out': 0.3,
+            'output_activation': nn.Softmax()
+        }
+        mlp_builder = MLPBuilder(model_attributes)
         mlp_model = mlp_builder.build()
         print(mlp_model)
 
     @unittest.skip("Ignore")
     def test_transpose(self):
         try:
-            input_block = MLPBlock.build(block_id='input',
-                                         in_features=8,
-                                         out_features=16,
-                                         activation_module=nn.ReLU(),
-                                         dropout_p=0.3)
-            hidden_block = MLPBlock.build(block_id='hidden',
-                                          in_features=16,
-                                          out_features=16,
-                                          activation_module=nn.ReLU(),
-                                          dropout_p=0.3)
-            output_block = MLPBlock.build(block_id='output',
-                                          in_features=16,
-                                          out_features=1,
-                                          activation_module=nn.Softmax())
+            input_block = MLPBlock.build_from_params(block_id='input',
+                                                     in_features=8,
+                                                     out_features=16,
+                                                     activation_module=nn.ReLU(),
+                                                     dropout_p=0.3)
+            hidden_block = MLPBlock.build_from_params(block_id='hidden',
+                                                      in_features=16,
+                                                      out_features=16,
+                                                      activation_module=nn.ReLU(),
+                                                      dropout_p=0.3)
+            output_block = MLPBlock.build_from_params(block_id='output',
+                                                      in_features=16,
+                                                      out_features=1,
+                                                      activation_module=nn.Softmax())
             mlp_model = MLPModel(model_id='test1',
                                  mlp_blocks=[input_block, hidden_block, output_block])
             mlp_model_transposed = mlp_model.transpose(output_activation=None)

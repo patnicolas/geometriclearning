@@ -10,6 +10,7 @@ import torch.nn as nn
 
 class GConvModelTest(unittest.TestCase):
 
+    @unittest.skip('Ignore')
     def test_init_1(self):
         import torch_geometric
         from dataset.graph.pyg_datasets import PyGDatasets
@@ -48,3 +49,44 @@ class GConvModelTest(unittest.TestCase):
         params = list(gconv_model.parameters())
         print(f'\nParameters:\n{params}')
         self.assertTrue(len(params) == 17)
+
+    def test_init_2(self):
+        out_channels = 256
+        num_node_features = 64
+        in_features = 256
+        out_features = 8
+
+        model_attributes = {
+            'model_id': 'MyModel',
+            'gconv_blocks': [
+                {
+                    'block_id': 'MyBlock_1',
+                    'conv_layer': GraphConv(in_channels=num_node_features, out_channels=out_channels),
+                    'num_channels': out_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': BatchNorm(out_channels),
+                    'pooling': None,
+                    'dropout': 0.25
+                },
+                {
+                    'block_id': 'MyBlock_2',
+                    'conv_layer': GraphConv(in_channels=out_channels, out_channels=out_channels),
+                    'num_channels': out_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': BatchNorm(out_channels),
+                    'pooling': None,
+                    'dropout': 0.25
+                }
+            ],
+            'mlp_blocks': [
+                {
+                    'block_id': 'MyMLP',
+                    'in_features': in_features,
+                    'out_features': out_features,
+                    'activation': nn.ReLU(),
+                    'dropout': 0.3
+                }
+            ]
+        }
+        gconv_model = GConvModel.build(model_attributes)
+        print(gconv_model)

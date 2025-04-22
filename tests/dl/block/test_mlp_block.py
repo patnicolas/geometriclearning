@@ -28,11 +28,11 @@ class MLPBlockTest(unittest.TestCase):
         in_features = 12
         out_features = 24
         try:
-            mlp_block = MLPBlock.build(block_id='id1',
-                                       in_features=12,
-                                       out_features=24,
-                                       activation_module=nn.ReLU(),
-                                       dropout_p=0.3)
+            mlp_block = MLPBlock.build_from_params(block_id='id1',
+                                                   in_features=12,
+                                                   out_features=24,
+                                                   activation_module=nn.ReLU(),
+                                                   dropout_p=0.3)
             self.assertTrue(mlp_block.get_in_features() == in_features)
             self.assertTrue(mlp_block.get_out_features() == out_features)
             print(str(mlp_block))
@@ -40,6 +40,22 @@ class MLPBlockTest(unittest.TestCase):
         except DLException as e:
             print(str(e))
             self.assertTrue(False)
+
+    def test_init_3(self):
+        in_features = 12
+        out_features = 24
+
+        block_attributes = {
+            'block_id': 'MyMLP',
+            'in_features': in_features,
+            'out_features': out_features,
+            'activation': nn.ReLU(),
+            'dropout': 0.3
+        }
+        mlp_block = MLPBlock.build(block_attributes)
+        print(str(mlp_block))
+        self.assertTrue(mlp_block.get_in_features() == in_features)
+        self.assertTrue(mlp_block.get_out_features() == out_features)
 
     @unittest.skip('Ignore')
     def test_transpose_1(self):

@@ -8,8 +8,8 @@ from dl.model.denoising_vae_model import DenoisingVAEModel
 
 class DenoisingVAEModelTest(unittest.TestCase):
     def test_init(self):
-        input_block = MLPBlock.build('in', 128, 32, torch.nn.ReLU())
-        hidden_block = MLPBlock.build('hid1', 32, 10, torch.nn.ReLU())
+        input_block = MLPBlock.build_from_params('in', 128, 32, torch.nn.ReLU())
+        hidden_block = MLPBlock.build_from_params('hid1', 32, 10, torch.nn.ReLU())
         ffnn_model = MLPModel('encoder', [input_block, hidden_block])
         latent_size = 6
         vae_model = DenoisingVAEModel('vae_test', ffnn_model, latent_size)

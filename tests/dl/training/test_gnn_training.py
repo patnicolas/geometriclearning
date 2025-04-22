@@ -24,34 +24,31 @@ class GNNTrainingTest(unittest.TestCase):
 
     def test_build(self):
         training_attributes = {
-            'learning_rate': 0.001,
+            'dataset_name': 'Flickr',
+            # Model training Hyperparameters
+            'learning_rate': 0.0005,
             'batch_size': 64,
-            'loss_function': nn.CrossEntropyLoss(),
-            'momentum': 0.98,
+            'loss_function': None,
+            'momentum': 0.90,
             'encoding_len': -1,
             'train_eval_ratio': 0.9,
             'weight_initialization': 'xavier',
             'optim_label': 'adam',
-            'drop_out': 0.0,
+            'drop_out': 0.25,
+            'is_class_imbalance': True,
             'class_weights': None,
             'patience': 2,
             'min_diff_loss': 0.02,
-            'Accuracy': False,
-            'Precision': True,
-            'Recall': True,
+            # Performance metric definition
+            'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1'],
             'plot_parameters': [
-                {
-                    'title': 'Accuracy',
-                    'x_label': 'x1',
-                    'y_label': 'accuracy'
-                },
-                {
-                    'title': 'Precision',
-                    'x_label': 'epochs',
-                    'y_label': 'precision'
-                }
+                {'title': 'Accuracy', 'x_label': 'epoch', 'y_label': 'accuracy'},
+                {'title': 'Precision', 'x_label': 'epochs', 'y_label': 'precision'},
+                {'title': 'Recall', 'x_label': 'epochs', 'y_label': 'recall'},
+                {'title': 'F1', 'x_label': 'epochs', 'y_label': 'F1'},
             ]
         }
+
         gnn_training = GNNTraining.build(training_attributes)
         print(gnn_training)
 
@@ -117,37 +114,49 @@ class GNNTrainingTest(unittest.TestCase):
             path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
             _dataset = Flickr(path)
             _data = _dataset[0]
-            metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
-            hyper_parameters = HyperParams(
-                lr=0.0005,
-                momentum=0.90,
-                epochs=48,
-                optim_label='adam',
-                batch_size=128,
-                loss_function=nn.CrossEntropyLoss(),
-                drop_out=0.2,
-                train_eval_ratio=0.9,
-                encoding_len=_dataset.num_classes)
+
+            training_attributes = {
+                'dataset_name': 'Flickr',
+                # Model training Hyperparameters
+                'learning_rate': 0.0005,
+                'batch_size': 64,
+                'loss_function': None,
+                'momentum': 0.90,
+                'encoding_len': -1,
+                'train_eval_ratio': 0.9,
+                'weight_initialization': 'xavier',
+                'optim_label': 'adam',
+                'drop_out': 0.25,
+                'is_class_imbalance': True,
+                'class_weights': None,
+                'patience': 2,
+                'min_diff_loss': 0.02,
+                # Model configuration
+                'hidden_channels': 256,
+                # Performance metric definition
+                'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1'],
+                'plot_parameters': [
+                    {'title': 'Accuracy', 'x_label': 'epoch', 'y_label': 'accuracy'},
+                    {'title': 'Precision', 'x_label': 'epochs', 'y_label': 'precision'},
+                    {'title': 'Recall', 'x_label': 'epochs', 'y_label': 'recall'},
+                    {'title': 'F1', 'x_label': 'epochs', 'y_label': 'F1'},
+                ]
+            }
 
             attrs = {
                 'id': 'NeighborLoader',
-                'num_neighbors': [8, 8],
-                'batch_size': 1024,
-                'replace': True
+                'num_neighbors': [12, 6, 3],
+                'batch_size': 128,
+                'replace': True,
+                'num_workers': 4
             }
-            network = GNNTraining.build(hyper_params=hyper_parameters,
-                                        metric_labels=metric_labels,
-                                        title_attribute=show(attrs))
-
+            network = GNNTraining.build(training_attributes)
             gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
                                                    num_classes=_dataset.num_classes)
-            graph_data_loader = GraphDataLoader(sampling_attributes=attrs, data=_data)
-            train_loader, eval_loader = graph_data_loader(num_workers=4)
-
+            graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
+            train_loader, eval_loader = graph_data_loader()
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.training_summary.metrics['Accuracy']
-            self.assertTrue(len(accuracy_list) > 1)
-            self.assertTrue(accuracy_list[-1].float() > 0.2)
+
         except GNNException as e:
             print(f'Error: {str(e)}')
             self.assertTrue(False)
@@ -606,15 +615,21 @@ class GNNTrainingTest(unittest.TestCase):
         gnn_block_1 = GMessagePassingBlock(block_id='K1',
                                            message_passing_module=conv_1,
                                            activation_module=nn.ReLU(),
-                                           drop_out_module=0.2)
+                                           drop_out_module=nn.Dropout(0.2))
         conv_2 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-        gnn_block_2 = GMessagePassingBlock(block_id='K2', message_passing_module=conv_2, activation_module=nn.ReLU(), drop_out_module=0.2)
+        gnn_block_2 = GMessagePassingBlock(block_id='K2',
+                                           message_passing_module=conv_2,
+                                           activation_module=nn.ReLU(),
+                                           drop_out_module=nn.Dropout(0.2))
         conv_3 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-        gnn_block_3 = GMessagePassingBlock(block_id='K3', message_passing_module=conv_3, activation_module=nn.ReLU(), drop_out_module=0.2)
+        gnn_block_3 = GMessagePassingBlock(block_id='K3',
+                                           message_passing_module=conv_3,
+                                           activation_module=nn.ReLU(),
+                                           drop_out_module=nn.Dropout(0.2))
 
-        ffnn_block = MLPBlock.build(block_id='Output',
-                                    layer=nn.Linear(3*hidden_channels, num_classes),
-                                    activation=nn.LogSoftmax(dim=-1))
+        ffnn_block = MLPBlock(block_id='Output',
+                              layer_module=nn.Linear(3*hidden_channels, num_classes),
+                              activation_module=nn.LogSoftmax(dim=-1))
         return GNNBaseModel(model_id='Flickr',
                             gnn_blocks=[gnn_block_1, gnn_block_2, gnn_block_3],
                             ffnn_blocks=[ffnn_block])

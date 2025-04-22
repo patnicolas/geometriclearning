@@ -2,7 +2,7 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from dl.block.conv.conv_block import ConvBlock
-from typing import AnyStr, Tuple, Optional, Self, Dict, List
+from typing import AnyStr, Tuple, Optional, Self, Dict, Any
 import torch.nn as nn
 from dl.block.conv import Conv3DataType
 from dl import ConvException
@@ -52,20 +52,44 @@ class Conv3dBlock(ConvBlock):
         if drop_out_module is not None:
             modules_list.append(drop_out_module)
 
+    @classmethod
+    def build(cls, block_attributes: Dict[AnyStr, Any]) -> Self:
+        block_id = block_attributes['block_id']
+        in_channels = block_attributes['in_channels']
+        out_channels = block_attributes['out_channels']
+        kernel_size = block_attributes['kernel_size']
+        stride = block_attributes['stride']
+        padding = block_attributes['padding']
+        bias = block_attributes['bias']
+        batch_norm_module = block_attributes['batch_norm']
+        activation_module = block_attributes['activation']
+        max_pooling_module = block_attributes['max_pooling']
+        dropout_ratio = block_attributes['dropout_ratio']
+        return cls(block_id=block_id,
+                   conv_layer_module=nn.Conv3d(in_channels=in_channels,
+                                               out_channels=out_channels,
+                                               kernel_size=kernel_size,
+                                               stride=stride,
+                                               padding=padding,
+                                               bias=bias),
+                   batch_norm_module=batch_norm_module,
+                   activation_module=activation_module,
+                   max_pooling_module=max_pooling_module,
+                   drop_out_module=nn.Dropout3d(dropout_ratio))
 
     @classmethod
-    def build(cls,
-              block_id: AnyStr,
-              in_channels: int,
-              out_channels: int,
-              kernel_size: Conv3DataType,
-              stride: Conv3DataType = (1, 1, 1),
-              padding: Conv3DataType = (0, 0, 0),
-              batch_norm: bool = False,
-              max_pooling_kernel: int = -1,
-              activation: nn.Module = None,
-              bias: bool = False,
-              drop_out: float = 0.0) -> Self:
+    def build_from_params(cls,
+                          block_id: AnyStr,
+                          in_channels: int,
+                          out_channels: int,
+                          kernel_size: Conv3DataType,
+                          stride: Conv3DataType = (1, 1, 1),
+                          padding: Conv3DataType = (0, 0, 0),
+                          batch_norm: bool = False,
+                          max_pooling_kernel: int = -1,
+                          activation: nn.Module = None,
+                          bias: bool = False,
+                          drop_out: float = 0.0) -> Self:
         """
         Alternative constructor for a 3-dimension convolutional block
         @param block_id: Identifier for the block id

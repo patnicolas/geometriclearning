@@ -29,9 +29,9 @@ class HyperParamsTest(unittest.TestCase):
             loss_function=nn.CrossEntropyLoss(),
             drop_out=0.2,
             train_eval_ratio=0.9)
-        input_block = MLPBlock.build('../../../python/input', 32, 16, nn.ReLU())
-        hidden_block = MLPBlock.build('hidden', 16, 5, nn.ReLU())
-        output_block = MLPBlock.build('output', 5, 5, nn.Softmax())
+        input_block = MLPBlock.build_from_params('../../../python/input', 32, 16, nn.ReLU())
+        hidden_block = MLPBlock.build_from_params('hidden', 16, 5, nn.ReLU())
+        output_block = MLPBlock.build_from_params('output', 5, 5, nn.Softmax())
         ffnn_model = MLPModel('test1', [input_block, hidden_block, output_block])
         opt = hyper_parameters.optimizer(ffnn_model)
         print(str(opt))

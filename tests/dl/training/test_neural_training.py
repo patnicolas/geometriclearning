@@ -52,14 +52,14 @@ class NeuralTrainingTest(unittest.TestCase):
         from metric.metric import Metric
         from metric.built_in_metric import BuiltInMetric, MetricType
 
-        hidden_block = MLPBlock.build(block_id='hidden',
-                                      in_features=5,
-                                      out_features=4,
-                                      activation_module=nn.ReLU())
-        output_block = MLPBlock.build(block_id='output',
-                                      in_features=4,
-                                      out_features=41,
-                                      activation_module=nn.Sigmoid())
+        hidden_block = MLPBlock.build_from_params(block_id='hidden',
+                                                  in_features=5,
+                                                  out_features=4,
+                                                  activation_module=nn.ReLU())
+        output_block = MLPBlock.build_from_params(block_id='output',
+                                                  in_features=4,
+                                                  out_features=41,
+                                                  activation_module=nn.Sigmoid())
         binary_classifier = MLPModel(model_id='test1', mlp_blocks=[hidden_block, output_block])
         print(repr(binary_classifier))
         hyper_parameters = HyperParams(
@@ -108,11 +108,11 @@ class NeuralTrainingTest(unittest.TestCase):
 
         features = ['age', 'sex', 'chest pain type', 'cholesterol', 'fasting blood sugar','max heart rate',
                     'exercise angina', 'ST slope']
-        hidden_block = MLPBlock.build(block_id='hidden',
-                                      in_features=len(features),
-                                      out_features=4,
-                                      activation_module=nn.ReLU())
-        output_block = MLPBlock.build(block_id='output', in_features=4, out_features=1, activation_module=nn.Sigmoid())
+        hidden_block = MLPBlock.build_from_params(block_id='hidden',
+                                                  in_features=len(features),
+                                                  out_features=4,
+                                                  activation_module=nn.ReLU())
+        output_block = MLPBlock.build_from_params(block_id='output', in_features=4, out_features=1, activation_module=nn.Sigmoid())
         binary_classifier = MLPModel(model_id='test1', mlp_blocks=[hidden_block, output_block])
         print(repr(binary_classifier))
         hyper_parameters = HyperParams(

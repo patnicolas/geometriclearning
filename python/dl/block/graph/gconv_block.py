@@ -1,7 +1,7 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-from typing import AnyStr, Optional
+from typing import AnyStr, Optional, Dict, Any, Self
 import torch
 import torch.nn as nn
 from torch_geometric.nn import BatchNorm, GraphConv
@@ -35,15 +35,51 @@ class GConvBlock(nn.Module):
             modules_list.append(dropout_module)
         self.modules_list = modules_list
 
-    """
-    Forward propagation along the network with an input x
-    and an adjacency, edge_index
-    """
+    @classmethod
+    def build(cls, block_attributes: Dict[AnyStr, Any]) -> Self:
+        """
+        block_attributes = {
+            'block_id': 'MyBlock',
+            'conv_layer': GraphConv(in_channels=num_node_features, out_channels=num_channels),
+            'num_channels': num_channels,
+            'activation': nn.ReLU(),
+            'batch_norm': BatchNorm(num_channels),
+            'pooling': None,
+            'dropout': 0.25
+        }
+        @param block_attributes: Attribute of this block
+        @type block_attributes: Dictionary
+        @return: Instance of GConvBlock
+        @rtype: GConvBlock
+        """
+        block_id = block_attributes['block_id']
+        conv_layer_attribute = block_attributes['conv_layer']
+        activation_attribute = block_attributes['activation']
+        batch_norm_attribute = block_attributes['batch_norm']
+        pooling_attribute = block_attributes['pooling']
+        dropout_attribute = block_attributes['dropout']
+        return cls(block_id,
+                   conv_layer_attribute,
+                   batch_norm_attribute,
+                   activation_attribute,
+                   pooling_attribute,
+                   nn.Dropout(dropout_attribute) if dropout_attribute > 0 else None)
+
     def forward(self,
                 x: torch.Tensor,
                 edge_index: Adj,
                 batch: torch.Tensor) -> torch.Tensor:
-
+        """
+        Forward propagation along the network with an input x  an adjacency, edge_index and a batch
+        @param x: Input tensor
+        @type x: torch.Tensor
+        @param edge_index: Adjacency matrix as an index pairs
+        @type edge_index:
+        @param batch: Batch
+        @type batch: torch.Tensor
+        @return: Output of the graph convolutional neural block
+        @rtype: torch.Tensor
+        """
         # Process all the torch modules if defined
         for module in self.modules_list:
             if isinstance(module, GraphConv):

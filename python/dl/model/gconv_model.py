@@ -4,7 +4,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from dl.block.mlp_block import MLPBlock
 from dl.block.graph.gconv_block import GConvBlock
 from dl.model.neural_model import NeuralModel
-from typing import List, AnyStr, Optional
+from typing import List, AnyStr, Optional, Any, Dict, Self
 import torch
 from torch_geometric.data import Data
 import torch.nn as nn
@@ -45,6 +45,15 @@ class GConvModel(NeuralModel):
             gconv_modules = gconv_modules + mlp_modules
         super(GConvModel, self).__init__(model_id, nn.Sequential(*gconv_modules))
 
+    @classmethod
+    def build(cls, model_attributes: Dict[AnyStr, Any]) -> Self:
+        gconv_blocks_attribute = model_attributes['gconv_blocks']
+        mlp_blocks_attribute = model_attributes['mlp_blocks']
+        gconv_blocks = [GConvBlock.build(gconv_block_attribute) for gconv_block_attribute in gconv_blocks_attribute]
+        mlp_blocks = [MLPBlock.build(mlp_block_attribute) for mlp_block_attribute in mlp_blocks_attribute]
+        return cls(model_attributes['model_id'], gconv_blocks, mlp_blocks)
+
+
     def forward(self, data: Data) -> torch.Tensor:
         # Step 1: Initiate the graph embedding vector
         x = data.x
@@ -56,9 +65,6 @@ class GConvModel(NeuralModel):
             # print(f'Before forward shape {x.shape}')
             x = gconv_block(x, data.edge_index, data.batch)
             # print(f'After forward shape {x.shape}')
-
-        # Step 3: Concatenate the output of the convolutional layers
-        # x = torch.cat(aggr, dim=0)
 
         # Step 4: Process the fully connected, MLP layers
         for mlp_block in self.mlp_blocks:

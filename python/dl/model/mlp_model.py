@@ -1,7 +1,7 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-from typing import List, AnyStr, Self, Dict
+from typing import List, AnyStr, Self, Dict, Any
 from dl.block.conv import ConvDataType
 from dl.model.neural_model import NeuralModel, NeuralBuilder
 from dl.block.mlp_block import MLPBlock
@@ -86,17 +86,15 @@ class MLPModel(NeuralModel):
 class MLPBuilder(NeuralBuilder):
     keys = ['in_features_list', 'activation', 'drop_out', 'output_activation']
 
-    def __init__(self, model_id: AnyStr) -> None:
+    def __init__(self, model_attributes: Dict[AnyStr, Any]) -> None:
         """
         Constructor for the builder using default set of keys (name of configuration
         parameters) and default value for activation module and no dropput
-        @param model_id: Identifier for the model
-        @type model_id: AnyStr
+        @param model_attributes: Model attributes
+        @type model_attributes: ADict[AnyStr, Any]
         """
-        super(MLPBuilder, self).__init__(model_id, MLPBuilder.keys)
+        super(MLPBuilder, self).__init__(model_attributes)
         # Default configuration parameters that can be overwritten
-        self._attributes['activation'] = nn.ReLU()
-        self._attributes['drop_out'] = 0.0
 
     def build(self) -> MLPModel:
         """
@@ -111,7 +109,7 @@ class MLPBuilder(NeuralBuilder):
         mlp_blocks = self.__create_blocks()
         # Validation
         MLPBuilder.validate(mlp_blocks)
-        return MLPModel(self._attributes['model_id'], mlp_blocks)
+        return MLPModel(self.model_attributes['model_id'], mlp_blocks)
 
     @staticmethod
     def validate(mlp_blocks: List[MLPBlock]) -> None:
@@ -126,7 +124,7 @@ class MLPBuilder(NeuralBuilder):
     """  ---------------  Private Helper Methods ------------- """
     def __create_blocks(self) -> List[MLPBlock]:
         mlp_blocks = []
-        in_features_list = self._attributes['in_features_list']
+        in_features_list = self.model_attributes['in_features_list']
         in_feature = in_features_list[0]
 
         # Build iteratively the sequence of Feed forward
@@ -135,17 +133,17 @@ class MLPBuilder(NeuralBuilder):
             layer = nn.Linear(in_features=in_feature,
                               out_features=in_features_list[idx],
                               bias=False)
-            activation_module = self._attributes['output_activation'] \
+            activation_module = self.model_attributes['output_activation'] \
                 if (idx == len(in_features_list) - 1 and
-                    self._attributes['output_activation'] is not None) \
-                else self._attributes['activation']
+                    self.model_attributes['output_activation'] is not None) \
+                else self.model_attributes['activation']
 
             # Build the MLP block
             mlp_block = MLPBlock(
-                    block_id=f'{self._attributes["model_id"]}-con-{idx}',
+                    block_id=f'{self.model_attributes["model_id"]}-con-{idx}',
                     layer_module=layer,
                     activation_module=activation_module,
-                    dropout_module=nn.Dropout(self._attributes['drop_out']))
+                    dropout_module=nn.Dropout(self.model_attributes['drop_out']))
             mlp_blocks.append(mlp_block)
             in_feature = in_features_list[idx]
         return mlp_blocks

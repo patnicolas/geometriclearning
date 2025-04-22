@@ -23,12 +23,12 @@ class VAETest(unittest.TestCase):
     def test_init(self):
         features = ['age', 'sex', 'chest pain type', 'cholesterol', 'fasting blood sugar', 'max heart rate',
                     'exercise angina', 'ST slope']
-        hidden_block = MLPBlock.build(block_id='hidden',
-                                      layer=nn.Linear(in_features=len(features), out_features=4),
-                                      activation=nn.ReLU())
-        output_block = MLPBlock.build(block_id='latent',
-                                      layer=nn.Linear(in_features=4, out_features=4),
-                                      activation=nn.ReLU())
+        hidden_block = MLPBlock.build_from_params(block_id='hidden',
+                                                  layer=nn.Linear(in_features=len(features), out_features=4),
+                                                  activation=nn.ReLU())
+        output_block = MLPBlock.build_from_params(block_id='latent',
+                                                  layer=nn.Linear(in_features=4, out_features=4),
+                                                  activation=nn.ReLU())
         vae_model = VAEModel(model_id='Autoencoder',
                              encoder=MLPModel(model_id='encoder', mlp_blocks=[hidden_block, output_block]),
                              latent_dim=6)
@@ -40,12 +40,12 @@ class VAETest(unittest.TestCase):
 
         features = ['age', 'sex', 'chest pain type', 'cholesterol', 'fasting blood sugar', 'max heart rate',
                     'exercise angina', 'ST slope']
-        hidden_block = MLPBlock.build(block_id='hidden',
-                                      layer=nn.Linear(in_features=len(features), out_features=4),
-                                      activation=nn.ReLU())
-        output_block = MLPBlock.build(block_id='latent',
-                                      layer=nn.Linear(in_features=4, out_features=4),
-                                      activation=nn.ReLU())
+        hidden_block = MLPBlock.build_from_params(block_id='hidden',
+                                                  layer=nn.Linear(in_features=len(features), out_features=4),
+                                                  activation=nn.ReLU())
+        output_block = MLPBlock.build_from_params(block_id='latent',
+                                                  layer=nn.Linear(in_features=4, out_features=4),
+                                                  activation=nn.ReLU())
         vae_model = VAEModel(model_id='Autoencoder',
                              encoder=MLPModel(model_id='encoder', mlp_blocks=[hidden_block, output_block]),
                              latent_dim=4)

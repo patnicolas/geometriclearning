@@ -4,7 +4,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from dl.block.conv.conv_block import ConvBlock
 from dl.block.conv.deconv_2d_block import DeConv2dBlock
 from dl.block.conv.conv_output_size import ConvOutputSize
-from typing import AnyStr, Tuple, Optional, Self, Dict, List
+from typing import AnyStr, Tuple, Optional, Self, Dict, Any
 import torch.nn as nn
 from dl.block.conv import Conv2DataType
 from dl import ConvException
@@ -63,18 +63,43 @@ class Conv2dBlock(ConvBlock):
         self.modules_list = modules_list
 
     @classmethod
-    def build(cls,
-              block_id: AnyStr,
-              in_channels: int,
-              out_channels: int,
-              kernel_size: Conv2DataType,
-              stride: Conv2DataType = (1, 1),
-              padding: Conv2DataType = (0, 0),
-              batch_norm: bool = False,
-              max_pooling_kernel: int = -1,
-              activation: nn.Module = None,
-              bias: bool = False,
-              drop_out: float = 0.0) -> Self:
+    def build(cls, block_attributes: Dict[AnyStr, Any]) -> Self:
+        block_id = block_attributes['block_id']
+        in_channels = block_attributes['in_channels']
+        out_channels = block_attributes['out_channels']
+        kernel_size = block_attributes['kernel_size']
+        stride = block_attributes['stride']
+        padding = block_attributes['padding']
+        bias = block_attributes['bias']
+        batch_norm_module = block_attributes['batch_norm']
+        activation_module = block_attributes['activation']
+        max_pooling_module = block_attributes['max_pooling']
+        dropout_ratio = block_attributes['dropout_ratio']
+        return cls(block_id=block_id,
+                   conv_layer_module=nn.Conv2d(in_channels=in_channels,
+                                               out_channels=out_channels,
+                                               kernel_size=kernel_size,
+                                               stride=stride,
+                                               padding=padding,
+                                               bias=bias),
+                   batch_norm_module=batch_norm_module,
+                   activation_module=activation_module,
+                   max_pooling_module=max_pooling_module,
+                   drop_out_module=nn.Dropout2d(dropout_ratio))
+
+    @classmethod
+    def build_from_params(cls,
+                          block_id: AnyStr,
+                          in_channels: int,
+                          out_channels: int,
+                          kernel_size: Conv2DataType,
+                          stride: Conv2DataType = (1, 1),
+                          padding: Conv2DataType = (0, 0),
+                          batch_norm: bool = False,
+                          max_pooling_kernel: int = -1,
+                          activation: nn.Module = None,
+                          bias: bool = False,
+                          drop_out: float = 0.0) -> Self:
         """
         Alternative constructor for a 2-dimension convolutional block
         @param block_id: Identifier for the block id
@@ -112,12 +137,12 @@ class Conv2dBlock(ConvBlock):
         drop_out_module = nn.Dropout2d(drop_out) if drop_out > 0.0 \
             else None
 
-        return cls(block_id,
-                   conv_2d_module,
-                   batch_norm_module,
-                   activation,
-                   max_pooling_module,
-                   drop_out_module)
+        return cls(block_id=block_id,
+                   conv_layer_module=conv_2d_module,
+                   batch_norm_module=batch_norm_module,
+                   activation_module=activation,
+                   max_pooling_module=max_pooling_module,
+                   drop_out_module=drop_out_module)
 
     def transpose(self, output_activation: Optional[nn.Module] = None) -> DeConv2dBlock:
         """

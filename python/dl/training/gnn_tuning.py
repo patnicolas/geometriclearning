@@ -3,7 +3,6 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import optuna
 from optuna.trial import TrialState
-from torch_geometric.nn.pool import TopKPooling
 
 from dl import GNNException
 import torch.nn as nn
@@ -14,7 +13,6 @@ from torch_geometric.nn import GraphConv
 from dl.block.graph.gconv_block import GConvBlock
 from dl.block.mlp_block import MLPBlock
 from dl.model.gconv_model import GConvModel
-import torch
 from torch_geometric.data import Data, Dataset
 
 from dl.training.graph_hyperparams_tuning import distribution

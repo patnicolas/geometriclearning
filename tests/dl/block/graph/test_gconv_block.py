@@ -32,4 +32,21 @@ class GConvBlockTest(unittest.TestCase):
         self.assertTrue(len(modules) == 2)
         print(f'\n{gconv_block}')
 
+    def test_init_3(self):
+        num_node_features = 24
+        num_channels = 256
+        block_attributes = {
+            'block_id': 'MyBlock',
+            'conv_layer': GraphConv(in_channels=num_node_features, out_channels=num_channels),
+            'num_channels': num_channels,
+            'activation': nn.ReLU(),
+            'batch_norm': BatchNorm(num_channels),
+            'pooling': None,
+            'dropout': 0.25
+        }
+        gconv_block = GConvBlock.build(block_attributes)
+        modules = list(gconv_block.modules_list)
+        self.assertTrue(len(modules) == 4)
+        print(f'\n{gconv_block}')
+
 

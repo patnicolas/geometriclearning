@@ -31,13 +31,13 @@ class ConvBlock(NeuralBlock):
         super(ConvBlock, self).__init__(block_id)
 
     def get_in_channels(self) -> int:
-        return self.modules[0].in_channels
+        return self.modules_list[0].in_channels
 
     def get_out_channels(self) -> int:
-        return self.modules[0].out_channels
+        return self.modules_list[0].out_channels
 
     def is_deconvolution_enabled(self) -> bool:
-        return self.attributes is not None
+        return self.model_attributes is not None
 
     def transpose(self, extra: Optional[nn.Module] = None) -> Any:
         raise ConvException('Cannot transpose abstract Convolutional block')
@@ -50,7 +50,7 @@ class ConvBlock(NeuralBlock):
         return f'\n{self.block_id}:\nModules:\n{modules_str}'
 
     def __repr__(self) -> AnyStr:
-        return '\n'.join([f'{idx}: {str(module)}' for idx, module in enumerate(self.modules)])
+        return '\n'.join([f'{idx}: {str(module)}' for idx, module in enumerate(self.modules_list)])
 
     def get_modules_weights(self) -> List[Any]:
         """
@@ -58,5 +58,5 @@ class ConvBlock(NeuralBlock):
         @returns: weight of convolutional neural_blocks
         @rtype: tuple
         """
-        return [module.weight.data for module in self.modules
+        return [module.weight.data for module in self.modules_list
                 if type(module) is nn.Linear or type(module) is nn.Conv2d or type(module) is nn.Conv1d]

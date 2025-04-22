@@ -1,62 +1,49 @@
-from torch_geometric.nn.pool import TopKPooling
+
 from dl import GNNException
 import torch.nn as nn
 import torch_geometric
 from dataset.graph.graph_data_loader import GraphDataLoader
 from dataset.graph.pyg_datasets import PyGDatasets
 from torch_geometric.nn import GraphConv
-from dl.block.graph.gconv_block import GConvBlock
-from dl.block.mlp_block import MLPBlock
 from dl.model.gconv_model import GConvModel
 import torch
 from torch_geometric.data import Data
-from plots.plotter import PlotterParameters
-from dl.training.hyper_params import HyperParams
-from metric.built_in_metric import BuiltInMetric
-from metric.metric_type import MetricType
-from typing import AnyStr, Dict, List, Any
+from typing import AnyStr, Dict, Any
 from dl.training.gnn_training import GNNTraining
-from dl.training.exec_config import ExecConfig
+from torch.utils.data import DataLoader
+
 
 
 class EvalGConv(object):
     def __init__(self,
-                 dataset_name: AnyStr,
-                 hidden_channels: int,
-                 dropout_p: float,
-                 pooling_ratio: float,
-                 lr: float,
-                 epochs: int,
-                 attrs: Dict[AnyStr, Any]) -> None:
-        self.dataset_name = dataset_name
-        self.hidden_channels = hidden_channels
-        self.dropout_p = dropout_p
-        self.pooling_ratio = pooling_ratio
-        self.lr = lr
-        self.epochs = epochs
-        self.batch_size = attrs['batch_size']
-        self.attrs = attrs
+                 _training_attributes: Dict[AnyStr, Any],
+                 _sampling_attributes: Dict[AnyStr, Any]) -> None:
+        self.training_attributes = _training_attributes
+        self.sampling_attributes = _sampling_attributes
 
-    def start_training(self):
-        flickr_model, class_weights = self.__flickr_model()
-        metrics, plot_parameters, hyper_params = self.__training_env(flickr_model, class_weights)
-        num_neighbors_str = '-'.join([str(n) for n in self.attrs['num_neighbors']])
-        title = f"{self.dataset_name}_neighbors_sampling_{num_neighbors_str}"
+    def start_training(self) -> None:
+        # Step 1: Retrieve the evaluation model
+        flickr_model, class_weights = self.__get_eval_model()
+        num_neighbors_str = '-'.join([str(n) for n in self.sampling_attributes['num_neighbors']])
+        title = f"{self.training_attributes['dataset_name']}_neighbors_sampling_{num_neighbors_str}"
 
-        network = GNNTraining(hyper_params=hyper_params,
-                              metrics_attributes=metrics,
-                              exec_config=ExecConfig.default(),
-                              plot_parameters=plot_parameters)
-        train_loader, val_loader = self.__loaders()
-        network.train(model_id=title,
-                      neural_model=flickr_model,
-                      train_loader=train_loader,
-                      val_loader=val_loader)
+        # Step 2: Retrieve the training environment
+        gnn_training = self.__get_training_env(flickr_model, class_weights)
+
+        # Step 3: Retrieve the training and validation data loader
+        train_loader, val_loader = self.__get_loaders()
+
+        # Step 4: Train the model
+        gnn_training.train(model_id=title,
+                           neural_model=flickr_model,
+                           train_loader=train_loader,
+                           val_loader=val_loader)
 
     """ --------------------------  Private Helper Methods -----------------------  """
 
-    def __loaders(self):
-        flickr_loaders = GraphDataLoader(dataset_name='Flickr', sampling_attributes=self.attrs)
+    def __get_loaders(self) -> (DataLoader, DataLoader):
+        flickr_loaders = GraphDataLoader(dataset_name=self.training_attributes['dataset_name'],
+                                         sampling_attributes=self.sampling_attributes)
         print(f'Graph data: {str(flickr_loaders.data)}')
         train_loader, val_loader = flickr_loaders()
         return train_loader, val_loader
@@ -70,35 +57,18 @@ class EvalGConv(object):
         distribution = raw_weights/total_sum
         return distribution
 
-    def __training_env(self, model: GConvModel, class_weights: torch.Tensor = None) -> \
-            (Dict[AnyStr, BuiltInMetric], List[PlotterParameters], HyperParams):
-        metric_labels = {
-            MetricType.Accuracy: BuiltInMetric(MetricType.Accuracy, encoding_len=-1, is_weighted=True),
-            MetricType.Precision: BuiltInMetric(MetricType.Precision, encoding_len=-1, is_weighted=True),
-            MetricType.Recall: BuiltInMetric(MetricType.Recall, encoding_len=-1, is_weighted=True),
-            MetricType.F1: BuiltInMetric(MetricType.F1, encoding_len=-1, is_weighted=True)
-        }
-        num_classes = model.mlp_blocks[-1].get_out_features()
-        parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label.value, fig_size=(11, 7))
-                      for label, _ in metric_labels.items()]
-        parameters.append(PlotterParameters(0, x_label='x', y_label='y', title='TrainLoss', fig_size=(11, 7)))
-        parameters.append(PlotterParameters(0, x_label='x', y_label='y', title='EvalLoss', fig_size=(11, 7)))
-        loss_func = nn.NLLLoss(weight=class_weights.to('mps')) if class_weights is not None else nn.NLLLoss()
-        hyper_parameters = HyperParams(lr=self.lr,
-                                       momentum=0.90,
-                                       epochs=self.epochs,
-                                       optim_label='adam',
-                                       batch_size=self.batch_size,
-                                       loss_function=loss_func,
-                                       drop_out=self.dropout_p,
-                                       train_eval_ratio=0.9,
-                                       encoding_len=num_classes)
-        return metric_labels, parameters, hyper_parameters
+    def __get_training_env(self, model: GConvModel, class_weights: torch.Tensor = None) -> GNNTraining:
+        self.training_attributes['loss_function'] = nn.NLLLoss(weight=class_weights.to('mps')) \
+            if class_weights is not None \
+            else nn.NLLLoss()
+        self.training_attributes['encoding_len'] = model.mlp_blocks[-1].get_out_features()
+        self.training_attributes['class_weights'] = class_weights
+        return GNNTraining.build(self.training_attributes)
 
-    def __flickr_model(self) -> (GConvModel, torch.Tensor):
+    def __get_eval_model(self) -> (GConvModel, torch.Tensor):
         from torch_geometric.datasets.flickr import Flickr
 
-        pyg_dataset = PyGDatasets(self.dataset_name)
+        pyg_dataset = PyGDatasets(self.training_attributes['dataset_name'])
         flickr_dataset: Flickr = pyg_dataset()
         if flickr_dataset is None:
             raise GNNException("Failed to load Flickr")
@@ -107,54 +77,82 @@ class EvalGConv(object):
         print(f'Number of features: {_data.num_node_features}\nNumber of classes: {flickr_dataset.num_classes}'
               f'\nSize of training: {_data.train_mask.sum()}')
 
-        conv_1 = GraphConv(in_channels=_data.num_node_features, out_channels=self.hidden_channels)
+        my_model = self.__get_model(num_node_features=_data.num_node_features,
+                                    _num_classes=flickr_dataset.num_classes,
+                                    hidden_channels=384)
+        return my_model, EvalGConv.__distribution(_data)
 
-        pooling_module = TopKPooling(self.hidden_channels, ratio=self.pooling_ratio) if self.pooling_ratio > 0 else None
-        gconv_block_1 = GConvBlock(block_id='Conv 24-256',
-                                   gconv_layer=conv_1,
-                                   batch_norm_module=None,  # BatchNorm(hidden_channels),
-                                   activation_module=nn.ReLU(),
-                                   pooling_module=pooling_module,
-                                   dropout_module=nn.Dropout(self.dropout_p))
-
-        conv_2 = GraphConv(in_channels=self.hidden_channels, out_channels=self.hidden_channels)
-        gconv_block_2 = GConvBlock(block_id='Conv 256-256',
-                                   gconv_layer=conv_2,
-                                   batch_norm_module=None,  # BatchNorm(hidden_channels),
-                                   activation_module=nn.ReLU(),
-                                   pooling_module=pooling_module,
-                                   dropout_module=nn.Dropout(self.dropout_p))
-
-        mlp_block = MLPBlock(block_id='Fully connected',
-                             layer_module=nn.Linear(self.hidden_channels, flickr_dataset.num_classes),
-                             activation_module=nn.LogSoftmax(dim=-1))
-
-        return GConvModel(model_id='Flicker test dataset',
-                          gconv_blocks=[gconv_block_1, gconv_block_2],
-                          mlp_blocks=[mlp_block]), EvalGConv.__distribution(_data)
+    def __get_model(self, num_node_features: int, _num_classes: int, hidden_channels: int) -> GConvModel:
+        model_attributes = {
+            'model_id': 'MyModel',
+            'gconv_blocks': [
+                {
+                    'block_id': 'MyBlock_1',
+                    'conv_layer': GraphConv(in_channels=num_node_features, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': None,
+                    'pooling': None,
+                    'dropout': 0.25
+                },
+                {
+                    'block_id': 'MyBlock_2',
+                    'conv_layer': GraphConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': None,
+                    'pooling': None,
+                    'dropout': 0.25
+                }
+            ],
+            'mlp_blocks': [
+                {
+                    'block_id': 'MyMLP',
+                    'in_features': hidden_channels,
+                    'out_features': _num_classes,
+                    'activation': nn.LogSoftmax(dim=-1),
+                    'dropout': 0.0
+                }
+            ]
+        }
+        return GConvModel.build(model_attributes)
 
 
 if __name__ == '__main__':
-    learning_rate = 0.0005
-    batch_size = 64
-    dropout_p = 0.2
-    num_neighbors = [
-        [12, 6, 3], [16, 8, 4], [8]
-    ]
-    for i in range(len(num_neighbors)):
-        eval_gconv = EvalGConv(dataset_name="Flickr",
-                               hidden_channels=384,
-                               dropout_p=dropout_p,
-                               pooling_ratio=-1,
-                               lr=learning_rate,
-                               epochs=32,
-                               attrs={
-                                   'id': 'NeighborLoader',
-                                   'num_neighbors': num_neighbors[i],
-                                   'batch_size': batch_size,
-                                   'replace': True,
-                                   'num_workers': 1
-                               })
-        eval_gconv.start_training()
+    training_attributes = {
+        'dataset_name': 'Flickr',
+        # Model training Hyperparameters
+        'learning_rate': 0.0005,
+        'momentum': 0.90,
+        'batch_size': 64,
+        'loss_function': None,
+        'encoding_len': -1,
+        'train_eval_ratio': 0.9,
+        'weight_initialization': 'xavier',
+        'optim_label': 'adam',
+        'drop_out': 0.25,
+        'is_class_imbalance': True,
+        'class_weights': None,
+        'patience': 2,
+        'min_diff_loss': 0.02,
+        # Performance metric definition
+        'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1'],
+        'plot_parameters': [
+            {'title': 'Accuracy', 'x_label': 'epoch', 'y_label': 'accuracy'},
+            {'title': 'Precision', 'x_label': 'epochs', 'y_label': 'precision'},
+            {'title': 'Recall', 'x_label': 'epochs', 'y_label': 'recall'},
+            {'title': 'F1', 'x_label': 'epochs', 'y_label': 'F1'},
+        ]
+    }
+    sampling_attributes = {
+        'id': 'NeighborLoader',
+        'num_neighbors': [12, 6, 3],
+        'batch_size': 64,
+        'replace': True,
+        'num_workers': 1
+    }
+
+    eval_gconv = EvalGConv(training_attributes, sampling_attributes)
+    eval_gconv.start_training()
 
 

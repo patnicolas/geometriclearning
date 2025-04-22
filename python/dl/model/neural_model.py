@@ -9,12 +9,10 @@ from dl.block.conv import ConvDataType
 from torch import Tensor
 from dl import DLException
 import logging
-
-
 logger = logging.getLogger('dl.model.NeuralModel')
 
 
-__all__ = ['NeuralModel']
+__all__ = ['NeuralModel', 'NeuralBuilder']
 
 """
 Abstract base class for Neural network models. The constructors of the sub-classes needs
@@ -96,13 +94,12 @@ class NeuralModel(torch.nn.Module, ABC):
 
 
 class NeuralBuilder(ABC):
-    def __init__(self, model_id: AnyStr, keys: List[AnyStr]) -> None:
-        self._attributes = dict.fromkeys(keys)
-        self._attributes['model_id'] = model_id
+    def __init__(self, model_attributes: Dict[AnyStr, Any]) -> None:
+        self.model_attributes = model_attributes
 
     # Add/update dynamically the torch module as value of attributes dict.
     def set(self, key: AnyStr, value: Any) -> Self:
-        self._attributes[key] = value
+        self.model_attributes[key] = value
         return self
 
     @abstractmethod
