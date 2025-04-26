@@ -4,7 +4,6 @@ from dataset import DatasetException
 from dataset.graph.graph_data_loader import GraphDataLoader
 from dl.training.gnn_training import GNNTraining
 from dl.training.exec_config import ExecConfig
-from dl.training.training_monitor import TrainingMonitor
 from plots.plotter import PlotterParameters
 from dl import GNNException, DLException, TrainingException
 from dl.model.gconv_model import GConvModel
@@ -18,17 +17,6 @@ import torch
 
 
 class GConvTest(unittest.TestCase):
-
-    @unittest.skip('Ignored')
-    def test_visualization(self):
-        import torch
-        import matplotlib.pyplot as plt
-
-        tensor = torch.rand(10, 10)  # Example 2D tensor
-        plt.imshow(tensor.numpy(), cmap='viridis')
-        plt.colorbar()
-        plt.title("Tensor Heatmap")
-        plt.show()
 
     @unittest.skip('Ignored')
     def test_visualization_3d(self):
@@ -47,6 +35,7 @@ class GConvTest(unittest.TestCase):
         ani = FuncAnimation(fig, update, frames=range(tensor.size(0)), interval=300)
         plt.show()
 
+    @unittest.skip('Ignored')
     def test_visualization_3d2(self):
         import torch
         import matplotlib.pyplot as plt
@@ -79,6 +68,7 @@ class GConvTest(unittest.TestCase):
         hidden_channels = 256
         pooling_ratio = 0.4
         dropout_p = 0.2
+        target_device = 'mps'
 
         try:
             flickr_model, class_weights = GConvTest.flickr_model(hidden_channels, pooling_ratio, dropout_p)
@@ -88,7 +78,6 @@ class GConvTest(unittest.TestCase):
                 Metric.recall_label: BuiltInMetric(MetricType.Recall, encoding_len=-1, is_weighted=True)
             }
             num_classes = flickr_model.mlp_blocks[-1].get_out_features()
-            training_summary = TrainingMonitor(patience=2, min_diff_loss=-0.002, early_stopping_enabled=True)
             parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
                           for label, _ in metric_labels.items()]
 
@@ -98,7 +87,7 @@ class GConvTest(unittest.TestCase):
                 epochs=64,
                 optim_label='adam',
                 batch_size=512,
-                loss_function=nn.NLLLoss(weight=class_weights.to('mps')),
+                loss_function=nn.NLLLoss(weight=class_weights.to(target_device)),
                 drop_out=0.2,
                 train_eval_ratio=0.9,
                 encoding_len=num_classes)
@@ -115,7 +104,6 @@ class GConvTest(unittest.TestCase):
             train_loader, val_loader = flickr_loaders()
 
             network = GNNTraining(hyper_params=hyper_parameters,
-                                  training_summary=training_summary,
                                   metrics_attributes=metric_labels,
                                   exec_config=ExecConfig.default(),
                                   plot_parameters=parameters)

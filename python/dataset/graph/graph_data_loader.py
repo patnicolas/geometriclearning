@@ -73,8 +73,8 @@ class GraphDataLoader(object):
         # Load a subgraph is specified
         self.data: Data = GraphDataLoader.__extract_subgraph(dataset[0], num_subgraph_nodes, start_index) \
             if num_subgraph_nodes > 0 else dataset[0]
+        self.num_classes = dataset.num_classes
         self.attributes_map = sampling_attributes
-
 
     @classmethod
     def build_neighbor_loader(cls, dataset_name: AnyStr, n_neighbors: List[int], b_size: int, num_workers: int) -> Self:
@@ -105,8 +105,10 @@ class GraphDataLoader(object):
     def distribution(data: Data) -> torch.Tensor:
         class_distribution = data.y[data.train_mask]
         raw_distribution = torch.bincount(class_distribution)
-        total_sum = raw_distribution.sum()
-        return raw_distribution / total_sum
+        raw_weights = 1.0 / raw_distribution
+        total_sum = raw_weights.sum()
+        distribution = raw_weights / total_sum
+        return distribution
 
     """ ------------------------ Private Helper Methods ------------------------ """
 

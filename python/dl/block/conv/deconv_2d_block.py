@@ -2,7 +2,7 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import torch.nn as nn
-from typing import Self, Optional, AnyStr, Dict
+from typing import Self, Optional, AnyStr, Dict, Any
 
 from dl.block.neural_block import NeuralBlock
 from dl import ConvException
@@ -35,43 +35,44 @@ class DeConv2dBlock(NeuralBlock):
         @param de_conv_2d_module: De-convolutional layer module for dimension 2
         @type de_conv_2d_module: nn.ConvTranspose2d
         """
-        modules = [de_conv_2d_module]
+        super(DeConv2dBlock, self).__init__(block_id)
+
+        modules_list = [de_conv_2d_module]
 
         # Add batch normalization if defined
         if batch_norm_module is not None:
-            modules.append(batch_norm_module)
+            modules_list.append(batch_norm_module)
 
         # Add activation if defined
         if activation_module is not None:
-            modules.append(activation_module)
+            modules_list.append(activation_module)
 
         # Add drop_out is specified
         if drop_out_module is not None:
-            modules.append(drop_out_module)
+            modules_list.append(drop_out_module)
+        self.modules_list = modules_list
 
-        super(DeConv2dBlock, self).__init__(block_id, tuple(modules))
 
     @classmethod
-    def build(cls, block_id: AnyStr, attributes: Dict[AnyStr, nn.Module]) -> Self:
+    def build(cls, block_id: AnyStr, block_attributes: Dict[AnyStr, Any]) -> Self:
         """
         Alternative constructor for the de convolutional neural block
         @param block_id: Identifier for this de-convolutional block
         @type block_id: str
-        @param attributes: Attributes for the Convolutional network
-        @type attributes: Dict[str, nn.Module]
+        @param block_attributes: Attributes for the Convolutional network
+        @type block_attributes: Dict[str, nn.Module]
         """
-        de_conv_module = nn.ConvTranspose2d(in_channels=attributes['conv_layer'].out_channels,
-                                            out_channels=attributes['conv_layer'].in_channels,
-                                            kernel_size=attributes['conv_layer'].kernel_size,
-                                            stride=attributes['conv_layer'].stride,
-                                            padding=attributes['conv_layer'].padding,
+        de_conv_module = nn.ConvTranspose2d(in_channels=block_attributes['conv_layer'].out_channels,
+                                            out_channels=block_attributes['conv_layer'].in_channels,
+                                            kernel_size=block_attributes['conv_layer'].kernel_size,
+                                            stride=block_attributes['conv_layer'].stride,
+                                            padding=block_attributes['conv_layer'].padding,
                                             bias=False)
-
         return cls(block_id,
                    de_conv_2d_module=de_conv_module,
-                   batch_norm_module=attributes['batch_norm'],
-                   activation_module=attributes['activation'],
-                   drop_out_module=attributes['drop_out'])
+                   batch_norm_module=block_attributes['batch_norm'],
+                   activation_module=block_attributes['activation'],
+                   drop_out_module=block_attributes['drop_out'])
 
     def transpose(self, extra: Optional[nn.Module] = None) -> Self:
         """
@@ -87,4 +88,4 @@ class DeConv2dBlock(NeuralBlock):
         return f'\nConfiguration {self.block_id}:\nModules:\n{modules_str}'
 
     def __repr__(self) -> str:
-        return ' '.join([f'\n{idx}: {str(module)}' for idx, module in enumerate(self.modules)])
+        return ' '.join([f'\n{idx}: {str(module)}' for idx, module in enumerate(self.modules_list)])

@@ -146,7 +146,7 @@ if __name__ == '__main__':
     }
     sampling_attributes = {
         'id': 'NeighborLoader',
-        'num_neighbors': [12, 6, 3],
+        'num_neighbors': [8, 4, 2],
         'batch_size': 64,
         'replace': True,
         'num_workers': 1

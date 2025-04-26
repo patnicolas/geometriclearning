@@ -50,7 +50,7 @@ class MLPBlock(NeuralBlock):
     @classmethod
     def build(cls, block_attributes: Dict[AnyStr, Any]) -> Self:
         """
-           block_attributes = {
+        block_attributes = {
             'block_id': 'MyMLP',
             'in_features': in_features,
             'out_features': out_features,

@@ -155,7 +155,7 @@ class Conv2dBlock(ConvBlock):
         if self.attributes is not None:
             if output_activation is not None:
                 self.attributes['activation'] = output_activation
-            return DeConv2dBlock.build(block_id=f'de_{self.block_id}', attributes=self.attributes)
+            return DeConv2dBlock.build(block_id=f'de_{self.block_id}', block_attributes=self.attributes)
         else:
             raise ConvException('Generation of De convolutional block is disabled')
 

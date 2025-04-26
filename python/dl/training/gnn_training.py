@@ -67,6 +67,16 @@ class GNNTraining(NeuralTraining):
                 f'\nPerformance Metrics\n{metrics_str}'
                 f'\nEarly stop condition{self.early_stopping}')
 
+    def get_metric_history(self, metric_type: MetricType) -> List[float]:
+        """
+        Access the values recorded during training or validation for a given metric of type metric_type
+        @param metric_type: Type of the performance metric (i.e. MetricType.Precision)
+        @type metric_type: MetricType
+        @return: List or history of values recorded for the metric of type metric_type
+        @rtype: List[float]
+        """
+        return self.performance_metrics.performance_values[metric_type]
+
     def train(self,
               model_id: AnyStr,
               neural_model: nn.Module,

@@ -97,11 +97,8 @@ class VariationalBlock(NeuralBlock):
 
     @staticmethod
     def __laplace_zero_tensor(x: torch.Tensor) -> torch.Tensor:
-        if not bool(x.any()):
-            s = list(x.shape)
-            return (torch.rand(s) - 0.5).to(torch.device("mps"))
-        else:
-            return x
+        return (torch.rand(list(x.shape)) - 0.5).to(torch.device("mps")) if not bool(x.any()) else x
+
 
 
 
