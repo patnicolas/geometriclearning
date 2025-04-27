@@ -10,15 +10,6 @@ check_modules_availability(modules)
 
 class GraphDataLoaderTest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
-    def test_torch_sparse(self):
-        import torch
-        import torch_sparse
-
-        row = torch.tensor([0, 1, 1])
-        col = torch.tensor([1, 0, 2])
-        edge_index = torch.stack([row, col], dim=0)
-        print(edge_index)
 
     @unittest.skip('Ignore')
     def test_graph_data(self):
@@ -34,7 +25,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         # Request validation of the graph parameters
         self.assertTrue(graph_data.validate(raise_on_error=True))
 
-    @unittest.skip('Ignore')
+    # @unittest.skip('Ignore')
     def test_random_node_flickr(self):
         dataset_name = 'Flickr'
         # 1. Initialize the loader

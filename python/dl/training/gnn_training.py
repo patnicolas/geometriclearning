@@ -126,7 +126,7 @@ class GNNTraining(NeuralTraining):
         neural_model.train()
         total_loss = 0.0
         optimizer = self.hyper_params.optimizer(neural_model)
-        model = neural_model.to(self.target_device)
+        model = neural_model.to(self.target_device, non_blocking=True)
 
         num_batches = len(train_loader)
         for idx, data in enumerate(train_loader):
@@ -135,8 +135,8 @@ class GNNTraining(NeuralTraining):
                 if data.x.dtype == torch.float64:
                     data.x = data.x.float()
 
-                # Move data to the GPU
-                data = data.to(self.target_device)
+                # Move data to the GPU and non_blocking
+                data = data.to(device=self.target_device, non_blocking=True)
                 predicted = model(data)  # Call forward - prediction
                 raw_loss = self.hyper_params.loss_function(predicted[data.train_mask], data.y[data.train_mask])
 

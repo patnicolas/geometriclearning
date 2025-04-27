@@ -107,8 +107,7 @@ class GraphDataLoader(object):
         raw_distribution = torch.bincount(class_distribution)
         raw_weights = 1.0 / raw_distribution
         total_sum = raw_weights.sum()
-        distribution = raw_weights / total_sum
-        return distribution
+        return raw_weights / total_sum
 
     """ ------------------------ Private Helper Methods ------------------------ """
 
@@ -122,12 +121,15 @@ class GraphDataLoader(object):
         train_loader = RandomNodeLoader(self.data,
                                         num_parts=num_parts,
                                         shuffle=True,
+                                        pin_memory=True,
                                         num_workers=num_workers)
 
         # We use a single GPU for evaluation with default batch size
         eval_loader = RandomNodeLoader(self.data,
                                        num_parts=num_parts,
-                                       shuffle=False)
+                                       pin_memory=True,
+                                       shuffle=False,
+                                       num_workers=num_workers)
         return train_loader, eval_loader
 
     def __neighbors_loader(self) -> (DataLoader, DataLoader):
@@ -142,6 +144,7 @@ class GraphDataLoader(object):
                                       replace=replace,
                                       drop_last=False,
                                       shuffle=True,
+                                      pin_memory=True,
                                       num_workers=num_workers,
                                       input_nodes=self.data.train_mask)
         val_loader = NeighborLoader(data=self.data,
@@ -157,11 +160,14 @@ class GraphDataLoader(object):
         batch_size = self.attributes_map['batch_size']
         num_steps = self.attributes_map['num_steps']
         sample_coverage = self.attributes_map['sample_coverage']
+        num_workers = self.attributes_map['num_workers']
         train_loader = GraphSAINTNodeSampler(data=self.data,
                                              batch_size=batch_size,
                                              num_steps=num_steps,
                                              sample_coverage=sample_coverage,
-                                             shuffle=True)
+                                             pin_memory=True,
+                                             shuffle=True,
+                                             num_workers=num_workers)
         eval_loader = GraphSAINTNodeSampler(data=self.data,
                                             batch_size=batch_size,
                                             num_steps=num_steps,
@@ -173,11 +179,14 @@ class GraphDataLoader(object):
         batch_size = self.attributes_map['batch_size']
         num_steps = self.attributes_map['num_steps']
         sample_coverage = self.attributes_map['sample_coverage']
+        num_workers = self.attributes_map['num_workers']
         train_loader = GraphSAINTEdgeSampler(data=self.data,
                                              batch_size=batch_size,
                                              num_steps=num_steps,
                                              sample_coverage=sample_coverage,
-                                             shuffle=True)
+                                             pin_memory=True,
+                                             shuffle=True,
+                                             num_workers=num_workers)
         eval_loader = GraphSAINTEdgeSampler(data=self.data,
                                             batch_size=batch_size,
                                             num_steps=num_steps,
@@ -186,7 +195,6 @@ class GraphDataLoader(object):
         return train_loader, eval_loader
 
     def __graph_saint_random_walk(self) -> (DataLoader, DataLoader):
-
         # Dynamic configuration parameter for the loader
         walk_length = self.attributes_map['walk_length']
         batch_size = self.attributes_map['batch_size']
@@ -200,6 +208,7 @@ class GraphDataLoader(object):
                                                    walk_length=walk_length,
                                                    num_steps=num_steps,
                                                    sample_coverage=sample_coverage,
+                                                   pin_memory=True,
                                                    num_workers=num_workers,
                                                    shuffle=True)
 
@@ -209,6 +218,7 @@ class GraphDataLoader(object):
                                                  walk_length=walk_length,
                                                  num_steps=num_steps,
                                                  sample_coverage=sample_coverage,
+                                                 pin_memory=True,
                                                  num_workers=num_workers,
                                                  shuffle=False)
         return train_loader, val_loader
@@ -223,6 +233,7 @@ class GraphDataLoader(object):
                                          num_neighbors=num_neighbors,
                                          node_idx=self.data.train_mask,
                                          batch_size=batch_size,
+                                         pin_memory=True,
                                          num_workers=num_workers,
                                          shuffle=True)
         eval_loader = ShaDowKHopSampler(data=self.data,
@@ -230,25 +241,23 @@ class GraphDataLoader(object):
                                         num_neighbors=num_neighbors,
                                         node_idx=self.data.val_mask,
                                         batch_size=batch_size,
+                                        pin_memory=True,
                                         num_workers=num_workers,
                                         shuffle=False)
         return train_loader, eval_loader
 
     def __cluster_loader(self) -> (DataLoader, DataLoader):
-        num_parts = self.attributes_map['num_parts']
-        recursive = self.attributes_map['recursive']
-        batch_size = self.attributes_map['batch_size']
-        keep_inter_cluster_edges = self.attributes_map['keep_inter_cluster_edges']
         cluster_data = ClusterData(data=self.data,
-                                   num_parts=num_parts,
-                                   recursive=recursive,
-                                   keep_inter_cluster_edges=keep_inter_cluster_edges)
-
-        train_loader = ClusterLoader(data=cluster_data,
-                                     batch_size=batch_size,
+                                   num_parts=self.attributes_map['num_parts'],
+                                   recursive=self.attributes_map['batch_size'],
+                                   keep_inter_cluster_edges=self.attributes_map['keep_inter_cluster_edges'])
+        train_loader = ClusterLoader(cluster_data=cluster_data,
+                                     num_workers=self.attributes_map['num_workers'],
+                                     pin_memory=True,
                                      shuffle=True)
-        eval_loader = ClusterLoader(data=cluster_data,
-                                    batch_size=batch_size,
+        eval_loader = ClusterLoader(cluster_data=cluster_data,
+                                    num_workers=self.attributes_map['num_workers'],
+                                    pin_memory=True,
                                     shuffle=False)
         return train_loader, eval_loader
 
@@ -307,6 +316,7 @@ class GraphDataLoader(object):
                 case 'GraphSAINTNodeSampler' | 'GraphSAINTEdgeSampler':
                     is_valid = ('batch_size' in attributes_map and
                                 'num_steps' in attributes_map and
+                                'num_workers' in attributes_map and
                                 'sample_coverage' in attributes_map)
 
                 case 'GraphSAINTRandomWalkSampler':
@@ -319,12 +329,14 @@ class GraphDataLoader(object):
                 case 'ShaDowKHopSampler':
                     is_valid = ('depth' in attributes_map and
                                 'num_neighbors' in attributes_map and
+                                'num_workers' in attributes_map,
                                 'batch_size' in attributes_map)
 
                 case 'ClusterLoader':
                     is_valid = ('num_parts' in attributes_map and
                                 'recursive' in attributes_map and
                                 'batch_size' in attributes_map and
+                                'num_workers' in attributes_map,
                                 'keep_inter_cluster_edges' in attributes_map)
         if not is_valid:
             raise DatasetException(GraphDataLoader.__attrs_map_def)

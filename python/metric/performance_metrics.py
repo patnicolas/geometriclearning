@@ -107,10 +107,6 @@ class PerformanceMetrics(object):
         @param output_filename: Relative name of file containing the summary of metrics and losses
         @type output_filename: str
         """
-        # Save the statistics in PyTorch format
-        #if output_filename is not None:
-        #    self.__save_summary(output_filename)
-
         parameters = [PlotterParameters(count=0,
                                         x_label='Epochs',
                                         y_label=k.value,

@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import torch
 from torch.utils.data import DataLoader
-from typing import AnyStr, Dict, Self, List, Optional
+from typing import AnyStr, Dict, List, Optional
 from dl.training.exec_config import ExecConfig
 from dl import TrainingException, ValidationException
 from dl.training.hyper_params import HyperParams
@@ -106,7 +106,7 @@ class NeuralTraining(object):
         optimizer = self.hyper_params.optimizer(neural_model)
 
         _, torch_device = self.exec_config.apply_device()
-        model = neural_model.to(torch_device)
+        model = neural_model.to(torch_device, non_blocking=True)
         model.train()
         idx = 0
 
@@ -115,8 +115,8 @@ class NeuralTraining(object):
                 # Add noise if the mode is defined
                 # features = model.add_noise(features)
                 # Transfer the input data and labels to the target device
-                features = features.to(torch_device)
-                labels = labels.to(torch_device)
+                features = features.to(device=torch_device, non_blocking=True)
+                labels = labels.to(device=torch_device, non_blocking=True)
 
                 predicted = model(features)  # Call forward - prediction
                 raw_loss = loss_function(predicted, labels)
@@ -169,8 +169,7 @@ class NeuralTraining(object):
                     self.performance_metrics.update_performance_values(np_predicted, np_labels)
 
                     # Compute and accumulate the loss
-                    loss = loss_func(predicted, labels)
-                    total_loss += loss.data
+                    total_loss += loss_func(predicted, labels)
                     count += 1
                 except RuntimeError as e:
                     raise ValidationException(str(e))

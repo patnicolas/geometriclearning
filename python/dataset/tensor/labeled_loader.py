@@ -61,7 +61,10 @@ class LabeledLoader(BaseLoader):
             transforms.Normalize(mean=(norm_factors[0],), std=(norm_factors[1],)),
         ])
         dataset = self.create_dataset(features, labels)
-        return DefaultLoaderGenerator.generate_loader(dataset)
+        return DefaultLoaderGenerator.generate_loader(dataset=dataset,
+                                                      num_samples=self.num_samples,
+                                                      batch_size=self.batch_size,
+                                                      split_ratio=self.split_ratio)
 
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):
         raise NotImplementedError(f'Failed to load data from path {root_path}')

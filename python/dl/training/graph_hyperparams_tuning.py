@@ -70,7 +70,7 @@ def flickr_model(dataset_name, hidden_channels, pooling_ratio, dropout_p) -> (GC
                       mlp_blocks=[mlp_block]), distribution(_data)
 
 
-def training_env(trail, model: GConvModel, class_weights: torch.Tensor) -> GNNTraining:
+def training_env(model: GConvModel, class_weights: torch.Tensor) -> GNNTraining:
     metric_labels = {
         MetricType.Accuracy: BuiltInMetric(MetricType.Accuracy, encoding_len=-1, is_weighted=True),
         MetricType.Precision: BuiltInMetric(MetricType.Precision, encoding_len=-1, is_weighted=True),

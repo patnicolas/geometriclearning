@@ -40,16 +40,13 @@ class UnlabeledLoader(BaseLoader):
 
     def from_tensor(self,
                     data: torch.Tensor,
-                    norm_factors: Tuple[float, float],
-                    dtype: AnyStr = 'float32') -> (DataLoader, DataLoader):
+                    norm_factors: Tuple[float, float]) -> (DataLoader, DataLoader):
         """
             Generate Training and evaluation data loader from a given input_tensor
             @param data: Input input_tensor
             @type data: Torch tensor
             @param norm_factors: Tuple of normalization factors
             @type norm_factors: Tuple (float, float)
-            @param dtype: Data type as a string (i.e. 'float64', ..)
-            @type dtype: str
             @return: Pair of Data loader for training data and validation data
             @rtype: Tuple of data loader
         """
@@ -57,8 +54,11 @@ class UnlabeledLoader(BaseLoader):
             transforms.ToTensor(),
             transforms.Normalize((norm_factors[0],), (norm_factors[1],)),
         ])
-        dataset = self.create_dataset(data, transform)
-        return DefaultLoaderGenerator.generate_loader(dataset)
+        dataset: Dataset = self.create_dataset(data, transform)
+        return DefaultLoaderGenerator.generate_loader(dataset=dataset,
+                                                      num_samples=self.num_samples,
+                                                      batch_size=self.batch_size,
+                                                      split_ratio=self.split_ratio)
 
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):
         raise NotImplementedError(f'Failed to load data from path {root_path}')

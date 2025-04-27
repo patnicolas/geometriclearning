@@ -6,14 +6,14 @@ from abc import ABC
 import torch.nn as nn
 from dl.training.neural_training import NeuralTraining
 from dl.training.hyper_params import HyperParams
-from dl.training.training_monitor import TrainingMonitor
+from dl.training.early_stopping import EarlyStopping
 from plots.plotter import PlotterParameters
-from metric.metric import Metric
-from metric.built_in_metric import create_metric_dict
+from metric.built_in_metric import BuiltInMetric
+from metric.metric_type import MetricType
 from dl.training.exec_config import ExecConfig
 from dl import ConvException, VAEException
 from dl.loss.vae_kl_loss import VAEKLLoss
-from typing import AnyStr, List, Optional, Dict, NoReturn, Self, Tuple
+from typing import AnyStr, List, Optional, Dict, Self, Tuple
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import torch
@@ -38,16 +38,14 @@ class VAETraining(NeuralTraining, ABC):
 
     def __init__(self,
                  hyper_params: HyperParams,
-                 training_summary: TrainingMonitor,
-                 metrics_attributes: Dict[AnyStr, Metric],
-                 exec_config: ExecConfig,
+                 metrics_attributes: Dict[AnyStr, BuiltInMetric],
+                 early_stopping: Optional[EarlyStopping] = None,
+                 exec_config: ExecConfig = ExecConfig.default(),
                  plot_parameters: Optional[List[PlotterParameters]] = None):
         """
         Default constructor for this variational auto-encoder
         @param hyper_params:  Hyper-parameters for training and optimizatoin
         @type hyper_params: HyperParams
-        @param training_summary: Training monitoring
-        @type training_summary: TrainingMonitor
         @param metrics_attributes: Dictionary of metrics and values
         @type metrics_attributes: Dictionary
         @param exec_config: Configuration for optimization of execution of training
@@ -56,30 +54,30 @@ class VAETraining(NeuralTraining, ABC):
         @type plot_parameters: List[PlotterParameters]
         """
         super(VAETraining, self).__init__(hyper_params,
-                                          training_summary,
                                           metrics_attributes,
+                                          early_stopping,
                                           exec_config,
                                           plot_parameters)
 
     @classmethod
     def build(cls,
               hyper_params: HyperParams,
-              metric_labels: List[AnyStr]) -> Self:
+              metrics_attributes: Dict[AnyStr, BuiltInMetric]) -> Self:
         """
         Simplified constructor for the training and execution of any neural network.
-        @param hyper_params: Hyper parameters associated with the training of th emodel
+        @param hyper_params: Hyperparameters associated with the training of th emodel
         @type hyper_params: HyperParams
-        @param metric_labels: Labels for metric to be used
-        @type metric_labels: List[str]
+        @param metrics_attributes: Dictionary of metrics
+        @type metrics_attributes: Dict[AnyStr, BuiltInMetric]
+        @return Instance of VAETraining
+        @rtype VAETraining
         """
         # Create metrics
-        metrics_dict = create_metric_dict(metric_labels, hyper_params.encoding_len)
         # Initialize the plotting parameters
         plot_parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
-                           for label, _ in metrics_dict.items()]
+                           for label, _ in metrics_attributes.items()]
         return cls(hyper_params=hyper_params,
-                   training_summary=TrainingMonitor(patience=2, min_diff_loss=-0.001, early_stopping_enabled=True),
-                   metrics_attributes=metrics_dict,
+                   metrics_attributes=metrics_attributes,
                    exec_config=ExecConfig.default(),
                    plot_parameters=plot_parameters)
 
@@ -113,15 +111,12 @@ class VAETraining(NeuralTraining, ABC):
 
         for epoch in tqdm(range(self.hyper_params.epochs)):
             # Set training mode and execute training
-            train_loss = self.__train_epoch(neural_model, epoch, train_loader)
-            print(f'Training loss: {train_loss}', flush=True)
+            self.__train_epoch(neural_model, epoch, train_loader)
 
             # Set mode and execute evaluation
-            eval_metrics = self.__val_epoch(neural_model, epoch, eval_loader)
-            self.training_summary(epoch, train_loss, eval_metrics)
-
-        # Generate summary
-        self.training_summary.summary()
+            self.__val_epoch(neural_model, epoch, eval_loader)
+        # Generate summary and save into file
+        self.performance_metrics.summary(f'{model_id}_metrics')
 
     @staticmethod
     def _reshape_output_variation(shapes: list, z: torch.Tensor) -> torch.Tensor:
@@ -131,7 +126,7 @@ class VAETraining(NeuralTraining, ABC):
 
     """ -----------------------  Private class and object methods -------------------- """
 
-    def __train_epoch(self, neural_model: nn.Module, epoch: int, train_loader: DataLoader) -> float:
+    def __train_epoch(self, neural_model: nn.Module, epoch: int, train_loader: DataLoader) -> None:
         neural_model.train()
         total_loss = 0
 
@@ -139,7 +134,7 @@ class VAETraining(NeuralTraining, ABC):
         decoder_optimizer = self.hyper_params.optimizer(neural_model)
         num_records = len(train_loader)
         mu, log_var = neural_model.get_mu_log_var()
-        model = neural_model.to(self.target_device)
+        model = neural_model.to(device=self.target_device, non_blocking=True)
         vae_kl_loss = VAEKLLoss(mu=mu,
                                 log_var=log_var,
                                 num_records=num_records,
@@ -151,7 +146,7 @@ class VAETraining(NeuralTraining, ABC):
                 # data = self.model.add_noise(data)
 
                 # Forward pass
-                input_data = data[0].to(self.target_device)
+                input_data = data[0].to(device=self.target_device, non_blocking=True)
                 reconstructed = model(input_data)
 
                 _input = input_data.view(input_data.size(0), input_data.size(1), -1)
@@ -178,7 +173,7 @@ class VAETraining(NeuralTraining, ABC):
 
         return total_loss / num_records
 
-    def __val_epoch(self, neural_model: nn.Module, epoch: int, eval_loader: DataLoader) -> Dict[AnyStr, float]:
+    def __val_epoch(self, neural_model: nn.Module, epoch: int, eval_loader: DataLoader) -> None:
         neural_model.eval()
         total_loss = 0
         mu, log_var = neural_model.get_mu_log_var()
@@ -189,7 +184,6 @@ class VAETraining(NeuralTraining, ABC):
                                 num_records=num_records,
                                 loss_func=self.hyper_params.loss_function)
 
-        metric_collector = {}
         eval_images: List[EvaluatedImages] = []
 
         with torch.no_grad():
@@ -198,11 +192,11 @@ class VAETraining(NeuralTraining, ABC):
                 for data in eval_loader:
                     # noisy_data = neural_model.add_noise(data)
 
-                    input = data[0].to(self.target_device)
-                    reconstructed = model(input)
+                    input_data = data[0].to(self.target_device, non_blocking=True)
+                    reconstructed = model(input_data)
 
-                    _input = input.view(input.size(0), input.size(1), -1)
-                    _reconstructed = reconstructed.view(input.size(0), input.size(1), -1)
+                    _input = input_data.view(input_data.size(0), input_data.size(1), -1)
+                    _reconstructed = reconstructed.view(input_data.size(0), input_data.size(1), -1)
                     loss = vae_kl_loss(_reconstructed, model.z, _input)
                     if loss is torch.nan:
                         raise VAEException(f'Eval Loss: {_reconstructed}, z: {model.z}, output {_input} is NAN')
@@ -222,9 +216,8 @@ class VAETraining(NeuralTraining, ABC):
                 raise VAEException(str(e))
 
         eval_loss = total_loss / num_records
-        metric_collector[Metric.eval_loss_label] = eval_loss
+        self.performance_metrics.update_metric(MetricType.EvalLoss, eval_loss)
         self.__visualize(eval_images)
-        return metric_collector
 
     """ ------------------------------  Private helper method for visual debugging --------------- """
 
