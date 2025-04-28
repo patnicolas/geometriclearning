@@ -27,5 +27,9 @@ class MetricType(Enum):
                 return MetricType.Recall
             case 'F1':
                 return MetricType.F1
+            case 'EvalLoss':
+                return MetricType.EvalLoss
+            case 'TrainLoss':
+                return MetricType.TrainLoss
             case _:
                 raise MetricException(f'{metric_type_str} metric is not supported')

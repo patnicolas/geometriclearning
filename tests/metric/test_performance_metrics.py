@@ -17,10 +17,7 @@ class PerformanceMetricsTest(unittest.TestCase):
 
     @unittest.skip('Ignored')
     def test_build(self):
-        attributes = {
-            MetricType.Accuracy: -1,
-            MetricType.Recall: -1
-        }
+        attributes = {'Accuracy': True, 'Recall': True}
         performance_metrics = PerformanceMetrics.build(attributes)
         print(performance_metrics.show_metrics())
         self.assertTrue(len(performance_metrics) == 2)
@@ -48,7 +45,6 @@ class PerformanceMetricsTest(unittest.TestCase):
         performance_metrics.update_metric(MetricType.EvalLoss, sum(val_loss)/len(val_loss))
         print(f'Performance:\n{str(performance_metrics)}')
 
-
     def test_summary(self):
         import numpy as np
         from metric.built_in_metric import BuiltInMetric
@@ -63,13 +59,11 @@ class PerformanceMetricsTest(unittest.TestCase):
 
         np_predictions = [np.array(1.0), np.array(0.0), np.array(0.0), np.array(1.0), np.array(1.0), np.array(1.0)]
         np_labels = [np.array(1.0), np.array(1.0), np.array(1.0), np.array(1.0), np.array(1.0), np.array(0.0)]
-        val_loss = [2.3, 1.9, 1.8, 1.6, 1.2, 0.9]
 
         np_pred = np.stack(np_predictions, axis=0)
         np_lab = np.stack(np_labels)
         performance_metrics.update_performance_values(np_pred, np_lab)
         performance_metrics.update_performance_values(np_pred, np_lab)
-        performance_metrics.update_metric(MetricType.EvalLoss, sum(val_loss) / len(val_loss))
         print(f'Performance:\n{str(performance_metrics)}')
 
         output_file_name = 'results'

@@ -1,7 +1,7 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-from typing import Dict, AnyStr, Self, List, Optional
+from typing import Dict, AnyStr, Self, List, Any
 import torch
 
 from metric import MetricException
@@ -10,11 +10,17 @@ from metric.metric_type import MetricType
 from plots.plotter import Plotter, PlotterParameters
 import numpy as np
 
-"""
-Wraps the various performance metrics used in training and evaluation
-"""
 
 class PerformanceMetrics(object):
+    """
+    Wraps the various performance metrics used in training and evaluation. valid_metrics is the list  of
+    supported metrics. A snapshot of the plots are dumped into output_folder.
+    There are two constructors
+    __init__: Default constructor taking a dictionary  {metric_name, build in metric} as input
+            example: {metric='Accuracy', BuildInMetric(MetricType.Accuracy, is_weighted}
+    build: Alternative constructor taking a dictionary   { metric_name, is_weighted} as input
+            example: {metric='Accuracy', is_weighted=True}
+    """
     import os
     output_path = '../../'
     output_filename = 'output'
@@ -22,30 +28,51 @@ class PerformanceMetrics(object):
     valid_metrics = ['Accuracy', 'Precision', 'Recall', 'F1']
 
     def __init__(self, metrics: Dict[MetricType, BuiltInMetric]) -> None:
+        """
+        Default constructor for the Performance metrics taking a dictionary input a
+        { metric_name, build in metric}   example {metric='Accuracy', BuildInMetric(MetricType.Accuracy, is_weighted}
+        @param metrics: Dictionary { metric_name, built in metric}
+        @type metrics: Dictionary
+        """
         self.metrics: Dict[MetricType, BuiltInMetric] = metrics
         self.performance_values: Dict[MetricType, List[np.array]] = {}
 
     def show_metrics(self) -> AnyStr:
-        return '\n'.join([f' {k.value}: {v}' for k, v in self.metrics.items()])
+        return '\n'.join([f' {k.value}: {str(v)}' for k, v in self.metrics.items()])
 
     def __str__(self) -> AnyStr:
-        return '\n'.join([f' {k.value}: {v}' for k, v in self.performance_values.items()])
+        return '\n'.join([f' {k.value}: {str(lst)}' for k, lst in self.performance_values.items()])
 
     @classmethod
-    def build(cls, attributes: Dict[AnyStr, bool]) -> Self:
-        metrics = {}
-        is_weighted = attributes['class_weights'] is not None
-        metrics_list = attributes['metrics_list']
-        if len(metrics_list) > 0:
-            for metric_label in metrics_list:
-                metric_type = MetricType.get_metric_type(metric_label)
-                metrics[metric_type] = BuiltInMetric(metric_type=metric_type, is_weighted=is_weighted)
+    def build(cls, metric_attributes: Dict[AnyStr, Any]) -> Self:
+        """
+        Alternative constructor for the Performance metrics taking a dictionary input as
+         { metric_name, is_weighted}  example {metric='Accuracy', is_weighted=True}
+        @param metric_attributes: Dictionary { metric_name, is_weighted}
+        @type metric_attributes: Dictionary
+        @return: Instance of PerformanceMetrics
+        @rtype: PerformanceMetrics
+        """
+        metrics_list = metric_attributes['metrics_list']
+        is_weighted = metric_attributes['is_class_imbalance']
+        metrics = {MetricType.get_metric_type(metric): BuiltInMetric(metric_type=MetricType.get_metric_type(metric),
+                                                                     is_weighted=is_weighted)
+                   for metric in metrics_list}
         return cls(metrics)
 
     def __len__(self) -> int:
         return len(self.metrics)
 
     def add_metric(self, metric_label: MetricType, encoding_len: int = -1, is_weighted: bool = False) -> None:
+        """
+        Add or register a new performance metric such as Precision, Recall, ...
+        @param metric_label: Name for the metric (i.e. 'Accuracy')
+        @type metric_label: str
+        @param encoding_len: Length for the encoding (ie. output Number of classes) with default -1 (no encoding)
+        @type encoding_len: int
+        @param is_weighted: Specify if the metric is weighted for class distribution imbalance
+        @type is_weighted: bool
+        """
         match metric_label:
             case MetricType.Accuracy:
                 self.metrics[MetricType.Accuracy] = BuiltInMetric(metric_type=MetricType.Accuracy,

@@ -1,3 +1,5 @@
+__author__ = "Patrick Nicolas"
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from dl import GNNException
 import torch.nn as nn
@@ -11,7 +13,6 @@ from torch_geometric.data import Data
 from typing import AnyStr, Dict, Any
 from dl.training.gnn_training import GNNTraining
 from torch.utils.data import DataLoader
-
 
 
 class EvalGConv(object):
@@ -128,6 +129,7 @@ if __name__ == '__main__':
         'loss_function': None,
         'encoding_len': -1,
         'train_eval_ratio': 0.9,
+        'epochs': 20,
         'weight_initialization': 'xavier',
         'optim_label': 'adam',
         'drop_out': 0.25,
@@ -146,7 +148,7 @@ if __name__ == '__main__':
     }
     sampling_attributes = {
         'id': 'NeighborLoader',
-        'num_neighbors': [8, 4, 2],
+        'num_neighbors': [10, 4],
         'batch_size': 64,
         'replace': True,
         'num_workers': 1

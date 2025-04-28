@@ -68,6 +68,7 @@ class GNNTuning(object):
         'encoding_len': -1,
         'train_eval_ratio': 0.9,
         'weight_initialization': 'xavier',
+        'epochs': 32,
         'optim_label': 'adam',
         'drop_out': 0.25,
         'is_class_imbalance': True,
@@ -77,9 +78,9 @@ class GNNTuning(object):
         'hidden_channels': 256,
         'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1'],
         'plot_parameters': [
-            {'title': 'Accuracy', 'x_label': 'epoch', 'y_label': 'Accuracy'},
+            {'title': 'Accuracy', 'x_label': 'epochs', 'y_label': 'Accuracy'},
             {'title': 'Precision', 'x_label': 'epochs', 'y_label': 'Precision'},
-            {'title': 'Recall', 'x_label': 'epoch', 'y_label': 'Recall'},
+            {'title': 'Recall', 'x_label': 'epochs', 'y_label': 'Recall'},
             {'title': 'F1', 'x_label': 'epochs', 'y_label': 'F1'},
         ]
     }

@@ -1,4 +1,7 @@
 import unittest
+
+from torch_geometric.data.remote_backend_utils import num_nodes
+
 from dataset.graph.graph_data_loader import GraphDataLoader
 from torch_geometric.data import Data
 import torch
@@ -9,7 +12,6 @@ check_modules_availability(modules)
 
 
 class GraphDataLoaderTest(unittest.TestCase):
-
 
     @unittest.skip('Ignore')
     def test_graph_data(self):

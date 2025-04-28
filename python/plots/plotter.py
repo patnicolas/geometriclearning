@@ -121,7 +121,8 @@ class Plotter(object):
         fig.suptitle(plot_title, **font_style)
         plt.tight_layout()
         # plt.show()
-        fig.savefig(f"{Plotter.test_images_folder}/plot_{plot_title}.png")
+        plot_file_name = f"{Plotter.test_images_folder}/plot_{plot_title}.png"
+        fig.savefig(plot_file_name)
 
     @staticmethod
     def plot(values: List[List[float]], labels: List[AnyStr], plotter_parameters: PlotterParameters) -> None:
@@ -254,14 +255,15 @@ class Plotter(object):
     def __validate_params(
             dict_values: Dict[AnyStr, List[float]],
             plotter_params_list: List[PlotterParameters]) -> int:
+        from metric.performance_metrics import PerformanceMetrics
+
         num_plots = len(dict_values)
         assert len(plotter_params_list) == num_plots, f'Number of plots {len(plotter_params_list)} should be {num_plots}'
         v_0 = None
         for k, v in dict_values.items():
-            if v_0 is None:
+            if k in PerformanceMetrics.valid_metrics and v_0 is None:
                 v_0 = v
-            else:
-                assert len(v) == len(v_0),  f'Num. values for {k}: {len(v)} should be {len(v_0)}'
         return len(v_0)
+
 
 

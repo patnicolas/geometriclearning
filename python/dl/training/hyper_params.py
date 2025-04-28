@@ -76,16 +76,16 @@ class HyperParams(object):
         """
         assert len(attributes), 'Attributes for hyper parameters are undefined'
 
-        learning_rate = attributes.get('learning_rate', 0.001)
-        epochs = attributes.get('epochs', 24)
-        batch_size = attributes.get('batch_size', 64)
+        learning_rate = attributes['learning_rate']
+        epochs = attributes['epochs']
+        batch_size = attributes['batch_size']
         loss_function = attributes.get('loss_function', nn.CrossEntropyLoss())
-        momentum = attributes.get('momentum', 0.98)
-        encoding_len = attributes.get('encoding_len', -1)
-        train_eval_ratio = attributes.get('train_eval_ratio', 0.9)
-        weight_initialization = attributes.get('weight_initialization', 'xavier')
-        optim_label = attributes.get('optim_label', 'adam')
-        drop_out = attributes.get('drop_out', 0.0)
+        momentum = attributes['momentum']
+        encoding_len = attributes['encoding_len']
+        train_eval_ratio = attributes['train_eval_ratio']
+        weight_initialization = attributes['weight_initialization']
+        optim_label = attributes['optim_label']
+        drop_out = attributes['drop_out']
         class_weights = attributes['class_weights'] if 'class_weights' in attributes else None
 
         return cls(learning_rate,
