@@ -89,7 +89,8 @@ class MLPBlock(NeuralBlock):
                           in_features: int,
                           out_features: int,
                           activation_module: Optional[nn.Module] = None,
-                          dropout_p: float = 0.0):
+                          dropout_p: float = 0.0,
+                          bias: bool = True):
         """
         Alternative constructor using descriptive parameters
         @param block_id  Optional identifier for the Neural block
@@ -100,12 +101,14 @@ class MLPBlock(NeuralBlock):
         @type out_features: int
         @param activation_module: Optional activation function
         @type activation_module: nn.Module
+        @param bias: Bias unit flag
+        @type bias: bool
         @param dropout_p: Drop out ratio for regularization in training
         @type dropout_p: float
         """
         dropout_module = nn.Dropout(dropout_p) if dropout_p > 0.0 else None
         return cls(block_id=block_id,
-                   layer_module=nn.Linear(in_features, out_features),
+                   layer_module=nn.Linear(in_features, out_features, bias),
                    activation_module=activation_module,
                    dropout_module=dropout_module)
 

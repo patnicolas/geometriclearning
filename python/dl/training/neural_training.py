@@ -16,21 +16,21 @@ from dl.training.early_stopping import EarlyStopping
 import numpy as np
 import torch.nn as nn
 import logging
-logger = logging.getLogger('dl.NeuralNet')
-
-"""
-    Generic Neural Network abstract class. There are 2 version of train and evaluation
-    - _train_and_evaluate Training and evaluation from a pre-configure train loader
-    -  train_and_evaluate Training and evaluation from a raw data set
-    The method transform_label has to be overwritten in the inheriting classes to support
-    transformation/conversion of labels if needed.
-    The following methods have to be overwritten in derived classes
-    - transform_label Transform the label input_tensor if necessary
-    - model_label Model identification
-"""
+logger = logging.getLogger('dl.training.NeuralTraining')
+__all__ = ['NeuralTraining']
 
 
 class NeuralTraining(object):
+    """
+        Generic Neural Network abstract class. There are 2 version of train and evaluation
+        - _train_and_evaluate Training and evaluation from a pre-configure train loader
+        -  train_and_evaluate Training and evaluation from a raw data set
+        The method transform_label has to be overwritten in the inheriting classes to support
+        transformation/conversion of labels if needed.
+        The following methods have to be overwritten in derived classes
+        - transform_label Transform the label input_tensor if necessary
+        - model_label Model identification
+    """
     def __init__(self,
                  hyper_params: HyperParams,
                  metrics_attributes: Dict[MetricType, BuiltInMetric],

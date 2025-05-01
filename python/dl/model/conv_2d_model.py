@@ -19,29 +19,30 @@ class Conv2dModel(ConvModel):
                  mlp_blocks: Optional[List[MLPBlock]] = None) -> None:
         """
         Default constructor for Convolutional Model
-        :param model_id: Identifier for model
-        :type model_id: AnyStr
-        :param input_size: Size of input (i.e. 64, 28x28, ...)
-        :type input_size: int or Tuple[Int, Int]
-        :param conv_blocks: List of convolutional block
-        :type conv_blocks: List[Conv2dBlock]
-        :param mlp_blocks: Optional list of MLP blocks
-        :type mlp_blocks: List[MLPBlock]
+        @param model_id: Identifier for model
+        @type model_id: AnyStr
+        @param input_size: Size of input (i.e. 64, 28x28, ...)
+        @type input_size: int or Tuple[Int, Int]
+        @param conv_blocks: List of convolutional block
+        @type conv_blocks: List[Conv2dBlock]
+        @param mlp_blocks: Optional list of MLP blocks
+        @type mlp_blocks: List[MLPBlock]
         """
         super(Conv2dModel, self).__init__(model_id, input_size, conv_blocks, mlp_blocks)
 
 
-"""
-    Builder for the 2-dimensional convolutional neural network.
-    The convolutional neural model is built from a dictionary of configuration parameters 
-    for which  the keys are predefined. The model is iteratively created by call to method set 
-    defined in the base class NeuralBuilder
-    The constructor define defaults value for activation (nn.ReLU()), stride, padding, 
-    enabling batch normalization and drop_out (no dropout)
-"""
-
-
 class Conv2dBuilder(NeuralBuilder):
+    """
+    Builder for the 2-dimensional convolutional neural network.
+    The convolutional neural model is built from a dictionary of configuration parameters
+    for which  the keys are predefined. The model is iteratively created by call to method set
+    defined in the base class NeuralBuilder
+
+    The constructor define defaults value for activation (nn.ReLU()), stride, padding,
+    enabling batch normalization and drop_out (no dropout).
+
+    Reference: https://patricknicolas.substack.com/p/modular-deep-learning-models-with
+    """
     def __init__(self, model_attributes: Dict[AnyStr, Any]) -> None:
         """
         Constructor for the builder of a 2-dimensional neural network using default
@@ -120,15 +121,6 @@ class Conv2dBuilder(NeuralBuilder):
         MLPBuilder.validate(mlp_blocks)
 
     """ ----------------------------   Private helper methods --------------------------- """
-    """
-    def __linear_layer_input_sizeX(self, last_conv_block: Conv2dBlock) -> int:
-        from dl.block.conv.conv_output_size import SeqConvOutputSize
-
-        conv_block_sizes = [conv_block.get_conv_output_size() for conv_block in self.conv_blocks]
-        conv_model_output_sizes = SeqConvOutputSize(conv_block_sizes)
-        conv_output_sizes = conv_model_output_sizes(input_size=self.input_size)
-        return last_conv_block.out_channels * conv_output_sizes[0] * conv_output_sizes[1]
-    """
 
     @staticmethod
     def validate_conv(conv_blocks: List[Conv2dBlock], input_size: Conv2DataType) -> None:

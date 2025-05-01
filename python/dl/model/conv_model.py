@@ -14,21 +14,21 @@ import torch
 import torch.nn as nn
 import logging
 logger = logging.getLogger('dl.model.ConvModel')
-
 __all__ = ['ConvModel']
 
-"""
-    Generic Convolutional neural network which can be used as Gan discriminator or 
-    VariationalNeuralBlock Auto-encoder_model decoder_model module. For Gan and LinearVAE, 
+
+class ConvModel(NeuralModel, ABC):
+    """
+        Generic Convolutional neural network which can be used as Gan discriminator or
+    VariationalNeuralBlock Auto-encoder_model decoder_model module. For Gan and LinearVAE,
     the fully connected linear modules are not defined.
     The build method creates a convolutional neural network without fully connected layers for
     VAE or GAN encoders.
     IF connected layers => CNN
     ELSE: Encoder for VAE or GAN
-"""
 
-
-class ConvModel(NeuralModel, ABC):
+    https://patricknicolas.substack.com/p/modular-deep-learning-models-with
+    """
     def __init__(self,
                  model_id: AnyStr,
                  input_size: ConvDataType,

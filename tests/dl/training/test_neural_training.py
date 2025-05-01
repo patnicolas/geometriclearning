@@ -3,7 +3,6 @@ import unittest
 from dl.model.mlp_model import MLPModel
 from dl.block.mlp_block import MLPBlock
 from dl.training.hyper_params import HyperParams
-from dl.training.training_monitor import TrainingMonitor
 from plots.plotter import PlotterParameters
 from dl.training.neural_training import NeuralTraining
 from dataset.tensor.labeled_loader import LabeledLoader
@@ -49,7 +48,6 @@ class NeuralTrainingTest(unittest.TestCase):
 
     @unittest.skip('Ignored')
     def test_train_wages(self):
-        from metric.metric import Metric
         from metric.built_in_metric import BuiltInMetric, MetricType
 
         hidden_block = MLPBlock.build_from_params(block_id='hidden',

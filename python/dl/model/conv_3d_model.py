@@ -10,12 +10,12 @@ from dl.block.mlp_block import MLPBlock
 
 
 
-class Conv2dModel(ConvModel):
+class Conv3dModel(ConvModel):
     def __init__(self,
                  model_id: AnyStr,
                  input_size: Conv3DataType,
                  conv_blocks: List[Conv3dBlock],
                  mlp_blocks: Optional[List[MLPBlock]] = None) -> None:
-        super(Conv2dModel, self).__init__(model_id, input_size, conv_blocks, mlp_blocks)
+        super(Conv3dModel, self).__init__(model_id, input_size, conv_blocks, mlp_blocks)
 
 

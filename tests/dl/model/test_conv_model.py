@@ -141,7 +141,6 @@ class ConvModelTest(unittest.TestCase):
         Conv2dBuilder.validate_conv(conv_blocks=[conv_2d_block_1, conv_2d_block_2, conv_2d_block_3],
                                     input_size=(28, 28))
 
-
     @unittest.skip('Ignore')
     def test_mnist_large(self):
         try:
@@ -178,12 +177,16 @@ class ConvModelTest(unittest.TestCase):
                                                             bias=False,
                                                             drop_out=0.25)
             mlp_block_1 = MLPBlock.build_from_params(block_id='hidden',
-                                                     layer=nn.Linear(in_features=0, out_features=64, bias=False),
-                                                     activation=nn.ReLU())
+                                                     in_features=0,
+                                                     out_features=64,
+                                                     bias=False,
+                                                     activation_module=nn.ReLU())
             num_classes = 10
             mlp_block_2 = MLPBlock.build_from_params(block_id='output',
-                                                     layer=nn.Linear(in_features=64, out_features=num_classes, bias=False),
-                                                     activation=nn.Softmax(dim=1))
+                                                     in_features=64,
+                                                     out_features=num_classes,
+                                                     bias=False,
+                                                     activation_module=nn.Softmax(dim=1))
             conv_model = ConvModel(model_id='MNIST',
                                    input_size=(28, 28),
                                    conv_blocks=[conv_2d_block_1, conv_2d_block_2, conv_2d_block_3],
@@ -194,22 +197,24 @@ class ConvModelTest(unittest.TestCase):
             print(str(e))
             self.assertTrue(False)
 
-
     @unittest.skip('Ignore')
     def test_builder(self):
         from dl.model.conv_2d_model import Conv2dBuilder
-        conv_2d_Builder = Conv2dBuilder('conv2DBuilder').set(key='input_size', value=(28, 28)) \
-            .set(key='in_channels_list', value=[3, 8, 16]) \
-            .set(key='kernel_size', value=(3, 3)) \
-            .set(key='stride', value=(1, 1)) \
-            .set(key='padding', value=(1, 1)) \
-            .set(key='is_batch_norm', value=True) \
-            .set(key='in_features_list', value=[256, 10]) \
-            .set(key='output_activation', value=nn.Softmax()) \
-            .set(key='bias', value=True) \
-            .set(key='drop_out', value=0.2)
-
+        conv_attributes = {
+            'input_size': (28, 28),
+            'in_channels_list': [3, 8, 16],
+            'kernel_size': (3, 3),
+            'stride': (1, 1),
+            'padding': (1, 1),
+            'is_batch_norm': True,
+            'in_features_list': [256, 20],
+            'output_activation': nn.Softmax(),
+            'bias': False,
+            'drop_out': 0.2
+        }
+        conv_2d_Builder = Conv2dBuilder(conv_attributes)
         conv_2d_model = conv_2d_Builder.build()
+        print(str(conv_2d_model))
 
     @unittest.skip('Ignore')
     def test_transpose(self):
@@ -289,8 +294,10 @@ class ConvModelTest(unittest.TestCase):
                                                             drop_out=0.25)
             num_classes = 10
             mlp_block_1 = MLPBlock.build_from_params(block_id='hidden',
-                                                     layer=nn.Linear(in_features=0, out_features=num_classes, bias=False),
-                                                     activation=nn.Softmax(dim=0))
+                                                     in_features=0,
+                                                     out_features=num_classes,
+                                                     bias=False,
+                                                     activation_module=nn.Softmax(dim=0))
             conv_model = ConvModel(model_id='MNIST',
                                    input_size=(28, 28),
                                    conv_blocks=[conv_2d_block_1, conv_2d_block_2],
@@ -348,11 +355,15 @@ class ConvModelTest(unittest.TestCase):
                                                             drop_out=0.25)
             num_classes = 101
             mlp_block_1 = MLPBlock.build_from_params(block_id='hidden',
-                                                     layer=nn.Linear(in_features=0, out_features=512, bias=False),
-                                                     activation=nn.ReLU())
+                                                     in_features=0,
+                                                     out_features=512,
+                                                     bias=False,
+                                                     activation_module=nn.ReLU())
             mlp_block_2 = MLPBlock.build_from_params(block_id='output',
-                                                     layer=nn.Linear(in_features=512, out_features=num_classes, bias=False),
-                                                     activation=nn.Softmax(dim=0))
+                                                     in_features=512,
+                                                     out_features=num_classes,
+                                                     bias=False,
+                                                     activation_module=nn.Softmax(dim=0))
             conv_model = ConvModel(model_id='Caltech-101',
                                    input_size=(target_size, target_size),
                                    conv_blocks=[conv_2d_block_1, conv_2d_block_2, conv_2d_block_3],
@@ -362,6 +373,7 @@ class ConvModelTest(unittest.TestCase):
             train_loader, eval_loader = caltech101_loader.loaders_from_path(root_path='../../../data/caltech-101',
                                                                             exec_config=ExecConfig.default())
             net_training = ConvModelTest.create_executor()
+            print(f'Network training:\n{net_training}')
             net_training.train(conv_model.model_id, conv_model, train_loader, eval_loader)
             self.assertTrue(True)
         except ConvException as e:
@@ -370,8 +382,9 @@ class ConvModelTest(unittest.TestCase):
 
     @staticmethod
     def create_executor() -> NeuralTraining:
+        from metric.metric_type import MetricType
         from dl.training.hyper_params import HyperParams
-        from metric.metric import Metric
+        from metric.built_in_metric import BuiltInMetric
 
         hyper_parameters = HyperParams(
             lr=0.001,
@@ -382,8 +395,11 @@ class ConvModelTest(unittest.TestCase):
             loss_function=nn.CrossEntropyLoss(),
             drop_out=0.0,
             train_eval_ratio=0.9)
-        metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
-        return NeuralTraining.build(hyper_parameters, metric_labels)
+
+        metrics_attributes = {MetricType.Accuracy: BuiltInMetric(metric_type=MetricType.Accuracy),
+                              MetricType.Precision: BuiltInMetric(metric_type=MetricType.Precision)}
+        return NeuralTraining(hyper_parameters, metrics_attributes)
+
 
 
 if __name__ == '__main__':
