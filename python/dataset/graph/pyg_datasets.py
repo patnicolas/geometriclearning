@@ -5,18 +5,21 @@ from torch.utils.data import Dataset
 from typing import AnyStr, Optional
 from dataset import DatasetException
 
-"""
-PyTorch Geometric data sets varies in their definition and loading protocol. This class provides a clean, simple
-functional interface to any PyTorch Geometric datasets.
-Currently 20 data sets are supported
-Examples:
-        pyg_dataset = PyGDatasets('Cora')
-        _dataset = pyg_dataset()
-        data = _dataset[0]
-"""
-
 
 class PyGDatasets(object):
+    """
+    PyTorch Geometric data sets varies in their definition and loading protocol. This class provides a clean, simple
+    functional interface to any PyTorch Geometric datasets.
+    20 data sets are currently supported
+    Note: the dictionary dataset-dict contains only a subset of PyTorch Geometric datasets. Loader for each
+    dataset is implemented as private method.
+    Reference: https://pytorch-geometric.readthedocs.io/en/latest/modules/datasets.html
+
+    Usage:
+            pyg_dataset = PyGDatasets('Cora')
+            _dataset = pyg_dataset()
+            data = _dataset[0]
+    """
     base_dir = '../../data'
     dataset_dict = {
         'Cora': lambda pyg: pyg.__load_planetoid(),
@@ -40,19 +43,19 @@ class PyGDatasets(object):
         'ToxCast': lambda pyg: pyg.__load_molecule_net(),
     }
 
-    def __init__(self, name: AnyStr) -> None:
+    def __init__(self, dataset_name: AnyStr) -> None:
         """
         Constructor for the interface to PyTorch Geometric dataset
-        @param name: Name of the dataset
-        @type name: AnyStr
+        @param dataset_name: Name of the dataset loaded from PyTorch Geometric
+        @type dataset_name: AnyStr
         """
-        self.name = name
+        self.name = dataset_name
 
     def __call__(self) -> Optional[Dataset]:
         """
         Method to load and extract data set from any supported source
         @return data set from PyTorch Geometric library
-        @ttype torch.util.Dataset
+        @rtype torch.util.Dataset
         """
         try:
             func = PyGDatasets.dataset_dict[self.name]

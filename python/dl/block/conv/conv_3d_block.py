@@ -6,9 +6,37 @@ from typing import AnyStr, Tuple, Optional, Self, Dict, Any
 import torch.nn as nn
 from dl.block.conv import Conv3DataType
 from dl import ConvException
+__all__ = ['Conv3dBlock']
 
 
 class Conv3dBlock(ConvBlock):
+    """
+      A neural block is a foundational unit which inherits from PyTorch class, Module and encapsulates a set of
+      PyTorch modules as described below in the case of the 3-dimensional convolutional layer:
+      - Conv2d layer torch module
+      - Max pooling module
+      - Activation module
+      - Optional batch normalization
+      - Optional dropout regularization for training
+
+      A Neural block can be constructor directly from PyTorch modules (nn.Module) using the default constructor
+      or from a descriptive dictionary of block attributes such as
+       {
+              'block_id': 'my_block',
+              'in_channels': 64,
+              'out_channels': 128,
+              'kernel_size': (3, 3, 3),
+              'stride': (1, 1, 1),
+              'padding': (2, 2, 2),
+              'bias': True,
+              'batch_norm': nn.BatchNorm3d(32),
+              'activation': nn.ReLU(),
+              'max_pooling': nn.MaxPool3d(kernel_size=2, stride=1, padding=0),
+              'dropout_ratio': 0.2
+          }
+
+      Reference: https://patricknicolas.substack.com/p/reusable-neural-blocks-in-pytorch
+      """
     valid_modules = ('Conv3d', 'MaxPool3d', 'BatchNorm3d', 'Dropout3d')
 
     def __init__(self,
@@ -54,6 +82,14 @@ class Conv3dBlock(ConvBlock):
 
     @classmethod
     def build(cls, block_attributes: Dict[AnyStr, Any]) -> Self:
+        """
+        Alternative constructor that instantiates a 3-dimensional neural block from a dictionary
+        of neural attributes
+        @param block_attributes: Dictionary of neural attributes
+        @type block_attributes: Dict[AnyStr, Any]
+        @return: Instance of a Conv3dBlock
+        @rtype: Conv3dBlock
+        """
         block_id = block_attributes['block_id']
         in_channels = block_attributes['in_channels']
         out_channels = block_attributes['out_channels']

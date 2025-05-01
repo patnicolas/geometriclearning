@@ -5,8 +5,6 @@ from dataclasses import dataclass
 from typing import AnyStr
 from torch_geometric.data import Data
 
-
-
 @dataclass
 class SubgraphExtractor:
     """

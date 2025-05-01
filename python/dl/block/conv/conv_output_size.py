@@ -3,9 +3,18 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from typing import Tuple, List
 from dl.block.conv import ConvDataType
+__all__ = ['ConvOutputSize']
 
 
 class ConvOutputSize(object):
+    """
+    Class that wraps the computation of the size of the output of a convolutional neural block.
+    .. math:
+        W_{conv}[out] = \frac{W_{conv}[in]+2p-k}{s} +1
+        H_{conv}[out]= \frac{H_{conv}[in]+2p-k}{s} +1
+
+    Reference: https://patricknicolas.substack.com/p/reusable-neural-blocks-in-pytorch
+    """
     def __init__(self,
                  kernel_size: ConvDataType,
                  stride: ConvDataType,

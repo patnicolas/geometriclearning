@@ -7,6 +7,10 @@ from torch.utils.data import DataLoader, Dataset, random_split
 
 
 class DefaultLoaderGenerator(object):
+    """
+    Class that encapsulates a generic extractor of training and validation data loader given
+    a dataset, num of samples, a split ration and a batch size
+    """
     @staticmethod
     def generate_loader(dataset: Dataset,
                         num_samples: int,

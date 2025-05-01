@@ -5,9 +5,16 @@ from typing import AnyStr, Self
 from dataset.graph.pyg_datasets import PyGDatasets
 from torch_geometric.data import Data
 from enum import Enum
+__all__ = ['GraphHomophily', 'GraphHomophilyType']
 
 
 class GraphHomophilyType(Enum):
+    """
+    Enumerator for the 3 type of homophily ratio
+    - Node homophily
+    - Edge homophily
+    - Class insensitive edge homophily
+    """
     Node = 'node'
     Edge = 'edge'
     ClassInsensitiveEdge = 'edge_insensitive'
@@ -108,19 +115,19 @@ class GraphHomophily(object):
         adj = [[] for _ in range(self.data.num_nodes)]
         for src, dst in self.data.edge_index.t():
             adj[src.item()].append(dst.item())
-            adj[dst.item()].append(src.item())  # assume undirected graph
+            adj[dst.item()].append(src.item())
 
         homophily_per_node = []
         for node in range(self.data.num_nodes):
             neighbors = adj[node]
-            if len(neighbors) == 0:
-                continue  # skip isolated nodes
-            same_label_count = sum(self.data.y[node] == self.data.y[neighbor] for neighbor in neighbors)
-            homophily_per_node.append(same_label_count / len(neighbors))
-
-        if len(homophily_per_node) == 0:
-            return 0.0  # handle case where all nodes are isolated
-        return sum(homophily_per_node) / len(homophily_per_node)
+            # Discard isolated node
+            if len(neighbors) > 0:
+                same_label_count = sum(self.data.y[node] == self.data.y[neighbor]
+                                       for neighbor in neighbors)
+                homophily_per_node.append(same_label_count / len(neighbors))
+        # handle case where all nodes are isolated
+        return 0.0 if len(homophily_per_node) == 0 \
+            else sum(homophily_per_node) / len(homophily_per_node)
 
     def __edge_homophily(self) -> float:
         # Get the vertices id for each of the pair of edge_index

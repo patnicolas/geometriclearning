@@ -9,18 +9,20 @@ from dl.block.neural_block import NeuralBlock
 from dl.block.conv.conv_output_size import ConvOutputSize
 import logging
 logger = logging.getLogger('dl.block.ConvBlock')
-
-
-"""
-Generic convolutional neural block for 1 and 2 dimensions
-
-Formula to compute output_dim of a convolutional block given an in_channels
-        output_dim = (in_channels + 2*padding - kernel_size)/stride + 1
-Note: Spectral Normalized convolution is available only for 2D models
-"""
+__all__ = ['ConvBlock']
 
 
 class ConvBlock(NeuralBlock):
+    """
+    Generic convolutional neural block for 1, 2 and 3 imensions
+
+    Formula to compute output_dim of a convolutional block given an in_channels
+            output_dim = (in_channels + 2*padding - kernel_size)/stride + 1
+    Note: Spectral Normalized convolution is available only for 2D models
+
+    Reference: https://patricknicolas.substack.com/p/reusable-neural-blocks-in-pytorch
+    """
+
     def __init__(self, block_id: Optional[AnyStr]) -> None:
         """
         Constructor for the Generic Convolutional Neural block

@@ -6,9 +6,26 @@ from dl.block.graph.g_message_passing_block import GMessagePassingBlock
 from typing import AnyStr, Self, Optional, Dict, Any
 import torch.nn as nn
 from torch_geometric.nn import BatchNorm, GCNConv
+__all__ = ['GCNBlock']
 
 
 class GCNBlock(GMessagePassingBlock):
+    """
+    Neural block for generic Graph Neural Network
+
+    A Neural block can be constructor directly from PyTorch modules (nn.Module) using the default constructor
+    or from a descriptive dictionary of block attributes such as:
+    {
+        'block_id': 'my_model',
+        'message_passing': nn.GraphConv,
+        'batch_norm': nn.BatchNorm(64),
+        'pooling': nn.TopKPooling
+        'activation': nn.ReLU(),
+        'dropout_ratio': 0.3
+    }
+
+    Reference: https://patricknicolas.substack.com/p/reusable-neural-blocks-in-pytorch
+    """
     def __int__(self,
                 block_id: AnyStr,
                 gcn_layer: GCNConv,
@@ -36,7 +53,15 @@ class GCNBlock(GMessagePassingBlock):
                                        drop_out_module=drop_out_module)
 
     @classmethod
-    def build(cls, block_attributes: Dict[AnyStr, Any])  -> Self:
+    def build(cls, block_attributes: Dict[AnyStr, Any]) -> Self:
+        """
+        Alternative constructor that instantiates a generic Graph neural block from a dictionary
+        of neural attributes
+        @param block_attributes: Dictionary of neural attributes
+        @type block_attributes: Dict[AnyStr, Any]
+        @return: Instance of a GCNBlock
+        @rtype: GCNBlock
+        """
         block_id = block_attributes['block_id']
         gcn_layer = block_attributes['message_passing']
         batch_norm_module = block_attributes['batch_norm']
@@ -51,16 +76,28 @@ class GCNBlock(GMessagePassingBlock):
                    graph_pooling_module=pooling_module,
                    drop_out_module=dropout_module)
 
-
-
-
     @classmethod
     def build_from_params(cls,
-                          _id: AnyStr,
+                          block_id: AnyStr,
                           input_layer_dim: int,
                           output_layer_dim: int,
                           activation: nn.Module,
                           drop_out: float = 0.0) -> Self:
+        """
+        Alternative constructor using Graph convolutional layer parameters
+        @param block_id: Identifier for the block
+        @type block_id: str
+        @param input_layer_dim: Size or dimension of the input layer
+        @type input_layer_dim: int
+        @param output_layer_dim: Size or dimension of the input layer
+        @type output_layer_dim: int
+        @param activation: Activation module
+        @type activation: nn.Module
+        @param drop_out: Drop-out regularization factor
+        @type drop_out: float
+        @return: Instance of GCNBlock
+        @rtype: GCNBlock
+        """
         gcn_layer = GCNConv(input_layer_dim, output_layer_dim)
         batch_norm = BatchNorm(output_layer_dim)
-        return cls(_id, gcn_layer, batch_norm, activation, drop_out)
+        return cls(block_id, gcn_layer, batch_norm, activation, drop_out)

@@ -46,7 +46,6 @@ class LieSE3Group(object):
         self.algebra_element = np.concatenate([rotation_matrix, translation_matrix], axis=1)
         self.group_element = LieSE3Group.lie_group.exp(self.algebra_element)
 
-
     @classmethod
     def build(cls, flatten_rotation_matrix: List[float], flatten_translation_vector: List[float]) -> Self:
         """
@@ -66,7 +65,6 @@ class LieSE3Group(object):
         rotation_matrix, translation_matrix = LieSE3Group.reshape(np_rotation_matrix, np_translation_matrix)
         return cls(rotation_matrix, translation_matrix)
 
-
     def inverse(self) -> Self:
         """
         Compute the inverse of this LieGroup element using Geomstats 'inverse' method
@@ -80,7 +78,6 @@ class LieSE3Group(object):
         # Extract the 1x3 translation matrix from the inverse element
         translation = np.expand_dims(inverse_group_element[:3, -1], axis=0)
         return LieSE3Group(rotation, translation)
-
 
     def product(self, lie_se3_group: Self) -> Self:
         """
@@ -154,7 +151,6 @@ class LieSE3Group(object):
         translation_matrix = np.concatenate([translation_matrix.T, LieSE3Group.extend_translation])
         return rotation_matrix,  translation_matrix
 
-
     @staticmethod
     def __visualize_element(se3_element: np.array, descriptor: AnyStr, ax: Axes3D) -> None:
         import geomstats.visualization as visualization
@@ -162,13 +158,6 @@ class LieSE3Group(object):
         visualization.plot(se3_element, ax=ax, space="SO3_GROUP")
         ax.set_title(descriptor, fontsize=14)
         LieSE3Group.__set_axes(ax)
-
-    """
-    def __get_se3_point(self,
-                        rotation_matrix: np.array,
-                        translation_vector: np.array) -> SE3Element:
-        return SE3Element(self.group_element, rotation_matrix, translation_vector)
-    """
 
     @staticmethod
     def __convert_translation_to_matrix(trans_vector: List[float]) -> np.array:

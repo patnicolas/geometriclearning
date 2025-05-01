@@ -54,9 +54,7 @@ class EvalGConv(object):
         class_distribution = data.y[data.train_mask]
         raw_distribution = torch.bincount(class_distribution)
         raw_weights = 1.0/raw_distribution
-        total_sum = raw_weights.sum()
-        distribution = raw_weights/total_sum
-        return distribution
+        return raw_weights/raw_weights.sum()
 
     def __get_training_env(self, model: GConvModel, class_weights: torch.Tensor = None) -> GNNTraining:
         self.training_attributes['loss_function'] = nn.NLLLoss(weight=class_weights.to('mps')) \
@@ -129,7 +127,7 @@ if __name__ == '__main__':
         'loss_function': None,
         'encoding_len': -1,
         'train_eval_ratio': 0.9,
-        'epochs': 20,
+        'epochs': 24,
         'weight_initialization': 'xavier',
         'optim_label': 'adam',
         'drop_out': 0.25,
@@ -148,10 +146,10 @@ if __name__ == '__main__':
     }
     sampling_attributes = {
         'id': 'NeighborLoader',
-        'num_neighbors': [10, 4],
+        'num_neighbors': [4],
         'batch_size': 64,
         'replace': True,
-        'num_workers': 1
+        'num_workers': 4
     }
 
     eval_gconv = EvalGConv(training_attributes, sampling_attributes)

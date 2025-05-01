@@ -13,28 +13,30 @@ from dataset import DatasetException
 __all__ = ['GraphDataLoader']
 
 
-"""
-Universal wrapper for the various Graph Data Loaders to generate the training and evaluation data loader to
-be directly used for training and evaluation of graph neural network models.
-The steps are
-1- Specify the dictionary of attributes (arguments) for a given data loader (i.e. num_neighbors, batch_size and replace) 
-   for NeighborsLoader
-2- Specify the data to be loaded (including the train and valuation masks)
-3- Use mask and/or Shuffle attribute to build the training and test loaders
-4- Specify the number of workers if > 1
-
-The graph data loader currently supported are:
-NeighborLoader
-RandomNodeLoader
-GraphSAINTRandomWalkSampler
-GraphSAINTNodeSampler
-GraphSAINTEdgeSampler
-ShaDowKHopSampler
-ClusterLoader
-"""
-
-
 class GraphDataLoader(object):
+    """
+    Universal wrapper for the various Graph Data Loaders to generate the training and evaluation data loader to
+    be directly used for training and evaluation of graph neural network models.
+    The steps are
+    1- Specify the dictionary of attributes (arguments) for a given data loader (i.e. num_neighbors, batch_size and replace)
+       for NeighborsLoader
+    2- Specify the data to be loaded (including the train and valuation masks)
+    3- Use mask and/or Shuffle attribute to build the training and test loaders
+    4- Specify the number of workers if > 1
+
+    The graph data loader currently supported are:
+    NeighborLoader
+    RandomNodeLoader
+    GraphSAINTRandomWalkSampler
+    GraphSAINTNodeSampler
+    GraphSAINTEdgeSampler
+    ShaDowKHopSampler
+    ClusterLoader
+
+    References - PyTorch Geometric
+    https://pytorch-geometric.readthedocs.io/en/latest/modules/datasets.html
+    https://pytorch-geometric.readthedocs.io/en/latest/modules/loader.html
+    """
     # Static definition of the sampling method dictionary
     loader_sampler_dict = {
         'NeighborLoader': lambda loader: loader.__neighbors_loader(),
@@ -77,12 +79,31 @@ class GraphDataLoader(object):
         self.attributes_map = sampling_attributes
 
     @classmethod
-    def build_neighbor_loader(cls, dataset_name: AnyStr, n_neighbors: List[int], b_size: int, num_workers: int) -> Self:
-        attrs = {'id': 'NeighborLoader',
-                 'num_neighbors': n_neighbors,
-                 'batch_size': b_size,
-                 'replace': True,
-                 'num_workers': num_workers }
+    def build_node_neighbor_loader(cls,
+                                   dataset_name: AnyStr,
+                                   num_neighbors: List[int],
+                                   batch_size: int,
+                                   num_workers: int) -> Self:
+        """
+        Alternative constructor dedicated to the node neighbor loader
+        @param dataset_name: Name of the dataset as defined in PyTorch Geometric
+        @type dataset_name: str
+        @param num_neighbors: Distribution of number of node neighbors used in sampling
+        @type num_neighbors: List[in]
+        @param batch_size: Size of the batch of graph nodes
+        @type batch_size: int
+        @param num_workers: Number of concurrent executors
+        @type num_workers: int
+        @return: Instance of GraphDataLoader
+        @rtype: GraphDataLoader
+        """
+        attrs = {
+            'id': 'NeighborLoader',
+            'num_neighbors': num_neighbors,
+            'batch_size': batch_size,
+            'replace': True,
+            'num_workers': num_workers
+        }
         return cls(dataset_name, attrs)
 
     def __call__(self) -> (DataLoader, DataLoader):

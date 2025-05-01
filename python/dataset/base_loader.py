@@ -1,15 +1,18 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-from torch.utils.data import DataLoader, Dataset, random_split
+from torch.utils.data import DataLoader, Dataset
 from dl.training.exec_config import ExecConfig
-from typing import AnyStr, Optional
+from typing import AnyStr
 from dataset import DatasetException
 import abc
 from abc import ABC
 
 
 class BaseLoader(ABC):
+    """
+    Base class for various PyTorch and PyTorch Geometric loader
+    """
     def __init__(self, batch_size: int, num_samples: int = -1):
         """
         Constructor for this generic data set loader. A sub-sample is selected if num_samples is > 0 or
@@ -63,4 +66,11 @@ class BaseLoader(ABC):
 
     @abc.abstractmethod
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):
+        """
+        Abstract protected method for extracting a training and validation dataset from a file
+        @param root_path: Absolute or relative path for the file containing the dataset
+        @type root_path:
+        @return: Pair of training and validation data sets
+        @rtype: Tuple[Dataset, Dataset]
+        """
         raise DatasetException(f'Failed to load data from path {root_path}')

@@ -6,21 +6,37 @@ from typing import Self, Optional, AnyStr, Dict, Any
 
 from dl.block.neural_block import NeuralBlock
 from dl import ConvException
-
-
-"""    
-    Generic de convolutional neural block for 1 and 2 dimensions
-    Components:
-         Convolution (kernel, Stride, padding)
-         Batch normalization (Optional)
-         Activation
-
-    Formula to compute output_dim of a de convolutional block given an in_channels
-        output_dim = stride*(in_channels -1) - 2*padding + kernel_size
-"""
+__all_ = ['DeConv2dBlock']
 
 
 class DeConv2dBlock(NeuralBlock):
+    """
+    Generic de-convolutional neural block for 2 dimensions (images)
+    Components:
+        Convolution (kernel, Stride, padding)
+        Batch normalization (Optional)
+        Activation
+
+    Formula to compute output_dim of a de convolutional block given an in_channels
+            output_dim = stride*(in_channels -1) - 2*padding + kernel_size
+
+    A Neural block can be constructor directly from PyTorch modules (nn.Module) using the default constructor
+    or from a descriptive dictionary of block attributes such as
+    {
+        'block_id': 'my_model',
+        'in_channels': 32,
+        'out_channels': 64,
+        'kernel_size': (3, 3),
+        'stride': (1, 1),
+        'padding': (1, 1),
+        'bias': True,
+        'batch_norm': nn.BatchNorm2d(64),
+        'activation': nn.ReLU(),
+        'dropout_ratio': 0.3
+    }
+
+    Reference: https://patricknicolas.substack.com/p/reusable-neural-blocks-in-pytorch
+    """
     def __init__(self,
                  block_id: Optional[AnyStr],
                  de_conv_2d_module: nn.ConvTranspose2d,
@@ -52,23 +68,20 @@ class DeConv2dBlock(NeuralBlock):
             modules_list.append(drop_out_module)
         self.modules_list = modules_list
 
-
     @classmethod
-    def build(cls, block_id: AnyStr, block_attributes: Dict[AnyStr, Any]) -> Self:
+    def build(cls, block_attributes: Dict[AnyStr, Any]) -> Self:
         """
         Alternative constructor for the de convolutional neural block
-        @param block_id: Identifier for this de-convolutional block
-        @type block_id: str
         @param block_attributes: Attributes for the Convolutional network
-        @type block_attributes: Dict[str, nn.Module]
+        @type block_attributes: Dict[str, Any]
         """
-        de_conv_module = nn.ConvTranspose2d(in_channels=block_attributes['conv_layer'].out_channels,
-                                            out_channels=block_attributes['conv_layer'].in_channels,
-                                            kernel_size=block_attributes['conv_layer'].kernel_size,
-                                            stride=block_attributes['conv_layer'].stride,
-                                            padding=block_attributes['conv_layer'].padding,
-                                            bias=False)
-        return cls(block_id,
+        de_conv_module = nn.ConvTranspose2d(in_channels=block_attributes['in_channels'],
+                                            out_channels=block_attributes['out_channels'],
+                                            kernel_size=block_attributes['kernel_size'],
+                                            stride=block_attributes['stride'],
+                                            padding=block_attributes['padding'],
+                                            bias=block_attributes['bias'])
+        return cls(block_id=block_attributes['block_id'],
                    de_conv_2d_module=de_conv_module,
                    batch_norm_module=block_attributes['batch_norm'],
                    activation_module=block_attributes['activation'],
