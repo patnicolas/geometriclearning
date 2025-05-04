@@ -401,6 +401,5 @@ class ConvModelTest(unittest.TestCase):
         return NeuralTraining(hyper_parameters, metrics_attributes)
 
 
-
 if __name__ == '__main__':
     unittest.main()

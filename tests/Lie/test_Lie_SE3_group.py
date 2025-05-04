@@ -1,6 +1,8 @@
 import unittest
 import numpy as np
 from Lie.Lie_SE3_group import LieSE3Group
+from typing import List, AnyStr
+from matplotlib.animation import FuncAnimation
 
 
 class LieSE3GroupTest(unittest.TestCase):
@@ -9,30 +11,36 @@ class LieSE3GroupTest(unittest.TestCase):
     def test_build_from_numpy(self):
         rot_matrix = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, -1.0], [0.0, 1.0, 0.0]])
         trans_matrix = np.array([[1.0, 3.0, 2.0]])
-        lie_se3_group = LieSE3Group(rot_matrix, trans_matrix)
+        epsilon = 1e-4
+        lie_se3_group = LieSE3Group(rot_matrix, trans_matrix, epsilon)
         print(lie_se3_group)
+        self.assertTrue(lie_se3_group.group_element.shape == (4, 4))
 
     @unittest.skip('Ignored')
     def test_build_from_vec(self):
         # Two inputs
         # - Unit generator of rotations along Y axis
         # - Generator for a translation along X xis
-        ly_rotation = np.array([[0.0, 0.0, 1.0],
-                                [0.0, 0.0, 0.0],
-                                [-1.0, 0.0, 0.0]])
-        x_translation = np.array([[1.0, 0.0, 0.0]])
-        print(f'\nRotation matrix:\n{np.reshape(ly_rotation, (3, 3))}')
-        print(f'Translation vector: {x_translation}')
-        lie_se3_group = LieSE3Group(ly_rotation, x_translation)
+
+        epsilon = 1e-4
+        print(f'\nRotation matrix:\n{np.reshape(LieSE3Group.ly_rotation, (3, 3))}')
+        print(f'Translation vector: {LieSE3Group.lx_translation}')
+        lie_se3_group = LieSE3Group(LieSE3Group.ly_rotation, LieSE3Group.lx_translation, epsilon)
         print(lie_se3_group)
 
     @unittest.skip('Ignored')
     def test_inverse(self):
-        ly_rotation = np.array([[0.0, 0.0, 1.0],
-                                [0.0, 0.0, 0.0],
-                                [-1.0, 0.0, 0.0]])
-        x_translation = np.array([[1.0, 0.0, 0.0]])
-        lie_se3_group = LieSE3Group(ly_rotation, x_translation)
+        lie_se3_group = LieSE3Group(rotation_matrix=LieSE3Group.ly_rotation,
+                                    translation_matrix=LieSE3Group.lx_translation,
+                                    epsilon=1e-4)
+        inv_lie_se3_group = lie_se3_group.inverse()
+        print(f'\nSE3 element\n{lie_se3_group}\nInverse\n{inv_lie_se3_group}')
+        self.assertTrue(inv_lie_se3_group.group_element.shape == (4, 4))
+
+    @unittest.skip('Ignored')
+    def test_inverse_2(self):
+        lie_se3_group = LieSE3Group(rotation_matrix=LieSE3Group.ly_rotation,
+                                    translation_matrix=LieSE3Group.lx_translation)
         inv_lie_se3_group = lie_se3_group.inverse()
         print(f'\nSE3 element\n{lie_se3_group}\nInverse\n{inv_lie_se3_group}')
 
@@ -52,14 +60,10 @@ class LieSE3GroupTest(unittest.TestCase):
 
     @unittest.skip('Ignored')
     def test_product_1(self):
-        ly_rotation = np.array([[0.0, 0.0, 1.0],
-                                [0.0, 0.0, 0.0],
-                                [-1.0, 0.0, 0.0]])
-        x_translation = np.array([[1.0, 0.0, 0.0]])
-        se3_group = LieSE3Group(ly_rotation, x_translation)
+        se3_group = LieSE3Group(LieSE3Group.ly_rotation, LieSE3Group.lx_translation)
 
         # Composition of the same SE3 element
-        so3_group_product = se3_group.product(se3_group)
+        so3_group_product = se3_group.compose(se3_group)
         print(f'\nSelf composed SE3 elements:\n{so3_group_product.group_element}')
 
         import matplotlib.pyplot as plt
@@ -73,23 +77,14 @@ class LieSE3GroupTest(unittest.TestCase):
 
     @unittest.skip('Ignored')
     def test_product_2(self):
-        ly_rotation = np.array([[0.0, 0.0, 1.0],
-                                [0.0, 0.0, 0.0],
-                                [-1.0, 0.0, 0.0]])
-        lz_rotation = np.array([[0.0, -1.0, 0.0],
-                                [1.0, 0.0, 0.0],
-                                [0.0, 0.0, 0.0]])
-        y_translation = np.array([[0.0, 1.0, 0.0]])
-        z_translation = np.array([[0.0, 0.0, 1.0]])
-
         # First SO3 rotation matrix 90 degree along x axis
-        se3_group_y = LieSE3Group(ly_rotation, y_translation)
+        se3_group_y = LieSE3Group(LieSE3Group.ly_rotation, LieSE3Group.ly_translation)
         print(f'\nFirst SE3 element:{se3_group_y}')
-        se3_group_z = LieSE3Group(lz_rotation, z_translation)
+        se3_group_z = LieSE3Group(LieSE3Group.lz_rotation, LieSE3Group.lz_translation)
         print(f'\nSecond SE3 element:{se3_group_z}')
 
         # Composition of the same matrix
-        se3_composed_group = se3_group_y.product(se3_group_z)
+        se3_composed_group = se3_group_y.compose(se3_group_z)
         print(f'\nComposed SE3 elements:{se3_composed_group}')
 
         import matplotlib.pyplot as plt
@@ -112,7 +107,7 @@ class LieSE3GroupTest(unittest.TestCase):
         plt.colorbar()
         plt.show()
 
-    # @unittest.skip('Ignored')
+    @unittest.skip('Ignored')
     def test_visualize(self):
         # Two inputs= in the tangent space: 3x3 90 degree rotation along Y axis
         # and Translation along X xis
@@ -134,7 +129,3 @@ class LieSE3GroupTest(unittest.TestCase):
         np.set_printoptions(precision=3, suppress=False, floatmode='fixed')
         plt.title(f'SE3 element\n{lie_se3_group.group_element}')
         plt.show()
-
-
-
-
