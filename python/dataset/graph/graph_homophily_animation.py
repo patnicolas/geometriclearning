@@ -1,27 +1,49 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-
+from typing import List
 import matplotlib.pyplot as plt
 from matplotlib.collections import PathCollection
 import matplotlib.animation as animation
 from networkx import Graph
 import networkx as nx
 from networkx.classes.reportviews import NodeView
-__all__ = ['GraphHomophilyVisualization']
+from util.base_animation import BaseAnimation
+__all__ = ['GraphHomophilyAnimation']
 
 
-class GraphHomophilyVisualization(object):
+class GraphHomophilyAnimation(BaseAnimation):
+    def __init__(self,
+                 chart_pos: List[float],
+                 interval: int,
+                 fps: int,
+                 num_nodes: int,
+                 average_degree: float,) -> None:
+        """
 
-    def __init__(self, num_nodes: int, average_degree: float, interval: int, fps: int) -> None:
+        @param chart_pos: Position of the chart used in call to plt.set_position or ax.set_position
+        @type chart_pos: 4-dimension array
+        @param interval: Interval in milliseconds between frames
+        @type interval: int
+        @param fps: Number of frame per seconds for animation
+        @type fps: int
+        @param num_nodes:
+        @type num_nodes:
+        @param average_degree:
+        @type average_degree:
+        """
+        super(GraphHomophilyAnimation, self).__init__(chart_pos, interval, fps)
+
         self.G = nx.erdos_renyi_graph(n=num_nodes, p=average_degree, seed=42)
-        self.central_node: int = GraphHomophilyVisualization.__get_central_node(self.G)
-        self.interval = interval
-        self.fps = fps
+        self.central_node: int = GraphHomophilyAnimation.__get_central_node(self.G)
+
 
     def draw(self) -> None:
         fig, ax = plt.subplots(figsize=(8, 7))
-        ax.set_position([-0.05, -0.07, 1.1, 1.06])
+        fig.patch.set_facecolor('#f0f9ff')
+        ax.set_facecolor('#f0f9ff')
+        ax.set_position(self.chart_pos)
+        self._draw_logo(fig, ax)
 
         hop1_neighbors, hop2_neighbors = self.__build_neighbors()
         node_artists = self.__layout(ax)
@@ -32,20 +54,20 @@ class GraphHomophilyVisualization(object):
             new_colors = []
             if frame < len(hop1_neighbors):
                 highlighted_nodes.append(hop1_neighbors[frame])
-                ax.text(x=-0.26,
-                        y=-0.80,
+                ax.text(x=0.42,
+                        y=0.76,
                         s=f"1st Hop: {len(highlighted_nodes)} neighbors",
-                        fontdict={'fontsize': 15, 'fontname': 'Helvetica', 'fontweight': 'bold', 'color': 'orange'},
+                        fontdict={'fontsize': 14, 'fontname': 'Helvetica', 'fontweight': 'bold', 'color': 'orange'},
                         bbox=dict(facecolor='black', edgecolor='black'))
                 new_colors = ['orange' if n in highlighted_nodes else 'lightgray' for n in self.G.nodes()]
                 new_colors[self.central_node] = 'red'
             else:
                 if frame - len(hop1_neighbors) < len(hop2_neighbors):
                     highlighted_nodes_2.append(hop2_neighbors[frame - len(hop1_neighbors)])
-                ax.text(x=-0.27,
-                        y=-0.80,
+                ax.text(x=0.41,
+                        y=0.76,
                         s=f"2nd Hop: {len(highlighted_nodes_2)} neighbors",
-                        fontdict={'fontsize': 15, 'fontname': 'Helvetica', 'color': 'yellow'},
+                        fontdict={'fontsize': 14, 'fontname': 'Helvetica', 'color': 'yellow'},
                         bbox=dict(facecolor='black', edgecolor='black'))
 
                 for n in self.G.nodes():
@@ -58,15 +80,16 @@ class GraphHomophilyVisualization(object):
                 new_colors[self.central_node] = 'red'
 
             node_artists.set_color(new_colors)
-            GraphHomophilyVisualization.__draw_formula(ax)
+            GraphHomophilyAnimation.__draw_formula(ax)
             return node_artists
 
         # 5. Animate
         ani = animation.FuncAnimation(fig, update, frames=len(hop1_neighbors)*6, interval=self.interval, repeat=False)
         plt.axis('off')
-        ax.set_title("Graph Neural Networks: Node Homophily",
-                     y=0.935,
-                     fontdict={'fontsize': 22, 'fontweight': 'bold', 'fontname': 'Helvetica', 'color': 'black'})
+        ax.set_title("Graph Neural Networks: Homophily",
+                     x=0.52,
+                     y=0.12,
+                     fontdict={'size': 21, 'weight': 'bold', 'fontname': 'Helvetica', 'color': 'black'})
         ani.save('homophily_animation.mp4', writer='ffmpeg', fps=self.fps, dpi=300)
         # plt.show()
 
@@ -75,11 +98,11 @@ class GraphHomophilyVisualization(object):
     @staticmethod
     def __draw_formula(ax):
         formula = r"$h_{G}=\frac{1}{|\mathcal{V}|} \sum_{v \in \mathcal{V}} \frac{ | \{ (w,v) : w \in \mathcal{N}(v) \wedge y_v = y_w \} |  } { |\mathcal{N}(v)| }$"
-        ax.text(x=0.2,
-                y=-0.92,
+        ax.text(x=0.22,
+                y=-0.72,
                 s=formula,
                 horizontalalignment='left',
-                fontdict={'fontsize': 14, 'fontweight': 'bold', 'color': 'black'},
+                fontdict={'fontsize': 13, 'fontweight': 'bold', 'color': 'black'},
                 bbox=dict(facecolor='lightgray', edgecolor='black'))
 
     def __layout(self, ax) -> PathCollection:
@@ -126,8 +149,9 @@ class GraphHomophilyVisualization(object):
 
 
 if __name__ == '__main__':
-    graph_homophily_visualization = GraphHomophilyVisualization(num_nodes=96,
-                                                                average_degree=0.12,
-                                                                interval=1400,
-                                                                fps=3)
+    graph_homophily_visualization = GraphHomophilyAnimation(chart_pos=[-0.05, -0.1, 1.1, 1.07],
+                                                            interval=1400,
+                                                            fps=3,
+                                                            num_nodes=96,
+                                                            average_degree=0.12)
     graph_homophily_visualization.draw()

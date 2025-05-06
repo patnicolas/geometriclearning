@@ -2,6 +2,8 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import geomstats.visualization as visualization
+from geomstats.visualization.pre_shape import KendallSphere
+
 from geomstats.geometry.hypersphere import Hypersphere, HypersphereMetric
 from typing import NoReturn, List
 import numpy as np
@@ -151,16 +153,17 @@ class HypersphereSpace(GeometricSpace):
         import matplotlib.pyplot as plt
 
         fig = plt.figure(figsize=(10, 10))
-        ax = fig.add_subplot(111, projection="3d")
-        ax.set_facecolor('#F2F9FE')
+        _ax = fig.add_subplot(111, projection="3d")
+        _ax.set_facecolor('#F2F9FE')
+        fig.set_facecolor('#F2F9FE')
 
         # Walk through the list of data point on the manifold
         for manifold_pt in manifold_points:
             ax = visualization.plot(
                 manifold_pt.location,
-                ax=ax,
+                ax=_ax,
                 space="S2",
-                s=100,
+                s=80,
                 alpha=1.0,
                 label=manifold_pt.id)
 
@@ -170,7 +173,7 @@ class HypersphereSpace(GeometricSpace):
                 # Show the end point
                 # ax = visualization.plot(end_pt, ax=ax, space="S2", s=100, alpha=0.8, label=f'End {manifold_pt.id}')
                 arrow = visualization.Arrow3D(manifold_pt.location, vector=tgt_vec)
-                arrow.draw(ax, color="red")
+                arrow.draw(_ax, color="red")
 
                 # If the geodesic is to be computed and displayed
                 if manifold_pt.geodesic:
@@ -180,9 +183,10 @@ class HypersphereSpace(GeometricSpace):
                     geodesics_pts = geodesics(gs.linspace(0.0, 1.0, 40))
                     ax = visualization.plot(
                         geodesics_pts,
-                        ax=ax,
+                        ax=_ax,
                         space="S2",
-                        color="blue",
+                        color='blue',
+                        s=15,
                         label=f'Geodesic {manifold_pt.id}')
 
         if euclidean_points is not None:
@@ -193,7 +197,6 @@ class HypersphereSpace(GeometricSpace):
                     euclidean_pt[2],
                     **{'label': f'Euclidean mean', 'color': 'black'},
                     alpha=0.5)
-
         ax.grid()
         ax.legend()
         plt.show()
@@ -231,7 +234,7 @@ class HypersphereSpace(GeometricSpace):
         return tangent_v, end_point
 
     @staticmethod
-    def show(vParams: VisualizationParams, locations: np.array) -> NoReturn:
+    def showX(vParams: VisualizationParams, locations: np.array) -> NoReturn:
         """
         Visualize the data points in 3D
         :param vParams Parameters for the visualization

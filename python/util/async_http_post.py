@@ -4,7 +4,6 @@ __copyright__ = "Copyright 2020, 2022  All rights reserved."
 import asyncio
 import requests
 import urllib3
-import constants
 
 """
     Implement Asynchronous/concurrent processing of a list of requests contained in an input file. 

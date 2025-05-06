@@ -1,7 +1,7 @@
 import unittest
 
 import numpy as np
-from manifolds.spacevisualization import SpaceVisualization, VisualizationParams
+from geometry import SpaceVisualization, VisualizationParams
 import matplotlib.pyplot as plt
 
 
@@ -20,7 +20,7 @@ class TestSpaceVisualization(unittest.TestCase):
         space_visualization = SpaceVisualization(visualization_param)
         space_visualization.scatter(data_points)
 
-    @unittest.skip
+    # @unittest.skip
     def test_plot(self):
         t = np.arange(0.0, 2.0, 0.01)
         s = 1 + np.sin(2 * np.pi * t)

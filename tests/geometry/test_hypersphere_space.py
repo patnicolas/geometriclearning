@@ -48,13 +48,13 @@ class TestGeometricSpace(unittest.TestCase):
     def test_show_tangent_vector_geodesics(self):
         manifold = HypersphereSpace(True)
 
-        for _ in range(4):
-            samples = manifold.sample(2)
+        for _ in range(8):
+            samples = manifold.sample(4)
             manifold_points = [
                 ManifoldPoint(
                     id=f'data{index}',
                     location=sample,
-                    tgt_vector=[0.5, 0.3, 0.5],
+                    tgt_vector=[-0.2, 0.3, 0.5],
                     geodesic=True) for index, sample in enumerate(samples)
             ]
             manifold.show_manifold(manifold_points)

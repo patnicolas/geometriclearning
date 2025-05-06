@@ -5,12 +5,13 @@ import numpy as np
 from typing import AnyStr, List, Self, Callable
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from util.base_animation import BaseAnimation
 import logging
 logger = logging.getLogger('Lie.SE3Animation')
 __all__ = ['SE3Animation']
 
 
-class SE3Animation(object):
+class SE3Animation(BaseAnimation):
     """
     Wrapper for simulation or animation of SE3 Lie group transformation defined as
     ..math::
@@ -27,50 +28,56 @@ class SE3Animation(object):
     Reference:
     """
     def __init__(self,
-                 coordinates: (float, float, float),
-                 SE3_transform: Callable[[np.array], np.array],
+                 chart_pos: List[float],
                  interval: int,
-                 fps: int) -> None:
+                 fps: int,
+                 coordinates: (float, float, float),
+                 SE3_transform: Callable[[np.array], np.array]) -> None:
         """
-        Default constructor for the SE3 lie Group
+        Default constructor for the animation of SE3 lie Group
+        @param chart_pos: Define the position of the chart [x, y, width, height]
+        @type chart_pos: List[float]
+        @param interval: Interval in milliseconds between frames
+        @type interval: int
+        @param fps: Number of frame per seconds for animation
+        @type fps: int
         @param coordinates: Initial coordinate of the sphere used for SE3 transformation
         @type coordinates: Tuple[float, float,float]
         @param SE3_transform: Rotation (SO3) + Translation transform
         @type SE3_transform: Callable
+        """
+        super(SE3Animation, self).__init__(chart_pos, interval, fps)
+
+        self.coordinates = coordinates
+        self.transform = SE3_transform
+        self.next_step = [np.array(0.0), np.array([[0.0], [0.0], [0.0]])]
+        self.fig = plt.figure(figsize=(10, 7))
+        self.ax = self.fig.add_subplot(111, projection='3d')
+
+    @classmethod
+    def build(cls,
+              chart_pos: List[float],
+              interval: int,
+              fps: int,
+              transform: Callable[[np.array], np.array]) -> Self:
+        """
+        Alternative constructor that takes a SE3 transformation as argument
+        @param chart_pos: Define the position of the chart [x, y, width, height]
+        @type chart_pos: List[float]
         @param interval: Interval in milliseconds between frames
         @type interval: int
         @param fps: Number of frame per seconds for animation
         @type fps: int
-        """
-        self.coordinates = coordinates
-        self.transform = SE3_transform
-        self.interval = interval
-        self.fps = fps
-        self.next_step = [np.array(0.0), np.array([[0.0], [0.0], [0.0]])]
-        self.fig = plt.figure(figsize=(10, 7))
-        self.ax = self.fig.add_subplot(111, projection='3d')
-        self.fig.patch.set_facecolor('lightblue')
-        self.ax.set_facecolor('lightblue')
-        self.ax.set_position([-0.55, 0.0, 2.0, 0.92])
-
-    @classmethod
-    def build(cls, transform: Callable[[np.array], np.array], interval: int, fps: int) -> Self:
-        """
-        Alternative constructor that takes a SE3 transformation as argument
         @param transform: Rotation (SO3) + Translation transform
         @type transform: Callable
         @return: Instance of SE3Animation
         @rtype: SE3Animation
-        @param interval: Interval in milliseconds between frames
-        @type interval: int
-        @param fps: Number of frame per seconds for animation
-        @type fps: int
         """
         u, v = np.linspace(0, 2 * np.pi, 50), np.linspace(0, np.pi, 50)
         x = np.outer(np.cos(u), np.sin(v))
         y = np.outer(np.sin(u), np.sin(v))
         z = np.outer(np.ones_like(u), np.cos(v))
-        return cls((x, y, z), transform, interval, fps)
+        return cls(chart_pos=chart_pos, interval=interval, fps=fps, coordinates=(x, y, z), SE3_transform=transform)
 
     def draw(self) -> None:
         """
@@ -88,9 +95,19 @@ class SE3Animation(object):
                            self.coordinates[1].ravel(),
                            self.coordinates[2].ravel(),
                            np.ones(self.coordinates[0].size)])
+        self.fig.patch.set_facecolor('#f0f9ff')
+        self.ax.set_facecolor('#f0f9ff')
+        self._draw_logo(fig=self.fig, ax=self.ax, z=0.0)
+        self.__draw_formula()
+
         geo_lines = SE3Animation.__sphere_geo_lines()
 
         def update(frame: int) -> None:
+            """
+            Update method to be executed for each frame
+            @param frame: Number of the frame (index) used in the simulation
+            @type frame: int
+            """
             self.ax.clear()
             self.__reset_axis()
             self.__animation_step(next_pts[frame], frame)
@@ -116,6 +133,13 @@ class SE3Animation(object):
     def __animation_step(self, next_point: np.array, frame: int) -> None:
         self.next_step = [frame*0.1, next_point]
 
+    def __draw_formula(self) -> None:
+        import matplotlib.image as mpimg
+        img = mpimg.imread('../input/SE3_formula.png')
+        inset_ax = self.fig.add_axes([0.01, 0.32, 0.26, 0.26])
+        inset_ax.imshow(img, alpha=1.0)
+        inset_ax.axis('off')
+
     def __draw_trajectory(self, next_pts: np.array, frame: int) -> None:
         self.ax.plot([next_pts[0][0], np.array([0.0])],
                      [next_pts[0][1], np.array([0.0])],
@@ -136,11 +160,11 @@ class SE3Animation(object):
     @staticmethod
     def __trajectory(t: np.array) -> np.array:
         import math
-        radius = 1.4
+        radius = 1.5
         x = radius * np.cos(t)
         y = radius * np.sin(t)
         u = (t/np.pi - 1/2)
-        z = 10*math.exp(-u*u) - np.array(9)
+        z = 12.5*math.exp(-u*u) - np.array(11)
         return np.array([[x], [y], [z]])
 
     def __draw_sphere(self, color: AnyStr, geo_lines: List[np.array]) -> None:
@@ -209,70 +233,18 @@ class SE3Animation(object):
             geo_lines.append(np.stack([x_lon, y_lon, z_lon, np.ones_like(theta)]))
         return geo_lines
 
-    def __draw_dot(self) -> np.array:
-        lat = np.radians(45)
-        lon = np.radians(-60)
-        x_dot = np.cos(lat) * np.cos(lon)
-        y_dot = np.cos(lat) * np.sin(lon)
-        z_dot = np.sin(lat)
-        self.ax.scatter(x_dot,
-                        y_dot,
-                        z_dot,
-                        color='black',
-                        s=150,
-                        label='Original Point',
-                        alpha=1.0,
-                        zorder=10,
-                        depthshade=False)
-        return np.array([[x_dot], [y_dot], [z_dot], [1.0]])
-
     def __reset_axis(self):
-        self.ax.set_box_aspect([1, 1, 1])
-        self.ax.set_xlim(-1.7, 1.7)
-        self.ax.set_ylim(-1.7, 1.7)
-        self.ax.set_zlim(-1.7, 1.7)
-        self.ax.set_title("SE(3) Transformation on a 3D Sphere",
-                          fontdict={'fontsize': 19, 'fontweight': 'bold', 'fontname': 'Helvetica', 'color': 'black'})
+        self.ax.set_box_aspect([1.3, 1.3, 1.2])
+        self.ax.set_xlim(-1.8, 1.8)
+        self.ax.set_ylim(-1.8, 1.8)
+        self.ax.set_zlim(-1.8, 1.8)
+        self.ax.set_title(x=0.5,
+                          y=1.0,
+                          label="SE(3) Transformation on a 3D Sphere",
+                          fontdict={'fontsize': 21, 'fontweight': 'bold', 'fontname': 'Helvetica', 'color': 'black'})
         self.ax.set_xlabel('X', fontdict={'fontsize': 14, 'fontweight': 'bold'})
         self.ax.set_ylabel('Y', fontdict={'fontsize': 14, 'fontweight': 'bold'})
         self.ax.set_zlabel('Z', fontdict={'fontsize': 14, 'fontweight': 'bold'})
-        self.__display_mathtex()
-
-    def __display_mathtex(self):
-        formula1 = r"$ cos(\theta) \ -sin(\theta) \ \ 0 \ \ t_{1}$"
-        formula2 = r"$sin(\theta) \ \ \ \ \ cos(\theta) \ \ 0 \ \ t_{2}$"
-        formula3 = r"$ \ \ \  0 \ \ \ \ \ \ \ \ \ \ \ 0 \ \ \ \ \ \ \ 1 \ \ t_{3}$"
-        formula4 = r"$ \ \ \  0 \ \ \ \ \ \ \ \ \ \ \ 0 \ \ \ \ \ \ \  0 \ \ 1 \ $"
-        formulas = [formula1, formula2, formula3, formula4]
-        top_z = 1.45
-        for idx in range(len(formulas)):
-            self.ax.text(x=-3.8,
-                         y=1.2,
-                         z=top_z - 0.3 * idx,
-                         s=formulas[idx],
-                         horizontalalignment='left',
-                         fontdict={'fontsize': 13, 'fontweight': 'bold', 'color': 'black'},
-                         bbox=dict(facecolor='lightblue', edgecolor='lightblue'))
-        self.ax.plot([-3.9, -3.9],
-                     [1.2, 1.2],
-                     [3.0, 0.5],
-                     color='black',
-                     linewidth=1)
-        self.ax.plot([-3.94, -3.94],
-                     [1.2, 1.2],
-                     [3.0, 0.5],
-                     color='black',
-                     linewidth=1)
-        self.ax.plot([-1.66, -1.66],
-                     [1.2, 1.2],
-                     [3.0, 1.1],
-                     color='black',
-                     linewidth=1)
-        self.ax.plot([-1.62, -1.62],
-                     [1.2, 1.2],
-                     [3.0, 1.1],
-                     color='black',
-                     linewidth=1)
 
 
 if __name__ == '__main__':
@@ -290,7 +262,28 @@ if __name__ == '__main__':
         T[:3, 3:] = t
         return T
 
-    lie_group_simulation = SE3Animation.build(transform=lie_transform, interval=2000, fps=10)
+
+    """
+    from PIL import Image
+
+    # Load image
+    img = Image.open('../input/Background_color.png')
+
+    # Convert to RGB if needed
+    img = img.convert('RGB')
+
+    # Get the RGB value of a pixel (x=10, y=20 for example)
+    r, g, b = img.getpixel((10, 20))
+
+    # Convert to HEX
+    hex_color = '#{:02x}{:02x}{:02x}'.format(r, g, b)
+    print("Hex color:", hex_color)
+
+    """
+    lie_group_simulation = SE3Animation.build(chart_pos=[-0.4, -0.1, 2.2, 1.1],
+                                              interval=2000,
+                                              fps=10,
+                                              transform=lie_transform,)
     lie_group_simulation.draw()
 
 
