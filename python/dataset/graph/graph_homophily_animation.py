@@ -37,13 +37,12 @@ class GraphHomophilyAnimation(BaseAnimation):
         self.G = nx.erdos_renyi_graph(n=num_nodes, p=average_degree, seed=42)
         self.central_node: int = GraphHomophilyAnimation.__get_central_node(self.G)
 
-
     def draw(self) -> None:
         fig, ax = plt.subplots(figsize=(8, 7))
         fig.patch.set_facecolor('#f0f9ff')
         ax.set_facecolor('#f0f9ff')
         ax.set_position(self.chart_pos)
-        self._draw_logo(fig, ax)
+        self._draw_logo(fig)
 
         hop1_neighbors, hop2_neighbors = self.__build_neighbors()
         node_artists = self.__layout(ax)

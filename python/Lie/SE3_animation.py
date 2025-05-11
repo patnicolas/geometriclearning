@@ -97,7 +97,7 @@ class SE3Animation(BaseAnimation):
                            np.ones(self.coordinates[0].size)])
         self.fig.patch.set_facecolor('#f0f9ff')
         self.ax.set_facecolor('#f0f9ff')
-        self._draw_logo(fig=self.fig, ax=self.ax, z=0.0)
+        self._draw_logo(fig=self.fig)
         self.__draw_formula()
 
         geo_lines = SE3Animation.__sphere_geo_lines()
@@ -177,9 +177,9 @@ class SE3Animation(BaseAnimation):
                              label='Original Sphere')
         for line in geo_lines:
             self.ax.plot(line[0], line[1], line[2], color='black', linewidth=1.5, alpha=1.0)
-        # return self.__draw_dot()
 
-    def __draw_next_sphere(self, color: AnyStr, geo_lines: List[np.array], points: np.array, T):
+
+    def __draw_next_sphere(self, color: AnyStr, geo_lines: List[np.array], points: np.array, T) -> None:
         # Step 3: Apply SE(3) transformation
         transformed_points = T @ points
         self.coordinates = [transformed_points[idx].reshape(self.coordinates[idx].shape) for idx in range(3)]
