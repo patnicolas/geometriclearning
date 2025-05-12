@@ -1,7 +1,8 @@
 import unittest
-
+import logging
 from dataset.tensor.caltech101_loader import Caltech101Loader
 from dl.training.exec_config import ExecConfig
+
 
 
 class Caltech101LoaderTest(unittest.TestCase):
@@ -15,7 +16,7 @@ class Caltech101LoaderTest(unittest.TestCase):
         )
         train_iter = iter(train_loader)
         first_data = next(train_iter)
-        print(str(first_data))
+        logging.info(str(first_data))
         self.assertTrue(len(train_loader) > 0)
 
     @unittest.skip("Ignore")
@@ -32,4 +33,4 @@ class Caltech101LoaderTest(unittest.TestCase):
         )
         for batch in train_loader:
             images, labels = batch
-            print(labels)
+            logging.info(labels)

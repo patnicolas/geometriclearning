@@ -5,7 +5,7 @@ from dl.block.mlp_block import MLPBlock
 from dl.model.conv_model import ConvModel
 from dl import ConvException
 from dl.training.neural_training import NeuralTraining
-
+import logging
 
 class ConvModelTest(unittest.TestCase):
 
@@ -42,10 +42,10 @@ class ConvModelTest(unittest.TestCase):
                                    input_size=(28, 28),
                                    conv_blocks=[conv_2d_block_1, conv_2d_block_2],
                                    mlp_blocks=[mlp_block])
-            print(repr(conv_model))
+            logging.info(repr(conv_model))
             self.assertTrue(True)
         except ConvException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
 
     @unittest.skip('Ignore')
@@ -70,10 +70,10 @@ class ConvModelTest(unittest.TestCase):
             conv_builder.set(key='output_activation', value=nn.Softmax(dim=1))
 
             conv_model = conv_builder.build()
-            print(repr(conv_model))
+            logging.info(repr(conv_model))
             self.assertTrue(True)
         except ConvException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
 
     def test_mnist_small_3(self):
@@ -96,10 +96,10 @@ class ConvModelTest(unittest.TestCase):
             }
             conv_builder = Conv2dBuilder(model_attributes)
             conv_model = conv_builder.build()
-            print(repr(conv_model))
+            logging.info(repr(conv_model))
             self.assertTrue(True)
         except ConvException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
 
     @unittest.skip('Ignore')
@@ -191,10 +191,10 @@ class ConvModelTest(unittest.TestCase):
                                    input_size=(28, 28),
                                    conv_blocks=[conv_2d_block_1, conv_2d_block_2, conv_2d_block_3],
                                    mlp_blocks=[mlp_block_1, mlp_block_2])
-            print(repr(conv_model))
+            logging.info(repr(conv_model))
             self.assertTrue(True)
         except ConvException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
 
     @unittest.skip('Ignore')
@@ -214,7 +214,7 @@ class ConvModelTest(unittest.TestCase):
         }
         conv_2d_Builder = Conv2dBuilder(conv_attributes)
         conv_2d_model = conv_2d_Builder.build()
-        print(str(conv_2d_model))
+        logging.info(str(conv_2d_model))
 
     @unittest.skip('Ignore')
     def test_transpose(self):
@@ -256,12 +256,12 @@ class ConvModelTest(unittest.TestCase):
                                    input_size=(28, 28),
                                    conv_blocks=[conv_2d_block_1, conv_2d_block_2, conv_2d_block_3],
                                    mlp_blocks=None)
-            print(f'\nConv modules:---\n{repr(conv_model)}')
+            logging.info(f'\nConv modules:---\n{repr(conv_model)}')
             de_conv_model = conv_model.transpose(extra=nn.Sigmoid())
-            print(f'\nDe conv modules: ----\n{repr(de_conv_model)}')
+            logging.info(f'\nDe conv modules: ----\n{repr(de_conv_model)}')
             self.assertTrue(True)
         except ConvException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
 
     @unittest.skip('Ignore')
@@ -302,7 +302,7 @@ class ConvModelTest(unittest.TestCase):
                                    input_size=(28, 28),
                                    conv_blocks=[conv_2d_block_1, conv_2d_block_2],
                                    mlp_blocks=[mlp_block_1])
-            print(repr(conv_model))
+            logging.info(repr(conv_model))
             mnist_loader = MNISTLoader(batch_size=8)
             train_loader, eval_loader = mnist_loader.loaders_from_path(root_path='../../../data/MNIST',
                                                                        exec_config=ExecConfig.default())
@@ -310,7 +310,7 @@ class ConvModelTest(unittest.TestCase):
             net_training.train(conv_model.model_id, conv_model, train_loader, eval_loader)
             self.assertTrue(True)
         except ConvException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
 
     @unittest.skip('Ignore')
@@ -368,16 +368,16 @@ class ConvModelTest(unittest.TestCase):
                                    input_size=(target_size, target_size),
                                    conv_blocks=[conv_2d_block_1, conv_2d_block_2, conv_2d_block_3],
                                    mlp_blocks=[mlp_block_1, mlp_block_2])
-            print(repr(conv_model))
+            logging.info(repr(conv_model))
             caltech101_loader = Caltech101Loader(batch_size=8, split_ratio=0.9, resize_image=128)
             train_loader, eval_loader = caltech101_loader.loaders_from_path(root_path='../../../data/caltech-101',
                                                                             exec_config=ExecConfig.default())
             net_training = ConvModelTest.create_executor()
-            print(f'Network training:\n{net_training}')
+            logging.info(f'Network training:\n{net_training}')
             net_training.train(conv_model.model_id, conv_model, train_loader, eval_loader)
             self.assertTrue(True)
         except ConvException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
 
     @staticmethod

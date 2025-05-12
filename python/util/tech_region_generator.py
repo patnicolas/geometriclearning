@@ -79,9 +79,9 @@ if __name__ == '__main__':
 
     my_list = MyList([3, 4, 19, 8])
     my_list.append(88)
-    print(my_list.data)
+    logging.info(my_list.data)
     my_list.pop(2)
-    print(my_list.data)
+    logging.info(my_list.data)
     my_list.remove(8)
 
     """

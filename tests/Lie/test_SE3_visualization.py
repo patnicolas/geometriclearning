@@ -6,6 +6,7 @@ from Lie.SE3_visualization import SE3Visualization
 import numpy as np
 from typing import List
 import geomstats.backend as gs
+import logging
 
 
 
@@ -16,7 +17,7 @@ class SE3VisualizationTest(unittest.TestCase):
         from Lie import u3d
 
         visualization = SE3Visualization(u3d.y_rot, u3d.x_trans)
-        print(visualization)
+        logging.info(visualization)
 
         rot_trans: List[float] = [-1.6, 0.5, 2.5, -1.9, 2.2, 2.3]
         rot_trans_str = ', '.join([str(x) for x in rot_trans])
@@ -40,7 +41,7 @@ class SE3VisualizationTest(unittest.TestCase):
         from Lie import u3d
 
         visualization = SE3Visualization(u3d.y_rot, u3d.x_trans)
-        print(visualization)
+        logging.info(visualization)
 
         rot_trans: List[float] = [1.9, 0.1, 0.35, 1.5, 1.5, 0.5]
         rot_trans_str = ', '.join([str(x) for x in rot_trans])
@@ -70,10 +71,10 @@ class SE3VisualizationTest(unittest.TestCase):
     def test_visualization_2(self):
         from Lie import u3d
 
-        print(f'\nRotation matrix:\n{np.reshape(u3d.y_rot, (3, 3))}')
-        print(f'Translation vector: {u3d.x_trans}')
+        logging.info(f'\nRotation matrix:\n{np.reshape(u3d.y_rot, (3, 3))}')
+        logging.info(f'Translation vector: {u3d.x_trans}')
         se3_visualization = SE3Visualization(u3d.y_rot, u3d.x_trans)
-        print(se3_visualization)
+        logging.info(se3_visualization)
 
         # First SE3 element
         rot_trans: List[float] = [1.9, 0.1, 0.35, 1.5, 1.5, 0.5]
@@ -108,7 +109,7 @@ class SE3VisualizationTest(unittest.TestCase):
 
         # Retrieve the inverse of the se3 group element
         inv_lie_se3_group = se3_lie_group.inverse()
-        print(f'\nSE3 element:\n{se3_lie_group}\nInverse:--\n{inv_lie_se3_group}')
+        logging.info(f'\nSE3 element:\n{se3_lie_group}\nInverse:--\n{inv_lie_se3_group}')
         self.assertTrue(inv_lie_se3_group.this_group_element().shape == (4, 4))
         inv_tgt_vector = inv_lie_se3_group.tangent_vector
 
@@ -147,7 +148,7 @@ class SE3VisualizationTest(unittest.TestCase):
         # Composition
         se3_composed_group = se3_group_1.multiply(se3_group_2)
         self.assertTrue(se3_composed_group.belongs())
-        print(f'\nFirst element:\n{se3_group_1}\nSecond element\n{se3_group_2}'
+        logging.info(f'\nFirst element:\n{se3_group_1}\nSecond element\n{se3_group_2}'
               f'\nComposed element: {se3_composed_group}')
 
         vec_descriptor_1 = ("          First Algebra\n 0.000 0.000 1.000 1.000\n 0.000 0.000 0.000 1.000"
@@ -220,8 +221,8 @@ class SE3VisualizationTest(unittest.TestCase):
 
 
     def test_animate(self):
-        print(f'\nRotation matrix:\n{np.reshape(u3d.y_rot, (3, 3))}')
-        print(f'Translation vector: {u3d.x_trans}')
+        logging.info(f'\nRotation matrix:\n{np.reshape(u3d.y_rot, (3, 3))}')
+        logging.info(f'Translation vector: {u3d.x_trans}')
         se3_visualization = SE3Visualization(u3d.y_rot, u3d.x_trans)
 
         rot_trans: List[float] = [1.9, 0.1, 0.35, 1.5, 1.5, 0.5]

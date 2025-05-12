@@ -1,4 +1,5 @@
 import unittest
+import logging
 from dl.block.conv.conv_output_size import ConvOutputSize, SeqConvOutputSize
 
 
@@ -9,7 +10,7 @@ class ConvOutputSizeTest(unittest.TestCase):
                                           padding=(1, 1),
                                           max_pooling_kernel=-1)
         output_size = conv_output_size(input_size=(28, 28))
-        print(output_size)
+        logging.info(output_size)
         self.assertTrue(output_size[0] == 14)
 
     def test_output_size_2(self):
@@ -18,7 +19,7 @@ class ConvOutputSizeTest(unittest.TestCase):
                                           padding=(1, 1),
                                           max_pooling_kernel=2)
         output_size = conv_output_size(input_size=(28, 28))
-        print(output_size)
+        logging.info(output_size)
         self.assertTrue(output_size[0] == 7)
         self.assertTrue(output_size[1] == 7)
 
@@ -34,7 +35,7 @@ class ConvOutputSizeTest(unittest.TestCase):
                                             max_pooling_kernel=-1)]
         )
         seq_output_size = seq_conv_output_size(input_size=(28, 28), out_channels=-1)
-        print(seq_output_size)
+        logging.info(seq_output_size)
         self.assertTrue(seq_output_size == 7*7)
 
     def test_seq_output_size_2(self):
@@ -49,7 +50,7 @@ class ConvOutputSizeTest(unittest.TestCase):
                                             max_pooling_kernel=-1)]
         )
         seq_output_size = seq_conv_output_size(input_size=(28, 28), out_channels=64)
-        print(seq_output_size)
+        logging.info(seq_output_size)
         self.assertTrue(seq_output_size == 64*7*7)
 
     def test_seq_output_size_3(self):
@@ -64,7 +65,7 @@ class ConvOutputSizeTest(unittest.TestCase):
                                             max_pooling_kernel=2)]
         )
         seq_output_size = seq_conv_output_size(input_size=(28, 28), out_channels=64)
-        print(seq_output_size)
+        logging.info(seq_output_size)
         self.assertTrue(seq_output_size == 64*2*2)
 
 

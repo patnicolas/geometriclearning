@@ -1,6 +1,7 @@
 import unittest
-from manifolds.kmeansonmanifold import KMeansOnManifold, KMeansCluster
+from geometry.kmeans_on_manifold import KMeansOnManifold, KMeansCluster
 from typing import List, AnyStr
+import logging
 
 
 class KMeansOnManifoldTest(unittest.TestCase):
@@ -11,12 +12,12 @@ class KMeansOnManifoldTest(unittest.TestCase):
         num_samples = 100
         num_clusters = 3
         kmeans = KMeansOnManifold(num_samples, num_clusters)
-        print(str(kmeans))
+        logging.info(str(kmeans))
 
     def test_euclidean(self):
         kmeans = KMeansOnManifold(KMeansOnManifoldTest.num_samples, KMeansOnManifoldTest.num_clusters)
         kmeans_cluster = kmeans.euclidean_clustering()
-        print(f'\n{KMeansOnManifoldTest.num_samples} random samples on {KMeansOnManifoldTest.num_clusters} '
+        logging.info(f'\n{KMeansOnManifoldTest.num_samples} random samples on {KMeansOnManifoldTest.num_clusters} '
               f'clusters in Euclidean space --------\n{KMeansOnManifoldTest.__str(kmeans_cluster)}')
 
     def test_riemannian_von_mises_fisher(self):
@@ -25,7 +26,7 @@ class KMeansOnManifoldTest(unittest.TestCase):
             KMeansOnManifoldTest.num_clusters,
             'random_von_mises_fisher')
         kmeans_cluster = kmeans.riemannian_clustering()
-        print(f'\n{KMeansOnManifoldTest.num_samples} random samples on {KMeansOnManifoldTest.num_clusters} '
+        logging.info(f'\n{KMeansOnManifoldTest.num_samples} random samples on {KMeansOnManifoldTest.num_clusters} '
               f'clusters with von-mises-Fisher distribution --------\n{KMeansOnManifoldTest.__str(kmeans_cluster)}')
 
 
@@ -35,24 +36,24 @@ class KMeansOnManifoldTest(unittest.TestCase):
             KMeansOnManifoldTest.num_clusters,
             'random_riemann_normal')
         kmeans_cluster = kmeans.riemannian_clustering()
-        print(f'\n{KMeansOnManifoldTest.num_samples} random samples on {KMeansOnManifoldTest.num_clusters} '
+        logging.info(f'\n{KMeansOnManifoldTest.num_samples} random samples on {KMeansOnManifoldTest.num_clusters} '
               f'clusters with normal distribution  --------\n{KMeansOnManifoldTest.__str(kmeans_cluster)}')
 
     def test_riemannian_random_uniform(self):
         kmeans = KMeansOnManifold(KMeansOnManifoldTest.num_samples, KMeansOnManifoldTest.num_clusters, 'random_uniform')
         kmeans_clusters = kmeans.riemannian_clustering()
-        print(f'\n{KMeansOnManifoldTest.num_samples} random samples on {KMeansOnManifoldTest.num_clusters} '
+        logging.info(f'\n{KMeansOnManifoldTest.num_samples} random samples on {KMeansOnManifoldTest.num_clusters} '
               f'clusters with uniform distribution  --------\n{KMeansOnManifoldTest.__str(kmeans_clusters)}')
 
     def test_riemannian_constrained_random_uniform(self):
         kmeans = KMeansOnManifold(KMeansOnManifoldTest.num_samples, KMeansOnManifoldTest.num_clusters, 'constrained_random_uniform')
         kmeans_clusters = kmeans.riemannian_clustering()
-        print(f'\n{KMeansOnManifoldTest.num_samples} random samples on {KMeansOnManifoldTest.num_clusters} '
+        logging.info(f'\n{KMeansOnManifoldTest.num_samples} random samples on {KMeansOnManifoldTest.num_clusters} '
               f'clusters with constrained uniform distribution  --------\n{KMeansOnManifoldTest.__str(kmeans_clusters)}')
 
     def test_evaluate(self):
         kmeans = KMeansOnManifold(KMeansOnManifoldTest.num_samples, KMeansOnManifoldTest.num_clusters)
-        print(f'Evaluate: {kmeans.evaluate()}')
+        logging.info(f'Evaluate: {kmeans.evaluate()}')
 
     @staticmethod
     def __str(cluster_result: List[KMeansCluster])-> AnyStr:

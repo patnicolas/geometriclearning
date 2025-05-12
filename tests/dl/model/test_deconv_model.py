@@ -1,6 +1,7 @@
 import unittest
+import logging
 import torch.nn as nn
-from dl.block.cnn.deconv_2d_block import DeConvBlock
+from dl.block.conv.deconv_2d_block import DeConv2dBlock
 from dl.model.deconv_2d_model import DeConv2dModel
 from dl import ConvException
 from typing import Tuple
@@ -20,7 +21,7 @@ class DeConvModelTest(unittest.TestCase):
             de_conv_block_2 = DeConvModelTest.__create_de_conv_block_2(in_channels_2, out_channels, kernel_size_2)
             de_conv_model = DeConv2dModel.build(model_id, [de_conv_block_1, de_conv_block_2])
             self.assertTrue(de_conv_model.out_channels == out_channels)
-            print(repr(de_conv_model))
+            logging.info(repr(de_conv_model))
             assert True
         except ConvException as e:
             assert False
@@ -37,7 +38,7 @@ class DeConvModelTest(unittest.TestCase):
             de_conv_block_2 = DeConvModelTest.__create_de_conv_block_2(in_channels_2, out_channels, kernel_size_2)
             de_conv_model = DeConv2dModel.build(model_id, [de_conv_block_1, de_conv_block_2])
             self.assertTrue(de_conv_model.out_channels == out_channels)
-            print(repr(de_conv_model))
+            logging.info(repr(de_conv_model))
             assert False
         except ConvException as e:
             assert True
@@ -51,7 +52,7 @@ class DeConvModelTest(unittest.TestCase):
         padding = (2, 2)
         input_size = (28, 28)
 
-        return DeConvBlock.buildX(
+        return DeConv2dBlock.buildX(
             2,
             in_channels,
             out_channels,

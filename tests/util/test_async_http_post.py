@@ -5,7 +5,7 @@ import asyncio
 import unittest
 import time
 from util.async_http_post import execute_request
-
+import logging
 
 class TestAsyncHttpPost(TestCase):
     @unittest.skip("Not needed")
@@ -14,7 +14,7 @@ class TestAsyncHttpPost(TestCase):
         num_clients = 4
         stride = len(lst) // num_clients
         partitions = [lst[i:i + stride] for i in range(0, len(lst), stride)]
-        print(partitions)
+        logging.info(partitions)
 
     def test_requests_async(self):
         in_file = "../../data/requests/sample-request-allowed-stage.json"
@@ -25,7 +25,7 @@ class TestAsyncHttpPost(TestCase):
         start_time = time.time()
         asyncio.run(execute_request(url, new_headers, in_file, num_clients))
         duration = time.time() - start_time
-        print(f'Async. duration: {duration}')
+        logging.info(f'Async. duration: {duration}')
 
 
     @staticmethod

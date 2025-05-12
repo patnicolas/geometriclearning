@@ -2,6 +2,8 @@ import unittest
 
 from plots.plotter import PlotterParameters, Plotter
 import matplotlib.pyplot as plt
+import logging
+
 
 class PlotterTest(unittest.TestCase):
 
@@ -98,16 +100,16 @@ class PlotterTest(unittest.TestCase):
     @unittest.skip('Ignore')
     def test_scaling_ticks(self):
         y_lim, x_delta, y_delta = Plotter.arrange_y((23, 2.9))
-        print(f'y_lim: {y_lim} x_delta: {x_delta}, y_delta: {y_delta} ')
+        logging.info(f'y_lim: {y_lim} x_delta: {x_delta}, y_delta: {y_delta} ')
         assert y_lim == 3, 'should be 3'
         y_lim, x_delta, y_delta = Plotter.arrange_y((9, 0.9))
-        print(f'y_lim: {y_lim} x_delta: {x_delta}, y_delta: {y_delta} ')
+        logging.info(f'y_lim: {y_lim} x_delta: {x_delta}, y_delta: {y_delta} ')
         assert y_lim == 1, 'should be 1'
         y_lim, x_delta, y_delta = Plotter.arrange_y((13, 1.9))
-        print(f'y_lim: {y_lim} x_delta: {x_delta}, y_delta: {y_delta} ')
+        logging.info(f'y_lim: {y_lim} x_delta: {x_delta}, y_delta: {y_delta} ')
         assert y_lim == 2, 'should be 2'
         y_lim, x_delta, y_delta = Plotter.arrange_y((60, 4.4))
-        print(f'y_lim: {y_lim} x_delta: {x_delta}, y_delta: {y_delta} ')
+        logging.info(f'y_lim: {y_lim} x_delta: {x_delta}, y_delta: {y_delta} ')
         assert y_lim == 5, 'should be 5'
 
     @unittest.skip('Ignore')

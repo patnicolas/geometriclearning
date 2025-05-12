@@ -12,7 +12,7 @@ class TestIOUtil(TestCase):
             file_name = '../../data/test.json'
             ioutil = IOUtil(file_name)
             json_content = ioutil.to_json()
-            print(json_content)
+            logging.info(json_content)
         except Exception as e:
             self.fail(str(e))
 

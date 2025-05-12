@@ -7,7 +7,7 @@ import logging
 logger = logging.Logger('TestHttpPost')
 
 
-print('path: ' + os.getcwd())
+logging.info('path: ' + os.getcwd())
 
 
 class TestHttpPost(TestCase):

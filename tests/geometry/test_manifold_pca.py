@@ -6,7 +6,7 @@ from geometry.manifold_pca import ManifoldPCA, PrincipalComponents
 from geometry.visualization.hypersphere_plot import HyperspherePlot
 from geometry.visualization.manifold_plot import ManifoldPlot
 import numpy as np
-
+import logging
 
 class TangentPCATest(unittest.TestCase):
 
@@ -16,10 +16,10 @@ class TangentPCATest(unittest.TestCase):
 
         sphere = Hypersphere(dim=2)
         X = sphere.random_uniform(n_samples=8)
-        print(f'Random data point on Sphere:\n{X}')
+        logging.info(f'Random data point on Sphere:\n{X}')
         tangent_pca = ManifoldPCA(sphere)
         principal_components, _ = tangent_pca.estimate(X)
-        print(f'\nPrincipal components:\n{principal_components}')
+        logging.info(f'\nPrincipal components:\n{principal_components}')
 
     @unittest.skip('Ignore')
     def test_components_euclidean_pca(self):
@@ -27,10 +27,10 @@ class TangentPCATest(unittest.TestCase):
 
         sphere = Euclidean(dim=3)
         X = np.random.rand(8, 3)
-        print(f'Random data points on 3D:\n{X}')
+        logging.info(f'Random data points on 3D:\n{X}')
         tangent_pca = ManifoldPCA(sphere)
         principal_components = tangent_pca.estimate(X)
-        print(f'\nPrincipal components:\n{principal_components.components}')
+        logging.info(f'\nPrincipal components:\n{principal_components.components}')
         self.assertTrue(len(principal_components.components) == 3)
 
 
@@ -42,9 +42,9 @@ class TangentPCATest(unittest.TestCase):
 
         manifold_pca = ManifoldPCA(sphere)
         principal_components = manifold_pca.estimate(X)
-        print(f'\nPrincipal components for Hypersphere:\n{principal_components.components}')
+        logging.info(f'\nPrincipal components for Hypersphere:\n{principal_components.components}')
         projected_points = manifold_pca.project(X)
-        print(f'\nProjected points on tangent space:\n{projected_points}')
+        logging.info(f'\nProjected points on tangent space:\n{projected_points}')
         self.assertTrue(len(projected_points) == len(X))
         self.assertTrue(len(projected_points[0]) == 2)
 
@@ -56,9 +56,9 @@ class TangentPCATest(unittest.TestCase):
 
         euclidean_pca = ManifoldPCA(Euclidean(3))
         principal_components = euclidean_pca.estimate(X)
-        print(f'\nPrincipal components in Euclidean space:\n{principal_components.components}')
+        logging.info(f'\nPrincipal components in Euclidean space:\n{principal_components.components}')
         projected_points = euclidean_pca.project(X)
-        print(f'\nProjected points in Euclidean space:\n{projected_points}')
+        logging.info(f'\nProjected points in Euclidean space:\n{projected_points}')
         TangentPCATest.euclidean_scatter(principal_components, projected_points)
 
     @staticmethod

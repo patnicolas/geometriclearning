@@ -1,7 +1,7 @@
 import unittest
 from plots.gnn_plotter import GNNPlotter
 import networkx as nx
-
+import logging
 
 class GNNPlotterTest(unittest.TestCase):
 
@@ -17,7 +17,7 @@ class GNNPlotterTest(unittest.TestCase):
 
         gnn_plotter = GNNPlotter.build(_data, sampled_node_index_range=(12, 21))
         gnn_plotter.sample()
-        print(gnn_plotter.graph)
+        logging.info(gnn_plotter.graph)
 
     @unittest.skip('Ignore')
     def test_draw(self):
@@ -34,7 +34,7 @@ class GNNPlotterTest(unittest.TestCase):
                                              node_color='blue',
                                              node_size=40,
                                              title='Flickr spring layout')
-        print(num_sampled_nodes)
+        logging.info(num_sampled_nodes)
 
 
     def test_draw_all_undirected(self):
@@ -48,7 +48,7 @@ class GNNPlotterTest(unittest.TestCase):
 
         gnn_plotter = GNNPlotter.build(_data, sampled_node_index_range=(12, 18))
         num_sampled_nodes = gnn_plotter.draw_all(node_size=100, title='Flickr directed')
-        print(num_sampled_nodes)
+        logging.info(num_sampled_nodes)
 
     @unittest.skip('Ignore')
     def test_draw_all_directed(self):

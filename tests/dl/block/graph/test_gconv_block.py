@@ -1,5 +1,6 @@
 
 import unittest
+import logging
 from torch_geometric.nn import GraphConv, BatchNorm
 from torch_geometric.nn.pool import TopKPooling
 from dl.block.graph.gconv_block import GConvBlock
@@ -19,7 +20,7 @@ class GConvBlockTest(unittest.TestCase):
                                  dropout_module=nn.Dropout(0.2))
         modules = list(gconv_block.modules_list)
         self.assertTrue(len(modules) == 5)
-        print(f'\n{gconv_block}')
+        logging.info(f'\n{gconv_block}')
 
     def test_init_2(self):
         num_node_features = 24
@@ -30,7 +31,7 @@ class GConvBlockTest(unittest.TestCase):
                                  batch_norm_module=BatchNorm(hidden_channels))
         modules = list(gconv_block.modules_list)
         self.assertTrue(len(modules) == 2)
-        print(f'\n{gconv_block}')
+        logging.info(f'\n{gconv_block}')
 
     def test_init_3(self):
         num_node_features = 24
@@ -47,6 +48,6 @@ class GConvBlockTest(unittest.TestCase):
         gconv_block = GConvBlock.build(block_attributes)
         modules = list(gconv_block.modules_list)
         self.assertTrue(len(modules) == 4)
-        print(f'\n{gconv_block}')
+        logging.info(f'\n{gconv_block}')
 
 

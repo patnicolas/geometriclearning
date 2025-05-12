@@ -3,46 +3,46 @@ import numpy as np
 from Lie.SE3_visualization import SE3Visualization
 from Lie.Lie_SE3_group import LieSE3Group
 from Lie import u3d
+import logging
 
 
 class LieSE3GroupTest(unittest.TestCase):
 
-    @unittest.skip('Ignored')
+    # @unittest.skip('Ignored')
     def test_build_from_numpy(self):
         np.set_printoptions(precision=3, suppress=True)
 
         rot_matrix = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, -1.0], [0.0, 1.0, 0.0]])
         trans_matrix = np.array([1.0, 3.0, 2.0])
         lie_se3_group = LieSE3Group(rot_matrix, trans_matrix)
-        print(repr(lie_se3_group))
+        logging.info(repr(lie_se3_group))
         self.assertTrue(lie_se3_group.se3_element.group_element.shape == (4, 4))
-        print(lie_se3_group.tangent_vector)
 
     @unittest.skip('Ignored')
     def test_build_from_unit_elements(self):
         from Lie import u3d
 
         lie_se3_group = LieSE3Group(u3d.y_rot, u3d.x_trans)
-        print(lie_se3_group)
+        logging.info(lie_se3_group)
 
     @unittest.skip('Ignored')
     def test_inverse(self):
         lie_se3_group = LieSE3Group(rot_matrix=u3d.y_rot, trans_matrix=u3d.x_trans, epsilon=1e-4)
         tgt_vector = lie_se3_group.tangent_vector
-        print(tgt_vector)
+        logging.info(tgt_vector)
 
         # Retrieve the inverse of the se3 group element
         inv_lie_se3_group = lie_se3_group.inverse()
-        print(f'\nSE3 element:\n{lie_se3_group}\nInverse:--\n{inv_lie_se3_group}')
+        logging.info(f'\nSE3 element:\n{lie_se3_group}\nInverse:--\n{inv_lie_se3_group}')
         self.assertTrue(inv_lie_se3_group.this_group_element().shape == (4, 4))
         inv_tgt_vector = inv_lie_se3_group.tangent_vector
-        print(inv_tgt_vector)
+        logging.info(inv_tgt_vector)
 
     @unittest.skip('Ignored')
     def test_inverse_2(self):
         lie_se3_group = SE3Visualization(rot_matrix=u3d.y_rot, trans_matrix=u3d.x_trans)
         inv_lie_se3_group = lie_se3_group.inverse()
-        print(f'\nSE3 element\n{lie_se3_group}\nInverse\n{inv_lie_se3_group}')
+        logging.info(f'\nSE3 element\n{lie_se3_group}\nInverse\n{inv_lie_se3_group}')
         self.assertTrue(inv_lie_se3_group.belongs())
 
         import matplotlib.pyplot as plt
@@ -69,8 +69,8 @@ class LieSE3GroupTest(unittest.TestCase):
         # Composition
         se3_composed_group = se3_group_1.multiply(se3_group_2)
         self.assertTrue(se3_composed_group.belongs())
-        print(f'\nFirst element:\n{se3_group_1}\nSecond element\n{se3_group_2}'
-              f'\nComposed element: {se3_composed_group}')
+        logging.info(f'\nFirst element:\n{se3_group_1}\nSecond element\n{se3_group_2}'
+                     f'\nComposed element: {se3_composed_group}')
 
     @unittest.skip('Ignored')
     def test_self_composition(self):
@@ -78,7 +78,7 @@ class LieSE3GroupTest(unittest.TestCase):
 
         # Composition
         se3_composed_group = se3_group_1.multiply(se3_group_1)
-        print(f'\nFirst element:\n{se3_group_1}\nSelf Composed element: {se3_composed_group}')
+        logging.info(f'\nFirst element:\n{se3_group_1}\nSelf Composed element: {se3_composed_group}')
         self.assertTrue(se3_composed_group.belongs())
 
     @unittest.skip('Ignored')
@@ -90,7 +90,7 @@ class LieSE3GroupTest(unittest.TestCase):
         se3_matrix = np.eye(4)
         se3_matrix[:3, :3] = rotation
         se3_matrix[:3, 3] = translation.flatten()
-        print(se3_matrix)
+        logging.info(se3_matrix)
 
     @unittest.skip('Ignored')
     def test_commutative(self):
@@ -100,8 +100,8 @@ class LieSE3GroupTest(unittest.TestCase):
                                  np.array(u.y_trans + u.z_trans))
         se3_2 = SE3Visualization(np.array(u.y_rot - 3.0 * u.x_rot),
                                  np.array(u.x_trans))
-        print(f'\nse3_1 x se3_2 {se3_1.multiply(se3_2)}')
-        print(f'\nse3_2 x se3_1 {se3_2.multiply(se3_1)}')
+        logging.info(f'\nse3_1 x se3_2 {se3_1.multiply(se3_2)}')
+        logging.info(f'\nse3_2 x se3_1 {se3_2.multiply(se3_1)}')
         self.assertFalse(se3_1.multiply(se3_2) == se3_2.multiply(se3_1))
 
     @unittest.skip('Ignored')
@@ -121,16 +121,15 @@ class LieSE3GroupTest(unittest.TestCase):
         algebra_element = np.concatenate([rot, trans], axis=1)
 
         self.assertTrue(se3_matrix.all() == algebra_element.all())
-        print(se3_matrix)
-
+        logging.info(se3_matrix)
 
     @unittest.skip('Ignored')
     def test_visualize(self):
         # Two inputs= in the tangent space: 3x3 90 degree rotation along Y axis
         # and Translation along X xis
-        print(f'\nRotation matrix:\n{np.reshape(u3d.y_rot, (3, 3))}')
+        logging.info(f'\nRotation matrix:\n{np.reshape(u3d.y_rot, (3, 3))}')
         lie_se3_group = SE3Visualization(u3d.y_rot, u3d.x_trans)
-        print(lie_se3_group)
+        logging.info(lie_se3_group)
         lie_se3_group.visualize_tangent_space(u3d.y_rot, u3d.x_trans)
 
         import matplotlib.pyplot as plt

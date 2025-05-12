@@ -1,7 +1,7 @@
 import unittest
-
+import logging
 import numpy as np
-from geometry import SpaceVisualization, VisualizationParams
+from geometry.visualization.space_visualization import SpaceVisualization, VisualizationParams
 import matplotlib.pyplot as plt
 
 
@@ -11,8 +11,8 @@ class TestSpaceVisualization(unittest.TestCase):
     def test_scatter(self):
         data_points = np.array([[-0.19963953, -0.90072907],
                      [-0.0292344,   0.77812525]])
-        print(data_points[:, 0])
-        print(data_points[:, 1])
+        logging.info(data_points[:, 0])
+        logging.info(data_points[:, 1])
         fig_size = (4, 4)
         label = 'Values'
         title = 'This is a test'
@@ -32,7 +32,7 @@ class TestSpaceVisualization(unittest.TestCase):
                        [-0.24688761, 0.64412856, -0.68645193]])
 
         fig, ax = plt.subplots()
-        print(data_points[:,0])
+        logging.info(data_points[:,0])
         ax.plot(data_points[:,0], data_points[:,1])
 
         ax.set(xlabel='time (s)', ylabel='voltage (mV)',
@@ -63,7 +63,7 @@ class TestSpaceVisualization(unittest.TestCase):
         num_samples = 10
         manifold = HypersphereSpace(dim)
         data_points = manifold.sample(num_samples)
-        print(f'Hypersphere:\n{str(data_points)}')
+        logging.info(f'Hypersphere:\n{str(data_points)}')
 
         fig_size = (8, 8)
         label = 'Values'

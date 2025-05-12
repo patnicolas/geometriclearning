@@ -1,6 +1,7 @@
 from unittest import TestCase
 import torch
 from util.tsne import T_SNE
+import logging
 
 class TestT_SNE(TestCase):
 
@@ -11,7 +12,7 @@ class TestT_SNE(TestCase):
             n_components = 2
             t_sne = T_SNE(n_components, "inferno_r", fig_save, "This plot")
             y = t_sne.forward(x)
-            print(y)
+            logging.info(y)
         except Exception as e:
             self.fail(str(e))
 
@@ -23,6 +24,6 @@ class TestT_SNE(TestCase):
             x = torch.rand((50, 4))
             t_sne = T_SNE(n_components, "inferno_r", fig_save, "This plot")
             y = t_sne.forward(x)
-            print(y)
+            logging.info(y)
         except Exception as e:
             self.fail(str(e))

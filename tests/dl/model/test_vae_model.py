@@ -8,30 +8,30 @@ from dl.block.conv.conv_2d_block import Conv2dBlock
 from dl.model.vae_model import VAEModel
 from dl import VAEException, ConvException
 from dl.training.vae_training import VAETraining
-
+import logging
 
 class VAEModelTest(unittest.TestCase):
 
     @unittest.skip('Ignore')
     def test_init_1(self):
         try:
-            input_block = MLPBlock.build_from_params(block_id='Input',
-                                                     layer=nn.Linear(in_features=128, out_features=64, bias=False),
-                                                     activation=nn.ReLU())
-            hidden_block = MLPBlock.build_from_params(block_id='hidden',
-                                                      layer=nn.Linear(in_features=64, out_features=32, bias=False),
-                                                      activation=nn.ReLU())
-            output_block = MLPBlock.build_from_params(block_id='output',
-                                                      layer=nn.Linear(in_features=32, out_features=10, bias=False),
-                                                      activation=nn.Sigmoid())
+            input_block = MLPBlock(block_id='Input',
+                                   layer_module=nn.Linear(in_features=128, out_features=64, bias=False),
+                                   activation_module=nn.ReLU())
+            hidden_block = MLPBlock(block_id='hidden',
+                                                      layer_module=nn.Linear(in_features=64, out_features=32, bias=False),
+                                                      activation_module=nn.ReLU())
+            output_block = MLPBlock(block_id='output',
+                                                      layer_module=nn.Linear(in_features=32, out_features=10, bias=False),
+                                                      activation_module=nn.Sigmoid())
             ffnn_model = MLPModel(model_id='encoder', mlp_blocks=[input_block, hidden_block, output_block])
-            print(str(ffnn_model))
+            logging.info(str(ffnn_model))
             latent_size = 6
-            vae_model = VAEModel(model_id='vae_ffnn', encoder=ffnn_model, latent_dim=latent_size, noise_func =None)
-            print(str(vae_model))
+            vae_model = VAEModel(model_id='vae_ffnn', encoder=ffnn_model, latent_dim=latent_size)
+            logging.info(str(vae_model))
             self.assertTrue(True)
         except VAEException as e:
-            print(f'ERROR: {str(e)}')
+            logging.info(f'ERROR: {str(e)}')
             self.assertTrue(True)
 
     @unittest.skip('Ignore')
@@ -63,12 +63,12 @@ class VAEModelTest(unittest.TestCase):
                                    input_size=(28, 28),
                                    conv_blocks=[conv_2d_block_1, conv_2d_block_2],
                                    mlp_blocks=None)
-            print(repr(conv_model))
+            logging.info(repr(conv_model))
             latent_size = 6
             vae_model = VAEModel(model_id='vae_ffnn', encoder=conv_model, latent_dim=latent_size, noise_func=None)
-            print(repr(vae_model))
+            logging.info(repr(vae_model))
         except VAEException as e:
-            print(f'ERROR: {str(e)}')
+            logging.info(f'ERROR: {str(e)}')
             self.assertTrue(True)
 
     def test_mnist_train(self):
@@ -106,7 +106,7 @@ class VAEModelTest(unittest.TestCase):
                                  encoder=conv_model,
                                  latent_dim=16,
                                  decoder_out_activation=nn.Sigmoid())
-            print(repr(vae_model))
+            logging.info(repr(vae_model))
             mnist_loader = MNISTLoader(batch_size=8)
             train_loader, eval_loader = mnist_loader.loaders_from_path(root_path='../../../data/MNIST',
                                                                        exec_config=ExecConfig.default())
@@ -114,10 +114,10 @@ class VAEModelTest(unittest.TestCase):
             net_training.train(vae_model.model_id, vae_model, train_loader, eval_loader)
             self.assertTrue(True)
         except ConvException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
         except VAEException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
 
     @staticmethod

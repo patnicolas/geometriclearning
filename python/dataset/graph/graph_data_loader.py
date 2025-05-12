@@ -293,7 +293,7 @@ class GraphDataLoader(object):
 
         # Select the starting index as a random value
         start_index = random.randint(0, dataset_len-num_random_indices-1) if start_index == -1 else start_index
-        print(f'Start index: {start_index}')
+        logging.info(f'Start index: {start_index}')
 
         # Collect the indices of the selected node for the subgraph
         subset = torch.arange(start_index, start_index+num_random_indices)

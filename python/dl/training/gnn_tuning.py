@@ -110,7 +110,7 @@ class GNNTuning(object):
         gnn_training = GNNTraining.build(GNNTuning.training_parameters)
 
         # For debugging purpose
-        print(f'Number of features: {graph_loader.data.num_node_features}n'
+        logging.info(f'Number of features: {graph_loader.data.num_node_features}n'
               f'\nNumber of classes: {graph_loader.num_classes}'
               f'\nSize of training: {graph_loader.data.train_mask.sum()}')
 

@@ -1,7 +1,8 @@
 import unittest
-from manifolds.euclideanspace import EuclideanSpace
-from manifolds.geometricspace import GeometricSpace
-from manifolds.spacevisualization import VisualizationParams
+import logging
+from geometry.euclidean_space import EuclideanSpace
+from geometry.geometric_space import GeometricSpace
+from geometry.visualization.space_visualization import VisualizationParams
 
 
 class TestEuclideanSpace(unittest.TestCase):
@@ -10,16 +11,16 @@ class TestEuclideanSpace(unittest.TestCase):
         dim = 2
         num_samples = 5
         euclidean_space = EuclideanSpace(dim)
-        print(str(euclidean_space))
+        logging.info(str(euclidean_space))
         data = euclidean_space.sample(num_samples)
-        print(f'Euclidean:\n{str(data)}')
+        logging.info(f'Euclidean:\n{str(data)}')
 
     def test_sample_3_euclidean(self):
         dim = 3
         num_samples = 100
         euclidean_space = EuclideanSpace(dim)
         data = euclidean_space.sample(num_samples)
-        print(f'Euclidean:\n{str(data)}')
+        logging.info(f'Euclidean:\n{str(data)}')
 
     def test_euclidean_mean(self):
         dim = 2
@@ -27,7 +28,7 @@ class TestEuclideanSpace(unittest.TestCase):
         euclidean_space = EuclideanSpace(dim)
         data = euclidean_space.sample(num_samples)
         average_points = GeometricSpace.euclidean_mean(data)
-        print(f'Euclidean average:\n{str(average_points)}')
+        logging.info(f'Euclidean average:\n{str(average_points)}')
 
     def test_euclidean_3d_visualization(self):
         style = {'color': 'blue', 'linestyle': '--', 'label': '2'}

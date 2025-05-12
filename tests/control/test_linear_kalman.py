@@ -21,7 +21,7 @@ class LinearKalmanFilterTest(unittest.TestCase):
         H = np.array([[1.0, 0.0]])
         cov_means = (0.6, 1.0)
         kf = LinearKalmanFilter.build(x0, P0, A, H, cov_means)
-        print(str(kf))
+        logging.info(str(kf))
         self.assertTrue(kf.A.shape[0] == 2)
 
     @unittest.skip('Ignored')
@@ -32,7 +32,7 @@ class LinearKalmanFilterTest(unittest.TestCase):
         H = np.array([[1.0, 0.0, 0.0]])
         cov_means = (0.6, 1.0)
         kf = LinearKalmanFilter.build(x0, P0, A, H, cov_means)
-        print(str(kf))
+        logging.info(str(kf))
         self.assertTrue(kf.A.shape[0] == 3)
 
     @unittest.skip('Ignored')

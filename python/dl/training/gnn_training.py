@@ -113,12 +113,12 @@ class GNNTraining(NeuralTraining):
             if val_enabled:
                 self.__val_epoch(neural_model, epoch, val_loader)
 
-            print(f'Performance metrics for epoch {epoch}\n{str(self.performance_metrics)}')
+            logging.info(f'Performance metrics for epoch {epoch}\n{str(self.performance_metrics)}')
             self.exec_config.apply_monitor_memory()
 
         # Generate summary
         self.performance_metrics.summary(model_id)
-        print(f"\nMPS usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
+        logging.info(f"\nMPS usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
 
     """ -----------------------------  Private helper methods ------------------------------  """
 

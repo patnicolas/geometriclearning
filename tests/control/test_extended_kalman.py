@@ -22,7 +22,7 @@ class ExtendedKalmanTest(unittest.TestCase):
         y0 = 3.0
         xy = jnp.array([x0, y0])
         J = J_func(xy)
-        print(f'Jacobian\n{J}')
+        logging.info(f'Jacobian\n{J}')
 
 
     def test_extended(self):
@@ -49,13 +49,13 @@ class ExtendedKalmanTest(unittest.TestCase):
         P0 = jnp.eye(4, 4)
         cov_means = (0.6, 0.6)
         ekf = ExtendedKalmanFilter.build(x0, motion_2d, observed, P0, cov_means)
-        print(str(ekf))
+        logging.info(str(ekf))
         num_points = 50
         estimation = ekf.simulate(num_points,
                                lambda t: generator(t),
                                jnp.array([0.1, 0.3, 0.1, 0.2]))
         for r in estimation:
-            print(f'z observed:\n{r[0]}\nState:\n{r[1]}')
+            logging.info(f'z observed:\n{r[0]}\nState:\n{r[1]}')
 
         import matplotlib.pyplot as plt
 
@@ -64,7 +64,7 @@ class ExtendedKalmanTest(unittest.TestCase):
         x: jnp.array = jnp.linspace(0, num_points*ExtendedKalmanFilter.dt, num_points)
         _x = x.tolist()
         for e in estimation:
-            print(f'e[0]:\n{e[0]}\ne[1]:\n{e[1]}')
+            logging.info(f'e[0]:\n{e[0]}\ne[1]:\n{e[1]}')
 
         ax1.plot(_x, [e[0][0] for e in estimation])
         ax1.plot(_x, [e[1][0] for e in estimation])

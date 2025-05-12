@@ -4,7 +4,7 @@ from dl.block.mlp_block import MLPBlock
 from dl.model.mlp_model import MLPModel, MLPBuilder
 from dl.training.neural_training import NeuralTraining
 from dl import DLException
-
+import logging
 
 class MLPModelTest(unittest.TestCase):
 
@@ -24,7 +24,7 @@ class MLPModelTest(unittest.TestCase):
             self.assertTrue(mlp_model.get_in_features() == 8)
             self.assertTrue(mlp_model.get_out_features() == 1)
             params = list(mlp_model.parameters())
-            print(f'Parameters:\n{params}')
+            logging.info(f'Parameters:\n{params}')
             self.assertTrue(len(params) == 3)
 
             mlp_builder = MLPBuilder({})
@@ -35,10 +35,10 @@ class MLPModelTest(unittest.TestCase):
             mlp_builder.set(key='activation', value=nn.ReLU())
             mlp_builder.set(key='output_activation', value=nn.Softmax())
             mlp_model = mlp_builder.build()
-            print(str(mlp_model))
+            logging.info(str(mlp_model))
             assert True
         except DLException as e:
-            print(e)
+            logging.info(e)
             assert False
 
     @unittest.skip("Ignore")
@@ -63,7 +63,7 @@ class MLPModelTest(unittest.TestCase):
                                  mlp_blocks=[input_block, hidden_block, output_block])
             self.assertTrue(mlp_model.get_in_features() == 8)
             self.assertTrue(mlp_model.get_out_features() == 1)
-            print(repr(mlp_model))
+            logging.info(repr(mlp_model))
             assert True
         except DLException as e:
             assert False
@@ -79,7 +79,7 @@ class MLPModelTest(unittest.TestCase):
         }
         mlp_builder = MLPBuilder(model_attributes)
         mlp_model = mlp_builder.build()
-        print(mlp_model)
+        logging.info(mlp_model)
 
     @unittest.skip("Ignore")
     def test_transpose(self):

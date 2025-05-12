@@ -2,7 +2,7 @@ from unittest import TestCase
 import unittest
 import pandas as pd
 import numpy as np
-
+import logging
 
 class TestVectorizer(TestCase):
     @unittest.skip("Not needed")
@@ -15,11 +15,11 @@ class TestVectorizer(TestCase):
         ]
         dv = DictVectorizer()
         dv.fit(token_dict)
-        print(dv.vocabulary_)
+        logging.info(dv.vocabulary_)
         x = dv.transform(token_dict)
-        print(x)
+        logging.info(x)
         df = pd.DataFrame(x, columns=['a', 'hello', 'is', 'joke', 'not', 'on', 'or', 'patrick', 'the', 'this', 'you'])
-        print(df)
+        logging.info(df)
 
     def test_generator_exp(TestCase):
         values = np.random.rand(8,10)
@@ -28,9 +28,9 @@ class TestVectorizer(TestCase):
         while True:
             try:
                 next_val = next(it1)
-                print(next_val)
+                logging.info(next_val)
             except StopIteration as e:
-                print('Completed!')
+                logging.info('Completed!')
                 break
 
         # Option 2: Generator expression
@@ -44,8 +44,8 @@ class TestVectorizer(TestCase):
         while True:
             try:
                 next_value = next(it)
-                print(next_value)
+                logging.info(next_value)
             except StopIteration as e:
-                print('completed')
+                logging.info('completed')
                 break
 

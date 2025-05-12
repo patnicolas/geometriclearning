@@ -8,7 +8,7 @@ def generate_data(num_samples: int) -> np.array:
     import random
     values = np.array([x * math.sin(x) + random.random() for x in range(num_samples)])
     values = values.reshape((-1, 32))
-    print(f'x shape {values.shape}')
+    logging.info(f'x shape {values.shape}')
     return values
 
 
@@ -25,7 +25,7 @@ class DynamicPlot(Scene):
     def __record(self) -> List[ImageMobject]:
         frames = []
         num_frames = DynamicPlot.data.shape[0]
-        print(f'num frames {num_frames}')
+        logging.info(f'num frames {num_frames}')
         for epoch in range(num_frames):
             plt.plot(range( DynamicPlot.data.shape[1]), DynamicPlot.data[epoch])
             fname = f'frame_{epoch}.png'

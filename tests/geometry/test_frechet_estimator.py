@@ -11,6 +11,7 @@ from geometry import GeometricException
 from geometry.visualization.hypersphere_plot import HyperspherePlot
 from geometry.visualization.euclidean_plot import EuclideanPlot
 from geometry.visualization.so3_plot import SO3Plot
+import logging
 
 
 class FrechetEstimatorTest(unittest.TestCase):
@@ -23,10 +24,10 @@ class FrechetEstimatorTest(unittest.TestCase):
         try:
             frechet_estimator = FrechetEstimator(manifold, GradientDescent(), weights)
             mean = frechet_estimator.estimate(X)
-            print(mean)
+            logging.info(mean)
             self.assertTrue(False)
         except GeometricException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(True)
 
     def test_estimate_hypersphere(self):
@@ -42,11 +43,11 @@ class FrechetEstimatorTest(unittest.TestCase):
             euclidean_plot = EuclideanPlot(np_points, frechet_mean)
             euclidean_plot.show()
             euclidean_mean = FrechetEstimator.euclidean_mean(np_points)
-            print(f'\nFrechet mean:   {frechet_mean}\nEuclidean mean: {euclidean_mean}')
+            logging.info(f'\nFrechet mean:   {frechet_mean}\nEuclidean mean: {euclidean_mean}')
 
             self.assertTrue(True)
         except GeometricException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
 
     @unittest.skip('Ignore')
@@ -58,10 +59,10 @@ class FrechetEstimatorTest(unittest.TestCase):
             euclidean_plot = EuclideanPlot(np_points)
             euclidean_plot.show()
             euclidean_mean = FrechetEstimator.euclidean_mean(np_points)
-            print(f'\nEuclidean mean: {euclidean_mean}')
+            logging.info(f'\nEuclidean mean: {euclidean_mean}')
             self.assertTrue(True)
         except GeometricException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
 
     @unittest.skip('Ignore')
@@ -75,11 +76,11 @@ class FrechetEstimatorTest(unittest.TestCase):
             so3_plot.show()
             frechet_mean = frechet_estimator.estimate(manifold_points)
             euclidean_mean = FrechetEstimator.euclidean_mean(manifold_points)
-            print(f'\nFrechet mean:   {frechet_mean}\nEuclidean mean: {euclidean_mean}')
+            logging.info(f'\nFrechet mean:   {frechet_mean}\nEuclidean mean: {euclidean_mean}')
 
             self.assertTrue(True)
         except GeometricException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
 
 

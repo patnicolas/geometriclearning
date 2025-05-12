@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2020, 2022  All rights reserved."
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import requests
 import time
@@ -97,7 +97,7 @@ class HttpPost(object):
                         if self.post_single(line):
                             success_count += 1
                         total_count += 1
-                        print(f'Successes: {success_count} Count: {total_count}')
+                        logging.info(f'Successes: {success_count} Count: {total_count}')
                         time.sleep(sleep_time)
         return success_count, total_count
 

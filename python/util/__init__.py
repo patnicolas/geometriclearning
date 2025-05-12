@@ -1,9 +1,28 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2020, 2022  All rights reserved."
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-import logging
 import torch
 from typing import AnyStr, NoReturn, overload
+import logging
+import sys
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+logger.handlers = []  # Clear existing handlers
+logger.addHandler(handler)
+
+
+"""
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s",  handlers=[logging.StreamHandler()])
+"""
+# loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
 
 
 @overload
@@ -51,13 +70,13 @@ def check_modules_availability(modules: List[AnyStr]) -> None:
         else:
             missing.append(name)
 
-    print("Available modules:")
+    logging.info("Available modules:")
     for mod in available:
-        print(f"  - {mod}")
+        logging.info(f"  - {mod}")
 
     if missing:
-        print("\nMissing modules:")
+        logging.info("\nMissing modules:")
         for mod in missing:
-            print(f"  - {mod}")
+            logging.info(f"  - {mod}")
     else:
-        print("\nAll modules are available!")
+        logging.info("\nAll modules are available!")

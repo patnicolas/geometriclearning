@@ -1,4 +1,5 @@
 import unittest
+import logging
 from torch import nn
 
 from dl.block.conv.deconv_2d_block import DeConv2dBlock
@@ -18,10 +19,10 @@ class DeConv2dBlockTest(unittest.TestCase):
                                              batch_norm_module=nn.BatchNorm2d(64),
                                              activation_module=nn.ReLU(),
                                              drop_out_module=nn.Dropout2d(0.3))
-            print(repr(de_conv_2d_block))
+            logging.info(repr(de_conv_2d_block))
             self.assertTrue(de_conv_2d_block.de_conv_2d_module.out_channels == 64)
         except ConvException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
 
     def test_init_de_conv2(self):
@@ -38,10 +39,10 @@ class DeConv2dBlockTest(unittest.TestCase):
                 'dropout_ratio': 0.3
             }
             de_conv_2d_block = DeConv2dBlock.build(block_attributes)
-            print(repr(de_conv_2d_block))
+            logging.info(repr(de_conv_2d_block))
             self.assertTrue(str(de_conv_2d_block.conv_block_config.activation_module) == 'Sigmoid()')
         except ConvException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
 
 

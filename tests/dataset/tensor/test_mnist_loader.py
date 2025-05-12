@@ -1,4 +1,5 @@
 import unittest
+import logging
 from dataset.tensor.mnist_loader import MNISTLoader
 from dl.training.exec_config import ExecConfig
 
@@ -14,7 +15,7 @@ class MNISTLoaderTest(unittest.TestCase):
         )
         train_iter = iter(train_loader)
         first_data = next(train_iter)
-        print(str(first_data))
+        logging.info(str(first_data))
         self.assertTrue(len(train_loader) > 0)
 
     @unittest.skip('Ignore')

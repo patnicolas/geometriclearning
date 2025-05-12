@@ -6,7 +6,7 @@ from dl.model.gnn_base_model import GNNBaseModel
 from dl.training.hyper_params import HyperParams
 from torch_geometric.nn import GraphConv
 import torch.nn as nn
-
+import logging
 
 class GNNBaseModelTest(unittest.TestCase):
 
@@ -31,14 +31,14 @@ class GNNBaseModelTest(unittest.TestCase):
         sparse_tensor = torch.sparse_coo_tensor(indices, values, size)
 
         # Verify the sparse tensor
-        print("Sparse Tensor:")
-        print(sparse_tensor)
+        logging.info("Sparse Tensor:")
+        logging.info(sparse_tensor)
 
     def test_init_2(self):
         num_node_features = 24
         num_classes = 8
         gcn_model = GNNBaseModelTest.build(num_node_features, num_classes)
-        print(repr(gcn_model))
+        logging.info(repr(gcn_model))
 
     def test_train(self):
         from torch_geometric.datasets.flickr import Flickr

@@ -1,5 +1,5 @@
 import unittest
-
+import logging
 from dl.block.graph.gconv_block import GConvBlock
 from dl.block.mlp_block import MLPBlock
 from dl.model.gconv_model import GConvModel
@@ -45,9 +45,9 @@ class GConvModelTest(unittest.TestCase):
         gconv_model = GConvModel(model_id='Flicker test dataset',
                                  gconv_blocks=[gconv_block_1, gconv_block_2, gconv_block_3],
                                  mlp_blocks=[mlp_block])
-        print(f'\n{gconv_model}')
+        logging.info(f'\n{gconv_model}')
         params = list(gconv_model.parameters())
-        print(f'\nParameters:\n{params}')
+        logging.info(f'\nParameters:\n{params}')
         self.assertTrue(len(params) == 17)
 
     def test_init_2(self):
@@ -89,4 +89,4 @@ class GConvModelTest(unittest.TestCase):
             ]
         }
         gconv_model = GConvModel.build(model_attributes)
-        print(gconv_model)
+        logging.info(gconv_model)

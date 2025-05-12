@@ -1,6 +1,7 @@
 import unittest
 from typing import AnyStr
 from dl.training.exec_config import ExecConfig
+import logging
 
 class ExecConfigTest(unittest.TestCase):
 
@@ -21,7 +22,7 @@ class ExecConfigTest(unittest.TestCase):
             monitor_memory=monitor_memory,
             grad_accu_steps=grad_accu_steps,
             device_config=device_config)
-        print(exec_config)
+        logging.info(exec_config)
         self.assertTrue(True)
 
     def test_get_device(self):
@@ -63,7 +64,7 @@ class ExecConfigTest(unittest.TestCase):
             subset_size=subset_size)
 
         device_name, _ = exec_config.apply_device()
-        print(f'Native device: {device_name}')
+        logging.info(f'Native device: {device_name}')
         self.assertTrue(True)
 
     def test_get_mix_precision(self):
@@ -84,8 +85,8 @@ class ExecConfigTest(unittest.TestCase):
             subset_size=subset_size)
 
         x = torch.Tensor([90.1, 98.2])
-        print(f'\nOriginal: {x.dtype}')
+        logging.info(f'\nOriginal: {x.dtype}')
         self.assertTrue(x.dtype == torch.float32)
         x = exec_config.apply_mix_precision(x)
         self.assertTrue(x.dtype == torch.float16)
-        print(f'\nConverted: {x.dtype}')
+        logging.info(f'\nConverted: {x.dtype}')

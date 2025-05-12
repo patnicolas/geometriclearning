@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import logging
 
 class MyModel(nn.Module):
     def __init__(self):
@@ -18,9 +19,9 @@ if __name__ == '__main__':
     model = MyModel()
     params = model.parameters()
     lst = list(params)
-    print(lst)
+    logging.info(lst)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-    print(optimizer)
+    logging.info(optimizer)
 
 
 

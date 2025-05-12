@@ -62,9 +62,9 @@ class GConvModel(NeuralModel):
         # Create and collect the output of each GNN layer
         for gconv_block in self.gconv_blocks:
             # Implicit invoke forward method for the block
-            # print(f'Before forward shape {x.shape}')
+            # logging.info(f'Before forward shape {x.shape}')
             x = gconv_block(x, data.edge_index, data.batch)
-            # print(f'After forward shape {x.shape}')
+            # logging.info(f'After forward shape {x.shape}')
 
         # Step 4: Process the fully connected, MLP layers
         for mlp_block in self.mlp_blocks:

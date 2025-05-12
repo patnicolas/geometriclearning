@@ -3,7 +3,7 @@ import unittest
 import torch
 from util.image_tensor import ImageTensor
 img_dir = '../output/test1'
-
+import logging
 
 class TestImageTensor(TestCase):
     def test_img(self):
@@ -13,7 +13,7 @@ class TestImageTensor(TestCase):
 
         values = [[[255, 0, 0],[255,0,0]],[[255, 0, 0],[255,0,0]]]
         np_values = np.array(values)
-        print(np_values.shape)
+        logging.info(np_values.shape)
         img = Image.fromarray(np_values, 'RGB')
         plt.imshow(img)
         img.save('../../images/test6.png')
@@ -26,7 +26,7 @@ class TestImageTensor(TestCase):
             import numpy
             im = Image.open("../../images/t.png")
             np_im = numpy.array(im)
-            print(np_im.shape)
+            logging.info(np_im.shape)
             np_im = np_im - 23
             new_im = Image.fromarray(np_im)
             new_im.save("../../output/altered_t.png")
@@ -43,7 +43,7 @@ class TestImageTensor(TestCase):
             image_conversion = ImageTensor(img_dir)
             image_conversion.to_images([input_tensor1, input_tensor2])
         except Exception as e:
-            print(str(e))
+            logging.info(str(e))
             self.fail()
 
     @unittest.skip("NO reason")
@@ -52,7 +52,7 @@ class TestImageTensor(TestCase):
             image_conversion = ImageTensor(img_dir)
             data_loader = image_conversion.to_dataset()
             it = iter(data_loader)
-            print(it.next())
+            logging.info(it.next())
         except Exception as e:
-            print(str(e))
+            logging.info(str(e))
             self.fail()

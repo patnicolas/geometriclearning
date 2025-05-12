@@ -1,7 +1,7 @@
 from unittest import TestCase
 import math
 from util.decorators import timeit
-
+import logging
 
 @timeit
 def procedure() -> float:
@@ -14,4 +14,4 @@ def procedure() -> float:
 class TestDecorator(TestCase):
 
     def test_timeit(self):
-        print(procedure())
+        logging.info(procedure())

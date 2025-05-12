@@ -12,7 +12,7 @@ from metric.built_in_metric import BuiltInMetric
 import torch.nn as nn
 import os
 from typing import Dict, Any, AnyStr
-
+import logging
 
 def show(attrs: Dict[AnyStr, Any]) -> AnyStr:
     return ', '.join([f'{k}:{v}' for k, v in attrs.items()])
@@ -50,7 +50,7 @@ class GNNTrainingTest(unittest.TestCase):
         }
 
         gnn_training = GNNTraining.build(training_attributes)
-        print(gnn_training)
+        logging.info(gnn_training)
 
     @unittest.skip('Ignore')
     def test_train_random_walk_loader(self):
@@ -97,13 +97,13 @@ class GNNTrainingTest(unittest.TestCase):
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GNNException as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except DatasetException as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except Exception as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
 
@@ -158,13 +158,13 @@ class GNNTrainingTest(unittest.TestCase):
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
 
         except GNNException as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except DatasetException as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except Exception as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
     @unittest.skip('Ignore')
@@ -206,13 +206,13 @@ class GNNTrainingTest(unittest.TestCase):
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GNNException as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except DatasetException as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except Exception as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
     @unittest.skip('Ignore')
@@ -252,13 +252,13 @@ class GNNTrainingTest(unittest.TestCase):
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GNNException as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except DatasetException as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except Exception as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
     @unittest.skip('Ignore')
@@ -298,13 +298,13 @@ class GNNTrainingTest(unittest.TestCase):
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GNNException as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except DatasetException as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except Exception as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
     @unittest.skip('Ignore')
@@ -346,13 +346,13 @@ class GNNTrainingTest(unittest.TestCase):
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GNNException as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except DatasetException as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except Exception as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
     @unittest.skip('Ignore')
@@ -394,13 +394,13 @@ class GNNTrainingTest(unittest.TestCase):
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GNNException as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except DatasetException as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except Exception as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
     @unittest.skip('Ignore')
@@ -443,13 +443,13 @@ class GNNTrainingTest(unittest.TestCase):
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GNNException as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except DatasetException as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except Exception as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
     @unittest.skip('Ignore')
@@ -492,13 +492,13 @@ class GNNTrainingTest(unittest.TestCase):
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GNNException as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except DatasetException as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except Exception as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
     @unittest.skip('Ignore')
@@ -524,7 +524,7 @@ class GNNTrainingTest(unittest.TestCase):
                 label=f'Flickr - ClusterLoader,num_parts:256,batch_size:2048,range:[10,25]')
             self.assertTrue(True)
         except DatasetException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
 
     def test_draw_sample_2(self):
@@ -543,10 +543,10 @@ class GNNTrainingTest(unittest.TestCase):
                                                 sampling_attributes=attrs,
                                                 num_subgraph_nodes=24,
                                                 start_index=6)
-            print(f'Number of nodes {_data.num_nodes}')
+            logging.info(f'Number of nodes {_data.num_nodes}')
             self.assertTrue(_data.num_nodes > 0)
         except DatasetException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
 
     @unittest.skip('Ignore')
@@ -576,7 +576,7 @@ class GNNTrainingTest(unittest.TestCase):
                          plotter_parameters=plotter_params)
             self.assertTrue(True)
         except DatasetException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
 
     @unittest.skip('Ignore')

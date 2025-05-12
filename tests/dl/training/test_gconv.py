@@ -14,7 +14,7 @@ from metric.metric_type import MetricType
 from torch_geometric.data import Data
 import torch.nn as nn
 import torch
-
+import logging
 
 class GConvTest(unittest.TestCase):
 
@@ -57,10 +57,10 @@ class GConvTest(unittest.TestCase):
 
         try:
             flickr_model = GConvTest.flickr_model(hidden_channels, pooling_ratio, dropout_p)
-            print(flickr_model)
+            logging.info(flickr_model)
             self.assertTrue(True)
         except GNNException as e:
-            print(e)
+            logging.info(e)
             self.assertTrue(False)
 
     @unittest.skip('Ignored')
@@ -100,7 +100,7 @@ class GConvTest(unittest.TestCase):
                 'num_workers': 1
             }
             flickr_loaders = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
-            print(f'Graph data: {str(flickr_loaders.data)}')
+            logging.info(f'Graph data: {str(flickr_loaders.data)}')
             train_loader, val_loader = flickr_loaders()
 
             network = GNNTraining(hyper_params=hyper_parameters,
@@ -112,7 +112,7 @@ class GConvTest(unittest.TestCase):
                           train_loader=train_loader,
                           val_loader=val_loader)
         except (GNNException | DLException | DatasetException | TrainingException) as e:
-            print(e)
+            logging.info(e)
             self.assertTrue(False)
 
     @staticmethod
@@ -130,7 +130,7 @@ class GConvTest(unittest.TestCase):
             raise GNNException("Failed to load Flickr")
 
         _data: torch_geometric.data.Data = flickr_dataset[0]
-        print(f'Number of features: {_data.num_node_features}\nNumber of classes: {flickr_dataset.num_classes}'
+        logging.info(f'Number of features: {_data.num_node_features}\nNumber of classes: {flickr_dataset.num_classes}'
               f'\nSize of training: {_data.train_mask.sum()}')
 
         conv_1 = GraphConv(in_channels=_data.num_node_features, out_channels=hidden_channels)

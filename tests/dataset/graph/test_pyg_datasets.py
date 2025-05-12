@@ -58,7 +58,7 @@ class PyGDatasetsTest(unittest.TestCase):
         sub_data = PyGDatasetsTest.__extract_subgraph(data)
 
         # sub_data.node_mapping = subset_nodes
-        print(f'\n{name}:\n{sub_data}')
+        logging.info(f'\n{name}:\n{sub_data}')
 
     @staticmethod
     def __extract_subgraph(data: Data) -> Data:

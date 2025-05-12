@@ -1,8 +1,8 @@
 import unittest
 from unittest import TestCase
-
-from python.ml.metropolis_hastings import MetropolisHastings
-from python.ml.proposal_distribution import ProposalBeta, ProposalDistribution
+import logging
+from mcmc.metropolis_hastings import MetropolisHastings
+from mcmc.proposal_distribution import ProposalBeta, ProposalDistribution
 from typing import AnyStr
 
 
@@ -86,7 +86,7 @@ class TestMetropolisHastings(TestCase):
 
         theta_history, success_rate = metropolis_hastings.sample(theta0)
         theta_history_str = str(theta_history)
-        print(f'{description} Success rate {success_rate}')
+        logging.info(f'{description} Success rate {success_rate}')
 
 
 if __name__ == '__main__':

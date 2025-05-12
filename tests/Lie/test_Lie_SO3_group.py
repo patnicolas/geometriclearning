@@ -2,9 +2,10 @@ import unittest
 
 from Lie.Lie_SO3_group import LieSO3Group
 from Lie.Lie_SO3_group import LieElement
-from Lie.Lie_SE3_group import UnitElements3D
 import numpy as np
 from typing import AnyStr, List
+from Lie import u3d
+import logging
 
 
 class LieSO3GroupTest(unittest.TestCase):
@@ -15,15 +16,15 @@ class LieSO3GroupTest(unittest.TestCase):
                                 [0.0, 1.0, -1.0]])
 
         det = np.linalg.trace(so3_element)
-        print(det)
+        logging.info(det)
         so3_group = LieSO3Group(so3_element)
-        print(str(so3_group))
+        logging.info(str(so3_group))
         self.assertTrue(so3_group.group_element.shape == (3, 3))
 
 
     @unittest.skip('Ignored')
     def test_init_2(self):
-        so3_group = LieSO3Group(UnitElements3D.y_rot)
+        so3_group = LieSO3Group(u3d.y_rot)
         so3_element_1 = LieElement(
             group_element=so3_group.group_element,
             identity_element=LieSO3Group.identity_matrix,
@@ -31,12 +32,12 @@ class LieSO3GroupTest(unittest.TestCase):
 
         self.assertTrue(so3_group.group_element.shape == (3, 3))
 
-        so3_group2 = LieSO3Group(UnitElements3D.z_rot)
+        so3_group2 = LieSO3Group(u3d.z_rot)
         so3_element_2 = LieElement(
             group_element=so3_group2.group_element,
             identity_element=LieSO3Group.identity_matrix,
             descriptor='SO3 Lz element\nIdentity element:\n[0 -1  0]\n[1  0  0]\n[0  0  0]')
-        print(str(so3_group2))
+        logging.info(str(so3_group2))
         LieSO3Group.visualize_all(so3_elements=[so3_element_1, so3_element_2], notation_index=3)
 
     @unittest.skip('Ignored')
@@ -45,8 +46,8 @@ class LieSO3GroupTest(unittest.TestCase):
         cy = -0.5
         cz = 1.5
 
-        element = cx * UnitElements3D.x_rot + cy * UnitElements3D.y_rot + cz * UnitElements3D.z_rot
-        print(element)
+        element = cx * u3d.x_rot + cy * u3d.y_rot + cz * u3d.z_rot
+        logging.info(element)
         so3_group = LieSO3Group(element)
         so3_element = LieElement(
             group_element=so3_group.group_element,
@@ -57,13 +58,13 @@ class LieSO3GroupTest(unittest.TestCase):
     @unittest.skip('Ignored')
     def test_inverse(self):
         # Generator for rotation along Y axis
-        so3_group = LieSO3Group(UnitElements3D.y_rot)
+        so3_group = LieSO3Group(u3d.y_rot)
         element = LieElement(
             group_element=so3_group.group_element,
             identity_element=LieSO3Group.identity_matrix,
             descriptor='SO3 point from tangent vector\n[1 0  0]\n[0 0 -1]\n[0 1  0]\nBase point: Identity')
 
-        print(str(so3_group))
+        logging.info(str(so3_group))
 
         # Inverse SO3 rotation matrix
         so3_inv_group = so3_group.inverse()
@@ -71,7 +72,7 @@ class LieSO3GroupTest(unittest.TestCase):
             group_element=so3_inv_group.group_element,
             identity_element=LieSO3Group.identity_matrix,
             descriptor='SO3 inverse point')
-        print(f'SO3 Inverse point:{so3_inv_group}')
+        logging.info(f'SO3 Inverse point:{so3_inv_group}')
         self.assertTrue(so3_inv_group.group_element.shape == (3, 3))
         # Visualization
         LieSO3Group.visualize_all([element, inv_so3_inverse], 2)
@@ -79,14 +80,14 @@ class LieSO3GroupTest(unittest.TestCase):
     @unittest.skip('Ignored')
     def test_product_1(self):
         # First SO3 rotation matrix along X axis
-        so3_group_x = LieSO3Group(algebra_element=UnitElements3D.x_rot)
+        so3_group_x = LieSO3Group(algebra_element=u3d.x_rot)
         so3_element_x = LieElement(
             group_element=so3_group_x.group_element,
             identity_element=LieSO3Group.identity_matrix,
             descriptor='SO3 Rotation along X\n[0 0  0]\n[0 0 -1]\n[0 1  0]\n@ identity')
 
         # Second SO3 rotation along Y axis
-        so3_group_y = LieSO3Group(algebra_element=UnitElements3D.y_rot)
+        so3_group_y = LieSO3Group(algebra_element=u3d.y_rot)
         so3_point_y = LieElement(
             group_element=so3_group_y.group_element,
             identity_element=LieSO3Group.identity_matrix,
@@ -95,7 +96,7 @@ class LieSO3GroupTest(unittest.TestCase):
         # Composition of two SO3 rotation matrices
         so3_group_product = so3_group_x.product(so3_group_y)
         self.assertTrue(so3_group_product.group_element.shape == (3, 3))
-        print(f'\nSO3 Product:{so3_group_product}')
+        logging.info(f'\nSO3 Product:{so3_group_product}')
 
         # Visualization
         LieSO3Group.visualize_all([so3_element_x, so3_point_y], 0)
@@ -104,7 +105,7 @@ class LieSO3GroupTest(unittest.TestCase):
     @unittest.skip('Ignored')
     def test_product_2(self):
         # First SO3 rotation matrix along X axis
-        so3_group_x = LieSO3Group(algebra_element=UnitElements3D.x_rot)
+        so3_group_x = LieSO3Group(algebra_element=u3d.x_rot)
         so3_element_x = LieElement(
             group_element=so3_group_x.group_element,
             identity_element=LieSO3Group.identity_matrix,
@@ -122,7 +123,7 @@ class LieSO3GroupTest(unittest.TestCase):
         # Composition of two SO3 rotation matrices
         so3_group_product = so3_group_x.product(so3_group_identity)
         self.assertTrue(so3_group_product.group_element.shape == (3, 3))
-        print(f'\nSO3 Product:{so3_group_product}')
+        logging.info(f'\nSO3 Product:{so3_group_product}')
 
         # Visualization
         LieSO3Group.visualize_all([so3_element_x, so3_point_identity], 0)
@@ -149,7 +150,7 @@ class LieSO3GroupTest(unittest.TestCase):
         # Composition of two SO3 rotation matrices
         so3_group_product = so3_group.product(so3_group2)
         self.assertTrue(so3_group_product.group_element.shape == (3, 3))
-        print(f'\nSO3 Product:{so3_group_product}')
+        logging.info(f'\nSO3 Product:{so3_group_product}')
 
         LieSO3Group.visualize_all([so3_point, so3_point2], 0)
         so3_group_product.visualize('Composition of 3D rotations')
@@ -157,71 +158,71 @@ class LieSO3GroupTest(unittest.TestCase):
     @unittest.skip('Ignored')
     def test_algebra(self):
         # Step 2; Compute the element on SO3 manifold
-        so3_group = LieSO3Group(algebra_element=UnitElements3D.y_rot)
-        print(f'SO3 element: {so3_group}')
+        so3_group = LieSO3Group(algebra_element=u3d.y_rot)
+        logging.info(f'SO3 element: {so3_group}')
 
         # Step 3: Compute the algebra element from SO3 element
         lie_algebra = so3_group.lie_algebra()
-        assert lie_algebra.size == len(UnitElements3D.y_rot)
-        print(f'\nComputed algebra element:\n{lie_algebra}')
+        assert lie_algebra.size == len(u3d.y_rot)
+        logging.info(f'\nComputed algebra element:\n{lie_algebra}')
 
 
     @unittest.skip('Ignored')
     def test_algebra2(self):
         # The SO3 element is computed at identity (to conform to Lie Algebra)
-        so3_group = LieSO3Group(algebra_element=UnitElements3D.z_rot)
-        print(f'SO3 point:\n{so3_group}')
+        so3_group = LieSO3Group(algebra_element=u3d.z_rot)
+        logging.info(f'SO3 point:\n{so3_group}')
         lie_algebra = so3_group.lie_algebra()
-        print(f'\nLie algebra:\n{lie_algebra}')
+        logging.info(f'\nLie algebra:\n{lie_algebra}')
 
 
     @unittest.skip('Ignored')
     def test_projection(self):
         # SO3 rotation along X axis
-        so3_group = LieSO3Group(algebra_element=UnitElements3D.x_rot)
+        so3_group = LieSO3Group(algebra_element=u3d.x_rot)
         projected = so3_group.projection()
-        print(f'\nProjected point with identity:\n{projected.group_element}')
+        logging.info(f'\nProjected point with identity:\n{projected.group_element}')
 
         # Use a different reference point on SO3 manifold
         non_identity = np.array([[0.0, 0.0, 1.0],
                                  [0.0, 1.0, 0.0],
                                  [-1.0, 0.0, 0.0]])
-        so3_group = LieSO3Group(algebra_element=UnitElements3D.x_rot, identity_element=non_identity)
+        so3_group = LieSO3Group(algebra_element=u3d.x_rot, identity_element=non_identity)
         projected = so3_group.projection()
-        print(f'\nProjected point reference\n{so3_group.algebra_element}:\n{projected.group_element}')
+        logging.info(f'\nProjected point reference\n{so3_group.algebra_element}:\n{projected.group_element}')
 
     @unittest.skip('Ignored')
     def test_bracket(self):
         # SO3 rotation along X axis
-        so3_group = LieSO3Group(algebra_element=UnitElements3D.x_rot)
-        print(f'\nAlgebra element:\n{so3_group.algebra_element}')
+        so3_group = LieSO3Group(algebra_element=u3d.x_rot)
+        logging.info(f'\nAlgebra element:\n{so3_group.algebra_element}')
         np.set_printoptions(precision=3)
-        print(f'\nSO3 element\n{so3_group.group_element}')
-        bracket = so3_group.bracket(UnitElements3D.x_rot)
-        print(f'\nBracket [x,x]:\n{bracket}')
+        logging.info(f'\nSO3 element\n{so3_group.group_element}')
+        bracket = so3_group.bracket(u3d.x_rot)
+        logging.info(f'\nBracket [x,x]:\n{bracket}')
 
 
     @unittest.skip('Ignored')
     def test_bracket2(self):
         # First SO3 rotation along X axis
-        so3_group_x = LieSO3Group(algebra_element=UnitElements3D.x_rot)
-        print(f'\n{so3_group_x.group_element}')
+        so3_group_x = LieSO3Group(algebra_element=u3d.x_rot)
+        logging.info(f'\n{so3_group_x.group_element}')
 
         # Second SO3 rotation matrix along Y axis
-        bracket = so3_group_x.bracket(UnitElements3D.y_rot)
-        print(f'\nBracket:\n{bracket}')
-        so3_group_y = LieSO3Group(algebra_element=UnitElements3D.y_rot)
+        bracket = so3_group_x.bracket(u3d.y_rot)
+        logging.info(f'\nBracket:\n{bracket}')
+        so3_group_y = LieSO3Group(algebra_element=u3d.y_rot)
 
         so3_element_x = LieElement(
             group_element= so3_group_x.algebra_element,
             identity_element=LieSO3Group.identity_matrix,
             descriptor='SO3 element from rotation\n[0 0  0]\n[0 0 -1]\n[0 1  0]\n@ identity')
-        print(f'SO3 element-x:\n{so3_element_x.group_element}')
+        logging.info(f'SO3 element-x:\n{so3_element_x.group_element}')
         so3_element_y = LieElement(
             group_element= so3_group_y.algebra_element,
             identity_element=LieSO3Group.identity_matrix,
             descriptor='SO3 element from rotation\n[ 0 0 1]\n[ 0 0 0]\n[-1 0  0]\n@ identity')
-        print(f'SO3 element-y:\n{so3_element_y.group_element}')
+        logging.info(f'SO3 element-y:\n{so3_element_y.group_element}')
         LieSO3Group.visualize_all([so3_element_x, so3_element_y], 0)
 
         so3_bracket_element = LieElement(

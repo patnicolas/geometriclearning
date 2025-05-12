@@ -23,7 +23,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         node_values = torch.tensor(data=[1, 2, 3, 7, -1, -2], dtype=torch.float)
         graph_data = Data(x=node_values.T, edge_index=edge_index_values)
 
-        print(graph_data)
+        logging.info(graph_data)
         # Request validation of the graph parameters
         self.assertTrue(graph_data.validate(raise_on_error=True))
 
@@ -43,7 +43,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         train_data_loader, test_data_loader = graph_data_loader()
         result = [f'{idx}: {str(batch)}'
                   for idx, batch in enumerate(train_data_loader) if idx < 3]
-        print('\n'.join(result))
+        logging.info('\n'.join(result))
         self.assertTrue(True)
 
     #@unittest.skip('Ignore')
@@ -64,8 +64,8 @@ class GraphDataLoaderTest(unittest.TestCase):
         train_data_loader, test_data_loader = graph_data_loader()
         result = [f'{idx}: {str(batch)}'
                   for idx, batch in enumerate(train_data_loader) if idx < 3]
-        print('\nTrain data')
-        print('\n'.join(result))
+        logging.info('\nTrain data')
+        logging.info('\n'.join(result))
         self.assertTrue(True)
 
     @unittest.skip('Ignore')
@@ -87,7 +87,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         train_data_loader, test_data_loader = graph_data_loader()
         result = [f'{idx}: {str(batch)}'
                   for idx, batch in enumerate(train_data_loader) if idx < 3]
-        print('\n'.join(result))
+        logging.info('\n'.join(result))
         self.assertTrue(True)
 
     @unittest.skip('Ignore')
@@ -109,7 +109,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         train_data_loader, test_data_loader = graph_data_loader()
         result = [f'{idx}: {str(batch)}'
                   for idx, batch in enumerate(train_data_loader) if idx < 3]
-        print('\n'.join(result))
+        logging.info('\n'.join(result))
         self.assertTrue(True)
 
     @unittest.skip('Ignore')
@@ -131,7 +131,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         train_data_loader, test_data_loader = graph_data_loader()
         result = [f'{idx}: {str(batch)}'
                   for idx, batch in enumerate(train_data_loader) if idx < 3]
-        print('\n'.join(result))
+        logging.info('\n'.join(result))
         self.assertTrue(True)
 
     @unittest.skip('Ignore')
@@ -151,7 +151,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         train_data_loader, test_data_loader = graph_data_loader()
         result = [f'{idx}: {str(batch)}'
                   for idx, batch in enumerate(train_data_loader) if idx < 3]
-        print('\n'.join(result))
+        logging.info('\n'.join(result))
         self.assertTrue(True)
 
     @unittest.skip('Ignore')
@@ -171,7 +171,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         train_data_loader, test_data_loader = graph_data_loader()
         result = [f'{idx}: {str(batch)}'
                   for idx, batch in enumerate(train_data_loader) if idx < 3]
-        print('\n'.join(result))
+        logging.info('\n'.join(result))
         self.assertTrue(True)
 
 

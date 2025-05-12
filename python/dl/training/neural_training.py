@@ -91,7 +91,7 @@ class NeuralTraining(object):
 
         # Generate summary
         self.performance_metrics.summary(output_file_name)
-        print(f"\nMPS usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
+        logging.info(f"\nMPS usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
 
     def __repr__(self) -> str:
         return repr(self.hyper_params)

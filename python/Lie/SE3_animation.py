@@ -277,7 +277,7 @@ if __name__ == '__main__':
 
     # Convert to HEX
     hex_color = '#{:02x}{:02x}{:02x}'.format(r, g, b)
-    print("Hex color:", hex_color)
+    logging.info("Hex color:", hex_color)
 
     """
     lie_group_simulation = SE3Animation.build(chart_pos=[-0.4, -0.1, 2.2, 1.1],

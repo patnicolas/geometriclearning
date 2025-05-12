@@ -10,7 +10,7 @@ def timeit(func):
         func(*args, **kwargs)
         duration = '{:.3f}'.format(time.time() - start)
         key: AnyStr = f'{args[1]} {args[2]}'
-        print(f'{key}\t{duration} secs.')
+        logging.info(f'{key}\t{duration} secs.')
         cur_list = collector.get(key)
         if cur_list is None:
             cur_list = [time.time() - start]

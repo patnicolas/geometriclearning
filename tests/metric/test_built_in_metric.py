@@ -2,7 +2,7 @@ import unittest
 import torch
 from python.metric.built_in_metric import BuiltInMetric, MetricType
 import numpy as np
-
+import logging
 
 class BuiltInMetricTest(unittest.TestCase):
 
@@ -12,16 +12,16 @@ class BuiltInMetricTest(unittest.TestCase):
             'banana': {'store1': 3.0, 'store2': 2.0},
         }
         result = [{fruit: min(stores, key=stores.get)} for fruit, stores in fruit_stores.items()]
-        print(f'Result: {result}')
+        logging.info(f'Result: {result}')
 
     def test_accuracy(self):
         metric_type = MetricType.Accuracy
         build_in_metric = BuiltInMetric(metric_type)
         predicted: torch.Tensor = torch.tensor([[1.0],[0.0],[0.0],[1.0]])
         labels: torch.Tensor = torch.tensor([[1.0], [0.0], [0.0], [1.0]])
-        print(f'Predicted {str(predicted)}')
+        logging.info(f'Predicted {str(predicted)}')
         np_accuracy = build_in_metric.from_torch(predicted, labels)
-        print(f'Accuracy {np_accuracy}')
+        logging.info(f'Accuracy {np_accuracy}')
         self.assertTrue(float(np_accuracy) == 1.0)
 
         predicted: torch.Tensor = torch.tensor([[0.0], [1.0], [1.0], [0.0]])
@@ -33,14 +33,14 @@ class BuiltInMetricTest(unittest.TestCase):
         build_in_metric = BuiltInMetric(metric_type)
         predicted = np.array([[1.0], [0.0], [0.0], [1.0]])
         labels = np.array([[1.0], [0.0], [0.0], [1.0]])
-        print(f'Predicted {str(predicted)}')
+        logging.info(f'Predicted {str(predicted)}')
         np_precision = build_in_metric.from_numpy(predicted, labels)
-        print(f'Precision: {np_precision}')
+        logging.info(f'Precision: {np_precision}')
         self.assertTrue(float(np_precision) == 1.0)
 
         predicted = np.array([[0.0], [1.0], [1.0], [0.0]])
         np_precision = build_in_metric.from_numpy(predicted, labels)
-        print(f'Precision: {np_precision}')
+        logging.info(f'Precision: {np_precision}')
         self.assertTrue(float(np_precision) == 0.0)
 
     def test_recall(self):
@@ -48,14 +48,14 @@ class BuiltInMetricTest(unittest.TestCase):
         build_in_metric = BuiltInMetric(metric_type)
         predicted: torch.Tensor = torch.tensor([[1.0], [0.0], [0.0], [1.0]])
         labels: torch.Tensor = torch.tensor([[1.0], [0.0], [0.0], [1.0]])
-        print(f'Predicted {str(predicted)}')
+        logging.info(f'Predicted {str(predicted)}')
         np_recall = build_in_metric.from_torch(predicted, labels)
-        print(f'Recall: {np_recall}')
+        logging.info(f'Recall: {np_recall}')
         self.assertTrue(float(np_recall) == 1.0)
 
         predicted: torch.Tensor = torch.tensor([[0.0], [1.0], [1.0], [0.0]])
         np_recall = build_in_metric.from_torch(predicted, labels)
-        print(f'Recall: {np_recall}')
+        logging.info(f'Recall: {np_recall}')
         self.assertTrue(float(np_recall) == 0.0)
 
 

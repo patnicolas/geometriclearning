@@ -6,32 +6,32 @@ class TestIterTools(TestCase):
     def test_count(self):
         counter_it = itertools.count(start=3, step =4)
         for idx in range(20):
-            print(f'{idx} next count: {next(counter_it)}')
+            logging.info(f'{idx} next count: {next(counter_it)}')
 
     def test_zipper(self):
         data = [idx for idx in range(200, 240)]
-        print(f'Length: {len(data)}')
+        logging.info(f'Length: {len(data)}')
         zipped_data_it = zip(itertools.count(), data)
         for n in range(len(data)):
-            print(f'Zipped: {next(zipped_data_it)}')
+            logging.info(f'Zipped: {next(zipped_data_it)}')
 
     def test_repeat(self):
         repeat_it = itertools.repeat(5, times=3)
-        print(f'Type counter {type(repeat_it)}')
+        logging.info(f'Type counter {type(repeat_it)}')
         cubes = map(pow, range(5), itertools.repeat(3))
         for cube in cubes:
-            print(f'Cube: {cube}')
+            logging.info(f'Cube: {cube}')
         inv_func = lambda x, n: 1.0/(1.0 + x+ n)
         inverses = map(inv_func, range(10), itertools.repeat(2))
         for inverse in inverses:
-            print(f'Inverse: {inverse}')
+            logging.info(f'Inverse: {inverse}')
 
     def test_chain(self):
         letters = ['a', 'b', 'c', 'd', 'e']
         numbers = [1, 2, 3, 4, 5]
         combines = itertools.chain(letters, numbers)
         for combine in combines:
-            print(f'Combine: {combine}')
+            logging.info(f'Combine: {combine}')
         # a, b c, d, e, 1, 2, 3, 4, 5
 
     def test_compress(self):
@@ -39,20 +39,20 @@ class TestIterTools(TestCase):
         filter = [True, False, False, True,True]
         compressed = itertools.compress(letters, filter)
         for compress in compressed:
-            print(f'Compress: {compress}')
+            logging.info(f'Compress: {compress}')
         # a, d, 3
 
     def test_takewhile(self):
         fct = lambda x: pow(x,2) < 32
         results = itertools.takewhile(fct, [n for n in range(30)])
         for result in results:
-            print(f'Result: {result}')
+            logging.info(f'Result: {result}')
 
     def test_dropwhile(self):
         fct = lambda x: pow(x,2) < 128
         results = itertools.dropwhile(fct, [n for n in range(30)])
         for result in results:
-            print(f'_Result: {result}')
+            logging.info(f'_Result: {result}')
 
     def test_groupby(self):
         class Person:
@@ -69,4 +69,4 @@ class TestIterTools(TestCase):
         grouped_by = itertools.groupby(persons, get_age)
         for key, group in grouped_by:
             for person in group:
-                print(f'KEY: {key} => {person.name}')
+                logging.info(f'KEY: {key} => {person.name}')

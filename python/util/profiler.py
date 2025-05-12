@@ -49,7 +49,7 @@ class Profiler(object):
             Execute the memory line profiler on a script or Python function defined in the constructor
         """
         usage = memory_profiler.memory_usage(self.python_script)
-        print(f'Memory usage func {usage}')
+        logging.info(f'Memory usage func {usage}')
 
 
     def run_memory_profiler(self):
@@ -57,7 +57,7 @@ class Profiler(object):
             Execute the memory line profiler on a script or Python function defined in the constructor
         """
         usage = memory_profiler.memory_usage(-1)
-        print(f'Memory usage default {usage}')
+        logging.info(f'Memory usage default {usage}')
 
 
 @profile

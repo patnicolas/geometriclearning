@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2020, 2022  All rights reserved."
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from PIL import Image
 import torch

@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2020, 2022  All rights reserved."
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import asyncio
 import requests
@@ -22,10 +22,10 @@ class AsyncHttpPost(object):
         self.url = url
         self.headers = headers
         with open(input_file) as input:
-            requests =  input.readlines()
-            self.num_requests = len(requests)
+            _requests =  input.readlines()
+            self.num_requests = len(_requests)
             stride = self.num_requests // num_clients
-            self.requests_iters = [iter(requests[i:i + stride]) for i in range(0, self.num_requests, stride)]
+            self.requests_iters = [iter(_requests[i:i + stride]) for i in range(0, self.num_requests, stride)]
 
     async def post(self) -> list:
         """

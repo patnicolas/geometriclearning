@@ -2,7 +2,7 @@
 import unittest
 from metric.performance_metrics import PerformanceMetrics
 from metric.metric_type import MetricType
-
+import logging
 
 class PerformanceMetricsTest(unittest.TestCase):
 
@@ -12,14 +12,14 @@ class PerformanceMetricsTest(unittest.TestCase):
         performance_metrics.add_metric(metric_label=MetricType.Accuracy, encoding_len=-1,is_weighted=False)
         performance_metrics.add_metric(metric_label=MetricType.Precision, encoding_len=-1, is_weighted=False)
 
-        print(performance_metrics.show_metrics())
+        logging.info(performance_metrics.show_metrics())
         self.assertTrue(len(performance_metrics) == 2)
 
     @unittest.skip('Ignored')
     def test_build(self):
         attributes = {'Accuracy': True, 'Recall': True}
         performance_metrics = PerformanceMetrics.build(attributes)
-        print(performance_metrics.show_metrics())
+        logging.info(performance_metrics.show_metrics())
         self.assertTrue(len(performance_metrics) == 2)
 
     @unittest.skip('Ignored')
@@ -33,7 +33,7 @@ class PerformanceMetricsTest(unittest.TestCase):
             MetricType.Recall: BuiltInMetric(metric_type=MetricType.Recall)
         }
         performance_metrics = PerformanceMetrics(metrics)
-        print(performance_metrics.show_metrics())
+        logging.info(performance_metrics.show_metrics())
 
         np_predictions = [np.array(1.0), np.array(0.0), np.array(0.0), np.array(1.0), np.array(1.0), np.array(1.0)]
         np_labels = [np.array(1.0), np.array(1.0), np.array(1.0), np.array(1.0), np.array(1.0), np.array(0.0)]
@@ -43,7 +43,7 @@ class PerformanceMetricsTest(unittest.TestCase):
         np_lab = np.stack(np_labels)
         performance_metrics.update_performance_values(np_pred, np_lab)
         performance_metrics.update_metric(MetricType.EvalLoss, sum(val_loss)/len(val_loss))
-        print(f'Performance:\n{str(performance_metrics)}')
+        logging.info(f'Performance:\n{str(performance_metrics)}')
 
     def test_summary(self):
         import numpy as np
@@ -55,7 +55,7 @@ class PerformanceMetricsTest(unittest.TestCase):
             MetricType.Recall: BuiltInMetric(metric_type=MetricType.Recall)
         }
         performance_metrics = PerformanceMetrics(metrics)
-        print(performance_metrics.show_metrics())
+        logging.info(performance_metrics.show_metrics())
 
         np_predictions = [np.array(1.0), np.array(0.0), np.array(0.0), np.array(1.0), np.array(1.0), np.array(1.0)]
         np_labels = [np.array(1.0), np.array(1.0), np.array(1.0), np.array(1.0), np.array(1.0), np.array(0.0)]
@@ -64,7 +64,7 @@ class PerformanceMetricsTest(unittest.TestCase):
         np_lab = np.stack(np_labels)
         performance_metrics.update_performance_values(np_pred, np_lab)
         performance_metrics.update_performance_values(np_pred, np_lab)
-        print(f'Performance:\n{str(performance_metrics)}')
+        logging.info(f'Performance:\n{str(performance_metrics)}')
 
         output_file_name = 'results'
         performance_metrics.summary(output_file_name)

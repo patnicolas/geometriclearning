@@ -1,6 +1,6 @@
 import unittest
 from dataset.tensor.labeled_loader import LabeledLoader
-from dataset.unlabeled_dataset import UnlabeledDataset
+import logging
 import torch
 import numpy as np
 
@@ -21,13 +21,13 @@ class LabeledLoaderTest(unittest.TestCase):
 
             train_set, eval_set = dataset_loader.from_tensor_transform(features, labels, logarithm_scale)
             output = '\n'.join([str(train_data) for idx, train_data in enumerate(train_set) if idx < 4])
-            print(output)
+            logging.info(output)
             self.assertTrue(len(output) > 0)
         except FileNotFoundError as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertFalse(True)
         except Exception as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertFalse(True)
 
     @unittest.skip('Ignore')
@@ -45,15 +45,15 @@ class LabeledLoaderTest(unittest.TestCase):
             train_loader, eval_loader = dataset_loader.from_dataframes(df, df['Top_player'])
 
             results = [(item[0].numpy(), item[1].numpy()) for idx, item in enumerate(train_loader) if idx < 3]
-            print(f'First data features:\n{results[0][0]})')
-            print(f'First data labels:\n{results[0][1]})')
-            print(f'First 3 values:\n{results})')
+            logging.info(f'First data features:\n{results[0][0]})')
+            logging.info(f'First data labels:\n{results[0][1]})')
+            logging.info(f'First 3 values:\n{results})')
             self.assertTrue(len(results) > 0)
         except FileNotFoundError as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertFalse(True)
         except Exception as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertFalse(True)
 
     def test_load_mnist(self):
@@ -74,10 +74,10 @@ class LabeledLoaderTest(unittest.TestCase):
                 plt.show()
 
         except FileNotFoundError as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertFalse(True)
         except Exception as e:
-            print(f'Error: {str(e)}')
+            logging.info(f'Error: {str(e)}')
             self.assertFalse(True)
 
 

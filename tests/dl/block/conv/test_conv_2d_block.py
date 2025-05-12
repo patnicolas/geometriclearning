@@ -1,5 +1,5 @@
 import unittest
-
+import logging
 from dl.block.conv.conv_2d_block import Conv2dBlock
 import torch.nn as nn
 
@@ -20,7 +20,7 @@ class Conv2dBlockTest(unittest.TestCase):
                                     activation_module=nn.ReLU(),
                                     max_pooling_module=nn.MaxPool2d(kernel_size=2, stride=1, padding=0),
                                     drop_out_module=nn.Dropout2d(0.2))
-        print(str(conv_2d_block))
+        logging.info(str(conv_2d_block))
         attributes = {}
         conv_2d_block.validate(attributes)
         self.assertTrue(len(conv_2d_block.attributes) == 5)
@@ -39,7 +39,7 @@ class Conv2dBlockTest(unittest.TestCase):
                                     max_pooling_module=nn.MaxPool2d(kernel_size=2, stride=1, padding=0),
                                     drop_out_module=nn.Dropout2d(0.2))
         conv_2d_block.validate()
-        print(str(conv_2d_block))
+        logging.info(str(conv_2d_block))
         self.assertTrue(conv_2d_block.attributes is None)
 
     @unittest.skip('Ignore')
@@ -55,7 +55,7 @@ class Conv2dBlockTest(unittest.TestCase):
                                                       activation=nn.ReLU(),
                                                       bias=False,
                                                       drop_out=0.0)
-        print(str(conv_2d_block))
+        logging.info(str(conv_2d_block))
         self.assertTrue(len(conv_2d_block.attributes) == 0)
 
     def test_init_4(self):
@@ -73,7 +73,7 @@ class Conv2dBlockTest(unittest.TestCase):
             'dropout_ratio': 0.3
         }
         conv_2d_block = Conv2dBlock.build(block_attributes)
-        print(str(conv_2d_block))
+        logging.info(str(conv_2d_block))
         self.assertTrue(len(conv_2d_block.modules_list) == 5)
 
     @unittest.skip('Ignore')
@@ -89,7 +89,7 @@ class Conv2dBlockTest(unittest.TestCase):
                                                       activation=nn.ReLU(),
                                                       bias=False,
                                                       drop_out=0.2)
-        print(conv_2d_block.get_attributes())
+        logging.info(conv_2d_block.get_attributes())
         de_conv_2d_block = conv_2d_block.transpose(output_activation=nn.Sigmoid())
-        print(str(de_conv_2d_block))
+        logging.info(str(de_conv_2d_block))
         self.assertTrue(str(conv_2d_block.attributes['activation']) == 'Sigmoid()')

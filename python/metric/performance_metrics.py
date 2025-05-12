@@ -95,7 +95,7 @@ class PerformanceMetrics(object):
 
     def collect_metrics(self, epoch: int,  metrics_value: Dict[MetricType, torch.Tensor]) -> None:
         metric_str = '\n'.join([f'   {k.value}: {v.numpy()}' for k, v in metrics_value.items()])
-        print(f'>> Epoch: {epoch}\n{metric_str}')
+        logging.info(f'>> Epoch: {epoch}\n{metric_str}')
         self.update_metrics(metrics_value)
 
     def update_performance_values(self, np_predicted: np.array, np_label: np.array):
@@ -150,11 +150,11 @@ class PerformanceMetrics(object):
         for k, lst in self.performance_values.items():
             stacked_tensor = torch.stack(lst)
             summary_dict[k] = stacked_tensor
-        print(f'Save summary {str(summary_dict)}')
+        logging.info(f'Save summary {str(summary_dict)}')
         torch.save(summary_dict, f"{PerformanceMetrics.output_folder}/{output_filename}.pth")
 
     def __record(self, epoch: int, metrics: Dict[MetricType, torch.Tensor]):
         metric_str = '\n'.join([f'   {k.value}: {v}' for k, v in metrics.items()])
         status_msg = f'>> Epoch: {epoch}\n{metric_str}'
-        print(status_msg, flush=True)
+        logging.info(status_msg, flush=True)
         self.update_metrics(metrics)

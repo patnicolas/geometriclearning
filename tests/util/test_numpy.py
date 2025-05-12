@@ -40,7 +40,7 @@ class TestNumpy(TestCase):
     def test_flattening(self):
         x = np.array([111.0,112.0,121.0,122.0,131.0,132.0,211.0,212.0,221.0,222.0,231.0,232.0])
         y = x.reshape(2, 3, 2)
-        print(y)
+        logging.info(y)
 
 
     @staticmethod

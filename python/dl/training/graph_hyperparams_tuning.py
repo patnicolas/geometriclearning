@@ -40,7 +40,7 @@ def flickr_model(dataset_name, hidden_channels, pooling_ratio, dropout_p) -> (GC
         raise GNNException("Failed to load Flickr")
 
     _data: torch_geometric.data.Data = flickr_dataset[0]
-    print(f'Number of features: {_data.num_node_features}\nNumber of classes: {flickr_dataset.num_classes}'
+    logging.info(f'Number of features: {_data.num_node_features}\nNumber of classes: {flickr_dataset.num_classes}'
           f'\nSize of training: {_data.train_mask.sum()}')
 
     conv_1 = GraphConv(in_channels=_data.num_node_features, out_channels=hidden_channels)
@@ -95,7 +95,7 @@ def training_env(model: GConvModel, class_weights: torch.Tensor) -> GNNTraining:
 
 def loaders(graph_attributes: Dict[AnyStr, Any]) -> (DataLoader, DataLoader):
     flickr_loaders = GraphDataLoader(dataset_name='Flickr', sampling_attributes=graph_attributes)
-    print(f'Graph data: {str(flickr_loaders.data)}')
+    logging.info(f'Graph data: {str(flickr_loaders.data)}')
     train_loader, val_loader = flickr_loaders()
     return train_loader, val_loader
 
@@ -136,7 +136,7 @@ def objective(trial) -> float:
 
     network.train(output_id, _model, train_loader, val_loader)
     accuracy_history = network.performance_metrics.performance_values.get([MetricType.Accuracy], [-1.0])
-    print('Accuracy')
+    logging.info('Accuracy')
     return accuracy_history[-1]
 
 

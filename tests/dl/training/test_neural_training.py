@@ -1,5 +1,5 @@
 import unittest
-
+import logging
 from dl.model.mlp_model import MLPModel
 from dl.block.mlp_block import MLPBlock
 from dl.training.hyper_params import HyperParams
@@ -28,7 +28,7 @@ class NeuralTrainingTest(unittest.TestCase):
                                 layer_module=nn.Linear(in_features=4, out_features=1),
                                 activation_module=None)
         binary_classifier = MLPModel(model_id='test1', mlp_blocks=[input_block, hidden_block, output_block])
-        print(repr(binary_classifier))
+        logging.info(repr(binary_classifier))
         params = binary_classifier.parameters()
         hyper_params = HyperParams(
             lr=0.001,
@@ -43,7 +43,7 @@ class NeuralTrainingTest(unittest.TestCase):
         metrics_attributes = {MetricType.Accuracy: BuiltInMetric(metric_type=MetricType.Accuracy),
                               MetricType.Precision: BuiltInMetric(metric_type=MetricType.Precision)}
         network_training = NeuralTraining(hyper_params, metrics_attributes)
-        print(str(network_training))
+        logging.info(str(network_training))
 
 
     @unittest.skip('Ignored')
@@ -59,7 +59,7 @@ class NeuralTrainingTest(unittest.TestCase):
                                                   out_features=41,
                                                   activation_module=nn.Sigmoid())
         binary_classifier = MLPModel(model_id='test1', mlp_blocks=[hidden_block, output_block])
-        print(repr(binary_classifier))
+        logging.info(repr(binary_classifier))
         hyper_parameters = HyperParams(
             lr=0.001,
             momentum=0.95,
@@ -86,10 +86,10 @@ class NeuralTrainingTest(unittest.TestCase):
         filename = '../../../data/misc/wages_cleaned.csv'
         df = pd.DataFrame(filename)
         df = df[['Reputation', 'Age', 'Caps', 'Apps', 'Salary']]
-        print(df)
+        logging.info(df)
         average_salary = df['Salary'].mean()
         df['Top_player'] = np.where(df['Salary'] > average_salary, 1.0, 0.0)
-        print(f'Update data frame: {df.columns}')
+        logging.info(f'Update data frame: {df.columns}')
         batch_size = 2
         train_eval_split_ratio = 0.85
         dataset_loader = LabeledLoader(batch_size, train_eval_split_ratio)
@@ -112,7 +112,7 @@ class NeuralTrainingTest(unittest.TestCase):
                                                   activation_module=nn.ReLU())
         output_block = MLPBlock.build_from_params(block_id='output', in_features=4, out_features=1, activation_module=nn.Sigmoid())
         binary_classifier = MLPModel(model_id='test1', mlp_blocks=[hidden_block, output_block])
-        print(repr(binary_classifier))
+        logging.info(repr(binary_classifier))
         hyper_parameters = HyperParams(
             lr=0.001,
             momentum=0.95,
@@ -141,7 +141,7 @@ class NeuralTrainingTest(unittest.TestCase):
             parameters)
         filename = '/users/patricknicolas/dev/geometric_learning/data/heart_diseases.csv'
         df = LabeledDataset.data_frame(filename)
-        print(f'Heart Diseases data frame---\nColumns: {df.columns}\n{str(df)}')
+        logging.info(f'Heart Diseases data frame---\nColumns: {df.columns}\n{str(df)}')
 
         features_df = df[features]
         labels_df = df['target']

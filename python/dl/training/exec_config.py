@@ -68,7 +68,7 @@ class ExecConfig(object):
             usage = 100.0*allocated_mem/total_mem
 
             self.accumulator.append(usage)
-            print(f'\nAllocated MPS: {format(allocated_mem, ",")}'
+            logging.info(f'\nAllocated MPS: {format(allocated_mem, ",")}'
                   f'\nTotal MPS:     {format(total_mem, ",")}'
                   f'\nUsage MPS:     {usage:.2f}'
             )
@@ -142,16 +142,16 @@ class ExecConfig(object):
 
         if self.device_config is None:
             if torch.cuda.is_available():
-                print("Using CUDA GPU")
+                logging.info("Using CUDA GPU")
                 return 'cuda', torch.device("cuda")
             elif torch.backends.mps.is_available():
-                print("Using MPS GPU")
+                logging.info("Using MPS GPU")
                 return 'mps', torch.device("mps")
             else:
-                print("Using CPU")
+                logging.info("Using CPU")
                 return 'cpu', torch.device("cpu")
         else:
-            print(f'Using {self.device_config}')
+            logging.info(f'Using {self.device_config}')
             return self.device_config, torch.device(self.device_config)
 
 

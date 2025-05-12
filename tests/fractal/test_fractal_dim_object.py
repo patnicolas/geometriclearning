@@ -1,6 +1,6 @@
 import unittest
 from fractal.fractal_dim_object import FractalDimObject
-
+import logging
 
 class FractalDimObjectTest(unittest.TestCase):
 
@@ -12,7 +12,7 @@ class FractalDimObjectTest(unittest.TestCase):
         threshold = 0.85
         fractal_dim_object = FractalDimObject.build(sample_size, threshold, True)
         xyz = fractal_dim_object.xyz
-        print(f'len(xyz[1]) = {len(xyz[1])}')
+        logging.info(f'len(xyz[1]) = {len(xyz[1])}')
 
         fig = plt.figure()
 
@@ -34,7 +34,7 @@ class FractalDimObjectTest(unittest.TestCase):
         self.assertTrue(fractal_dim_object.xyz.shape[0] == sample_size)
         self.assertTrue(fractal_dim_object.xyz.shape[1] == sample_size)
         self.assertTrue(fractal_dim_object.xyz.shape[2] == sample_size)
-        print(str(fractal_dim_object))
+        logging.info(str(fractal_dim_object))
 
     @unittest.skip('ignore')
     def test_call(self):
@@ -45,7 +45,7 @@ class FractalDimObjectTest(unittest.TestCase):
         coefficient, counts, sizes = fractal_dim_object()
         estimated_num_counts = math.log2(sample_size)
         self.assertTrue(len(counts) == estimated_num_counts - 1)
-        print(coefficient)
+        logging.info(coefficient)
         self.assertTrue( 2 < math.fabs(coefficient) < 3)
 
     @unittest.skip('ignore')

@@ -1,6 +1,6 @@
 import unittest
 from torch import nn
-from dl.block.conv.conv_block_b import ConvBlockB
+import logging
 from dl import ConvException
 
 
@@ -10,19 +10,19 @@ class ConvBlockTest(unittest.TestCase):
         try:
             conv_block = ConvBlockTest.__create_conv_block(dimension=1, out_channels=33)
             self.assertTrue(conv_block.conv_block_config.out_channels == 33)
-            print(str(conv_block))
+            logging.info(str(conv_block))
         except ConvException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
 
     def test_init_conv2(self):
         try:
             conv_block = ConvBlockTest.__create_conv_block(dimension=2, out_channels=19)
             self.assertTrue(conv_block.conv_block_config.out_channels == 19)
-            print(repr(conv_block))
+            logging.info(repr(conv_block))
             self.assertTrue(True)
         except ConvException as e:
-            print(str(e))
+            logging.info(str(e))
             self.assertTrue(False)
 
     @staticmethod

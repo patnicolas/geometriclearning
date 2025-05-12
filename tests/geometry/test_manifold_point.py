@@ -1,8 +1,8 @@
 import unittest
 import numpy as np
-from manifolds.manifoldpoint import ManifoldPoint
-from manifolds.hyperspherespace import HypersphereSpace
-
+from geometry.manifold_point import ManifoldPoint
+from geometry.hypersphere_space import HypersphereSpace
+import logging
 
 class TestManifoldPoint(unittest.TestCase):
 
@@ -11,7 +11,7 @@ class TestManifoldPoint(unittest.TestCase):
         manifold_pt = TestManifoldPoint.__create_manifold_point(hypersphere_space)
         intrinsic_coordinates = manifold_pt.to_intrinsic(hypersphere_space.space)
         assert len(intrinsic_coordinates) == 2
-        print(f'To intrinsic: {intrinsic_coordinates}')
+        logging.info(f'To intrinsic: {intrinsic_coordinates}')
 
     def test_to_extrinsic(self):
         intrinsic = True
@@ -19,14 +19,14 @@ class TestManifoldPoint(unittest.TestCase):
         manifold_pt = TestManifoldPoint.__create_manifold_point(hypersphere_space)
         extrinsic_coordinates = manifold_pt.to_extrinsic(hypersphere_space.space)
         assert len(extrinsic_coordinates) == 3
-        print(f'To extrinsic: {extrinsic_coordinates}')
+        logging.info(f'To extrinsic: {extrinsic_coordinates}')
 
     def test_to_intrinsic_polar(self):
         hypersphere_space = HypersphereSpace(True)
         manifold_pt = TestManifoldPoint.__create_manifold_point(hypersphere_space)
         polar_coordinates = manifold_pt.to_intrinsic_polar(hypersphere_space.space)
         assert len(polar_coordinates) == 2
-        print(f'To polar: {polar_coordinates}')
+        logging.info(f'To polar: {polar_coordinates}')
 
     @staticmethod
     def __create_manifold_point(hypersphere_space: HypersphereSpace) -> ManifoldPoint:

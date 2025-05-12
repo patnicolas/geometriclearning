@@ -1,4 +1,5 @@
 import unittest
+import logging
 from geometry.hypersphere_space import HypersphereSpace
 from geometry.manifold_point import ManifoldPoint
 from geometry.visualization.space_visualization import VisualizationParams
@@ -11,14 +12,14 @@ class TestGeometricSpace(unittest.TestCase):
         num_samples = 180
         manifold = HypersphereSpace()
         data = manifold.sample(num_samples)
-        print(f'Hypersphere:\n{str(data)}')
+        logging.info(f'Hypersphere:\n{str(data)}')
 
     @unittest.skip('ignore')
     def test_hypersphere(self):
         num_samples = 8
         style = {'color': 'red', 'linestyle': '--', 'label': 'Edges'}
         manifold = HypersphereSpace()
-        print(str(manifold))
+        logging.info(str(manifold))
         data = manifold.sample(num_samples)
         visualParams = VisualizationParams("Data on Hypersphere", "locations", (8, 8), style, "3d")
         HypersphereSpace.show(visualParams, data)
@@ -41,7 +42,7 @@ class TestGeometricSpace(unittest.TestCase):
         manifold = HypersphereSpace(True)
         exp_map = manifold.tangent_vectors(manifold_points)
         for vec, end_point in exp_map:
-            print(f'Tangent vector: {vec} End point: {end_point}')
+            logging.info(f'Tangent vector: {vec} End point: {end_point}')
         manifold.show_manifold(manifold_points)
 
     # @unittest.skip('ignore')
@@ -69,7 +70,7 @@ class TestGeometricSpace(unittest.TestCase):
                 location=sample) for index, sample in enumerate(samples)
         ]
         mean = manifold.euclidean_mean(manifold_points)
-        print(mean)
+        logging.info(mean)
 
     @unittest.skip('ignore')
     def test_frechet_mean(self):
@@ -91,7 +92,7 @@ class TestGeometricSpace(unittest.TestCase):
         tgt_vec, end_point = exp_map[0]
         assert manifold.belongs(end_point)     # Is True
         frechet_mean = manifold.frechet_mean(manifold_points[0], manifold_points[1])
-        print(f'Euclidean mean: {euclidean_mean}\nFrechet mean: {frechet_mean}')
+        logging.info(f'Euclidean mean: {euclidean_mean}\nFrechet mean: {frechet_mean}')
         assert manifold.belongs(frechet_mean)
 
         frechet_pt = ManifoldPoint(
@@ -114,9 +115,9 @@ class TestGeometricSpace(unittest.TestCase):
             for index, value in enumerate(random_samples)
         ]
         assert manifold.belongs(manifold_pts[0])
-        print(f'From extrinsic Coordinates:\n{[m_pt.location for m_pt in manifold_pts]}')
+        logging.info(f'From extrinsic Coordinates:\n{[m_pt.location for m_pt in manifold_pts]}')
         intrinsic_manifold_pts = manifold.extrinsic_to_intrinsic(manifold_pts)
-        print(f'To intrinsic Coordinates: {[m_pt.location for m_pt in intrinsic_manifold_pts]}')
+        logging.info(f'To intrinsic Coordinates: {[m_pt.location for m_pt in intrinsic_manifold_pts]}')
 
     @unittest.skip('ignore')
     def test_intrinsic_to_extrinsic(self):
@@ -127,9 +128,9 @@ class TestGeometricSpace(unittest.TestCase):
         manifold_pts = [
             ManifoldPoint(f'id{index}', value, None, False, intrinsic) for index, value in enumerate(random_samples)
         ]
-        print(f'From intrinsic Coordinates:\n{[m_pt.location for m_pt in manifold_pts]}')
+        logging.info(f'From intrinsic Coordinates:\n{[m_pt.location for m_pt in manifold_pts]}')
         extrinsic_manifold_pts = manifold.intrinsic_to_extrinsic(manifold_pts)
-        print(f'To extrinsic Coordinates:\n{[m_pt.location for m_pt in extrinsic_manifold_pts]}')
+        logging.info(f'To extrinsic Coordinates:\n{[m_pt.location for m_pt in extrinsic_manifold_pts]}')
 
     @unittest.skip('ignore')
     def test_reciprocate_coordinates(self):
@@ -142,11 +143,11 @@ class TestGeometricSpace(unittest.TestCase):
             for index, value in enumerate(random_samples)
         ]
         assert manifold.belongs(manifold_pts[0])
-        print(f'Original extrinsic coordinates:\n{[m_pt.location for m_pt in manifold_pts]}')
+        logging.info(f'Original extrinsic coordinates:\n{[m_pt.location for m_pt in manifold_pts]}')
         intrinsic_manifold_pts = manifold.extrinsic_to_intrinsic(manifold_pts)
-        print(f'Intrinsic Coordinates:\n{[m_pt.location for m_pt in intrinsic_manifold_pts]}')
+        logging.info(f'Intrinsic Coordinates:\n{[m_pt.location for m_pt in intrinsic_manifold_pts]}')
         extrinsic_manifold_pts = manifold.intrinsic_to_extrinsic(intrinsic_manifold_pts)
-        print(f'Regenerated extrinsic Coordinates:\n{[m_pt.location for m_pt in extrinsic_manifold_pts]}')
+        logging.info(f'Regenerated extrinsic Coordinates:\n{[m_pt.location for m_pt in extrinsic_manifold_pts]}')
 
     @unittest.skip('ignore')
     def test_extrinsic_to_spherical(self):
@@ -158,13 +159,13 @@ class TestGeometricSpace(unittest.TestCase):
             ManifoldPoint(f'id{index}', value, None, False, intrinsic)
             for index, value in enumerate(random_samples)
         ]
-        print(f'Original extrinsic coordinates:\n{[m_pt.location for m_pt in manifold_pts]}')
+        logging.info(f'Original extrinsic coordinates:\n{[m_pt.location for m_pt in manifold_pts]}')
 
         intrinsic_manifold_pts = manifold.extrinsic_to_intrinsic(manifold_pts)
-        print(f'Intrinsic Coordinates:\n{[m_pt.location for m_pt in intrinsic_manifold_pts]}')
+        logging.info(f'Intrinsic Coordinates:\n{[m_pt.location for m_pt in intrinsic_manifold_pts]}')
 
         spherical_manifold_pts = manifold.extrinsic_to_spherical(manifold_pts)
-        print(f'Spherical Coordinates:\n{[m_pt.location for m_pt in spherical_manifold_pts]}')
+        logging.info(f'Spherical Coordinates:\n{[m_pt.location for m_pt in spherical_manifold_pts]}')
 
     def test_extrinsic_to_polar(self):
         intrinsic = False
@@ -177,7 +178,7 @@ class TestGeometricSpace(unittest.TestCase):
         ]
 
         polar_coordinates = manifold.extrinsic_to_intrinsic_polar(manifold_pts)
-        print(polar_coordinates)
+        logging.info(polar_coordinates)
 
 
 if __name__ == '__main__':

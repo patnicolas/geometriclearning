@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import torch
 from util.perf_eval import PerfEval
-
+import logging
 
 def perf_test_func():
     x = torch.rand(200000)
@@ -26,7 +26,7 @@ class TestPerfEval(TestCase):
             eval_perf = PerfEval(perf_test_func, None)
             eval_perf.eval()
         except Exception as e:
-            print(str(e))
+            logging.info(str(e))
             self.fail()
 
     def test_eval_acc1(self):
@@ -35,7 +35,7 @@ class TestPerfEval(TestCase):
             eval_perf = PerfEval(acc_list1, lst)
             eval_perf.eval()
         except Exception as e:
-            print(str(e))
+            logging.info(str(e))
             self.fail()
 
     def test_eval_acc2(self):
@@ -44,5 +44,5 @@ class TestPerfEval(TestCase):
             eval_perf = PerfEval(acc_list2, lst)
             eval_perf.eval()
         except Exception as e:
-            print(str(e))
+            logging.info(str(e))
             self.fail()

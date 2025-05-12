@@ -3,7 +3,7 @@ from torch import nn
 from dl.training.hyper_params import HyperParams
 from dl.block.mlp_block import MLPBlock
 from dl.model.mlp_model import MLPModel
-
+import logging
 
 class HyperParamsTest(unittest.TestCase):
 
@@ -17,7 +17,7 @@ class HyperParamsTest(unittest.TestCase):
             loss_function=nn.CrossEntropyLoss(),
             drop_out=0.2,
             train_eval_ratio=0.9)
-        print(repr(hyper_parameters))
+        logging.info(repr(hyper_parameters))
 
     def test_optimizer(self):
         hyper_parameters = HyperParams(
@@ -34,7 +34,7 @@ class HyperParamsTest(unittest.TestCase):
         output_block = MLPBlock.build_from_params('output', 5, 5, nn.Softmax())
         ffnn_model = MLPModel('test1', [input_block, hidden_block, output_block])
         opt = hyper_parameters.optimizer(ffnn_model)
-        print(str(opt))
+        logging.info(str(opt))
 
 
 if __name__ == '__main__':

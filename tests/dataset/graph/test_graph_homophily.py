@@ -12,12 +12,12 @@ class GraphHomophilyTest(unittest.TestCase):
     @unittest.skip('Ignore')
     def test_init_1(self):
         homophily_flickr = GraphHomophily.build(dataset_name='Flickr', homophily_type=GraphHomophilyType.Node)
-        print(homophily_flickr)
+        logging.info(homophily_flickr)
 
     @unittest.skip('Ignore')
     def test_init_2(self):
         homophily_cora = GraphHomophily.build(dataset_name='Cora', homophily_type=GraphHomophilyType.Node)
-        print(homophily_cora)
+        logging.info(homophily_cora)
 
     @unittest.skip('Ignore')
     def test_homegrown_edge_homophily(self):
@@ -30,7 +30,7 @@ class GraphHomophilyTest(unittest.TestCase):
                     )
         homophily = GraphHomophily(data=data, homophily_type=GraphHomophilyType.Edge)
         edge_homophily = homophily.compute()
-        print(f'Edge homophily: {edge_homophily}')
+        logging.info(f'Edge homophily: {edge_homophily}')
 
     @unittest.skip('Ignore')
     def test_homegrown_node_homophily(self):
@@ -43,7 +43,7 @@ class GraphHomophilyTest(unittest.TestCase):
                     )
         homophily = GraphHomophily(data=data, homophily_type=GraphHomophilyType.Node)
         node_homophily = homophily.compute()
-        print(f'Node homophily: {node_homophily}')
+        logging.info(f'Node homophily: {node_homophily}')
 
     @unittest.skip('Ignore')
     def test_edge_homophily(self):
@@ -56,7 +56,7 @@ class GraphHomophilyTest(unittest.TestCase):
                     )
         homophily = GraphHomophily(data=data, homophily_type=GraphHomophilyType.Edge)
         edge_homophily = homophily()
-        print(f'Edge homophily: {edge_homophily}')
+        logging.info(f'Edge homophily: {edge_homophily}')
 
     @unittest.skip('Ignore')
     def test_node_homophily(self):
@@ -69,37 +69,37 @@ class GraphHomophilyTest(unittest.TestCase):
                     )
         homophily = GraphHomophily(data=data, homophily_type=GraphHomophilyType.Node)
         node_homophily = homophily()
-        print(f'Node homophily: {node_homophily}')
+        logging.info(f'Node homophily: {node_homophily}')
 
     @unittest.skip('Ignore')
     def test_node_homophily_datasets(self):
         homophily = GraphHomophily.build(dataset_name='Flickr', homophily_type=GraphHomophilyType.Node)
         node_homophily = homophily()
-        print(f'Flickr node homophily: {node_homophily:.3f}')
+        logging.info(f'Flickr node homophily: {node_homophily:.3f}')
 
         homophily = GraphHomophily.build(dataset_name='Cora', homophily_type=GraphHomophilyType.Node)
         node_homophily = homophily()
-        print(f'Cora node homophily: {node_homophily:.3f}')
+        logging.info(f'Cora node homophily: {node_homophily:.3f}')
 
     @unittest.skip('Ignore')
     def test_edge_homophily_datasets(self):
         homophily = GraphHomophily.build(dataset_name='Flickr', homophily_type=GraphHomophilyType.Edge)
         edge_homophily = homophily()
-        print(f'Flickr edge homophily: {edge_homophily:.3f}')
+        logging.info(f'Flickr edge homophily: {edge_homophily:.3f}')
 
         homophily = GraphHomophily.build(dataset_name='Cora', homophily_type=GraphHomophilyType.Edge)
         edge_homophily = homophily()
-        print(f'Cora edge homophily: {edge_homophily:.3f}')
+        logging.info(f'Cora edge homophily: {edge_homophily:.3f}')
 
     @unittest.skip('Ignore')
     def test_class_insensitive_edge_homophily_datasets(self):
         homophily = GraphHomophily.build(dataset_name='Flickr', homophily_type=GraphHomophilyType.ClassInsensitiveEdge)
         edge_homophily = homophily()
-        print(f'Flickr class insensitive edge homophily: {edge_homophily:.3f}')
+        logging.info(f'Flickr class insensitive edge homophily: {edge_homophily:.3f}')
 
         homophily = GraphHomophily.build(dataset_name='Cora', homophily_type=GraphHomophilyType.ClassInsensitiveEdge)
         edge_homophily = homophily()
-        print(f'Cora class insensitive edge homophily: {edge_homophily:.3f}')
+        logging.info(f'Cora class insensitive edge homophily: {edge_homophily:.3f}')
 
     @unittest.skip('Ignore')
     def test_all(self):
@@ -109,7 +109,7 @@ class GraphHomophilyTest(unittest.TestCase):
             for homophily_type in homophily_types:
                 homophily = GraphHomophily.build(dataset_name=dataset_name, homophily_type=homophily_type)
                 homophily_factor = homophily()
-                print(f'{dataset_name} {homophily_type.value} homophily: {homophily_factor:.3f}')
+                logging.info(f'{dataset_name} {homophily_type.value} homophily: {homophily_factor:.3f}')
 
     def test_message_propagation(self):
         import matplotlib.pyplot as plt
@@ -123,7 +123,7 @@ class GraphHomophilyTest(unittest.TestCase):
         neighbors_neighbors = []
         for nbr in neighbors:
             nbr_nodes = list(G.neighbors(nbr))
-            print(f'nbr_nodes: {nbr_nodes}')
+            logging.info(f'nbr_nodes: {nbr_nodes}')
             for n in nbr_nodes:
                 neighbors_neighbors.append(n)
         neighbors_neighbors = list(set(neighbors_neighbors))
@@ -169,5 +169,5 @@ class GraphHomophilyTest(unittest.TestCase):
         # 5. Animate
         ani = animation.FuncAnimation(fig, update, frames=len(neighbors)*4, interval=800, repeat=False)
         plt.axis('off')
-        print('show')
+        logging.info('show')
         plt.show()

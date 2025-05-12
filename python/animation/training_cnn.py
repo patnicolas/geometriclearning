@@ -14,10 +14,10 @@ class SimpleCNN(nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)
-        print(x.shape)
+        logging.info(x.shape)
         x = self.relu(x)
         x = torch.flatten(x, 1)
-        print(x.shape)
+        logging.info(x.shape)
         x = self.fc1(x)
         return x
 

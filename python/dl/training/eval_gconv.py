@@ -45,7 +45,7 @@ class EvalGConv(object):
     def __get_loaders(self) -> (DataLoader, DataLoader):
         flickr_loaders = GraphDataLoader(dataset_name=self.training_attributes['dataset_name'],
                                          sampling_attributes=self.sampling_attributes)
-        print(f'Graph data: {str(flickr_loaders.data)}')
+        logging.info(f'Graph data: {str(flickr_loaders.data)}')
         train_loader, val_loader = flickr_loaders()
         return train_loader, val_loader
 
@@ -73,7 +73,7 @@ class EvalGConv(object):
             raise GNNException("Failed to load Flickr")
 
         _data: torch_geometric.data.Data = flickr_dataset[0]
-        print(f'Number of features: {_data.num_node_features}\nNumber of classes: {flickr_dataset.num_classes}'
+        logging.info(f'Number of features: {_data.num_node_features}\nNumber of classes: {flickr_dataset.num_classes}'
               f'\nSize of training: {_data.train_mask.sum()}')
 
         my_model = self.__get_model(num_node_features=_data.num_node_features,

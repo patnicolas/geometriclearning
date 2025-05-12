@@ -81,9 +81,9 @@ class MetropolisHastings(MCMC):
                             j += 1
 
             except ArithmeticError as e:
-                print(f'Arithmetic error: {e}')
+                logging.info(f'Arithmetic error: {e}')
             except ValueError as e:
-                print(f'Value error: {e}')
+                logging.info(f'Value error: {e}')
         return theta_walk, float(accepted_count) / num_valid_thetas
 
         # --------------  Supporting methods -----------------------
