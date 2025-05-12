@@ -3,6 +3,7 @@ import unittest
 import pandas as pd
 import numpy as np
 import logging
+from typing import AnyStr, List
 
 class TestVectorizer(TestCase):
     @unittest.skip("Not needed")
@@ -21,6 +22,38 @@ class TestVectorizer(TestCase):
         df = pd.DataFrame(x, columns=['a', 'hello', 'is', 'joke', 'not', 'on', 'or', 'patrick', 'the', 'this', 'you'])
         logging.info(df)
 
+    def test_numexpr(self):
+        import numexpr as ne
+        from util.decorators import timeit
+
+        @timeit
+        def f(args: AnyStr) -> bool:
+            x = np.linspace(-1, 1, 1000000)
+            expr = "0.25*x**3 + 0.75*x**2 - 1.5*x +5"
+            eval(expr)
+            return True
+
+        @timeit
+        def g(args: AnyStr) -> bool:
+            x = np.linspace(-1, 1, 1000000)
+            expr = "0.25*x**3 + 0.75*x**2 - 1.5*x +5"
+            ne.set_num_threads(1)
+            ne.evaluate(expr)
+            return True
+
+        @timeit
+        def h(args: AnyStr) -> bool:
+            x = np.linspace(-1, 1, 1000000)
+            expr = "0.25*x**3 + 0.75*x**2 - 1.5*x +5"
+            ne.set_num_threads(8)
+            ne.evaluate(expr)
+            return True
+        f('Numpy eval')
+        g('Numexpr eval')
+        h('Numexpr eval 8 threads')
+
+
+    @unittest.skip("Not needed")
     def test_generator_exp(TestCase):
         values = np.random.rand(8,10)
         # Option 1: Direct iterator

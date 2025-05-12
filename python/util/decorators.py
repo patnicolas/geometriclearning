@@ -2,7 +2,7 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import time
-import constants
+import logging
 
 
 def timeit(func):
@@ -10,6 +10,7 @@ def timeit(func):
         start = time.time()
         func(*args, **kwargs)
         duration = time.time() - start
-        constants.log_info(f'Duration: {duration}')
+        text = 'Duration' if len(args) == 0 else f'{args[0]}, duration'
+        logging.info(f'{text} {duration}')
         return 0
     return wrapper
