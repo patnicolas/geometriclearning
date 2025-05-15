@@ -17,14 +17,6 @@ logger.handlers = []  # Clear existing handlers
 logger.addHandler(handler)
 
 
-"""
-for handler in logging.root.handlers[:]:
-    logging.root.removeHandler(handler)
-logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s",  handlers=[logging.StreamHandler()])
-"""
-# loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
-
-
 @overload
 def log_size(x: torch.Tensor, comment: AnyStr = "") -> NoReturn:
     """

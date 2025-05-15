@@ -28,14 +28,14 @@ class TestVectorizer(TestCase):
 
         @timeit
         def f(args: AnyStr) -> bool:
-            x = np.linspace(-1, 1, 1000000)
+            x = np.linspace(-1, 1, 100000000)
             expr = "0.25*x**3 + 0.75*x**2 - 1.5*x +5"
             eval(expr)
             return True
 
         @timeit
         def g(args: AnyStr) -> bool:
-            x = np.linspace(-1, 1, 1000000)
+            x = np.linspace(-1, 1, 100000000)
             expr = "0.25*x**3 + 0.75*x**2 - 1.5*x +5"
             ne.set_num_threads(1)
             ne.evaluate(expr)
@@ -43,7 +43,7 @@ class TestVectorizer(TestCase):
 
         @timeit
         def h(args: AnyStr) -> bool:
-            x = np.linspace(-1, 1, 1000000)
+            x = np.linspace(-1, 1, 100000000)
             expr = "0.25*x**3 + 0.75*x**2 - 1.5*x +5"
             ne.set_num_threads(8)
             ne.evaluate(expr)

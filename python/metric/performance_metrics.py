@@ -9,6 +9,7 @@ from metric.built_in_metric import BuiltInMetric
 from metric.metric_type import MetricType
 from plots.plotter import Plotter, PlotterParameters
 import numpy as np
+import logging
 
 
 class PerformanceMetrics(object):

@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from util.base_animation import BaseAnimation
 import logging
-logger = logging.getLogger('Lie.SE3Animation')
 __all__ = ['SE3Animation']
 
 
