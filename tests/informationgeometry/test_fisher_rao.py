@@ -58,19 +58,46 @@ class FisherRaoTest(unittest.TestCase):
     @unittest.skip('ignore')
     def test_distance_exponential(self):
         import torch
-        from plots.plotter import Plotter
-        l = 0.0
-        u = 10.0
-        fisher_rao = FisherRao(ExponentialDistributions(equip=True), (l, u))
+
+        low_bound = 0.0
+        upper_bound = 10.0
+        fisher_rao = FisherRao(ExponentialDistributions(equip=True), bounds=(low_bound, upper_bound))
         values = fisher_rao.samples(2)
         metrics = [fisher_rao.metric_matrix(x) for x in values]
         logging.info(f'Exponential Metrics:\n{metrics[0]}, {metrics[1]}')
         inputs = [torch.Tensor(x) for x in values]
         distance = fisher_rao.distance(inputs[0], inputs[1])
         logging.info(f'Exponential Distance {distance}')
+        fisher_rao.visualize_pdf(values[0], values[1],  r"$\theta$")
 
-        fisher_rao.visualize_pdf(values[0], values[0]+2.5)
+    def test_visualize_exponentials(self):
+        import torch
 
+        low_bound = 0.0
+        upper_bound = 2.0
+        fisher_rao = FisherRao(ExponentialDistributions(equip=True), bounds =(low_bound, upper_bound))
+        values = fisher_rao.samples(128)
+        min_theta = f'{float(torch.min(values)):.4f}'
+        max_theta = f'{float(torch.max(values)):.4f}'
+        fisher_rao.visualize_pdfs(values,
+                                  rf"Exp. Distribution Manifold $\theta$ 128 samples [{min_theta}, {max_theta}]")
+
+    @unittest.skip('ignore')
+    def test_visualize_normal_mu(self):
+        import torch
+
+        low_bound = 0.0
+        upper_bound = 2.0
+        fisher_rao = FisherRao(UnivariateNormalDistributions(equip=True), bounds=(low_bound, upper_bound))
+        values = fisher_rao.samples(48)
+        min_mu = f'{float(torch.min(values[:, 0])):.4f}'
+        max_mu = f'{float(torch.max(values[:, 0])):.4f}'
+        fisher_rao.visualize_pdfs(values,
+                                  rf"Normal Distribution Manifold $\mu$ 48 samples [{min_mu}, {max_mu}]")
+        min_sigma = f'{float(torch.min(values[:, 1])):.4f}'
+        max_sigma = f'{float(torch.max(values[:, 1])):.4f}'
+        fisher_rao.visualize_pdfs(values,
+                                  rf"Normal Distribution Manifold  $\sigma$ 48 samples [{min_sigma}, {max_sigma}]")
 
 
     @unittest.skip('ignore')
