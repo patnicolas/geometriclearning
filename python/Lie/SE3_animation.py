@@ -177,7 +177,6 @@ class SE3Animation(BaseAnimation):
         for line in geo_lines:
             self.ax.plot(line[0], line[1], line[2], color='black', linewidth=1.5, alpha=1.0)
 
-
     def __draw_next_sphere(self, color: AnyStr, geo_lines: List[np.array], points: np.array, T) -> None:
         # Step 3: Apply SE(3) transformation
         transformed_points = T @ points
@@ -261,24 +260,6 @@ if __name__ == '__main__':
         T[:3, 3:] = t
         return T
 
-
-    """
-    from PIL import Image
-
-    # Load image
-    img = Image.open('../input/Background_color.png')
-
-    # Convert to RGB if needed
-    img = img.convert('RGB')
-
-    # Get the RGB value of a pixel (x=10, y=20 for example)
-    r, g, b = img.getpixel((10, 20))
-
-    # Convert to HEX
-    hex_color = '#{:02x}{:02x}{:02x}'.format(r, g, b)
-    logging.info("Hex color:", hex_color)
-
-    """
     lie_group_simulation = SE3Animation.build(chart_pos=[-0.4, -0.1, 2.2, 1.1],
                                               interval=2000,
                                               fps=10,

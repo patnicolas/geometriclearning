@@ -93,6 +93,7 @@ class SE3Visualization(LieSE3Group):
         ax = fig.add_subplot(111, projection="3d")
         fig.set_facecolor('#F2F9FE')
         ax.set_facecolor('#F2F9FE')
+        self.__draw_logo(fig)
 
         # Initial point is identity if not provided
         initial_point = self.lie_group.identity if initial_point is None else initial_point
@@ -146,3 +147,10 @@ class SE3Visualization(LieSE3Group):
             se3_element_desc.draw(ax)
         points = np.concatenate(pts, axis=0)
         visualization.plot(points, num_groups=len(se3_element_descs), space="SE3_GROUP")
+
+    def __draw_logo(self, fig) -> None:
+        import matplotlib.image as mpimg
+        img = mpimg.imread('../../python/input/Animation_logo.png')
+        inset_ax = fig.add_axes([0.02, 0.67, 0.48, 0.48])
+        inset_ax.imshow(img, alpha=1.0)
+        inset_ax.axis('off')

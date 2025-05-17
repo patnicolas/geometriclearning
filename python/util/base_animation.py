@@ -30,18 +30,4 @@ class BaseAnimation(object):
         inset_ax = fig.add_axes([0.01, 0.73, 0.36, 0.36])
         inset_ax.imshow(img, alpha=1.0)
         inset_ax.axis('off')
-        """
-        if z == -1:
-            ax.text(x=-0.7,
-                    y=0.79,
-                    s="Hands-on Deep Geometric Learning",
-                    horizontalalignment='left',
-                    fontdict={'size': 16, 'color': 'blue', 'fontname': 'Helvetica', 'weight': 'bold'})
-        else:
-            ax.text(x=0.3,
-                    y=0.4,
-                    z=0.1,
-                    s="Hands-on Deep Geometric Learning",
-                    horizontalalignment='left',
-                    fontdict={'size': 16, 'color': 'blue', 'fontname': 'Helvetica', 'weight': 'bold'})
-        """
+

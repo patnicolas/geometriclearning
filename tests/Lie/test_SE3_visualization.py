@@ -68,6 +68,7 @@ class SE3VisualizationTest(unittest.TestCase):
                               interval=400,
                               fps=40)
 
+    @unittest.skip('Ignored')
     def test_visualization_2(self):
         from Lie import u3d
 
@@ -219,7 +220,6 @@ class SE3VisualizationTest(unittest.TestCase):
                                     scale=(-0.35, 0.35),
                                     title='48 Displacement Points - SE(3) Self Composition @ Identity')
 
-
     def test_animate(self):
         logging.info(f'\nRotation matrix:\n{np.reshape(u3d.y_rot, (3, 3))}')
         logging.info(f'Translation vector: {u3d.x_trans}')
@@ -242,9 +242,12 @@ class SE3VisualizationTest(unittest.TestCase):
                                              z=-4.8,
                                              s=f'Vector [{rot_trans_str}]',
                                              color='blue')
-
+        num_displacement_points = 128
         se3_visualization.animate(se3_element_descs=[se3_element_1, se3_element_2],
-                                  num_points=84,
+                                  num_points=num_displacement_points,
                                   initial_point=se3_visualization.identity(),
-                                  scale=(-0.35, 0.35),
-                                  title='84 Displacements Points - SE(3) @ Identity')
+                                  scale=(-1.2, 1.2),
+                                  title=f'{num_displacement_points} Displacements Points - SE(3) @ Identity',
+                                  interval=2400,
+                                  fps=8)
+

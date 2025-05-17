@@ -3,6 +3,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from geomstats.information_geometry.base import InformationManifoldMixin
 from geomstats.information_geometry.fisher_rao_metric import FisherRaoMetric
+from informationgeometry.statistical_manifold import StatisticalManifold
 from typing import Tuple, AnyStr, List
 import numpy as np
 import torch
@@ -11,7 +12,7 @@ from geometry import GeometricException
 ParamType = torch.Tensor | Tuple[torch.Tensor, torch.Tensor]
 
 
-class FisherRao(object):
+class FisherRao(StatisticalManifold):
     """
     Class that wraps the computation of the Riemannian metric for some common statistical manifolds and support the
     computation of:
@@ -41,11 +42,6 @@ class FisherRao(object):
                         \partial_i f \partial_j f \partial_k f \frac{1}{f^2}
 
     """
-    # List of statistical manifolds supported by this class
-    valid_info_manifolds = [
-        'ExponentialDistributions', 'BetaDistributions', 'GammaDistributions', 'UnivariateNormalDistributions',
-        'GeometricDistributions'
-    ]
 
     def __init__(self, info_manifold: InformationManifoldMixin, bounds: Tuple[float, float]) -> None:
         """
@@ -57,47 +53,8 @@ class FisherRao(object):
         @param bounds: Tuple of values which set the bounds of input to probability density function
         @type bounds: Tuple[float, float]
         """
-        class_name = info_manifold.__class__.__name__
-        assert class_name in FisherRao.valid_info_manifolds, f'Information Geometry for {class_name} is not supported'
+        super(FisherRao, self).__init__(info_manifold, bounds)
 
-        self.info_manifold = info_manifold
-        self.fisher_rao_metric = FisherRaoMetric(info_manifold, bounds)
-
-    def __str__(self) -> AnyStr:
-        return (f'Information Manifold: {self.info_manifold.__class__.__name__}'
-                f'\nFisher-Rao metric:\n{self.fisher_rao_metric.signature}')
-
-    def belongs(self, points: List[np.array]) -> bool:
-        """
-        Test if a list of points belongs to this statistical manifold
-        @param points: Points on the statistical manifold
-        @type points: List of Numpy arrays
-        @return: True if each point belongs to the manifold, False if one or more points do not belong to
-        the manifold
-        @rtype: bool
-        """
-        all_pts_belongs = [self.info_manifold.belongs(pt) for pt in points]
-        return all(all_pts_belongs)
-
-    def samples(self, n_samples: int) -> np.array:
-        return self.info_manifold.random_point(n_samples)
-
-    def metric_matrix(self, base_point: np.array = None) -> np.array:
-        """
-        Computation of the Fisher_Rao metric at a given point. Contrary to the computation of
-            the distance and inner product, this method invoke Geomstats API.
-            If the point on the manifold is not provided, we select a random point
-        @param base_point: Point of the manifold the metric is computed.
-        @type base_point: Numpy array
-        @return: Metric for this manifold
-        @rtype: Numpy array
-        """
-        # Set the base point as a random point on the manifold if none is provided
-        base_point = self.info_manifold.random_point(1) if base_point is None else base_point
-        # Make sure the base point actually belongs to the manifold
-        assert self.info_manifold.belongs(base_point)
-        # Invoke the Geomstats method
-        return self.fisher_rao_metric.metric_matrix(base_point)
 
     def distance(self, point1: ParamType, point2: ParamType) -> torch.Tensor:
         """
@@ -140,45 +97,6 @@ class FisherRao(object):
                 return sigma_sq_inv * v[0] * w[0] + 2 * sigma_sq_inv * v[1] * w[1]
             case _:
                 raise GeometricException(f'inner product for {self.info_manifold.__class__.__name__} not supported')
-
-    def visualize_pdf(self, parameters1: torch.Tensor,  parameters2: torch.Tensor, label: AnyStr) -> None:
-        support = self.fisher_rao_metric.support
-        x = np.linspace(support[0], support[1], 100)
-        pdf_1 = self.info_manifold.point_to_pdf(parameters1)
-        pdf_2 = self.info_manifold.point_to_pdf(parameters2)
-
-        import matplotlib.pyplot as plt
-        plt.figure(figsize=(7, 7))
-        plt.plot(x, pdf_1(x), label=f'{label} {float(parameters1):.4f}', linewidth=2)
-        plt.plot(x, pdf_2(x), label=f'{label}  {float(parameters2):.4f}', linewidth=2, linestyle='--')
-        plt.plot(x, pdf_1(x) - pdf_2(x), label=f'Diff {label} {(float(parameters1)-float(parameters2)):.4f}', linewidth=2)
-        plt.xlabel('x', fontdict={'fontsize': 16})
-        plt.ylabel('pdf', fontdict={'fontsize': 16})
-        plt.tick_params(axis='both', which='major', labelsize=12)
-        plt.legend(fontsize=12)
-        plt.grid(True)
-        plt.tight_layout()
-        plt.show()
-
-    def visualize_pdfs(self, parameters: List[torch.Tensor], param_label: AnyStr) -> None:
-        support = self.fisher_rao_metric.support
-        x = np.linspace(support[0], support[1], 100)
-        pdfs = [self.info_manifold.point_to_pdf(params) for params in parameters]
-
-        import matplotlib.pyplot as plt
-        fig = plt.figure(figsize=(9, 8))
-        fig.set_facecolor('#F2F9FE')
-        for idx, pdf in enumerate(pdfs):
-            plt.plot(x, pdf(x), linewidth=2)
-
-        plt.xlabel('x', fontdict={'fontsize': 16})
-        plt.ylabel('pdf', fontdict={'fontsize': 16})
-        plt.tick_params(axis='both', which='major', labelsize=12)
-        plt.title(label=param_label, fontdict={'fontsize': 17})
-        plt.legend(fontsize=10, ncol=2, loc='upper right')
-        plt.grid(True)
-        plt.tight_layout()
-        plt.show()
 
     """  -----------------------  Private Helpers methods ------------------   """
 
