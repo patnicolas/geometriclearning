@@ -11,7 +11,6 @@ from geomstats.information_geometry.geometric import GeometricDistributions
 from geomstats.information_geometry.gamma import GammaDistributions
 from informationgeometry.statistical_manifold import StatisticalManifold
 
-
 class StatisticalManifoldTest(unittest.TestCase):
 
     @unittest.skip('ignore')

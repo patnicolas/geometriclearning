@@ -11,6 +11,6 @@ def timeit(func):
         func(*args, **kwargs)
         duration = time.time() - start
         text = 'Duration' if len(args) == 0 else f'{args[0]}, duration'
-        logging.info(f'{text} {duration}')
+        logging.info(f'{text=} {duration=}')
         return 0
     return wrapper

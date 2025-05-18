@@ -1,6 +1,5 @@
 import unittest
-
-from torch_geometric.data.remote_backend_utils import num_nodes
+import logging
 
 from dataset.graph.graph_data_loader import GraphDataLoader
 from torch_geometric.data import Data
@@ -85,7 +84,7 @@ class GraphDataLoaderTest(unittest.TestCase):
 
         # 2. Extract the loader for training and validation sets
         train_data_loader, test_data_loader = graph_data_loader()
-        result = [f'{idx}: {str(batch)}'
+        result = [f'{id=}: {batch=}'
                   for idx, batch in enumerate(train_data_loader) if idx < 3]
         logging.info('\n'.join(result))
         self.assertTrue(True)

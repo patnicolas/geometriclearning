@@ -85,7 +85,7 @@ class FractalDimImage(object):
             n_boxes = max(1, num_boxes)
             num_r = 0
             eps = iter / image_pixels
-            logging.info(f'Iteration: {iter}: {float(iter)/max_iters} %')
+            logging.info(f'{iter=}: {float(iter)/max_iters} %')
 
             # Populate each box with the pixels, then compute the sum of least sqiare
             for i in range(0, image_pixels, iter):

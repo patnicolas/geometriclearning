@@ -42,8 +42,8 @@ class GeometricDistribution(object):
         """
         manifold_pts = self._random_manifold_points(num_pts, tgt_vector)
         exp_map = self.manifold.tangent_vectors(manifold_pts)
-        for v, end_pt in exp_map:
-            logging.info(f'Tangent vector: {v} End point: {end_pt}')
+        for tangent_vector, end_pt in exp_map:
+            logging.info(f'{tangent_vector=},{end_pt=}')
 
         self.manifold.show_manifold(manifold_pts)
         return len(manifold_pts)

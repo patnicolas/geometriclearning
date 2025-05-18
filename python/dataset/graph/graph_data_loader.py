@@ -10,6 +10,7 @@ from torch_geometric.loader import (NeighborLoader, RandomNodeLoader, GraphSAINT
 import torch
 from typing import Dict, AnyStr, Any, Optional, List, Self
 from dataset import DatasetException
+import logging
 __all__ = ['GraphDataLoader']
 
 
@@ -293,7 +294,7 @@ class GraphDataLoader(object):
 
         # Select the starting index as a random value
         start_index = random.randint(0, dataset_len-num_random_indices-1) if start_index == -1 else start_index
-        logging.info(f'Start index: {start_index}')
+        logging.info(f'{start_index=}')
 
         # Collect the indices of the selected node for the subgraph
         subset = torch.arange(start_index, start_index+num_random_indices)

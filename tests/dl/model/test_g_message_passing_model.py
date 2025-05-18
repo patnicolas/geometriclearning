@@ -29,10 +29,8 @@ class GNNBaseModelTest(unittest.TestCase):
         size = dense_array.shape  # Shape of the original array
 
         sparse_tensor = torch.sparse_coo_tensor(indices, values, size)
-
         # Verify the sparse tensor
-        logging.info("Sparse Tensor:")
-        logging.info(sparse_tensor)
+        logging.info(f'{sparse_tensor=}')
 
     def test_init_2(self):
         num_node_features = 24
@@ -75,7 +73,7 @@ class GNNBaseModelTest(unittest.TestCase):
                                           message_passing_module=conv_1,
                                           activation_module=nn.ReLU(),
                                           batch_norm_module=BatchNorm(hidden_channels),
-                                          drop_out_module=0.2)
+                                          drop_out_module=nn.Dropout(0.2))
         conv_2 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
         gcn_conv_2 = GMessagePassingBlock(block_id='K2', message_passing_module=conv_2, activation_module=nn.ReLU())
         conv_3 = GraphConv(in_channels=hidden_channels, out_channels=num_classes)

@@ -4,27 +4,30 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 import requests
 import time
 import urllib3
+import logging
 from util.decorators import timeit
 
-""""
-	Simple synchronous implementation of HTTP post using JSON input_tensor line or file. The target can be defined as 
-	- Fully defined URL (i.e. http://ip-10-5-47-158.us-east-2.compute.internal:8087/geminiml/predict)
-	- Pre-defined targets (i.e. feedback_local)
-	Command line
-		python $target $is_predefined_target
-	Example
-		python stage_predicted True input_file
-		python http://ip-10-5-47-158.us-east-2.compute.internal:8087/geminiml/predict False input_file
-	
-	@param target: URL (if is_predefined_target == True) or a pre-defined
-	@param headers: Header of the HTTP Post
-	@param is_predefined_target: Specify if this is a predefined target (True) or a vision URL (False)
-	:exception KeyError: Predefined URL is not found
-"""
 
 
 class HttpPost(object):
-    def __init__(self, target: str, headers: list, is_predefined_target: bool = False):
+    """"
+    Simple synchronous implementation of HTTP post using JSON input_tensor line or file. The target can be defined as
+    - Fully defined URL (i.e. http://ip-10-5-47-158.us-east-2.compute.internal:8087/geminiml/predict)
+    - Pre-defined targets (i.e. feedback_local)
+    Command line
+        python $target $is_predefined_target
+    Example
+        python stage_predicted True input_file
+        python http://ip-10-5-47-158.us-east-2.compute.internal:8087/geminiml/predict False input_file
+    """
+    def __init__(self, target: str, headers: list, is_predefined_target: bool = False) -> None:
+        """
+        Constructor for HttpPost
+        @param target: URL (if is_predefined_target == True) or a pre-defined
+        @param headers: Header of the HTTP Post
+        @param is_predefined_target: Specify if this is a predefined target (True) or a vision URL (False)
+        @exception KeyError: Predefined URL is not found
+        """
         self.headers = headers
         # If this is a predefined target.
         if is_predefined_target:
@@ -32,41 +35,41 @@ class HttpPost(object):
                 self.target = predefined_targets[target]
             except KeyError as e:
                 self.target = None
-                constants.log_error(str(e))
+                logging.error(str(e))
         # Otherwise a URL
         else:
             self.target = target
 
     def post_single(self, line: str) -> bool:
         """
-			Process an doc_terms_str as single JSON line
-			@param line: A single JSON structure
-			@return: True if request successful, False otherwise
-		"""
+        Process an doc_terms_str as single JSON line
+        @param line: A single JSON structure
+        @return: True if request successful, False otherwise
+        """
         if self.target is not None:
             try:
                 response = requests.post(self.target, data=line, headers=self.headers)
-                constants.log_info("Received ML Response: {}".format(response.status_code))
+                logging.info("Received ML Response: {}".format(response.status_code))
                 if response.status_code == 200:
                     json_response = response.json()
-                    constants.log_info(json_response)
+                    logging.info(f'{json_response=}')
                     return True
                 else:
-                    constants.log_error(f'Error: {line}')
+                    logging.error(f'Error: {line}')
                     return False
             except urllib3.exceptions.ProtocolError as e:
-                constants.log_error(str(e))
+                logging.error(str(e))
                 return False
             except Exception as e:
-                constants.log_error(str(e))
+                logging.error(str(e))
                 return False
             except TypeError as e:
-                constants.log_error(str(e))
+                logging.error(str(e))
                 return False
         else:
             return False
 
-    # @timeit
+    @timeit
     def post_batch(
             self,
             input_file: str,
@@ -97,7 +100,7 @@ class HttpPost(object):
                         if self.post_single(line):
                             success_count += 1
                         total_count += 1
-                        logging.info(f'Successes: {success_count} Count: {total_count}')
+                        logging.info(f'{success_count=}, {total_count=}')
                         time.sleep(sleep_time)
         return success_count, total_count
 

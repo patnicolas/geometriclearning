@@ -61,9 +61,9 @@ class NeuralModel(torch.nn.Module, ABC):
         @return: Prediction for the input
         @rtype: Torch tensor
         """
-        # logging.info(f'Input {self.model_id}\n{x.shape}')
+        # logging.info(f'{self.model_id=}\n{x.shape=}')
         x = self.modules_seq(x)
-        # logging.info(f'Output {self.model_id}\n{x.shape}')
+        # logging.info(f'Output {self.model_id=}\n{x.shape=}')
         return x
 
     def get_in_features(self) -> int:

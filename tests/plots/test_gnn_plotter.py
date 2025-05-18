@@ -17,7 +17,7 @@ class GNNPlotterTest(unittest.TestCase):
 
         gnn_plotter = GNNPlotter.build(_data, sampled_node_index_range=(12, 21))
         gnn_plotter.sample()
-        logging.info(gnn_plotter.graph)
+        logging.info(f'{gnn_plotter.graph=}')
 
     @unittest.skip('Ignore')
     def test_draw(self):

@@ -14,6 +14,7 @@ from typing import Dict, AnyStr, Optional, List, Any, Self
 import torch.nn as nn
 import torch
 import torch_geometric
+import logging
 import random
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -113,7 +114,7 @@ class GNNTraining(NeuralTraining):
             if val_enabled:
                 self.__val_epoch(neural_model, epoch, val_loader)
 
-            logging.info(f'Performance metrics for epoch {epoch}\n{str(self.performance_metrics)}')
+            logging.info(f'Performance: {epoch=}\n{self.performance_metrics=}')
             self.exec_config.apply_monitor_memory()
 
         # Generate summary
