@@ -6,6 +6,11 @@ from geomstats.information_geometry.fisher_rao_metric import FisherRaoMetric
 from typing import Tuple, AnyStr, List
 import numpy as np
 import torch
+import os
+
+from geometry import GeometricException
+
+os.environ["GEOMSTATS_BACKEND"] = "pytorch"
 
 
 class StatisticalManifold(object):
@@ -20,7 +25,7 @@ class StatisticalManifold(object):
     - logarithm map
     """
     valid_info_manifolds = [
-        'ExponentialDistributions', 'BetaDistributions', 'PoissonDistributions', 'UnivariateNormalDistributions',
+        'ExponentialDistributions', 'BetaDistributions', 'PoissonDistributions', 'BinomialDistributions',
         'GeometricDistributions'
     ]
 
@@ -72,7 +77,11 @@ class StatisticalManifold(object):
         @return: Tensor of the random samplers
         @rtype: torch.Tensor
         """
-        return torch.Tensor(self.info_manifold.random_point(n_samples))
+        lower_bound, upper_bound = self.get_bounds()
+        delta = upper_bound - lower_bound \
+            if self.info_manifold.__class__.__name__ == 'PoissonDistributions' else 1.0
+
+        return torch.Tensor(self.info_manifold.random_point(n_samples))*delta   #torch.Tensor(self.info_manifold.random_point(n_samples))*20
 
     def metric_matrix(self, base_point: np.array = None) -> np.array:
         """
@@ -107,7 +116,19 @@ class StatisticalManifold(object):
         @return: Value of exp(v) or end point on the manifold
         @rtype: torch.Tensor
         """
-        return torch.Tensor(self.fisher_rao_metric.exp(tangent_vec.numpy(), base_point.numpy()))
+        match self.info_manifold.__class__.__name__:
+            case 'ExponentialDistributions':
+                return base_point + tangent_vec
+            case 'GeometricDistributions':
+                phi_base_point = -2.0*torch.arctanh(torch.sqrt(1.0 - base_point))
+                return 1.0 - torch.tanh(0.5*(phi_base_point+tangent_vec))**2
+            case 'PoissonDistributions':
+                return (torch.sqrt(base_point) + 0.5*tangent_vec)**2
+            case 'BinomialDistributions':
+                n = self.info_manifold.n_draws
+                return (torch.arcsin(torch.sqrt(base_point)) + 0.5 * tangent_vec/torch.sqrt(n)) ** 2
+            case _:
+                raise GeometricException(f'Exponential map for {self.info_manifold.__class__.__name__} not supported')
 
     def log(self, manifold_point: torch.Tensor, base_point: torch.Tensor) -> torch.Tensor:
         """
@@ -117,13 +138,24 @@ class StatisticalManifold(object):
             log_{\theta_{1)(\theta_{2) = v
 
         @param manifold_point: Second point on the manifold, along a geodesic.
-        @type manifold_point: tprch.Tensor
+        @type manifold_point: torch.Tensor
         @param base_point: Base point on the manifold
-        @type base_point:tprch.Tensor
-        @return: Tangent vectpr v
-        @rtype: tprch.Tensor
+        @type base_point: torch.Tensor
+        @return: Tangent vector v
+        @rtype: torch.Tensor
         """
-        return torch.Tensor(self.fisher_rao_metric.log(manifold_point.numpy(), base_point.numpy()))
+        match self.info_manifold.__class__.__name__:
+            case 'ExponentialDistributions':
+                return base_point*torch.log(manifold_point/base_point)
+            case 'GeometricDistributions':
+                return -2.0*(torch.arctanh(torch.sqrt(1.0 - manifold_point)) - torch.arctanh(torch.sqrt(1.0 - base_point)))
+            case 'PoissonDistribution':
+                return 2.0*(torch.sqrt(manifold_point) - torch.sqrt(base_point))
+            case 'BinomialDistribution':
+                n = self.info_manifold.n_draws
+                return 2.0 * torch.sqrt(n)*(torch.arcsin(torch.sqrt(manifold_point)) - torch.arcsin(torch.sqrt(base_point)))
+            case _:
+                raise GeometricException(f'Logarithm map for {self.info_manifold.__class__.__name__} not supported')
 
     """ ----------------------------  Visualization methods ----------------------   """
 
@@ -145,7 +177,7 @@ class StatisticalManifold(object):
         plt.tight_layout()
         plt.show()
 
-    def visualize_pdfs(self, parameters: List[torch.Tensor], param_label: AnyStr) -> None:
+    def visualize_pdfs(self, parameters: torch.Tensor, param_label: AnyStr) -> None:
         x = np.linspace(self.get_bounds()[0], self.get_bounds()[1], 100)
         pdfs = [self.info_manifold.point_to_pdf(params) for params in parameters]
 
