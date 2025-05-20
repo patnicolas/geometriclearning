@@ -6,7 +6,6 @@ from typing import AnyStr, List, Self, Callable
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from util.base_animation import BaseAnimation
-import logging
 __all__ = ['SE3Animation']
 
 

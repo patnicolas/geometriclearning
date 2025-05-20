@@ -68,7 +68,7 @@ class FisherRaoTest(unittest.TestCase):
         inputs = [torch.Tensor(x) for x in values]
         distance = fisher_rao.distance(inputs[0], inputs[1])
         logging.info(f'Exponential Distance {distance}')
-        fisher_rao.visualize_pdf(values[0], values[1],  r"$\theta$")
+        fisher_rao.visualize_diff(values[0], values[1], r"$\theta$")
 
     def test_visualize_exponentials(self):
         import torch

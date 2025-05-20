@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from geomstats.information_geometry.base import InformationManifoldMixin
 from geomstats.information_geometry.fisher_rao_metric import FisherRaoMetric
-from informationgeometry.statistical_manifold import StatisticalManifold
+from informationgeometry.cf_statistical_manifold import CFStatisticalManifold
 from typing import Tuple, AnyStr, List
 import numpy as np
 import torch
@@ -12,7 +12,7 @@ from geometry import GeometricException
 ParamType = torch.Tensor | Tuple[torch.Tensor, torch.Tensor]
 
 
-class FisherRao(StatisticalManifold):
+class FisherRao(CFStatisticalManifold):
     """
     Class that wraps the computation of the Riemannian metric for some common statistical manifolds and support the
     computation of:
