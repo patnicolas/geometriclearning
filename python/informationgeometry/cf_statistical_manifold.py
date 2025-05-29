@@ -55,7 +55,7 @@ class CFStatisticalManifold(object):
 
     def __str__(self) -> AnyStr:
         return (f'Information Manifold: {self.info_manifold.__class__.__name__}'
-                f'\nFisher-Rao metric:\n{self.fisher_rao_metric.signature}')
+                f'Fisher-Rao Metric Signature: {self.fisher_rao_metric.signature}')
 
     def belongs(self, points: List[torch.Tensor]) -> bool:
         """

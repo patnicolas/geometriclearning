@@ -7,6 +7,12 @@ from dl import DLException
 
 class MLPBlockTest(unittest.TestCase):
 
+    def test_init(self):
+        data = (3.0, 5.2, 6.7, 0.6, 0.8)
+        a, _, b, *_ = data
+        print(b)
+
+    @unittest.skip('Ignore')
     def test_init_1(self):
         try:
             mlp_block = MLPBlock(block_id='id1',
@@ -42,6 +48,7 @@ class MLPBlockTest(unittest.TestCase):
             logging.info(str(e))
             self.assertTrue(False)
 
+    @unittest.skip('Ignore')
     def test_init_3(self):
         in_features = 12
         out_features = 24

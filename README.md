@@ -1,14 +1,45 @@
-# Geometric Learning
-Classes and methods for Geometric Learning and related topics.
+# Geometric Deep Learning - Hands-on
+Classes and methods for Geometric Deep Learning and related topics.
 
-#### Patrick Nicolas - Last update 03.28.2025
-
+#### Patrick Nicolas - Last update 05.27.2025   [Substack - Newsletter](https://patricknicolas.substack.com)
 ![Banner](images/GeometricLearning.png)
 
-# Theory 
-## Differential Geometry
-__Differential geometry__ offers a solution by enabling data scientists to grasp the true shape and distribution of data.   
+# Why it Matters
+### Purpose:      
+Facing challenges with high-dimensional, densely packed but limited data, and complex distributions?     
+Geometric Deep Learning (GDL) offers a solution by enabling data scientists to grasp the true shape and distribution of data. This newsletter explores the diverse techniques and frameworks shaping the field of Geometric Deep Learning.
+
+### Audience:       
+Data Scientists or machine learning engineers involved in fields of research or applications such as Computer Vision, Robotics, Physics-informed Modeling, Molecular Science, Telecommunication Network Optimization, Transport Systems, Cosmology, Fluid Dynamics or Design Optimization.     
+
+### Value:      
+Learn about Geometric Learning, Graph Neural Networks, Manifolds, Equivariance and Lie Groups or Topological data analysis and unlocks the ability to model complex, structured, and relational data.
+
+# Theory    
+
+Geometric Deep Learning (GDL) is a field of machine learning that generalizes deep learning to non-Euclidean domains—such as graphs, manifolds, groups, and other structured geometric spaces—by leveraging their symmetries and topologies.   
+The key concepts are:   
+- __Invariance__: Output stays the same when input is transformed.     
+- __Equivariance__: Preserves transformations. The output transforms predictably when input is transformed.
+- __Manifolds__: Operates directly on Non-euclidean or curved spaces or tangent spaces.     
+- __Locality__: Uses local node structures and infinitesimal neighborhoods.    
      
+Here are some references to get you feet wet!     
+
+- [Geometric deep learning: going beyond Euclidean data M. Bronstein, J. Bruna, Y. LeCun, A. Szlam, P. Vadergheynst - 2017](https://arxiv.org/pdf/1611.08097)      
+- [Geometric Deep Learning Grids, Groups, Graphs, Geodesics, and Gauges M. Bronstein, J. Bruna, T Cohen, P. Veličković  - 2021](https://arxiv.org/pdf/2104.13478)     
+- [Theory of Graph Neural Networks: Representation and Learning S Jegelka, Dept. of EECS and CSAIL, MIT, 2022](https://arxiv.org/pdf/2204.07697)     
+- [AMMI 2022 Course "Geometric Deep Learning" Lectures 1 to 12  M. Bronstein, J. Bruna, T Cohen, P. Veličković  - YouTube - 2022](https://www.youtube.com/watch?v=5c_-KX1sRDQ)     
+- [Topological Deep Learning: Going Beyond Graph Data M Hajij et All - 2023](https://arxiv.org/pdf/2206.00606)      
+- [A Brief Introduction to Geometric Deep Learning - J. McEwen, Medium - 2023](https://medium.com/data-science/a-brief-introduction-to-geometric-deep-learning-dae114923ddb)      
+- [A Hands-on Introduction to Geometric Deep Learning, with Examples in PyTorch Geometric - G. Santin, A minitutorial at the SIAM Conference on Computational Science and Engineering, 2023](https://medium.com/data-science/a-brief-introduction-to-geometric-deep-learning-dae114923ddb)    
+- [Michael Bronstein - Geometric Deep Learning  EEML Community - YouTube - 2024](https://www.youtube.com/watch?v=TLeofz0o7uY)       
+- [Introduction To Geometric Deep Learning  Patrick Nicolas Substack - 2025](https://patricknicolas.substack.com/p/introduction-to-geometric-deep-learning)  
+
+
+
+## Differential Geometry
+__Differential geometry__ offers a solution by enabling data scientists to grasp the true shape and distribution of data.    
 Differential geometry is a branch of mathematics that uses techniques from calculus, algebra and topology to study the properties of curves, surfaces, and higher-dimensional objects in space. It focuses on concepts such as curvature, angles, and distances, examining how these properties vary as one moves along different paths on a geometric object.  
 Differential geometry is crucial in understanding the shapes and structures of objects that can be continuously altered, and it has applications in many fields including physics (I.e., general relativity and quantum mechanics), engineering, computer science, and data exploration and analysis.   
    
@@ -45,6 +76,86 @@ Lie groups have numerous practical applications in various fields:
     
 The directory __Lie__ illustrates the various element of __Special Orthogonal Group__ of 3 dimension (__SO3__) and __Special Euclidean Group__ in 3 dimension (__SE3__) using __Geomstats__ library. 
 
+
+## Equivariance   
+
+
+
+## Graph Neural Networks    
+### Overview
+Graph Neural Networks (GNNs) are a class of deep learning models designed to operate directly on graph-structured data. Unlike standard neural networks that work on fixed-size vectors or grids (like images or sequences), GNNs handle data where relationships are represented as nodes and edges—like social networks, molecules, recommendation systems, and more.    
+
+There are 3 levels or categories of tasks:    
+- __Graph-level task__: Predict the property of the entire graph such as classification problems with MNIST or CIFAR images or sentiment analysis for a document or paragraph.      
+- __Node-level task__: Predict if a node belongs to a specific class (i.e. Karate club) or image segmentation (identify the role of a pixel in an image) or part of speech a word belongs to.        
+- __Edge-level task__: Predict the relationship between node (i.e. Interaction between users) that can be classified (discovery of connections between entities or nodes). The task also consists in pruning a fully connected graph into a sparse graph.       
+    
+The key Attributes that define the complexity of a Graph Neural Network are     
+- Number of graph convolutional and attention layers    
+- Graph pooling layer      
+- Node or edge neighbor sampling method       
+- Residual connections    
+- Heteromophilic nodes      
+- Inclusion of isolated nodes      
+- Aggregation method      
+- Data transformation prior aggregation       
+
+There are 5 different types of Graph Neural Networks:         
+- Graph Convolutional Networks    
+- Graph Attention Networks     
+- GraphSAGE    
+- Spectral Graph Neural Networks    
+- Graph Transformers
+
+### Homophily    
+The homophily ratio in a Graph Neural Network (GNN) quantifies how often nodes in a graph are connected to other nodes with the same label or class. It’s a key measure for understanding how well GNNs are likely to perform, especially those that rely on message passing—which typically assumes that connected nodes share similar features or labels.     
+
+There are 3 homophily ratios:     
+- __Node homophily__: average fraction of same-label neighbors per node.
+- __Edge homophily__: fraction of edges connecting nodes with the same label     
+- __Class-insensitive edge homophily__: adjusts for class imbalance by computing same-label edge fractions per class, then averaging. across the C classes.    
+
+### PyTorch Geometric    
+Since its introduction in early 2019, PyTorch Geometric has expanded significantly, incorporating new models, graph samplers, and transformations, continuously evolving to align with the latest research publications.     
+
+The key Features of PyTorch Geometric are:    
+- __Efficient Graph Processing__: Optimizes memory and computation using sparse graph representations.    
+- __Flexible GNN Layers__: Covers GCN, GAT, GraphSAGE, GIN, and other advanced architectures.     
+- __Batching for Large Graphs__: Supports for mini-batching for handling graphs with millions of edges.     
+- __Seamless PyTorch Integration__: Provides full compatibility with PyTorch tensors, autograd, and neural network modules.      
+- __Diverse Graph Support__: PyTorch Geometric handles directed, undirected, weighted, and heterogeneous graphs.     
+
+The most important PyG Modules are:      
+- __torch_geometric.data__ to manages graph structures, including nodes, edges, and features.        
+- __torch_geometric.nn__ to provide data scientists prebuilt GNN layers like convolutional and gated layers.        
+- __torch_geometric.transforms__ to pre-process input data (e.g., feature normalization, graph sampling).     
+- __torch_geometric.loader__ to handle large-scale graph datasets with specialized loaders.
+
+
+## Information Geometry
+__Information geometry__ applies the principles and methods of differential geometry to problems in probability theory and statistics. It studies the manifold of probability distributions and provides a natural framework for understanding and analyzing statistical models.     
+The directory __informationgeometry__ focuses on the __Fisher Information Metric__ (FIM).    
+    
+### Smooth Statistical Manifolds    
+Statistical manifolds generalize the concept of Riemannian manifolds to the space of probability distributions. While their geometric properties—such as exponential and logarithm maps or distance—are often intractable, univariate distributions typically allow for closed-form or analytical expressions of these properties.    
+Most of Statistical manifolds (with 2 or more parameters) have intractable exponential, logarithm and inner production formulation. However single parameters distribution have closed-form formulation:     
+- __Exponential Distribution__    
+- __Poisson Distribution__
+- __Geometric Distribution__
+- __Binomial Distribution with fixed draw__   
+
+Example:   Geometric Distribution    
+![Geometric Distribution](images/Geometric_Distribution.png)
+Reference [Geometry of Closed-form Statistical Manifolds]
+
+
+### Fisher-Rao Metric    
+The Fisher Information Matrix plays a crucial role in various aspects of machine learning and statistics. Its primary significance lies in providing a measure of the amount of information that an observable random variable carries about an unknown parameter upon which the probability depends on.   
+The Fisher information matrix is a type of __Riemannian metric__ that can be applied to a __smooth statistical manifold__. It serves to quantify the informational difference between measurements. The points on this manifold represent probability measures defined within a Euclidean probability space, such as the Normal distribution. Mathematically, it is represented by the Hessian of the __Kullback-Leibler__ divergence.
+
+![Statistical Manifold](images/Statistical_Manifold.png)
+
+
 ## Deep Learning Models
 The directory __dl__ implements a framework of __reusable neural blocks__ as key components of any deep learning models such as:
 - Feed forward neural network
@@ -53,12 +164,6 @@ The directory __dl__ implements a framework of __reusable neural blocks__ as key
 - Generative adversarial network
 - Automatic generation (mirror) of encoder/de-convolutional blocks.   
 
-## Information Geometry
-__Information geometry__ applies the principles and methods of differential geometry to problems in probability theory and statistics [ref 3]. It studies the manifold of probability distributions and provides a natural framework for understanding and analyzing statistical models.     
-The directory 'informationgeometry' focuses on the __Fisher Information Metric__ (FIM).    
-    
-The Fisher Information Matrix plays a crucial role in various aspects of machine learning and statistics. Its primary significance lies in providing a measure of the amount of information that an observable random variable carries about an unknown parameter upon which the probability depends on.   
-The Fisher information matrix is a type of __Riemannian metric__ that can be applied to a __smooth statistical manifold__. It serves to quantify the informational difference between measurements. The points on this manifold represent probability measures defined within a Euclidean probability space, such as the Normal distribution. Mathematically, it is represented by the Hessian of the __Kullback-Leibler__ divergence.
 
 ## Fractal Dimension
 Configuring the parameters of a 2D convolutional neural network, such as kernel size and padding, can be challenging because it largely depends on the complexity of an image or its specific sections. __Fractals__ help quantify the complexity of important features and boundaries within an image and ultimately guide the data scientist in optimizing his/her model.    
