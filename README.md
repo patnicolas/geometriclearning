@@ -77,9 +77,10 @@ Lie groups have numerous practical applications in various fields:
 The directory __Lie__ illustrates the various element of __Special Orthogonal Group__ of 3 dimension (__SO3__) and __Special Euclidean Group__ in 3 dimension (__SE3__) using __Geomstats__ library. 
 
 
-## Equivariance   
+## Equivariance
+__Lie-equivariant__ networks are neural networks that are equivariant to transformations from a Lie group, such as rotations, translations, scaling, or Lorentz transformations. These networks are designed to respect the continuous symmetries inherent in many scientific and geometric problems.    
 
-
+__Group-equivariant Convolutional Neural Networks__ (G-CNN) are a generalization of standard Convolutional Neural Networks designed to respect symmetries in data, especially group symmetries (translational, Rotational, Reflectional and Permutational).    
 
 ## Graph Neural Networks    
 ### Overview
