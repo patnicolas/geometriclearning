@@ -1,5 +1,6 @@
 import unittest
 import logging
+import util
 from dl.block.conv.conv_2d_block import Conv2dBlock
 import torch.nn as nn
 

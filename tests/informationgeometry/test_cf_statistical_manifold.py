@@ -1,6 +1,6 @@
 import unittest
 import logging
-
+import util
 import torch
 import os
 
@@ -11,14 +11,13 @@ from geomstats.information_geometry.exponential import ExponentialDistributions
 from geomstats.information_geometry.base import InformationManifoldMixin
 from geomstats.information_geometry.geometric import GeometricDistributions
 from geomstats.information_geometry.poisson import PoissonDistributions
-from geomstats.information_geometry.normal import UnivariateNormalDistributions
 from informationgeometry.cf_statistical_manifold import CFStatisticalManifold
 from typing import Tuple, AnyStr
 
 
 class CFStatisticalManifoldTest(unittest.TestCase):
 
-    @unittest.skip('ignore')
+    # @unittest.skip('ignore')
     def test_init(self):
         exponential_distributions = ExponentialDistributions(equip=True)
         statistical_manifold = CFStatisticalManifold(exponential_distributions, (1.0, 2.0))
@@ -150,6 +149,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
         logging.info(f'Metric={metric}')
         self.assertTrue(-0.02 < metric - 1.0/std**2 < 0.02)
 
+    @unittest.skip('ignore')
     def test_visualize_normal(self):
         import numpy as np
         import matplotlib.pyplot as plt

@@ -4,6 +4,7 @@ from Lie.SE3_visualization import SE3Visualization
 from Lie.Lie_SE3_group import LieSE3Group
 from Lie import u3d
 import logging
+import util
 
 
 class LieSE3GroupTest(unittest.TestCase):

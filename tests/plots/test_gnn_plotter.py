@@ -2,6 +2,7 @@ import unittest
 from plots.gnn_plotter import GNNPlotter
 import networkx as nx
 import logging
+import util
 
 class GNNPlotterTest(unittest.TestCase):
 

@@ -1,7 +1,8 @@
 import unittest
 from geometry.function_space import FunctionSpace
 import numpy as np
-import geometry
+import logging
+import util
 
 
 class TestFunctionSpace(unittest.TestCase):

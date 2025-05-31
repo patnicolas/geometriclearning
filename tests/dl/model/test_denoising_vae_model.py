@@ -1,10 +1,10 @@
 import unittest
 import torch
-import torch.nn as nn
 from dl.block.mlp_block import MLPBlock
 from dl.model.mlp_model import MLPModel
 from dl.model.denoising_vae_model import DenoisingVAEModel
 import logging
+import util
 
 class DenoisingVAEModelTest(unittest.TestCase):
     def test_init(self):

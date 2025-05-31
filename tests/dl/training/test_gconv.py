@@ -15,6 +15,8 @@ from torch_geometric.data import Data
 import torch.nn as nn
 import torch
 import logging
+import util
+
 
 class GConvTest(unittest.TestCase):
 

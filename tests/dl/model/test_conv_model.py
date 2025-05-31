@@ -6,6 +6,7 @@ from dl.model.conv_model import ConvModel
 from dl import ConvException
 from dl.training.neural_training import NeuralTraining
 import logging
+import util
 
 class ConvModelTest(unittest.TestCase):
 

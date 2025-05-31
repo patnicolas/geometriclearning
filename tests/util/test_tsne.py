@@ -2,6 +2,8 @@ from unittest import TestCase
 import torch
 from util.tsne import T_SNE
 import logging
+import util
+
 
 class TestT_SNE(TestCase):
 

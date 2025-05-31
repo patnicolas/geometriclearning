@@ -1,6 +1,7 @@
 import unittest
 from fractal.fractal_dim_image import FractalDimImage
 import logging
+import util
 
 class FractalDimImageTest(unittest.TestCase):
 

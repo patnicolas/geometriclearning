@@ -4,7 +4,7 @@ from unittest import TestCase
 import unittest
 from util.http_post import HttpPost
 import logging
-logger = logging.Logger('TestHttpPost')
+import util
 
 
 logging.info('path: ' + os.getcwd())
@@ -17,8 +17,8 @@ class TestHttpPost(TestCase):
         in_file = TestHttpPost.__predict_file()
         new_headers = {'Content-type': 'application/json', 'X-API-key':'ec18a88bc96d4c84bd4d6a0c4c8886ed'}
         post = HttpPost('predict_local', new_headers, True)
-        successes, total = post.post_batch(in_file, False, num_iterations)
-        logger.info(f'Success: {successes} All counts {total}')
+        successes, total_count = post.post_batch(in_file, False, num_iterations)
+        logging.info(f'{successes=}, {total_count=}')
 
     @unittest.skip("Not needed")
     def test_batch_predict(self):
@@ -27,8 +27,8 @@ class TestHttpPost(TestCase):
         num_clients = 3
         for idx in range(num_clients):
             post = HttpPost('predict_training', new_headers, True)
-            successes, total = post.post_batch(in_file, False, 1)
-            logger.info(f'Success: {successes} All counts {total}')
+            successes, total_count = post.post_batch(in_file, False, 1)
+            logging.info(f'{successes=}, {total_count=}')
 
     @unittest.skip("Not needed")
     def test_process_feedback(self):
@@ -36,8 +36,8 @@ class TestHttpPost(TestCase):
         num_iterations = 4
         new_headers = {'Content-type': 'application/json'}
         post = HttpPost('feedback_local', new_headers, True)
-        successes, total = post.post_batch(in_file, False, num_iterations)
-        logger.info(f'Success: {successes} All counts {total}')
+        successes, total_count = post.post_batch(in_file, False, num_iterations)
+        logging.info(f'{successes=}, {total_count=}')
 
     @staticmethod
     def __virtual_coder_file() -> str:

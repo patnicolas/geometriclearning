@@ -5,6 +5,7 @@ from dl.model.mlp_model import MLPModel, MLPBuilder
 from dl.training.neural_training import NeuralTraining
 from dl import DLException
 import logging
+import util
 
 class MLPModelTest(unittest.TestCase):
 

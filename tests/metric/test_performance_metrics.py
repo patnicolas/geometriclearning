@@ -3,6 +3,7 @@ import unittest
 from metric.performance_metrics import PerformanceMetrics
 from metric.metric_type import MetricType
 import logging
+import util
 
 class PerformanceMetricsTest(unittest.TestCase):
 
@@ -43,7 +44,7 @@ class PerformanceMetricsTest(unittest.TestCase):
         np_lab = np.stack(np_labels)
         performance_metrics.update_performance_values(np_pred, np_lab)
         performance_metrics.update_metric(MetricType.EvalLoss, sum(val_loss)/len(val_loss))
-        logging.info(f'Performance:\n{str(performance_metrics)}')
+        logging.info(f'\n{performance_metrics=}')
 
     def test_summary(self):
         import numpy as np
@@ -64,7 +65,7 @@ class PerformanceMetricsTest(unittest.TestCase):
         np_lab = np.stack(np_labels)
         performance_metrics.update_performance_values(np_pred, np_lab)
         performance_metrics.update_performance_values(np_pred, np_lab)
-        logging.info(f'Performance:\n{str(performance_metrics)}')
+        logging.info(f'\n{performance_metrics=}')
 
         output_file_name = 'results'
         performance_metrics.summary(output_file_name)

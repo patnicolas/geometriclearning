@@ -8,10 +8,11 @@ from torch_geometric.loader import (NeighborLoader, RandomNodeLoader, GraphSAINT
                                     GraphSAINTNodeSampler, GraphSAINTEdgeSampler, ShaDowKHopSampler,
                                     ClusterData, ClusterLoader)
 import torch
-from typing import Dict, AnyStr, Any, Optional, List, Self
+from typing import Dict, AnyStr, Any, Optional, List, Self, Callable
 from dataset import DatasetException
 import logging
 __all__ = ['GraphDataLoader']
+
 
 
 class GraphDataLoader(object):

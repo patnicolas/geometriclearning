@@ -4,6 +4,8 @@ from dl.training.hyper_params import HyperParams
 from dl.block.mlp_block import MLPBlock
 from dl.model.mlp_model import MLPModel
 import logging
+import util
+
 
 class HyperParamsTest(unittest.TestCase):
 

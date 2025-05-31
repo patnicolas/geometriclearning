@@ -1,5 +1,6 @@
 import unittest
 import logging
+import util
 from geometry.hypersphere_space import HypersphereSpace
 from geometry.manifold_point import ManifoldPoint
 from geometry.visualization.space_visualization import VisualizationParams
@@ -11,8 +12,8 @@ class TestGeometricSpace(unittest.TestCase):
     def test_sample_hypersphere(self):
         num_samples = 180
         manifold = HypersphereSpace()
-        data = manifold.sample(num_samples)
-        logging.info(f'Hypersphere:\n{str(data)}')
+        hypersphere_data = manifold.sample(num_samples)
+        logging.info(f'\n{hypersphere_data=}')
 
     @unittest.skip('ignore')
     def test_hypersphere(self):
@@ -20,9 +21,9 @@ class TestGeometricSpace(unittest.TestCase):
         style = {'color': 'red', 'linestyle': '--', 'label': 'Edges'}
         manifold = HypersphereSpace()
         logging.info(str(manifold))
-        data = manifold.sample(num_samples)
-        visualParams = VisualizationParams("Data on Hypersphere", "locations", (8, 8), style, "3d")
-        HypersphereSpace.show(visualParams, data)
+        manifold_data = manifold.sample(num_samples)
+        manifold.show_manifold(manifold_points=manifold_data)
+
 
     @unittest.skip('ignore')
     def test_tangent_vector(self):
@@ -91,7 +92,7 @@ class TestGeometricSpace(unittest.TestCase):
         exp_map = manifold.tangent_vectors(manifold_points)
         tgt_vec, end_point = exp_map[0]
         assert manifold.belongs(end_point)     # Is True
-        frechet_mean = manifold.frechet_mean(manifold_points[0], manifold_points[1])
+        frechet_mean = manifold.frechet_mean(manifold_points)
         logging.info(f'Euclidean mean: {euclidean_mean}\nFrechet mean: {frechet_mean}')
         assert manifold.belongs(frechet_mean)
 

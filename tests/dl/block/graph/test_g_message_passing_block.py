@@ -3,6 +3,7 @@ from torch_geometric.nn import GCNConv
 from dl.block.graph.g_message_passing_block import GMessagePassingBlock
 import torch.nn as nn
 import logging
+import util
 
 class GMessagePassingBlockTest(unittest.TestCase):
 

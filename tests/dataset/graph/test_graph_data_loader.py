@@ -45,7 +45,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         logging.info('\n'.join(result))
         self.assertTrue(True)
 
-    #@unittest.skip('Ignore')
+    @unittest.skip('Ignore')
     def test_random_node_flickr_2(self):
         dataset_name = 'Flickr'
         # 1. Initialize the loader

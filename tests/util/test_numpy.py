@@ -3,7 +3,7 @@ from unittest import TestCase
 import unittest
 import numpy as np
 import logging
-logger = logging.Logger('TestNumpy')
+import util
 
 
 class TestNumpy(TestCase):
@@ -11,29 +11,29 @@ class TestNumpy(TestCase):
     def test_slice(self):
         try:
             x = TestNumpy.__generate_3d_array(32, 4)
-            logger.info(f'\nx:------\n{x}')
-            logger.info(f'\nx[::1]:------\n{x[::1]}')
-            logger.info(f'\nx[::2]:------\n{x[::2]}')
-            logger.info(f'\nx[::3]:------\n{x[::3]}')
-            logger.info(f'\nx[:1:]:------\n{x[:1:]}')
-            logger.info(f'\nx[:2:]:------\n{x[:2:]}')
-            logger.info(f'\nx[0::]:------\n{x[0::]}')
-            logger.info(f'\nx[1::]:------\n{x[1::]}')
-            logger.info(f'\nx[2::]:------\n{x[2::]}')
-            logger.info(f'\nx[2::1]:------\n{x[2::1]}')
-            logger.info(f'\nx[1:2,:,1]:------\n{x[1:2,:,1]}')
-            logger.info(f'\nx[1:2:,1]:------\n{x[1:2:,1]}')
-            logger.info(f'\nx[::,1]:------\n{x[::,1]}')
-            logger.info(f'\nx[:2,:,1]:------\n{x[:2,:,1]}')
-            logger.info(f'\nx[0,0,0]:------\n{x[0,0,0]}')
-            logger.info(f'\nx[:0:,1]:------\n{x[:0:,1]}')
-            logger.info(f'\nx[0:,:,1]:------\n{x[0:,:,1]}')
-            logger.info(f'\nx[2::,0]:------\n{x[2::,0]}')
-            logger.info(f'\nx[1:3,0:2,1]:------\n{x[1:3,0:2,1]}')
-            logger.info(f'\nx[1:3,:,1]:------\n{x[1:3,:,1]}')
-            logger.info(f'\nx[1:3,:,0]:------\n{x[1:3,:,0]}')
-            logger.info(f'\nx[1:2,:,0]:------\n{x[1:2,:,0]}')
-            logger.info(f'\nx[:,0:,0]:------\n{x[:,0:,0]}')
+            logging.info(f'\nx:------\n{x}')
+            logging.info(f'\nx[::1]:------\n{x[::1]}')
+            logging.info(f'\nx[::2]:------\n{x[::2]}')
+            logging.info(f'\nx[::3]:------\n{x[::3]}')
+            logging.info(f'\nx[:1:]:------\n{x[:1:]}')
+            logging.info(f'\nx[:2:]:------\n{x[:2:]}')
+            logging.info(f'\nx[0::]:------\n{x[0::]}')
+            logging.info(f'\nx[1::]:------\n{x[1::]}')
+            logging.info(f'\nx[2::]:------\n{x[2::]}')
+            logging.info(f'\nx[2::1]:------\n{x[2::1]}')
+            logging.info(f'\nx[1:2,:,1]:------\n{x[1:2,:,1]}')
+            logging.info(f'\nx[1:2:,1]:------\n{x[1:2:,1]}')
+            logging.info(f'\nx[::,1]:------\n{x[::,1]}')
+            logging.info(f'\nx[:2,:,1]:------\n{x[:2,:,1]}')
+            logging.info(f'\nx[0,0,0]:------\n{x[0,0,0]}')
+            logging.info(f'\nx[:0:,1]:------\n{x[:0:,1]}')
+            logging.info(f'\nx[0:,:,1]:------\n{x[0:,:,1]}')
+            logging.info(f'\nx[2::,0]:------\n{x[2::,0]}')
+            logging.info(f'\nx[1:3,0:2,1]:------\n{x[1:3,0:2,1]}')
+            logging.info(f'\nx[1:3,:,1]:------\n{x[1:3,:,1]}')
+            logging.info(f'\nx[1:3,:,0]:------\n{x[1:3,:,0]}')
+            logging.info(f'\nx[1:2,:,0]:------\n{x[1:2,:,0]}')
+            logging.info(f'\nx[:,0:,0]:------\n{x[:,0:,0]}')
         except Exception as e:
             self.fail(str(e))
 

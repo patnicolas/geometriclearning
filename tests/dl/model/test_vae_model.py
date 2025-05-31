@@ -9,6 +9,7 @@ from dl.model.vae_model import VAEModel
 from dl import VAEException, ConvException
 from dl.training.vae_training import VAETraining
 import logging
+import util
 
 class VAEModelTest(unittest.TestCase):
 

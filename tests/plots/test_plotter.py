@@ -3,6 +3,7 @@ import unittest
 from plots.plotter import PlotterParameters, Plotter
 import matplotlib.pyplot as plt
 import logging
+import util
 
 
 class PlotterTest(unittest.TestCase):

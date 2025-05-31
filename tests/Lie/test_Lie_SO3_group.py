@@ -6,6 +6,7 @@ import numpy as np
 from typing import AnyStr, List
 from Lie import u3d
 import logging
+import util
 
 
 class LieSO3GroupTest(unittest.TestCase):

@@ -3,6 +3,7 @@ import unittest
 import pandas as pd
 import numpy as np
 import logging
+import util
 from typing import AnyStr, List
 
 class TestVectorizer(TestCase):

@@ -1,12 +1,12 @@
 import unittest
 
 from geomstats.geometry.euclidean import Euclidean
-
 from geometry.manifold_pca import ManifoldPCA, PrincipalComponents
 from geometry.visualization.hypersphere_plot import HyperspherePlot
 from geometry.visualization.manifold_plot import ManifoldPlot
 import numpy as np
 import logging
+import util
 
 class TangentPCATest(unittest.TestCase):
 
@@ -19,7 +19,7 @@ class TangentPCATest(unittest.TestCase):
         logging.info(f'Random data point on Sphere:\n{X}')
         tangent_pca = ManifoldPCA(sphere)
         principal_components, _ = tangent_pca.estimate(X)
-        logging.info(f'\nPrincipal components:\n{principal_components}')
+        logging.info(f'\n{principal_components=}')
 
     @unittest.skip('Ignore')
     def test_components_euclidean_pca(self):
@@ -91,11 +91,8 @@ class TangentPCATest(unittest.TestCase):
             x = projected_points[:, 0]
             y = projected_points[:, 1]
             z = projected_points[:, 2]
-           # sc = ax.scatter(x, y, z, c=x, cmap='cool', s=120, marker='o', label='Euclidean')
-            # fig.colorbar(sc, ax=ax, label='Z-axis Value')
             for idx in range(len(x)):
                 ax.scatter(x[idx], y[idx], z[idx], cmap='cool', s=120, marker='o', label=f'data {idx}')
-
 
             ax.scatter(principal_components.base_point[0],
                        principal_components.base_point[1],

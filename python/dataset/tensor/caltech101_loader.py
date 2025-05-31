@@ -1,14 +1,14 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
+import logging
+import util
 from dataset import DatasetException
 from dataset.base_loader import BaseLoader
 from typing import AnyStr, List
 from torch.utils.data import Dataset
 from dl.model import GrayscaleToRGB
 from torchvision.transforms import InterpolationMode
-import logging
-logger = logging.getLogger('dataset.Caltech101Loader')
 
 
 class Caltech101Loader(BaseLoader):

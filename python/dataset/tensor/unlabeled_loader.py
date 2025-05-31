@@ -11,18 +11,18 @@ from dataset.base_loader import BaseLoader
 
 __all__ = ['UnlabeledLoader']
 
-"""
-    Wraps static methods to load public data sets. The methods generate two data loader
-    - Training 
-    - Evaluation
-"""
-
 class UnlabeledLoader(BaseLoader):
+    """
+        Wraps static methods to load public data sets. The methods generate two data loader
+        - Training
+        - Evaluation
+    """
+
     def __init__(self,
                  create_dataset: Callable[[torch.Tensor, Compose], Dataset],
                  batch_size: int,
                  split_ratio: float,
-                 num_samples: int = -1):
+                 num_samples: int = -1) -> None:
         """
         Constructor for this generic data set loader. A sub-sample is selected if num_samples is > 0 or
         the entire data set otherwise.

@@ -2,6 +2,7 @@ from unittest import TestCase
 import math
 from util.decorators import timeit
 import logging
+import util
 
 @timeit
 def procedure() -> float:

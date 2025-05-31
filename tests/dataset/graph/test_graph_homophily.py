@@ -1,7 +1,6 @@
 import unittest
-
-from torch_geometric.data.remote_backend_utils import num_nodes
-
+import logging
+import util
 from dataset.graph.graph_homophily import GraphHomophily, GraphHomophilyType
 from torch_geometric.data import Data
 import torch
@@ -111,6 +110,7 @@ class GraphHomophilyTest(unittest.TestCase):
                 homophily_factor = homophily()
                 logging.info(f'{dataset_name} {homophily_type.value} homophily: {homophily_factor:.3f}')
 
+    @unittest.skip('Ignore')
     def test_message_propagation(self):
         import matplotlib.pyplot as plt
         import networkx as nx

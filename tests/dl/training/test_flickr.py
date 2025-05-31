@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import logging
+import util
 
 class MyModel(nn.Module):
     def __init__(self):

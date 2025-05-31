@@ -2,11 +2,12 @@ import unittest
 from geometry.kmeans_on_manifold import KMeansOnManifold, KMeansCluster
 from typing import List, AnyStr
 import logging
-
+import util
 
 class KMeansOnManifoldTest(unittest.TestCase):
     num_samples = 500
     num_clusters = 4
+
     @unittest.skip('Ignore')
     def test_init(self):
         num_samples = 100

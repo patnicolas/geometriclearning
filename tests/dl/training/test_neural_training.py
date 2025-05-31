@@ -1,5 +1,6 @@
 import unittest
 import logging
+import util
 from dl.model.mlp_model import MLPModel
 from dl.block.mlp_block import MLPBlock
 from dl.training.hyper_params import HyperParams

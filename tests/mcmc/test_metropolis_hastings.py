@@ -1,6 +1,7 @@
 import unittest
 from unittest import TestCase
 import logging
+import util
 from mcmc.metropolis_hastings import MetropolisHastings
 from mcmc.proposal_distribution import ProposalBeta, ProposalDistribution
 from typing import AnyStr
@@ -26,7 +27,7 @@ class TestMetropolisHastings(TestCase):
             burn_in_ratio,
             sigma_delta,
             theta0,
-            f"Beta({alpha}, {beta}) burn_in ratio:{burn_in_ratio}, Initial theta: {theta0} Delta {sigma_delta}"
+            f"Beta({alpha}, {beta}) {burn_in_ratio=}, {theta0=}, {sigma_delta=}"
         )
 
 
@@ -48,7 +49,7 @@ class TestMetropolisHastings(TestCase):
             burn_in_ratio,
             sigma_delta,
             theta0,
-            f"Beta({alpha}, {beta}) burn_in ratio:{burn_in_ratio}, Initial theta: {theta0}"
+            f"Beta({alpha}, {beta}) {burn_in_ratio=}, {theta0=}"
         )
 
 
@@ -71,7 +72,7 @@ class TestMetropolisHastings(TestCase):
             burn_in_ratio,
             sigma_delta,
             theta0,
-            f"Beta({alpha}, {beta}) burn_in ratio:{burn_in_ratio}, Initial theta: {theta0}"
+            f"Beta({alpha}, {beta}) {burn_in_ratio=}, {theta0=}"
         )
 
     @staticmethod
@@ -85,8 +86,7 @@ class TestMetropolisHastings(TestCase):
         metropolis_hastings = MetropolisHastings(proposed_distribution, num_iterations, burn_in_ratio, sigma_delta)
 
         theta_history, success_rate = metropolis_hastings.sample(theta0)
-        theta_history_str = str(theta_history)
-        logging.info(f'{description} Success rate {success_rate}')
+        logging.info(f'{description} {success_rate=}')
 
 
 if __name__ == '__main__':

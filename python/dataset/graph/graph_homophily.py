@@ -4,11 +4,12 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from typing import AnyStr, Self
 from dataset.graph.pyg_datasets import PyGDatasets
 from torch_geometric.data import Data
-from enum import Enum
+from enum import StrEnum, verify, UNIQUE
 __all__ = ['GraphHomophily', 'GraphHomophilyType']
 
 
-class GraphHomophilyType(Enum):
+@verify(UNIQUE)
+class GraphHomophilyType(StrEnum):
     """
     Enumerator for the 3 type of homophily ratio
     - Node homophily

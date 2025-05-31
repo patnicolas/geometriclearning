@@ -1,6 +1,7 @@
 import unittest
 from torch import nn
 import logging
+import util
 from dl import ConvException
 from dl.block.conv.conv_2d_block import Conv2dBlock
 from dl.block.conv.conv_3d_block import Conv3dBlock

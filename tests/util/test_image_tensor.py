@@ -4,6 +4,7 @@ import torch
 from util.image_tensor import ImageTensor
 img_dir = '../output/test1'
 import logging
+import util
 
 class TestImageTensor(TestCase):
     def test_img(self):

@@ -1,5 +1,6 @@
 import unittest
 import logging
+import util
 from dl.block.conv.conv_output_size import ConvOutputSize, SeqConvOutputSize
 
 

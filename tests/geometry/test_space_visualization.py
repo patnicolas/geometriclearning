@@ -1,5 +1,6 @@
 import unittest
 import logging
+import util
 import numpy as np
 from geometry.visualization.space_visualization import SpaceVisualization, VisualizationParams
 import matplotlib.pyplot as plt
@@ -38,7 +39,6 @@ class TestSpaceVisualization(unittest.TestCase):
         ax.set(xlabel='time (s)', ylabel='voltage (mV)',
                title='About as simple as it gets, folks')
         ax.grid()
-
         fig.savefig("test.png")
         plt.show()
 

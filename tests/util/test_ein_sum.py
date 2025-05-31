@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
-from util.ein_sum import EinSum
 import logging
+import util
 
 class EinSumTest(unittest.TestCase):
 
@@ -17,7 +17,7 @@ class EinSumTest(unittest.TestCase):
         einsum_explicit_dot_product = np.einsum('i,i->', a, b)
         # Using Numpy method
         np_dot = np.dot(a, b)
-        logging.info(f'\neinsum dot product: {einsum_dot_product}\nNumpy dot product: {np_dot}')
+        logging.info(f'\n{einsum_dot_product=}\n{np_dot=}')
         self.assertTrue(einsum_dot_product == np_dot)
         self.assertTrue(einsum_explicit_dot_product == np_dot)
 
@@ -26,7 +26,7 @@ class EinSumTest(unittest.TestCase):
                                        torch.Tensor(a),
                                        torch.Tensor(b))
         torch_dot = torch.dot(torch.Tensor(a), torch.Tensor(b))
-        logging.info(f'Einsum notation: {einsum_notation}\nTorch dot: {torch_dot}')
+        logging.info(f'{einsum_notation=}\n{torch_dot=}')
 
     def test_dot_mismatch(self):
         try:
@@ -52,7 +52,7 @@ class EinSumTest(unittest.TestCase):
         matrix_mul = a @ b
         matrix_matmul = np.matmul(a, b)
         logging.info(f'\neinsum matrix multiplication:\n{einsum_mul}\nMatrix multiplication:'
-              f'\n{matrix_mul}\nNumpy matmul function:\n{matrix_matmul}')
+                     f'\n{matrix_mul}\nNumpy matmul function:\n{matrix_matmul}')
         self.assertTrue(einsum_mul[0][0] == matrix_mul[0][0])
         self.assertTrue(einsum_mul[1][0] == matrix_matmul[1][0])
 

@@ -122,7 +122,7 @@ class GeometricSpace(ABC):
         :param manifold_type Type of manifold
         :return True if manifold is supported, False otherwise
         """
-        return manifold_type in supported_manifolds
+        return manifold_type in GeometricSpace.supported_manifolds
 
     @staticmethod
     def load_csv(filename: AnyStr) -> np.array:

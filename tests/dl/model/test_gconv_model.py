@@ -1,5 +1,6 @@
 import unittest
 import logging
+import util
 from dl.block.graph.gconv_block import GConvBlock
 from dl.block.mlp_block import MLPBlock
 from dl.model.gconv_model import GConvModel

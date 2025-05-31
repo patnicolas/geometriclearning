@@ -1,6 +1,5 @@
 import unittest
 import random
-import logging
 
 class GraphicsTest(unittest.TestCase):
 

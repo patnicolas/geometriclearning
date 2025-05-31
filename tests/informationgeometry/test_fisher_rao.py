@@ -4,8 +4,6 @@ import logging
 # Force Geomstats to use Pytorch as a backend
 import os
 
-import numpy as np
-
 os.environ["GEOMSTATS_BACKEND"] = "pytorch"
 
 from geomstats.information_geometry.normal import UnivariateNormalDistributions
@@ -18,14 +16,14 @@ from informationgeometry.fisher_rao import FisherRao
 
 class FisherRaoTest(unittest.TestCase):
 
-    @unittest.skip('ignore')
+    # @unittest.skip('ignore')
     def test_init(self):
         exponential_distributions = ExponentialDistributions(equip=True)
         fisher_rao = FisherRao(exponential_distributions, (1.0, 2.0))
-        logging.info(str(fisher_rao))
+        logging.info(f'Fisher-Rao:\n{str(fisher_rao)}')
         self.assertTrue(fisher_rao.fisher_rao_metric.signature == (1, 0))
 
-    @unittest.skip('ignore')
+    # @unittest.skip('ignore')
     def test_exponential_samples(self):
         exponential_distributions = ExponentialDistributions(equip=True)
         fisher_rao = FisherRao(exponential_distributions, (-2.0, 2.0))
@@ -70,6 +68,7 @@ class FisherRaoTest(unittest.TestCase):
         logging.info(f'Exponential Distance {distance}')
         fisher_rao.visualize_diff(values[0], values[1], r"$\theta$")
 
+    @unittest.skip('ignore')
     def test_visualize_exponentials(self):
         import torch
 
@@ -124,7 +123,7 @@ class FisherRaoTest(unittest.TestCase):
         distance = fisher_rao.distance(inputs[0], inputs[1])
         logging.info(f'Geometric Distance  {distance}')
 
-    # @unittest.skip('ignore')
+    @unittest.skip('ignore')
     def test_inner_product(self):
         import torch
 

@@ -1,5 +1,6 @@
 import unittest
 import logging
+import util
 from dataset.tensor.caltech101_loader import Caltech101Loader
 from dl.training.exec_config import ExecConfig
 

@@ -1,5 +1,6 @@
 import unittest
 import logging
+import util
 import torch.nn as nn
 from dl.block.conv.deconv_2d_block import DeConv2dBlock
 from dl.model.deconv_2d_model import DeConv2dModel

@@ -2,6 +2,8 @@ import unittest
 import torch
 from dl.block.variational_block import VariationalBlock
 import logging
+import util
+
 
 class VariationalBlockTest(unittest.TestCase):
 

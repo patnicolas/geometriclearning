@@ -2,6 +2,7 @@ from functools import total_ordering
 from unittest import TestCase
 import unittest
 import logging
+import util
 
 @total_ordering
 class Student:

@@ -5,7 +5,9 @@ from mcmc.proposal_distribution import ProposalBeta, ProposalDistribution
 import numpy as np
 from scipy import stats
 
+
 class MyTestCase(unittest.TestCase):
+
     def test_beta_distribution(self):
         num_data_points = 1000
         alpha = 12

@@ -1,8 +1,10 @@
 import unittest
 
 from geomstats.geometry.spd_matrices import SPDAffineMetric, SPDLogEuclideanMetric
+from geometry.binary_lr_manifold import BinaryLRManifold
 import numpy as np
 import logging
+import util
 
 class BinaryLRManifoldTest(unittest.TestCase):
 

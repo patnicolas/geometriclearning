@@ -12,6 +12,7 @@ from geometry.visualization.hypersphere_plot import HyperspherePlot
 from geometry.visualization.euclidean_plot import EuclideanPlot
 from geometry.visualization.so3_plot import SO3Plot
 import logging
+import util
 
 
 class FrechetEstimatorTest(unittest.TestCase):

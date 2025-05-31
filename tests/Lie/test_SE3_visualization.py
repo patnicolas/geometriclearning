@@ -7,6 +7,7 @@ import numpy as np
 from typing import List
 import geomstats.backend as gs
 import logging
+import util
 
 
 

@@ -1,16 +1,12 @@
 import unittest
 import logging
+import util
 from torch import nn
 from dl.block.mlp_block import MLPBlock
 from dl import DLException
 
 
 class MLPBlockTest(unittest.TestCase):
-
-    def test_init(self):
-        data = (3.0, 5.2, 6.7, 0.6, 0.8)
-        a, _, b, *_ = data
-        print(b)
 
     @unittest.skip('Ignore')
     def test_init_1(self):

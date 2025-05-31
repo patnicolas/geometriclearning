@@ -2,7 +2,7 @@ import unittest
 from unittest import TestCase
 from util.io_util import IOUtil
 import logging
-logger = logging.Logger('TestIOUtil')
+import util
 
 
 class TestIOUtil(TestCase):
@@ -19,12 +19,12 @@ class TestIOUtil(TestCase):
     def test_pickle(self):
         try:
             file_name = '../../input/test1-pickle'
-            dict = {"a":1, "b":2}
-            lst = [dict, dict]
+            my_dict = {"a": 1, "b": 2}
+            lst = [my_dict, my_dict]
             ioutil = IOUtil(file_name)
             ioutil.to_pickle(lst)
             new_lst = ioutil.from_pickle()
-            logger.info(str(new_lst))
+            logging.info(f'{new_lst=}')
         except Exception as e:
             self.fail(str(e))
 
