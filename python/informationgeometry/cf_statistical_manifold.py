@@ -23,6 +23,13 @@ class CFStatisticalManifold(object):
     - sample and randomly generated point on a given statistical manifold
     - exponential map
     - logarithm map
+
+    NOTES:
+        - This class supports only the closed-form distributions that are available through Geomstats API
+        - Although other classes relies on Numpy binding for back-end computations, Statistical manifolds reqyire
+          PyTorch be selected as back-end
+
+    REFERENCE:
     """
     closed_form_manifolds = [
         'ExponentialDistributions', 'PoissonDistributions', 'BinomialDistributions', 'GeometricDistributions'
@@ -98,8 +105,7 @@ class CFStatisticalManifold(object):
         @rtype: Numpy array
         """
         # Set the base point as a random point on the manifold if none is provided
-        base_point = self.info_manifold.random_point(1) if base_point is None \
-            else base_point.numpy()
+        base_point = self.info_manifold.random_point(1) if base_point is None else base_point
         # Make sure the base point actually belongs to the manifold
         assert self.info_manifold.belongs(base_point)
         # Invoke the Geomstats method
@@ -194,6 +200,7 @@ class CFStatisticalManifold(object):
         plt.xlabel('x', fontdict={'fontsize': 16})
         plt.ylabel('pdf', fontdict={'fontsize': 16})
         plt.tick_params(axis='both', which='major', labelsize=12)
+        plt.title(self.info_manifold.__class__.__name__)
         plt.legend(fontsize=12)
         plt.grid(True)
         plt.tight_layout()

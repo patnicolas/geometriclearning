@@ -134,7 +134,7 @@ class LieSO3GroupTest(unittest.TestCase):
     def test_product_3(self):
         # First SO3 rotation matrix
         so3_tangent_vec = [1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 1.0, 0.0]
-        so3_group = LieSO3Group.build(algebra_element=so3_tangent_vec)
+        so3_group = LieSO3Group.build_identity(algebra_element=so3_tangent_vec)
         so3_point = LieElement(
             group_element=so3_group.group_element,
             identity_element=LieSO3Group.identity_matrix,
@@ -142,7 +142,7 @@ class LieSO3GroupTest(unittest.TestCase):
 
         # Second SO3 rotation matrix
         so3_tangent_vec2 = [0.5]*len(so3_tangent_vec)
-        so3_group2 = LieSO3Group.build(algebra_element=so3_tangent_vec2)
+        so3_group2 = LieSO3Group.build_identity(algebra_element=so3_tangent_vec2)
         so3_point2 = LieElement(
             group_element=so3_group2.group_element,
             identity_element=LieSO3Group.identity_matrix,
@@ -201,7 +201,6 @@ class LieSO3GroupTest(unittest.TestCase):
         logging.info(f'\nSO3 element\n{so3_group.group_element}')
         bracket = so3_group.bracket(u3d.x_rot)
         logging.info(f'\nBracket [x,x]:\n{bracket}')
-
 
     @unittest.skip('Ignored')
     def test_bracket2(self):

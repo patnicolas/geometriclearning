@@ -64,6 +64,9 @@ class LieSO3Group(object):
             if identity_matrix is not None else LieSO3Group.identity_matrix
         return cls(algebra_element=np_algebra_element, identity_element=np_identity_element)
 
+    from functools import partialmethod
+    build_identity = partialmethod(build, identity_matrix=None)
+
     def __str__(self) -> AnyStr:
         return f'\nAlgebra element:\n{str(self.algebra_element)}\nSO3 group element:\n{str(self.group_element)}'
 

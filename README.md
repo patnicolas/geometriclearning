@@ -73,9 +73,12 @@ Lie groups have numerous practical applications in various fields:
 
 ![LieGroups](images/Lie_Manifold.png)
 
-    
-The directory __Lie__ illustrates the various element of __Special Orthogonal Group__ of 3 dimension (__SO3__) and __Special Euclidean Group__ in 3 dimension (__SE3__) using __Geomstats__ library. 
 
+The directory __Lie__ illustrates the various element of __Special Orthogonal Group__ of 3 dimension (__SO3__) and __Special Euclidean Group__ in 3 dimension (__SE3__) using __Geomstats__ library.      
+     
+
+__Note__: _Visualizing the SO(3) manifold in three dimensions is inherently challenging. In this example, we represent the space of rotations as a solid ball, where the center corresponds to the identity rotation and each point within the ball encodes a rotation using the axis-angle representation_.
+[Reference: SO3 Visualization](https://en.wikipedia.org/wiki/Charts_on_SO(3))  
 
 ## Equivariance
 __Lie-equivariant__ networks are neural networks that are equivariant to transformations from a Lie group, such as rotations, translations, scaling, or Lorentz transformations. These networks are designed to respect the continuous symmetries inherent in many scientific and geometric problems.    

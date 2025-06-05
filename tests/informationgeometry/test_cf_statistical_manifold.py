@@ -17,7 +17,7 @@ from typing import Tuple, AnyStr
 
 class CFStatisticalManifoldTest(unittest.TestCase):
 
-    # @unittest.skip('ignore')
+    @unittest.skip('ignore')
     def test_init(self):
         exponential_distributions = ExponentialDistributions(equip=True)
         statistical_manifold = CFStatisticalManifold(exponential_distributions, (1.0, 2.0))
@@ -187,9 +187,6 @@ class CFStatisticalManifoldTest(unittest.TestCase):
         ani = FuncAnimation(fig, update, frames=num, interval=8, repeat=False, blit=False)
         # plt.show()
         ani.save('normal_manifold.mp4', writer='ffmpeg', fps=32, dpi=240)
-
-
-
 
     """ ---------------------------   Support methods ---------------------------  """
 

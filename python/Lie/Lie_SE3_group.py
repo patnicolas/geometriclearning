@@ -106,8 +106,8 @@ class LieSE3Group(object):
     def build(cls,
               flatten_rotation_matrix: List[float],
               flatten_translation_vector: List[float],
-              epsilon: float = 0.001,
-              point_type: AnyStr = 'matrix') -> Self:
+              epsilon: float,
+              point_type: AnyStr) -> Self:
         """
         Build an instance of LieSE3Group given a rotation matrix, a tangent vector and a base point if defined
         @param flatten_rotation_matrix: 3x3 Rotation matrix (see. LieSO3Group)
@@ -130,6 +130,10 @@ class LieSE3Group(object):
         np_translation_matrix = np.reshape(flatten_translation_vector, (1, 3))
         rotation_matrix, translation_matrix = LieSE3Group.reshape(np_rotation_matrix, np_translation_matrix)
         return cls(rotation_matrix, translation_matrix, epsilon, point_type)
+
+    from functools import partialmethod
+    """ Minimalist build method leveraging default values """
+    build_default = partialmethod(build, epsilon=0.001, point_type='matrix')
 
     @staticmethod
     def get_tangent_vector(rotation: np.array, translation: np.array) -> np.array:
