@@ -137,7 +137,8 @@ class CFStatisticalManifold(object):
                 return (torch.sqrt(base_point) + 0.5*tangent_vec)**2
             case 'BinomialDistributions':
                 # Fixed the number of draws for analytical solution
-                n_sqrt = torch.sqrt(self.info_manifold.n_draws)
+                import math
+                n_sqrt = math.sqrt(self.info_manifold.n_draws)
                 return (torch.arcsin(torch.sqrt(base_point)) + 0.5 * tangent_vec/n_sqrt) ** 2
             case _:
                 raise GeometricException(f'Exponential map for {self.info_manifold.__class__.__name__} not supported')

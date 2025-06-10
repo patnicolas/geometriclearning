@@ -24,11 +24,12 @@ class CFStatisticalManifoldTest(unittest.TestCase):
         logging.info(f'\n{statistical_manifold=}')
         self.assertTrue(statistical_manifold.fisher_rao_metric.signature == (1, 0))
 
-    @unittest.skip('ignore')
-    def test_exponential_samples(self):
+    # @unittest.skip('ignore')
+    def test_random_samples(self):
         exponential_distributions = ExponentialDistributions(equip=True)
         exponential_manifold = CFStatisticalManifold(exponential_distributions, (-2.0, 2.0))
         exponential_samples = exponential_manifold.samples(n_samples=8)
+        assert exponential_manifold.belongs(exponential_samples)
         geometric_distributions = GeometricDistributions(equip=True)
         geometric_manifold = CFStatisticalManifold(geometric_distributions, (1, 10))
         geometric_samples = geometric_manifold.samples(n_samples=4)

@@ -4,7 +4,6 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from geomstats.information_geometry.base import InformationManifoldMixin
 from informationgeometry.cf_statistical_manifold import CFStatisticalManifold
 from typing import Tuple
-import numpy as np
 import torch
 
 from geometry import GeometricException
@@ -56,7 +55,7 @@ class FisherRao(CFStatisticalManifold):
         """
         super(FisherRao, self).__init__(info_manifold, bounds)
 
-    def distance(self, point1: ParamType, point2: ParamType) -> torch.Tensor:
+    def distance(self, point1: torch.Tensor, point2: torch.Tensor) -> torch.Tensor:
         """
         Compute the distance between two distributions on the manifold given parameters theta1 (point 1)
         and theta2 (point 2).
@@ -71,13 +70,16 @@ class FisherRao(CFStatisticalManifold):
         """
         match self.info_manifold.__class__.__name__:
             case 'ExponentialDistributions':
-                return self.__distance_exponential(point1, point2)
-            case 'BinomialDistributions':
-                return self.__distance_binomial(point1, point2)
+                return torch.abs(torch.log(point2) - torch.log(point1))
             case 'GeometricDistributions':
-                return self.__distance_geometric(point1, point2)
+                return 2.0*torch.abs(torch.arctanh(torch.sqrt(1 - point1) - torch.arctanh(torch.sqrt(1 - point2))))
             case 'PoissonDistributions':
-                return self.__distance_poisson(point1, point2)
+                return 2.0 * torch.abs(torch.sqrt(point2) - torch.sqrt(point1))
+            case 'BinomialDistributions':
+                import math
+                n = self.info_manifold.n_draws
+                m = math.sqrt(n) * torch.abs(torch.arcsin(2 * point2 - 1) - torch.arcsin(2 * point1 - 1))
+                return m
             case _:
                 raise GeometricException(f'Distance for {self.info_manifold.__class__.__name__} not supported')
 
@@ -121,27 +123,6 @@ class FisherRao(CFStatisticalManifold):
 
     """  -----------------------  Private Helpers methods ------------------   """
 
-    def __distance_exponential(self, point1: torch.Tensor, point2: torch.Tensor) -> torch.Tensor:
-        return torch.abs(torch.log(point2) - torch.log(point1))
-
-    def __distance_binomial(self, point1: torch.Tensor, point2: torch.Tensor) -> torch.Tensor:
-        n = torch.Tensor(self.info_manifold.n_draws)
-        return torch.sqrt(n)*torch.abs(torch.arcsin(2*point2-1) - torch.arcsin(2*point1-1))
-
-    def __distance_poisson(self, point1: torch.Tensor, point2: torch.Tensor) -> torch.Tensor:
-        return 2.0*torch.abs(torch.sqrt(point2) - torch.sqrt(point1))
-
-    def __distance_geometric(self, point1: torch.Tensor, point2: torch.Tensor) -> torch.Tensor:
-        from scipy.integrate import quad
-
-        p1 = point1.numpy()
-        p2 = point2.numpy()
-
-        def _metric(p: float) -> float:
-            return np.sqrt(1 / p ** 2 + 1 / (1 - p) ** 2)
-
-        distance, _ = quad(_metric, p1, p2)
-        return abs(distance)
 
     @staticmethod
     def __distance_univariate_normal(point1: Tuple[torch.Tensor, torch.Tensor],

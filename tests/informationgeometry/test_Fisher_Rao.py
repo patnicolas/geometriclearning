@@ -17,6 +17,7 @@ from geomstats.information_geometry.base import InformationManifoldMixin
 from informationgeometry.Fisher_Rao import FisherRao
 import torch
 
+
 class FisherRaoTest(unittest.TestCase):
 
     @unittest.skip('ignore')
@@ -39,7 +40,7 @@ class FisherRaoTest(unittest.TestCase):
         FisherRaoTest.__distance(ExponentialDistributions(equip=True), (-2.0, 2.0))
         FisherRaoTest.__distance(GeometricDistributions(equip=True), (1.0, 12.0))
         FisherRaoTest.__distance(PoissonDistributions(equip=True), (0.0, 20.0))
-        FisherRaoTest.__distance(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0))
+        FisherRaoTest.__distance(BinomialDistributions(equip=True, n_draws=8), (0.0, 20.0))
 
     @unittest.skip('ignore')
     def test_inner_products_1(self):
@@ -52,8 +53,8 @@ class FisherRaoTest(unittest.TestCase):
 
     @unittest.skip('ignore')
     def test_inner_products_2(self):
-        v = torch.Tensor([0.0])
-        w = torch.Tensor([0.0])
+        v = torch.Tensor([2.0])
+        w = torch.Tensor([0.5])
         FisherRaoTest.__inner_product(ExponentialDistributions(equip=True), (-2.0, 2.0), v, w)
         FisherRaoTest.__inner_product(GeometricDistributions(equip=True), (1.0, 12.0), v, w)
         FisherRaoTest.__inner_product(PoissonDistributions(equip=True), (0.0, 20.0), v, w)
@@ -68,6 +69,7 @@ class FisherRaoTest(unittest.TestCase):
         FisherRaoTest.__inner_product(PoissonDistributions(equip=True), (0.0, 20.0), v, w)
         FisherRaoTest.__inner_product(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), v, w)
 
+    # @unittest.skip('ignore')
     def test_inner_norm_1(self):
         v = torch.Tensor([0.5])
         FisherRaoTest.__norm(ExponentialDistributions(equip=True), (-2.0, 2.0), v)
@@ -75,6 +77,7 @@ class FisherRaoTest(unittest.TestCase):
         FisherRaoTest.__norm(PoissonDistributions(equip=True), (0.0, 20.0), v)
         FisherRaoTest.__norm(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), v)
 
+    # @unittest.skip('ignore')
     def test_inner_norm_2(self):
         v = torch.Tensor([1.0])
         FisherRaoTest.__norm(ExponentialDistributions(equip=True), (-2.0, 2.0), v)
@@ -183,22 +186,26 @@ class FisherRaoTest(unittest.TestCase):
         import torch
 
         fisher_rao = FisherRao(GeometricDistributions(equip=True), (1.0, 2.0))
-        inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
+        # inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
+        inputs = fisher_rao.samples(2)
         inner_product = fisher_rao.inner_product(inputs[0], torch.Tensor([1.0]), torch.Tensor([0.2]))
         logging.info(f'Geometric inner product  {inner_product}')
 
         fisher_rao = FisherRao(BetaDistributions(equip=True), (0.2, 0.8))
-        inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
+        inputs = fisher_rao.samples(2)
+        # inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
         inner_product = fisher_rao.inner_product(inputs[0], torch.Tensor([0.5, 0.8]), torch.Tensor([0.2, 0.6]))
         logging.info(f'Beta inner product  {inner_product}')
 
         fisher_rao = FisherRao(UnivariateNormalDistributions(equip=True), (0.0, 1.0))
-        inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
+        # inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
+        inputs = fisher_rao.samples(2)
         inner_product = fisher_rao.inner_product(inputs[0], torch.Tensor([0.5, 0.8]), torch.Tensor([0.2, 0.6]))
         logging.info(f'Univariate Normal inner product  {inner_product}')
 
         fisher_rao = FisherRao(GeometricDistributions(equip=True), (1.0, 2.0))
-        inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
+        inputs = fisher_rao.samples(2)
+        # inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
         inner_product = fisher_rao.inner_product(inputs[0], torch.Tensor([1.0]), torch.Tensor([0.2]))
         logging.info(f'Exponential inner product  {inner_product}')
 
@@ -216,23 +223,26 @@ class FisherRaoTest(unittest.TestCase):
 
 
     @staticmethod
-    def __sample_distribution(stats_manifold: InformationManifoldMixin, bounds: Tuple[float, float], n_samples: int) -> None:
+    def __sample_distribution(stats_manifold: InformationManifoldMixin,
+                              bounds: Tuple[float, float],
+                              n_samples: int) -> None:
         fisher_rao = FisherRao(stats_manifold, bounds)
-        samples = fisher_rao.samples(n_samples=n_samples)
-        results = '\n'.join([str(x) for x in samples])
+        random_samples = fisher_rao.samples(n_samples=n_samples)
+        assert fisher_rao.belongs(random_samples)
+
+        results = ', '.join([f'{(float(x)):.4f}' for x in random_samples])
         logging.info(f"{stats_manifold.__class__.__name__} samples:\n{results}")
+
+    def __init__(self, methodName="runTest"):
+        super().__init__(methodName)
 
     @staticmethod
     def __distance(stats_manifold: InformationManifoldMixin, bounds: Tuple[float, float]):
-        import torch
         fisher_rao = FisherRao(stats_manifold, bounds=bounds)
         logging.info(stats_manifold.__class__.__name__)
         values = fisher_rao.samples(2)
-        metrics = [fisher_rao.metric_matrix(x) for x in values]
-        logging.info(f'Metrics:\n{metrics[0]}, {metrics[1]}')
-        inputs = [torch.Tensor(x) for x in values]
-        distance = fisher_rao.distance(inputs[0], inputs[1])
-        logging.info(f'd({values[0]}, {values[1]}) = {distance}')
+        distance = fisher_rao.distance(values[0], values[1])
+        logging.info(f'd({float(values[0]):.4f}, {float(values[1]):.4f}) = {float(distance):.4f}')
         fisher_rao.visualize_diff(values[0], values[1], r"$\theta$")
 
     @staticmethod
