@@ -9,7 +9,7 @@ __all__ = ['ConvOutputSize']
 class ConvOutputSize(object):
     """
     Class that wraps the computation of the size of the output of a convolutional neural block.
-    .. math:
+    math::
         W_{conv}[out] = \frac{W_{conv}[in]+2p-k}{s} +1
         H_{conv}[out]= \frac{H_{conv}[in]+2p-k}{s} +1
 

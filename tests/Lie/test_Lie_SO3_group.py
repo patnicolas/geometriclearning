@@ -167,7 +167,6 @@ class LieSO3GroupTest(unittest.TestCase):
         assert lie_algebra.size == len(u3d.y_rot)
         logging.info(f'\nComputed algebra element:\n{lie_algebra}')
 
-
     @unittest.skip('Ignored')
     def test_algebra2(self):
         # The SO3 element is computed at identity (to conform to Lie Algebra)

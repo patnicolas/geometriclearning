@@ -36,18 +36,18 @@ class GraphHomophily(object):
 
         Edge homophily
         The fraction of edges in a graph which connects nodes that have the same class label:
-        .. math::
+        math::
             \frac{| \{ (v,w) : (v,w) \in \mathcal{E} \wedge y_v = y_w \} | }{|\mathcal{E}|}
 
         Node homophily:
         Edge homophily is normalized across neighborhoods
-        .. math::
+        math::
             \frac{1}{|\mathcal{V}|} \sum_{v \in \mathcal{V}} \frac{ | \{ (w,v) : w \in \mathcal{N}(v)
             \wedge y_v = y_w \} |  } { |\mathcal{N}(v)| }
 
         class insensitive edge homophily ratio
         Edge homophily is modified to be insensitive to the number of classes and size of each class
-        .. math::
+        math::
             \frac{1}{C-1} \sum_{k=1}^{C} \max \left(0, h_k - \frac{|\mathcal{C}_k|} {|\mathcal{V}|} \right)
     """
 

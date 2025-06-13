@@ -21,13 +21,13 @@ class FisherRao(CFStatisticalManifold):
     - Distance between two distributions parameters [Homegrown implementation]
 
     The Riemannan metric for a distribution on a manifold is defined by
-    .. math::
+    math::
            g_{j k}(\theta)=\int_X \frac{\partial \log p(x, \theta)}
                 {\partial \theta_j}\frac{\partial \log p(x, \theta)}
                 {\partial \theta_k} p(x, \theta) d x
 
     The metric matrix for a distribution with pdf f, and parmeters \theta is defined as
-    .. math::
+    math::
                   I_{ij} = \int \
                         \partial_{i} f_{\theta}(x)\
                         \partial_{j} f_{\theta}(x)\
@@ -35,8 +35,8 @@ class FisherRao(CFStatisticalManifold):
 
     The inner-product of two vectors or tensors in the tangent space at a given parameter point on the statistical
     manifold is defined as
-    .. math::
-                  \partial_k I_{ij} = \int\
+    math::
+                  \partial_k I_{ij} = \int \
                         \partial_{ki}^2 f\partial_j f \frac{1}{f} + \
                         \partial_{kj}^2 f\partial_i f \frac{1}{f} - \
                         \partial_i f \partial_j f \partial_k f \frac{1}{f^2}

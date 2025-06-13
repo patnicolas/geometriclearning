@@ -7,8 +7,6 @@ from mpl_toolkits.mplot3d import Axes3D
 from dataclasses import dataclass
 import geomstats.backend as gs
 from geomstats.geometry.special_euclidean import SpecialEuclidean
-import logging
-logger = logging.getLogger('Lie.Lie_SE3_group')
 __all__ = ['SE3Element', 'LieSE3Group', 'SE3ElementDescriptor']
 
 

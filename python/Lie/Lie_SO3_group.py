@@ -19,10 +19,9 @@ from Lie import LieElement
 
 
 class LieSO3Group(object):
-    dim = 3
     # Lie group as defined in Geomstats library
-    lie_group = SpecialOrthogonal(n=dim, point_type='vector', equip=False)
-    identity_matrix = np.eye(dim)
+    lie_group = SpecialOrthogonal(n=3, point_type='vector', equip=False)
+    identity_matrix = np.eye(3)
 
     def __init__(self, algebra_element: np.array, identity_element: np.array = identity_matrix) -> None:
         """
