@@ -3,7 +3,8 @@ import numpy as np
 from geometry.manifold_point import ManifoldPoint
 from geometry.hypersphere_space import HypersphereSpace
 import logging
-import util
+import python
+
 
 class TestManifoldPoint(unittest.TestCase):
 

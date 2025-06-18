@@ -3,7 +3,7 @@ import torch
 from python.metric.built_in_metric import BuiltInMetric, MetricType
 import numpy as np
 import logging
-import util
+import python
 
 
 class BuiltInMetricTest(unittest.TestCase):

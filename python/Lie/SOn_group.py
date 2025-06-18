@@ -129,7 +129,7 @@ class SOnGroup(object):
         @param rtol: Error tolerance for validating the condition on preserving the orientation
         @type rtol: float
         """
-        from python import tensor_all_close
+        from python import are_tensors_close
 
         for pt in points:
             _shape = (pt.shape[1], pt.shape[2]) if len(pt.shape) > 2 else pt.shape
@@ -139,7 +139,7 @@ class SOnGroup(object):
 
             # Validate condition of orthogonality   R^T.R = Identity
             id = pt.T @ pt
-            if not tensor_all_close(pt.T @ pt, torch.eye(dim), rtol=rtol):
+            if not are_tensors_close(pt.T @ pt, torch.eye(dim), rtol=rtol):
                 raise GeometricException(f'Orthogonality R^T.R  failed')
 
             # Validate orientation det(R) = +1
@@ -270,8 +270,8 @@ class SOnGroup(object):
         @return: True if the two tensors are similar, False otherwise
         @rtype: bool
         """
-        from python import tensor_all_close
-        return tensor_all_close(t1, t2, rtol=rtol)
+        from python import are_tensors_close
+        return are_tensors_close(t1, t2, rtol=rtol)
 
     """ ------------------------   Private Helper Methods -------------------------------- """
     

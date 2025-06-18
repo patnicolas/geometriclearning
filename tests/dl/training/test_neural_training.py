@@ -1,6 +1,5 @@
 import unittest
 import logging
-import util
 from dl.model.mlp_model import MLPModel
 from dl.block.mlp_block import MLPBlock
 from dl.training.hyper_params import HyperParams
@@ -13,11 +12,13 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from torch import nn
 import numpy as np
+import os
+import python
+from python import SKIP_REASON
 
 
 class NeuralTrainingTest(unittest.TestCase):
 
-    # @unittest.skip('Ignored')
     def test_init(self):
         input_block = MLPBlock(block_id='../../../python/input',
                                layer_module=nn.Linear(in_features=32, out_features=16),
@@ -46,8 +47,7 @@ class NeuralTrainingTest(unittest.TestCase):
         network_training = NeuralTraining(hyper_params, metrics_attributes)
         logging.info(str(network_training))
 
-
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_train_wages(self):
         from metric.built_in_metric import BuiltInMetric, MetricType
 
@@ -98,9 +98,9 @@ class NeuralTrainingTest(unittest.TestCase):
             df[['Reputation', 'Age', 'Caps', 'Apps', 'Salary']],
             df['Top_player'],
             MinMaxScaler())
-        network(train_loader, eval_loader)
+        network.train(train_loader, eval_loader)
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_train_eval_heart_diseases(self):
         from metric.metric import Metric
         from metric.built_in_metric import BuiltInMetric, MetricType
@@ -150,7 +150,7 @@ class NeuralTrainingTest(unittest.TestCase):
         train_eval_split_ratio = 0.85
         dataset_loader = LabeledLoader(batch_size, train_eval_split_ratio)
         train_loader, eval_loader = dataset_loader.from_dataframes(features_df,labels_df,min_max_scaler,'float32')
-        network(train_loader, eval_loader)
+        network.train(train_loader, eval_loader)
 
 
 if __name__ == '__main__':

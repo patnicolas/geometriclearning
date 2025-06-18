@@ -1,6 +1,6 @@
 from unittest import TestCase
 import logging
-import util
+import python
 
 class Generators(object):
     @staticmethod

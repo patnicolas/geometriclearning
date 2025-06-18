@@ -5,7 +5,8 @@ from dl.model.mlp_model import MLPModel, MLPBuilder
 from dl.training.neural_training import NeuralTraining
 from dl import DLException
 import logging
-import util
+import python
+
 
 class MLPModelTest(unittest.TestCase):
 
@@ -42,7 +43,7 @@ class MLPModelTest(unittest.TestCase):
             logging.info(e)
             assert False
 
-    @unittest.skip("Ignore")
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_2(self):
         try:
             input_block = MLPBlock.build_from_params(block_id='input',
@@ -69,7 +70,7 @@ class MLPModelTest(unittest.TestCase):
         except DLException as e:
             assert False
 
-    # @unittest.skip("Ignore")
+
     def test_builder(self):
         model_attributes = {
             'model_id': 'my_mlp',
@@ -82,7 +83,7 @@ class MLPModelTest(unittest.TestCase):
         mlp_model = mlp_builder.build()
         logging.info(mlp_model)
 
-    @unittest.skip("Ignore")
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_transpose(self):
         try:
             input_block = MLPBlock.build_from_params(block_id='input',
@@ -108,7 +109,7 @@ class MLPModelTest(unittest.TestCase):
         except DLException as e:
             assert False
 
-    @unittest.skip("Ignore")
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_train_mnist(self):
         # Input layer
         from dataset.tensor.mnist_loader import MNISTLoader

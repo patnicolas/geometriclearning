@@ -4,7 +4,10 @@ import torch
 from util.image_tensor import ImageTensor
 img_dir = '../output/test1'
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
+
 
 class TestImageTensor(TestCase):
     def test_img(self):
@@ -20,7 +23,7 @@ class TestImageTensor(TestCase):
         img.save('../../images/test6.png')
         plt.show()
 
-    @unittest.skip("NO reason")
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_to_image(self):
         try:
             from PIL import Image

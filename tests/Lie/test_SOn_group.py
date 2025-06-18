@@ -6,29 +6,31 @@ import torch
 from geometry import GeometricException
 import os
 import python
+from python import SKIP_REASON
+
 
 
 class SOnGroupTest(unittest.TestCase):
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to environment variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_2(self):
         logging.info('Start test')
         son_group = SOnGroup(dim=2, equip=False)
         logging.info(son_group)
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to environment variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_3(self):
         son_group = SOnGroup(dim=3, equip=False)
         logging.info(son_group)
         sampled_points = son_group.sample_points(6)
         self.assertTrue(son_group.belongs(sampled_points))
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to environment variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_4(self):
         son_group = SOnGroup(dim=4, equip=False)
         logging.info(son_group)
         logging.info(f'\n{son_group.sample_points(3)}')
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to environment variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_exp_3(self):
         try:
             son_group = SOnGroup(dim=3, equip=False)
@@ -49,7 +51,7 @@ class SOnGroupTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to environment variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_log_1(self):
         try:
             son_group = SOnGroup(dim=2, equip=False)
@@ -76,12 +78,12 @@ class SOnGroupTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to env. variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_log_3(self):
         try:
             son_group = SOnGroup(dim=3, equip=False)
             # Random uniform sampling of SO(3) rotation matrix
-            base_point = torch.eye(3)
+            identity = torch.eye(3)
             # Given tangent vector
             tgt_vector = torch.Tensor([
                 [0, -1, 0.5],
@@ -89,19 +91,19 @@ class SOnGroupTest(unittest.TestCase):
                 [-0.5, 1, 0]]
             )
             # Apply the exponential map
-            end_point = son_group.exp(tgt_vector, base_point)
+            end_point = son_group.exp(tgt_vector, identity)
             logging.info(f'SO(3) end point:\n{end_point}')
             SOnGroup.validate_points(end_point, dim=3)
 
             # Apply the logarithm map back to the algebra
-            computed_tgt_vector = son_group.log(end_point, base_point)
+            computed_tgt_vector = son_group.log(end_point, identity)
             logging.info(f'so3 algebra A:\n{tgt_vector}\nso3 computed algebra log(exp(A)):\n{computed_tgt_vector}')
             self.assertTrue(son_group.equal(tgt_vector, computed_tgt_vector))
         except GeometricException as e:
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to env. variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_exp_4(self):
         try:
             son_group = SOnGroup(dim=4, equip=False)
@@ -121,7 +123,7 @@ class SOnGroupTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to env. variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_lie_algebra_3(self):
         try:
             son_group = SOnGroup(dim=3, equip=True)
@@ -141,7 +143,7 @@ class SOnGroupTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to env. variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_lie_algebra_2(self):
         try:
             son_group = SOnGroup(dim=2, equip=False)
@@ -160,7 +162,7 @@ class SOnGroupTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to env. variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_lie_algebra_4(self):
         try:
             son_group = SOnGroup(dim=4, equip=False)
@@ -173,7 +175,7 @@ class SOnGroupTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to env. variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_projection_1(self):
         try:
             son_group = SOnGroup(dim=2, equip=True)
@@ -200,7 +202,7 @@ class SOnGroupTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to env. variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_projection_2(self):
         try:
             son_group = SOnGroup(dim=3, equip=True)
@@ -223,7 +225,7 @@ class SOnGroupTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to env. variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_projection_3(self):
         try:
             son_group = SOnGroup(dim=4, equip=True)
@@ -244,7 +246,7 @@ class SOnGroupTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to env. variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_compose_1(self):
         try:
             son_group = SOnGroup(dim=3, equip=True)
@@ -267,7 +269,7 @@ class SOnGroupTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to env. variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_compose_2(self):
         try:
             dimension = 4
@@ -291,7 +293,7 @@ class SOnGroupTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to env. variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_inverse_1(self):
         try:
             group_dim = 2
@@ -316,7 +318,7 @@ class SOnGroupTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to env. variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_inverse_2(self):
         try:
             dim = 4
@@ -339,7 +341,7 @@ class SOnGroupTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to env. variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_inverse_3(self):
         try:
             son_group = SOnGroup(dim=3, equip=True)
@@ -357,20 +359,20 @@ class SOnGroupTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to env. variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_aggregation(self):
         son_group = SOnGroup(dim=3, equip=True)
         aggregated = son_group.generate_rotation(weights=[0.2, 0.5, 0.3])
         logging.info(f'\nAggregated rotation: {aggregated}')
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to env. variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_create_matrix(self):
         matrix = SOnGroupTest.create_matrix(theta_rad=90)
         logging.info(f'\nSO(2) matrix read=45:\n{matrix}')
         matrix = SOnGroupTest.create_matrix(theta_rad=90, gamma_rad=45)
         logging.info(f'\nSO(3) matrix read=90:\n{matrix}')
 
-    @unittest.skipIf(os.getenv('SKIP_SLOW_TESTS', '0') == '1', reason='Skipping slow tests due to env. variable')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_create_random_matrix(self):
         # Random generation SO(2)
         son_group = SOnGroup(dim=2, equip=True)

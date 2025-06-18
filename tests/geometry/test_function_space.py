@@ -2,17 +2,18 @@ import unittest
 from geometry.function_space import FunctionSpace
 import numpy as np
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 
 class TestFunctionSpace(unittest.TestCase):
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init(self):
         num_samples = 100
         function_space = FunctionSpace(num_samples)
         logging.info(str(function_space))
 
-    # @unittest.skip('ignore')
     def test_create_manifold_point(self):
         num_samples = 4
         function_space = FunctionSpace(num_samples)

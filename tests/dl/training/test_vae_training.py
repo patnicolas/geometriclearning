@@ -6,15 +6,13 @@ from dataset.tensor.unlabeled_loader import UnlabeledLoader
 from dl.training.exec_config import ExecConfig
 from dl.training.vae_training import VAETraining
 from dl.training.hyper_params import HyperParams
-from metric.metric import Metric
 import pandas as pd
-from metric.metric_type import MetricType
-from metric.built_in_metric import BuiltInMetric
 from torch.utils.data import DataLoader, Dataset
 from typing import AnyStr
 import torch.nn as nn
 import logging
-import util
+import python
+
 
 class VAETest(unittest.TestCase):
 

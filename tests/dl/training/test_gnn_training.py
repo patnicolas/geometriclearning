@@ -1,5 +1,7 @@
 import unittest
 
+from mpmath import hyper
+
 from dl import GNNException
 from dataset import DatasetException
 from dl.block.mlp_block import MLPBlock
@@ -13,7 +15,9 @@ import torch.nn as nn
 import os
 from typing import Dict, Any, AnyStr
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 
 def show(attrs: Dict[AnyStr, Any]) -> AnyStr:
@@ -54,7 +58,7 @@ class GNNTrainingTest(unittest.TestCase):
         gnn_training = GNNTraining.build(training_attributes)
         logging.info(gnn_training)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_train_random_walk_loader(self):
         from torch_geometric.datasets.flickr import Flickr
 
@@ -63,23 +67,8 @@ class GNNTrainingTest(unittest.TestCase):
             _dataset = Flickr(path)
             _data = _dataset[0]
 
-            metric_labels = {
-                MetricType.Accuracy: BuiltInMetric(MetricType.Accuracy, encoding_len=-1, is_weighted=True),
-                MetricType.Precision: BuiltInMetric(MetricType.Precision, encoding_len=-1, is_weighted=True),
-                MetricType.Recall: BuiltInMetric(MetricType.Recall, encoding_len=-1, is_weighted=True)
-            }
-
-            hyper_parameters = HyperParams(
-                lr=0.0005,
-                momentum=0.90,
-                epochs=60,
-                optim_label='adam',
-                batch_size=128,
-                loss_function=nn.CrossEntropyLoss(),
-                drop_out=0.2,
-                train_eval_ratio=0.9,
-                encoding_len=_dataset.num_classes)
-
+            metric_labels = GNNTrainingTest.default_metrics_attributes()
+            hyper_parameters = GNNTrainingTest.default_hyperparams(_dataset.num_classes)
             attrs = {
                 'id': 'GraphSAINTRandomWalkSampler',
                 'walk_length': 4,
@@ -89,8 +78,8 @@ class GNNTrainingTest(unittest.TestCase):
             }
             network = GNNTraining(hyper_params=hyper_parameters, metrics_attributes=metric_labels)
 
-            gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
-                                                   num_classes=_dataset.num_classes)
+            gnn_base_model = GNNTrainingTest.create_model(num_node_features=_dataset.num_node_features,
+                                                          num_classes=_dataset.num_classes)
             graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
             train_loader, eval_loader = graph_data_loader()
 
@@ -108,8 +97,7 @@ class GNNTrainingTest(unittest.TestCase):
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
-
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_train_neighbor_loader_1(self):
         from torch_geometric.datasets.flickr import Flickr
         try:
@@ -153,8 +141,8 @@ class GNNTrainingTest(unittest.TestCase):
                 'num_workers': 4
             }
             network = GNNTraining.build(training_attributes)
-            gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
-                                                   num_classes=_dataset.num_classes)
+            gnn_base_model = GNNTrainingTest.create_model(num_node_features=_dataset.num_node_features,
+                                                          num_classes=_dataset.num_classes)
             graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
             train_loader, eval_loader = graph_data_loader()
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
@@ -169,39 +157,28 @@ class GNNTrainingTest(unittest.TestCase):
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_train_neighbor_loader_2(self):
         from torch_geometric.datasets.flickr import Flickr
         try:
             path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
             _dataset = Flickr(path)
             _data = _dataset[0]
-            metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
-            hyper_parameters = HyperParams(
-                lr=0.0005,
-                momentum=0.90,
-                epochs=60,
-                optim_label='adam',
-                batch_size=128,
-                loss_function=nn.CrossEntropyLoss(),
-                drop_out=0.2,
-                train_eval_ratio=0.9,
-                encoding_len=_dataset.num_classes)
-
+            metric_labels = GNNTrainingTest.default_metrics_attributes()
+            hyper_parameters = GNNTrainingTest.default_hyperparams(_dataset.num_classes)
             attrs = {
                 'id': 'NeighborLoader',
                 'num_neighbors': [6, 4],
                 'batch_size': 1024,
                 'replace': True
             }
-            network = GNNTraining.build(hyper_params=hyper_parameters,
-                                        metric_labels=metric_labels,
-                                        title_attribute=show(attrs))
+            network = GNNTraining(hyper_params=hyper_parameters,
+                                  metrics_attributes=metric_labels)
 
-            gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
-                                                   num_classes=_dataset.num_classes)
-            graph_data_loader = GraphDataLoader(sampling_attributes=attrs, data=_data)
-            train_loader, eval_loader = graph_data_loader(num_workers=4)
+            gnn_base_model = GNNTrainingTest.create_model(num_node_features=_dataset.num_node_features,
+                                                          num_classes=_dataset.num_classes)
+            graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
+            train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
             accuracy_list = network.training_summary.metrics['Accuracy']
@@ -217,37 +194,25 @@ class GNNTrainingTest(unittest.TestCase):
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_train_random_loader_1(self):
         from torch_geometric.datasets.flickr import Flickr
         try:
             path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
             _dataset = Flickr(path)
             _data = _dataset[0]
-            metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
-            hyper_parameters = HyperParams(
-                lr=0.0005,
-                momentum=0.90,
-                epochs=60,
-                optim_label='adam',
-                batch_size=256,
-                loss_function=nn.CrossEntropyLoss(),
-                drop_out=0.2,
-                train_eval_ratio=0.9,
-                encoding_len=_dataset.num_classes)
-
+            metric_labels = GNNTrainingTest.default_metrics_attributes()
+            hyper_parameters = GNNTrainingTest.default_hyperparams(_dataset.num_classes)
             attrs = {
                 'id': 'RandomNodeLoader',
                 'num_parts': 256
             }
-            network = GNNTraining.build(hyper_params=hyper_parameters,
-                                        metric_labels=metric_labels,
-                                        title_attribute=show(attrs))
+            network = GNNTraining(hyper_params=hyper_parameters, metrics_attributes=metric_labels)
 
-            gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
-                                                   num_classes=_dataset.num_classes)
-            graph_data_loader = GraphDataLoader(sampling_attributes=attrs, data=_data)
-            train_loader, eval_loader = graph_data_loader(num_workers=4)
+            gnn_base_model = GNNTrainingTest.create_model(num_node_features=_dataset.num_node_features,
+                                                          num_classes=_dataset.num_classes)
+            graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
+            train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
             accuracy_list = network.training_summary.metrics['Accuracy']
@@ -263,37 +228,25 @@ class GNNTrainingTest(unittest.TestCase):
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_train_random_loader_2(self):
         from torch_geometric.datasets.flickr import Flickr
         try:
             path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
             _dataset = Flickr(path)
             _data = _dataset[0]
-            metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
-            hyper_parameters = HyperParams(
-                lr=0.0005,
-                momentum=0.90,
-                epochs=60,
-                optim_label='adam',
-                batch_size=128,
-                loss_function=nn.CrossEntropyLoss(),
-                drop_out=0.2,
-                train_eval_ratio=0.9,
-                encoding_len=_dataset.num_classes)
-
+            metric_labels = GNNTrainingTest.default_metrics_attributes()
+            hyper_parameters = GNNTrainingTest.default_hyperparams(_dataset.num_classes)
             attrs = {
                 'id': 'RandomNodeLoader',
                 'num_parts': 256
             }
-            network = GNNTraining.build(hyper_params=hyper_parameters,
-                                        metric_labels=metric_labels,
-                                        title_attribute=show(attrs))
+            network = GNNTraining(hyper_params=hyper_parameters, metrics_attributes=metric_labels)
 
-            gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
-                                                   num_classes=_dataset.num_classes)
-            graph_data_loader = GraphDataLoader(sampling_attributes=attrs, data=_data)
-            train_loader, eval_loader = graph_data_loader(num_workers=4)
+            gnn_base_model = GNNTrainingTest.create_model(num_node_features=_dataset.num_node_features,
+                                                          num_classes=_dataset.num_classes)
+            graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
+            train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
             accuracy_list = network.training_summary.metrics['Accuracy']
@@ -309,39 +262,27 @@ class GNNTrainingTest(unittest.TestCase):
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_train_graph_SAINT_node_sampler_1(self):
         from torch_geometric.datasets.flickr import Flickr
         try:
             path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
             _dataset = Flickr(path)
             _data = _dataset[0]
-            metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
-            hyper_parameters = HyperParams(
-                lr=0.0008,
-                momentum=0.90,
-                epochs=60,
-                optim_label='adam',
-                batch_size=128,
-                loss_function=nn.CrossEntropyLoss(),
-                drop_out=0.2,
-                train_eval_ratio=0.9,
-                encoding_len=_dataset.num_classes)
-
+            metric_labels = GNNTrainingTest.default_metrics_attributes()
+            hyper_parameters = GNNTrainingTest.default_hyperparams(_dataset.num_classes)
             attrs = {
                 'id': 'GraphSAINTNodeSampler',
                 'num_steps': 256,
                 'sample_coverage': 100,
                 'batch_size': 1024
             }
-            network = GNNTraining.build(hyper_params=hyper_parameters,
-                                        metric_labels=metric_labels,
-                                        title_attribute=show(attrs))
+            network = GNNTraining(hyper_params=hyper_parameters, metrics_attributes=metric_labels)
 
-            gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
-                                                   num_classes=_dataset.num_classes)
-            graph_data_loader = GraphDataLoader(sampling_attributes=attrs, data=_data)
-            train_loader, eval_loader = graph_data_loader(num_workers=4)
+            gnn_base_model = GNNTrainingTest.create_model(num_node_features=_dataset.num_node_features,
+                                                          num_classes=_dataset.num_classes)
+            graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
+            train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
             accuracy_list = network.training_summary.metrics['Accuracy']
@@ -357,39 +298,26 @@ class GNNTrainingTest(unittest.TestCase):
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_train_shadow_khop_sampler(self):
         from torch_geometric.datasets.flickr import Flickr
         try:
             path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
             _dataset = Flickr(path)
             _data = _dataset[0]
-            metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
-            hyper_parameters = HyperParams(
-                lr=0.0005,
-                momentum=0.90,
-                epochs=4,
-                optim_label='adam',
-                batch_size=128,
-                loss_function=nn.CrossEntropyLoss(),
-                drop_out=0.2,
-                train_eval_ratio=0.9,
-                encoding_len=_dataset.num_classes)
-
+            metric_labels = GNNTrainingTest.default_metrics_attributes()
+            hyper_parameters = GNNTrainingTest.default_hyperparams(_dataset.num_classes)
             attrs = {
                 'id': 'ShaDowKHopSampler',
                 'depth': 3,
                 'num_neighbors': 8,
                 'batch_size': 1024
             }
-            network = GNNTraining.build(hyper_params=hyper_parameters,
-                                        metric_labels=metric_labels,
-                                        title_attribute=show(attrs))
-
-            gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
-                                                   num_classes=_dataset.num_classes)
-            graph_data_loader = GraphDataLoader(sampling_attributes=attrs, data=_data)
-            train_loader, eval_loader = graph_data_loader(num_workers=4)
+            network = GNNTraining(hyper_params=hyper_parameters, metrics_attributes=metric_labels)
+            gnn_base_model = GNNTrainingTest.create_model(num_node_features=_dataset.num_node_features,
+                                                          num_classes=_dataset.num_classes)
+            graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
+            train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
             accuracy_list = network.training_summary.metrics['Accuracy']
@@ -405,25 +333,15 @@ class GNNTrainingTest(unittest.TestCase):
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_train_cluster_loader_1(self):
         from torch_geometric.datasets.flickr import Flickr
         try:
             path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
             _dataset = Flickr(path)
             _data = _dataset[0]
-            metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
-            hyper_parameters = HyperParams(
-                lr=0.0005,
-                momentum=0.90,
-                epochs=8,
-                optim_label='adam',
-                batch_size=128,
-                loss_function=nn.CrossEntropyLoss(),
-                drop_out=0.2,
-                train_eval_ratio=0.9,
-                encoding_len=_dataset.num_classes)
-
+            metric_labels = GNNTrainingTest.default_metrics_attributes()
+            hyper_parameters = GNNTrainingTest.default_hyperparams(_dataset.num_classes)
             attrs = {
                 'id': 'ClusterLoader',
                 'num_parts': 256,
@@ -431,14 +349,11 @@ class GNNTrainingTest(unittest.TestCase):
                 'batch_size': 2048,
                 'keep_inter_cluster_edges': False
             }
-            network = GNNTraining.build(hyper_params=hyper_parameters,
-                                        metric_labels=metric_labels,
-                                        title_attribute=show(attrs))
-
-            gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
-                                                   num_classes=_dataset.num_classes)
-            graph_data_loader = GraphDataLoader(sampling_attributes=attrs, data=_data)
-            train_loader, eval_loader = graph_data_loader(num_workers=4)
+            network = GNNTraining(hyper_params=hyper_parameters, metrics_attributes=metric_labels)
+            gnn_base_model = GNNTrainingTest.create_model(num_node_features=_dataset.num_node_features,
+                                                          num_classes=_dataset.num_classes)
+            graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
+            train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
             accuracy_list = network.training_summary.metrics['Accuracy']
@@ -454,25 +369,15 @@ class GNNTrainingTest(unittest.TestCase):
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_train_cluster_loader_2(self):
         from torch_geometric.datasets.flickr import Flickr
         try:
             path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
             _dataset = Flickr(path)
             _data = _dataset[0]
-            metric_labels = [Metric.accuracy_label, Metric.precision_label, Metric.recall_label]
-            hyper_parameters = HyperParams(
-                lr=0.0005,
-                momentum=0.90,
-                epochs=8,
-                optim_label='adam',
-                batch_size=128,
-                loss_function=nn.CrossEntropyLoss(),
-                drop_out=0.2,
-                train_eval_ratio=0.9,
-                encoding_len=_dataset.num_classes)
-
+            metric_labels = GNNTrainingTest.default_metrics_attributes()
+            hyper_parameters = GNNTrainingTest.default_hyperparams(_dataset.num_classes)
             attrs = {
                 'id': 'ClusterLoader',
                 'num_parts': 256,
@@ -480,14 +385,11 @@ class GNNTrainingTest(unittest.TestCase):
                 'batch_size': 2048,
                 'keep_inter_cluster_edges': False
             }
-            network = GNNTraining.build(hyper_params=hyper_parameters,
-                                        metric_labels=metric_labels,
-                                        title_attribute=show(attrs))
-
-            gnn_base_model = GNNTrainingTest.build(num_node_features=_dataset.num_node_features,
-                                                   num_classes=_dataset.num_classes)
-            graph_data_loader = GraphDataLoader(sampling_attributes=attrs, data=_data)
-            train_loader, eval_loader = graph_data_loader(num_workers=4)
+            network = GNNTraining(hyper_params=hyper_parameters, metrics_attributes=metric_labels)
+            gnn_base_model = GNNTrainingTest.create_model(num_node_features=_dataset.num_node_features,
+                                                          num_classes=_dataset.num_classes)
+            graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
+            train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
             accuracy_list = network.training_summary.metrics['Accuracy']
@@ -503,7 +405,7 @@ class GNNTrainingTest(unittest.TestCase):
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_draw_sample(self):
         from torch_geometric.datasets.flickr import Flickr
         try:
@@ -517,7 +419,7 @@ class GNNTrainingTest(unittest.TestCase):
                 'batch_size': 2048,
                 'keep_inter_cluster_edges': False
             }
-            graph_data_loader = GraphDataLoader(sampling_attributes=attrs, data=_data)
+            graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
             graph_data_loader.draw_sample(
                 first_node_index=10,
                 last_node_index=26,
@@ -551,7 +453,7 @@ class GNNTrainingTest(unittest.TestCase):
             logging.info(str(e))
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_compare_accuracy(self):
         from plots.plotter import PlotterParameters, Plotter
 
@@ -581,7 +483,7 @@ class GNNTrainingTest(unittest.TestCase):
             logging.info(str(e))
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_compare_precision(self):
         from plots.plotter import PlotterParameters, Plotter
 
@@ -606,8 +508,31 @@ class GNNTrainingTest(unittest.TestCase):
                      labels=['NeighborLoader', 'RandomLoader', 'GraphsSAINTRandomWalk'],
                      plotter_parameters=plotter_params)
 
+    """ --------------------------  Supporting methods --------------------  """
+
     @staticmethod
-    def build(num_node_features: int, num_classes: int) -> GNNBaseModel:
+    def default_metrics_attributes() -> Dict[MetricType, BuiltInMetric]:
+        return {
+            BuiltInMetric.accuracy_label: BuiltInMetric(MetricType.Accuracy, encoding_len=-1, is_weighted=True),
+            BuiltInMetric.precision_label: BuiltInMetric(MetricType.Precision, encoding_len=-1, is_weighted=True),
+            BuiltInMetric.recall_label: BuiltInMetric(MetricType.Recall, encoding_len=-1, is_weighted=True)
+        }
+
+    @staticmethod
+    def default_hyperparams(num_classes: int) -> HyperParams:
+        return HyperParams(
+            lr=0.0005,
+            momentum=0.90,
+            epochs=8,
+            optim_label='adam',
+            batch_size=128,
+            loss_function=nn.CrossEntropyLoss(),
+            drop_out=0.2,
+            train_eval_ratio=0.9,
+            encoding_len=num_classes)
+
+    @staticmethod
+    def create_model(num_node_features: int, num_classes: int) -> GNNBaseModel:
         from torch_geometric.nn import GraphConv
         from dl.block.graph.g_message_passing_block import GMessagePassingBlock
         from dl.model.gnn_base_model import GNNBaseModel

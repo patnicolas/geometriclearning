@@ -1,24 +1,24 @@
 import unittest
 import logging
-import util
 from dataset.graph.graph_homophily import GraphHomophily, GraphHomophilyType
 from torch_geometric.data import Data
 import torch
+import os
+import python
+from python import SKIP_REASON
 
 
 class GraphHomophilyTest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
     def test_init_1(self):
         homophily_flickr = GraphHomophily.build(dataset_name='Flickr', homophily_type=GraphHomophilyType.Node)
         logging.info(homophily_flickr)
 
-    @unittest.skip('Ignore')
     def test_init_2(self):
         homophily_cora = GraphHomophily.build(dataset_name='Cora', homophily_type=GraphHomophilyType.Node)
         logging.info(homophily_cora)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_homegrown_edge_homophily(self):
         labels = torch.Tensor([0, 0, 1, 1, 0])
         data = Data(y=labels,
@@ -31,7 +31,7 @@ class GraphHomophilyTest(unittest.TestCase):
         edge_homophily = homophily.compute()
         logging.info(f'Edge homophily: {edge_homophily}')
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_homegrown_node_homophily(self):
         labels = torch.Tensor([0, 0, 1, 1, 0])
         data = Data(y=labels,
@@ -44,7 +44,7 @@ class GraphHomophilyTest(unittest.TestCase):
         node_homophily = homophily.compute()
         logging.info(f'Node homophily: {node_homophily}')
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_edge_homophily(self):
         labels = torch.Tensor([0, 0, 1, 1, 0])
         data = Data(y=labels,
@@ -57,7 +57,7 @@ class GraphHomophilyTest(unittest.TestCase):
         edge_homophily = homophily()
         logging.info(f'Edge homophily: {edge_homophily}')
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_node_homophily(self):
         labels = torch.Tensor([0, 0, 1, 1, 0])
         data = Data(y=labels,
@@ -70,7 +70,6 @@ class GraphHomophilyTest(unittest.TestCase):
         node_homophily = homophily()
         logging.info(f'Node homophily: {node_homophily}')
 
-    @unittest.skip('Ignore')
     def test_node_homophily_datasets(self):
         homophily = GraphHomophily.build(dataset_name='Flickr', homophily_type=GraphHomophilyType.Node)
         node_homophily = homophily()
@@ -80,7 +79,7 @@ class GraphHomophilyTest(unittest.TestCase):
         node_homophily = homophily()
         logging.info(f'Cora node homophily: {node_homophily:.3f}')
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_edge_homophily_datasets(self):
         homophily = GraphHomophily.build(dataset_name='Flickr', homophily_type=GraphHomophilyType.Edge)
         edge_homophily = homophily()
@@ -90,7 +89,7 @@ class GraphHomophilyTest(unittest.TestCase):
         edge_homophily = homophily()
         logging.info(f'Cora edge homophily: {edge_homophily:.3f}')
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_class_insensitive_edge_homophily_datasets(self):
         homophily = GraphHomophily.build(dataset_name='Flickr', homophily_type=GraphHomophilyType.ClassInsensitiveEdge)
         edge_homophily = homophily()
@@ -100,7 +99,7 @@ class GraphHomophilyTest(unittest.TestCase):
         edge_homophily = homophily()
         logging.info(f'Cora class insensitive edge homophily: {edge_homophily:.3f}')
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_all(self):
         dataset_names = ['Cora', 'PubMed', 'CiteSeer', 'Wikipedia', 'Flickr']
         homophily_types = [GraphHomophilyType.Node, GraphHomophilyType.Edge, GraphHomophilyType.ClassInsensitiveEdge]
@@ -110,7 +109,7 @@ class GraphHomophilyTest(unittest.TestCase):
                 homophily_factor = homophily()
                 logging.info(f'{dataset_name} {homophily_type.value} homophily: {homophily_factor:.3f}')
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_message_propagation(self):
         import matplotlib.pyplot as plt
         import networkx as nx

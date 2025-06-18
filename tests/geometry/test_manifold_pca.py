@@ -6,11 +6,13 @@ from geometry.visualization.hypersphere_plot import HyperspherePlot
 from geometry.visualization.manifold_plot import ManifoldPlot
 import numpy as np
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 class TangentPCATest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_components_tangent_pca(self):
         from geomstats.geometry.hypersphere import Hypersphere
 
@@ -21,7 +23,7 @@ class TangentPCATest(unittest.TestCase):
         principal_components, _ = tangent_pca.estimate(X)
         logging.info(f'\n{principal_components=}')
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_components_euclidean_pca(self):
         from geomstats.geometry.euclidean import Euclidean
 
@@ -32,7 +34,6 @@ class TangentPCATest(unittest.TestCase):
         principal_components = tangent_pca.estimate(X)
         logging.info(f'\nPrincipal components:\n{principal_components.components}')
         self.assertTrue(len(principal_components.components) == 3)
-
 
     def test_principal_projection(self):
         from geomstats.geometry.hypersphere import Hypersphere

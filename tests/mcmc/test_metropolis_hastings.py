@@ -1,15 +1,17 @@
 import unittest
 from unittest import TestCase
 import logging
-import util
 from mcmc.metropolis_hastings import MetropolisHastings
 from mcmc.proposal_distribution import ProposalBeta, ProposalDistribution
 from typing import AnyStr
+import os
+import python
+from python import SKIP_REASON
 
 
 class TestMetropolisHastings(TestCase):
 
-    @unittest.skip
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_mh_sample_high_burn_in(self):
         num_iterations = 12000
         burn_in_ratio = 0.2
@@ -29,7 +31,6 @@ class TestMetropolisHastings(TestCase):
             theta0,
             f"Beta({alpha}, {beta}) {burn_in_ratio=}, {theta0=}, {sigma_delta=}"
         )
-
 
     def test_mh_sample_no_burn_in(self):
         num_iterations = 12000
@@ -52,8 +53,7 @@ class TestMetropolisHastings(TestCase):
             f"Beta({alpha}, {beta}) {burn_in_ratio=}, {theta0=}"
         )
 
-
-    @unittest.skip
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_mh_sample_burn_in_beta(self):
         num_iterations = 12000
         burn_in_ratio = 0.1

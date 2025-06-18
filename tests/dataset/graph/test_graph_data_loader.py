@@ -1,5 +1,4 @@
 import unittest
-import logging
 
 from dataset.graph.graph_data_loader import GraphDataLoader
 from torch_geometric.data import Data
@@ -8,11 +7,15 @@ import torch
 modules = ['torch', 'torch_sparse', 'torch_cluster', 'torch_scatter', 'torch_spline_conv']
 from util import check_modules_availability
 check_modules_availability(modules)
+import logging
+import os
+import python
+from python import SKIP_REASON
 
 
 class GraphDataLoaderTest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_graph_data(self):
         # Define the vertex-edge structure
         graph_descriptor = [[0, 0, 0, 0, 1],    # Source nodes/vertices
@@ -26,7 +29,6 @@ class GraphDataLoaderTest(unittest.TestCase):
         # Request validation of the graph parameters
         self.assertTrue(graph_data.validate(raise_on_error=True))
 
-    # @unittest.skip('Ignore')
     def test_random_node_flickr(self):
         dataset_name = 'Flickr'
         # 1. Initialize the loader
@@ -45,7 +47,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         logging.info('\n'.join(result))
         self.assertTrue(True)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_random_node_flickr_2(self):
         dataset_name = 'Flickr'
         # 1. Initialize the loader
@@ -67,7 +69,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         logging.info('\n'.join(result))
         self.assertTrue(True)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_neighbor_node_flickr(self):
         dataset_name = 'Flickr'
         # 1. Initialize the loader
@@ -89,7 +91,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         logging.info('\n'.join(result))
         self.assertTrue(True)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_graph_SAINT_random_walk_cora(self):
         dataset_name = 'Cora'
         # 1. Initialize the loader
@@ -111,7 +113,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         logging.info('\n'.join(result))
         self.assertTrue(True)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_neighbor_node_facebook(self):
         dataset_name = 'Facebook'
         # 1. Initialize the loader
@@ -133,7 +135,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         logging.info('\n'.join(result))
         self.assertTrue(True)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_graph_SAINT_node_karate_club(self):
         dataset_name = 'KarateClub'
         # 1. Initialize the loader
@@ -153,7 +155,7 @@ class GraphDataLoaderTest(unittest.TestCase):
         logging.info('\n'.join(result))
         self.assertTrue(True)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_cluster_proteins(self):
         dataset_name = 'PROTEINS'
         # 1. Initialize the loader

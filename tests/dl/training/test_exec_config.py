@@ -2,7 +2,7 @@ import unittest
 from typing import AnyStr
 from dl.training.exec_config import ExecConfig
 import logging
-import util
+import python
 
 class ExecConfigTest(unittest.TestCase):
 

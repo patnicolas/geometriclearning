@@ -4,7 +4,8 @@ from dl.block.mlp_block import MLPBlock
 from dl.model.mlp_model import MLPModel
 from dl.model.ae_model import AEModel
 import logging
-import util
+import python
+
 
 class AEModelTest(unittest.TestCase):
     def test_init(self):

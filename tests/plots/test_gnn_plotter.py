@@ -2,11 +2,13 @@ import unittest
 from plots.gnn_plotter import GNNPlotter
 import networkx as nx
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 class GNNPlotterTest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_sample(self):
         import os
         from torch_geometric.datasets.flickr import Flickr
@@ -20,7 +22,7 @@ class GNNPlotterTest(unittest.TestCase):
         gnn_plotter.sample()
         logging.info(f'{gnn_plotter.graph=}')
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_draw(self):
         import os
         from torch_geometric.datasets.flickr import Flickr
@@ -37,7 +39,6 @@ class GNNPlotterTest(unittest.TestCase):
                                              title='Flickr spring layout')
         logging.info(num_sampled_nodes)
 
-
     def test_draw_all_undirected(self):
         import os
         from torch_geometric.datasets.flickr import Flickr
@@ -51,7 +52,7 @@ class GNNPlotterTest(unittest.TestCase):
         num_sampled_nodes = gnn_plotter.draw_all(node_size=100, title='Flickr directed')
         logging.info(num_sampled_nodes)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_draw_all_directed(self):
         import os
         from torch_geometric.datasets.flickr import Flickr

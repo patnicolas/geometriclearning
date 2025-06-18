@@ -3,7 +3,7 @@ from unittest import TestCase
 import torch
 from util.perf_eval import PerfEval
 import logging
-import util
+import python
 
 def perf_test_func():
     x = torch.rand(200000)

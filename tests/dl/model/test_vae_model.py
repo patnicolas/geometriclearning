@@ -9,22 +9,25 @@ from dl.model.vae_model import VAEModel
 from dl import VAEException, ConvException
 from dl.training.vae_training import VAETraining
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
+
 
 class VAEModelTest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_1(self):
         try:
             input_block = MLPBlock(block_id='Input',
                                    layer_module=nn.Linear(in_features=128, out_features=64, bias=False),
                                    activation_module=nn.ReLU())
             hidden_block = MLPBlock(block_id='hidden',
-                                                      layer_module=nn.Linear(in_features=64, out_features=32, bias=False),
-                                                      activation_module=nn.ReLU())
+                                    layer_module=nn.Linear(in_features=64, out_features=32, bias=False),
+                                    activation_module=nn.ReLU())
             output_block = MLPBlock(block_id='output',
-                                                      layer_module=nn.Linear(in_features=32, out_features=10, bias=False),
-                                                      activation_module=nn.Sigmoid())
+                                    layer_module=nn.Linear(in_features=32, out_features=10, bias=False),
+                                    activation_module=nn.Sigmoid())
             ffnn_model = MLPModel(model_id='encoder', mlp_blocks=[input_block, hidden_block, output_block])
             logging.info(str(ffnn_model))
             latent_size = 6
@@ -35,7 +38,7 @@ class VAEModelTest(unittest.TestCase):
             logging.info(f'ERROR: {str(e)}')
             self.assertTrue(True)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_2(self):
         try:
             conv_2d_block_1 = Conv2dBlock.build_from_params(block_id='conv_1',

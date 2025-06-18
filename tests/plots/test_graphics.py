@@ -1,9 +1,13 @@
 import unittest
 import random
+import os
+import python
+from python import SKIP_REASON
+
 
 class GraphicsTest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_plot_sphere(self):
         import numpy as np
         import matplotlib.pyplot as plt
@@ -45,8 +49,7 @@ class GraphicsTest(unittest.TestCase):
         # Show the plot
         plt.show()
 
-
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_drop_out_visualization(self):
         import numpy as np
         import matplotlib.pyplot as plt
@@ -81,7 +84,7 @@ class GraphicsTest(unittest.TestCase):
         plt.show()
         self.assertTrue(True)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_batch_norm_visualization(self):
         import numpy as np
         import matplotlib.pyplot as plt
@@ -108,7 +111,7 @@ class GraphicsTest(unittest.TestCase):
         plt.show()
         self.assertTrue(True)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_activation_visualization(self):
         import numpy as np
         import matplotlib.pyplot as plt
@@ -135,7 +138,7 @@ class GraphicsTest(unittest.TestCase):
         plt.show()
         self.assertTrue(True)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_activation_visualization_wireframe(self):
         import numpy as np
         import matplotlib.pyplot as plt

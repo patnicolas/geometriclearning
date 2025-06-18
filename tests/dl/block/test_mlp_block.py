@@ -1,14 +1,16 @@
 import unittest
 import logging
-import util
 from torch import nn
 from dl.block.mlp_block import MLPBlock
 from dl import DLException
+import os
+import python
+from python import SKIP_REASON
 
 
 class MLPBlockTest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_1(self):
         try:
             mlp_block = MLPBlock(block_id='id1',
@@ -26,7 +28,7 @@ class MLPBlockTest(unittest.TestCase):
             logging.info(str(e))
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_2(self):
         in_features = 12
         out_features = 24
@@ -44,7 +46,7 @@ class MLPBlockTest(unittest.TestCase):
             logging.info(str(e))
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_3(self):
         in_features = 12
         out_features = 24
@@ -61,7 +63,7 @@ class MLPBlockTest(unittest.TestCase):
         self.assertTrue(mlp_block.get_in_features() == in_features)
         self.assertTrue(mlp_block.get_out_features() == out_features)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_transpose_1(self):
         try:
             linear_layer = nn.Linear(in_features=12, out_features=24, bias=False)
@@ -78,7 +80,7 @@ class MLPBlockTest(unittest.TestCase):
             logging.info(str(e))
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_transpose_2(self):
         try:
             linear_layer = nn.Linear(in_features=12, out_features=24, bias=False)

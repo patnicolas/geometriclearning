@@ -4,12 +4,13 @@ from Lie.SE3_visualization import SE3Visualization
 from Lie.Lie_SE3_group import LieSE3Group
 from Lie import u3d
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 
 class LieSE3GroupTest(unittest.TestCase):
 
-    # @unittest.skip('Ignored')
     def test_build_from_numpy(self):
         np.set_printoptions(precision=3, suppress=True)
 
@@ -19,14 +20,14 @@ class LieSE3GroupTest(unittest.TestCase):
         logging.info(repr(lie_se3_group))
         self.assertTrue(lie_se3_group.se3_element.group_element.shape == (4, 4))
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_build_from_unit_elements(self):
         from Lie import u3d
 
         lie_se3_group = LieSE3Group(u3d.y_rot, u3d.x_trans)
         logging.info(lie_se3_group)
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_inverse(self):
         lie_se3_group = LieSE3Group(rot_matrix=u3d.y_rot, trans_matrix=u3d.x_trans, epsilon=1e-4)
         tgt_vector = lie_se3_group.tangent_vector
@@ -39,7 +40,7 @@ class LieSE3GroupTest(unittest.TestCase):
         inv_tgt_vector = inv_lie_se3_group.tangent_vector
         logging.info(inv_tgt_vector)
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_inverse_2(self):
         lie_se3_group = SE3Visualization(rot_matrix=u3d.y_rot, trans_matrix=u3d.x_trans)
         inv_lie_se3_group = lie_se3_group.inverse()
@@ -60,7 +61,7 @@ class LieSE3GroupTest(unittest.TestCase):
         plt.title(f'SE3 Inverse Element\n{inv_lie_se3_group.this_group_element()}')
         plt.show()
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_composition(self):
         first_trans = u3d.x_trans + u3d.y_trans + u3d.z_trans
         second_trans = u3d.x_trans - u3d.y_trans - 3
@@ -73,7 +74,7 @@ class LieSE3GroupTest(unittest.TestCase):
         logging.info(f'\nFirst element:\n{se3_group_1}\nSecond element\n{se3_group_2}'
                      f'\nComposed element: {se3_composed_group}')
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_self_composition(self):
         se3_group_1 = SE3Visualization(rot_matrix=u3d.x_rot, trans_matrix=u3d.y_trans)
 
@@ -82,7 +83,7 @@ class LieSE3GroupTest(unittest.TestCase):
         logging.info(f'\nFirst element:\n{se3_group_1}\nSelf Composed element: {se3_composed_group}')
         self.assertTrue(se3_composed_group.belongs())
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_se3_matrix_generation(self):
         rotation = np.array([[ 0.0, 1.0,  2.0],
                              [-1.0, 0.0, -0.5],
@@ -93,7 +94,7 @@ class LieSE3GroupTest(unittest.TestCase):
         se3_matrix[:3, 3] = translation.flatten()
         logging.info(se3_matrix)
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_commutative(self):
         from Lie import u3d as u
 
@@ -105,7 +106,7 @@ class LieSE3GroupTest(unittest.TestCase):
         logging.info(f'\nse3_2 x se3_1 {se3_2.multiply(se3_1)}')
         self.assertFalse(se3_1.multiply(se3_2) == se3_2.multiply(se3_1))
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_matrix_generation(self):
         R = np.array([
             [0.0, -1.0, 0.0],
@@ -124,7 +125,7 @@ class LieSE3GroupTest(unittest.TestCase):
         self.assertTrue(se3_matrix.all() == algebra_element.all())
         logging.info(se3_matrix)
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_visualize(self):
         # Two inputs= in the tangent space: 3x3 90 degree rotation along Y axis
         # and Translation along X xis

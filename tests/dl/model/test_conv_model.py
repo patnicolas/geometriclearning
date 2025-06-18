@@ -6,11 +6,14 @@ from dl.model.conv_model import ConvModel
 from dl import ConvException
 from dl.training.neural_training import NeuralTraining
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
+
 
 class ConvModelTest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_mnist_small(self):
         try:
             conv_2d_block_1 = Conv2dBlock.build_from_params(block_id='conv_1',
@@ -49,7 +52,7 @@ class ConvModelTest(unittest.TestCase):
             logging.info(str(e))
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_mnist_small_2(self):
         from dl.model.conv_2d_model import Conv2dBuilder
         try:
@@ -103,7 +106,7 @@ class ConvModelTest(unittest.TestCase):
             logging.info(str(e))
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_validation_conv(self):
         from dl.model.conv_2d_model import Conv2dBuilder
 
@@ -142,7 +145,7 @@ class ConvModelTest(unittest.TestCase):
         Conv2dBuilder.validate_conv(conv_blocks=[conv_2d_block_1, conv_2d_block_2, conv_2d_block_3],
                                     input_size=(28, 28))
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_mnist_large(self):
         try:
             conv_2d_block_1 = Conv2dBlock.build_from_params(block_id='conv_1',
@@ -198,7 +201,7 @@ class ConvModelTest(unittest.TestCase):
             logging.info(str(e))
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_builder(self):
         from dl.model.conv_2d_model import Conv2dBuilder
         conv_attributes = {
@@ -217,7 +220,7 @@ class ConvModelTest(unittest.TestCase):
         conv_2d_model = conv_2d_Builder.build()
         logging.info(str(conv_2d_model))
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_transpose(self):
         try:
             conv_2d_block_1 = Conv2dBlock.build_from_params(block_id='conv_1',
@@ -265,7 +268,7 @@ class ConvModelTest(unittest.TestCase):
             logging.info(str(e))
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_mnist_train(self):
         from dataset.tensor.mnist_loader import MNISTLoader
         from dl.training.exec_config import ExecConfig
@@ -314,7 +317,7 @@ class ConvModelTest(unittest.TestCase):
             logging.info(str(e))
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_caltech101_train(self):
         from dataset.tensor.caltech101_loader import Caltech101Loader
         from dl.training.exec_config import ExecConfig

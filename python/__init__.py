@@ -1,12 +1,23 @@
+__author__ = "Patrick Nicolas"
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
+
 
 import torch
 torch.set_default_dtype(torch.float32)
 
+"""
+Environment variable to enable/disable unit test for execution
+"""
 import os
+os.environ['SKIP_TESTS_IN_PROGRESS'] = '1'
 os.environ['SKIP_SLOW_TESTS'] = '1'
+SKIP_REASON = 'Skipping some tests due to environment variable'
 import logging
 import sys
 
+"""
+Set up the proper logging handlers and format
+"""
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -18,14 +29,29 @@ logger.handlers = []  # Clear existing handlers
 logger.addHandler(handler)
 
 
-def tensor_all_close(t1: torch.Tensor, t2: torch.Tensor, rtol: float = 1e-6) -> bool:
-    is_match = True
-    if t1.shape == t2.shape:
+"""
+Evaluate if two tensors is almost identical, element-wize
+"""
+def are_tensors_close(t1: torch.Tensor, t2: torch.Tensor, rtol: float = 1e-6) -> bool:
+    """
+    Test of two tensors are identical within an error tolerance
+
+    @param t1: First tensor
+    @type t1: torch.Tensor
+    @param t2: Second tensor
+    @type t2: torch.Tensor
+    @param rtol: Error tolerance
+    @type rtol: float
+    @return: True if the two tensors are almost identical, False otherwise
+    @rtype: boolean
+    """
+    assert 1e-15 < rtol < 0.01, f'Error tolerance {rtol} is out of range'
+
+    is_match = t1.shape == t2.shape
+    if is_match:
         diff = torch.abs(t1 - t2)
         for val in diff.view(-1):
             if val > rtol:
                 is_match = False
-    else:
-        is_match = False
     return is_match
 

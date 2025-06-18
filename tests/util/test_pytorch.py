@@ -2,7 +2,7 @@ from unittest import TestCase
 import numpy as np
 import torch
 import logging
-import util
+import python
 
 
 class TestPyTorch(TestCase):

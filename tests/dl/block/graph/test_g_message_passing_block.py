@@ -3,7 +3,9 @@ from torch_geometric.nn import GCNConv
 from dl.block.graph.g_message_passing_block import GMessagePassingBlock
 import torch.nn as nn
 import logging
-import util
+import python
+
+
 
 class GMessagePassingBlockTest(unittest.TestCase):
 
@@ -28,7 +30,7 @@ class GMessagePassingBlockTest(unittest.TestCase):
                                         conv,
                                         activation_module=nn.ReLU(),
                                         batch_norm_module=BatchNorm(hidden_channels),
-                                        dropout_module=0.2)
-        logging.info(repr(gcn_conv), flush=True)
+                                        drop_out_module=nn.Dropout(0.2))
+        logging.info(repr(gcn_conv))
         self.assertTrue(True)
 

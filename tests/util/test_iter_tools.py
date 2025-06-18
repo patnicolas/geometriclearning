@@ -1,7 +1,7 @@
 from unittest import TestCase
 import itertools
 import logging
-import util
+import python
 
 
 class TestIterTools(TestCase):

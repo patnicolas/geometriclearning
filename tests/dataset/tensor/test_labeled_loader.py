@@ -3,11 +3,13 @@ from dataset.tensor.labeled_loader import LabeledLoader
 import logging
 import torch
 import numpy as np
-
+import os
+import python
+from python import SKIP_REASON
 
 class LabeledLoaderTest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_load_tensor_transform(self):
         try:
             batch_size = 4
@@ -30,7 +32,7 @@ class LabeledLoaderTest(unittest.TestCase):
             logging.info(f'Error: {str(e)}')
             self.assertFalse(True)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_load_csv_file(self):
         try:
             filename = '/users/patricknicolas/dev/geometric_learning/data/wages_cleaned.csv'

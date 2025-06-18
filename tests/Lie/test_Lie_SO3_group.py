@@ -6,11 +6,13 @@ import numpy as np
 from typing import AnyStr, List
 from Lie import u3d
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 
 class LieSO3GroupTest(unittest.TestCase):
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init(self):
         so3_element = np.array([[0.0, 0.0, 0.0],
                                 [0.0, -1.0, -1.0],
@@ -22,8 +24,7 @@ class LieSO3GroupTest(unittest.TestCase):
         logging.info(str(so3_group))
         self.assertTrue(so3_group.group_element.shape == (3, 3))
 
-
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_2(self):
         so3_group = LieSO3Group(u3d.y_rot)
         so3_element_1 = LieElement(
@@ -41,7 +42,7 @@ class LieSO3GroupTest(unittest.TestCase):
         logging.info(str(so3_group2))
         LieSO3Group.visualize_all(so3_elements=[so3_element_1, so3_element_2], notation_index=3)
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_3(self):
         cx = 2.0
         cy = -0.5
@@ -56,7 +57,7 @@ class LieSO3GroupTest(unittest.TestCase):
             descriptor='SO3 element for\n[0.0 -1.5 -0.5]\n[1.5  0.0 -2.0]\n[0.5  2.0  0.0]\n@ identity element')
         LieSO3Group.visualize_all(so3_elements=[so3_element], notation_index=3)
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_inverse(self):
         # Generator for rotation along Y axis
         so3_group = LieSO3Group(u3d.y_rot)
@@ -78,7 +79,7 @@ class LieSO3GroupTest(unittest.TestCase):
         # Visualization
         LieSO3Group.visualize_all([element, inv_so3_inverse], 2)
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_product_1(self):
         # First SO3 rotation matrix along X axis
         so3_group_x = LieSO3Group(algebra_element=u3d.x_rot)
@@ -103,7 +104,7 @@ class LieSO3GroupTest(unittest.TestCase):
         LieSO3Group.visualize_all([so3_element_x, so3_point_y], 0)
         so3_group_product.visualize('Composition of two SO3 matrices\nRotation along X with Y axis', 0)
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_product_2(self):
         # First SO3 rotation matrix along X axis
         so3_group_x = LieSO3Group(algebra_element=u3d.x_rot)
@@ -130,7 +131,7 @@ class LieSO3GroupTest(unittest.TestCase):
         LieSO3Group.visualize_all([so3_element_x, so3_point_identity], 0)
         so3_group_product.visualize('Composition of a Rotation along X\nwith identity', 0)
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_product_3(self):
         # First SO3 rotation matrix
         so3_tangent_vec = [1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 1.0, 0.0]
@@ -156,7 +157,7 @@ class LieSO3GroupTest(unittest.TestCase):
         LieSO3Group.visualize_all([so3_point, so3_point2], 0)
         so3_group_product.visualize('Composition of 3D rotations')
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_algebra(self):
         # Step 2; Compute the element on SO3 manifold
         so3_group = LieSO3Group(algebra_element=u3d.y_rot)
@@ -167,7 +168,7 @@ class LieSO3GroupTest(unittest.TestCase):
         assert lie_algebra.size == len(u3d.y_rot)
         logging.info(f'\nComputed algebra element:\n{lie_algebra}')
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_algebra2(self):
         # The SO3 element is computed at identity (to conform to Lie Algebra)
         so3_group = LieSO3Group(algebra_element=u3d.z_rot)
@@ -175,8 +176,7 @@ class LieSO3GroupTest(unittest.TestCase):
         lie_algebra = so3_group.lie_algebra()
         logging.info(f'\nLie algebra:\n{lie_algebra}')
 
-
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_projection(self):
         # SO3 rotation along X axis
         so3_group = LieSO3Group(algebra_element=u3d.x_rot)
@@ -191,7 +191,7 @@ class LieSO3GroupTest(unittest.TestCase):
         projected = so3_group.projection()
         logging.info(f'\nProjected point reference\n{so3_group.algebra_element}:\n{projected.group_element}')
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_bracket(self):
         # SO3 rotation along X axis
         so3_group = LieSO3Group(algebra_element=u3d.x_rot)
@@ -201,7 +201,7 @@ class LieSO3GroupTest(unittest.TestCase):
         bracket = so3_group.bracket(u3d.x_rot)
         logging.info(f'\nBracket [x,x]:\n{bracket}')
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_bracket2(self):
         # First SO3 rotation along X axis
         so3_group_x = LieSO3Group(algebra_element=u3d.x_rot)
@@ -230,7 +230,7 @@ class LieSO3GroupTest(unittest.TestCase):
             descriptor='Lie Bracket')
         LieSO3Group.visualize_all([so3_bracket_element], 0)
 
-    # @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_visualize_geomstats(self):
         import geomstats.backend as gs
         import matplotlib.pyplot as plt

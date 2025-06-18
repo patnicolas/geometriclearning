@@ -1,10 +1,9 @@
 import unittest
 import logging
-import util
 from torch import nn
-
 from dl.block.conv.deconv_2d_block import DeConv2dBlock
 from dl import ConvException
+import python
 
 
 class DeConv2dBlockTest(unittest.TestCase):

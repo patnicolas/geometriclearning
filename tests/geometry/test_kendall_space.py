@@ -2,7 +2,7 @@ import unittest
 from geometry.kendall_space import KendallSpace
 from geometry.visualization.space_visualization import VisualizationParams
 import logging
-import util
+import python
 
 class TestKendallSpace(unittest.TestCase):
 

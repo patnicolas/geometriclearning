@@ -12,12 +12,14 @@ from geometry.visualization.hypersphere_plot import HyperspherePlot
 from geometry.visualization.euclidean_plot import EuclideanPlot
 from geometry.visualization.so3_plot import SO3Plot
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 
 class FrechetEstimatorTest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_1(self):
         manifold = Hypersphere(dim=2, intrinsic=False, equip=True)
         weights = Tensor([0.4, 0.6, 1.0])
@@ -51,7 +53,7 @@ class FrechetEstimatorTest(unittest.TestCase):
             logging.info(str(e))
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_estimate_Euclidean(self):
         manifold = Hypersphere(dim=2)
         try:
@@ -66,7 +68,7 @@ class FrechetEstimatorTest(unittest.TestCase):
             logging.info(str(e))
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_estimate_SO3(self):
         try:
             manifold = SpecialOrthogonal(n=3, point_type="matrix")

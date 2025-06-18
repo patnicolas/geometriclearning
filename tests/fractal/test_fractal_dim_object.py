@@ -1,11 +1,13 @@
 import unittest
 from fractal.fractal_dim_object import FractalDimObject
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 class FractalDimObjectTest(unittest.TestCase):
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init(self):
         import matplotlib.pyplot as plt
 
@@ -37,7 +39,7 @@ class FractalDimObjectTest(unittest.TestCase):
         self.assertTrue(fractal_dim_object.xyz.shape[2] == sample_size)
         logging.info(str(fractal_dim_object))
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_call(self):
         import math
         sample_size = 256
@@ -49,7 +51,7 @@ class FractalDimObjectTest(unittest.TestCase):
         logging.info(coefficient)
         self.assertTrue( 2 < math.fabs(coefficient) < 3)
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_plot(self):
         import matplotlib.pyplot as plt
         import math

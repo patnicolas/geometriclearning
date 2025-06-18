@@ -4,14 +4,16 @@ from unittest import TestCase
 import unittest
 from util.http_post import HttpPost
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 
 logging.info('path: ' + os.getcwd())
 
 
 class TestHttpPost(TestCase):
-    # @unittest.skip("Not needed")
+
     def test_process_predict(self):
         num_iterations = 1
         in_file = TestHttpPost.__predict_file()
@@ -20,7 +22,7 @@ class TestHttpPost(TestCase):
         successes, total_count = post.post_batch(in_file, False, num_iterations)
         logging.info(f'{successes=}, {total_count=}')
 
-    @unittest.skip("Not needed")
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_batch_predict(self):
         in_file = TestHttpPost.__predict_file()
         new_headers = {'Content-type': 'application/json'}
@@ -30,7 +32,7 @@ class TestHttpPost(TestCase):
             successes, total_count = post.post_batch(in_file, False, 1)
             logging.info(f'{successes=}, {total_count=}')
 
-    @unittest.skip("Not needed")
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_process_feedback(self):
         in_file = TestHttpPost.__feedback_file()
         num_iterations = 4

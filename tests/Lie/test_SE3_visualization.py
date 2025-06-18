@@ -7,13 +7,15 @@ import numpy as np
 from typing import List
 import geomstats.backend as gs
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 
 
 class SE3VisualizationTest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_animation_one(self):
         from Lie import u3d
 
@@ -37,7 +39,7 @@ class SE3VisualizationTest(unittest.TestCase):
                               interval=1000,
                               fps=40)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_animation_two(self):
         from Lie import u3d
 
@@ -69,7 +71,7 @@ class SE3VisualizationTest(unittest.TestCase):
                               interval=400,
                               fps=40)
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_visualization_2(self):
         from Lie import u3d
 
@@ -103,7 +105,7 @@ class SE3VisualizationTest(unittest.TestCase):
                                     num_points=84,
                                     title='84 Displacements Points - two SE(3) @ Identity')
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_inverse_visualization(self):
         se3_lie_group = SE3Visualization(rot_matrix=u3d.y_rot, trans_matrix=u3d.x_trans)
 
@@ -140,7 +142,7 @@ class SE3VisualizationTest(unittest.TestCase):
                                     num_points=48,
                                     title='48 Displacement Points - SE(3) Inverse @ Identity')
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_composition_visualization(self):
         first_trans = u3d.x_trans + u3d.y_trans + u3d.z_trans
         second_trans = u3d.x_trans - u3d.y_trans - 3
@@ -189,7 +191,7 @@ class SE3VisualizationTest(unittest.TestCase):
                                     scale=(-0.7, 0.7),
                                     title='64 Displacement Points - SE(3) Composition @ Identity')
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_self_composition(self):
         se3_group = SE3Visualization(rot_matrix=u3d.x_rot, trans_matrix=u3d.y_trans)
 

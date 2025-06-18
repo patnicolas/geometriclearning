@@ -2,11 +2,13 @@ import unittest
 from unittest import TestCase
 from util.io_util import IOUtil
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 
 class TestIOUtil(TestCase):
-    @unittest.skip("No required")
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_to_json(self):
         try:
             file_name = '../../data/test.json'

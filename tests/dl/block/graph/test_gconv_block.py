@@ -1,10 +1,10 @@
 import unittest
 import logging
-import util
 from torch_geometric.nn import GraphConv, BatchNorm
 from torch_geometric.nn.pool import TopKPooling
 from dl.block.graph.gconv_block import GConvBlock
 import torch.nn as nn
+import python
 
 class GConvBlockTest(unittest.TestCase):
 

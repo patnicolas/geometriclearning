@@ -15,12 +15,14 @@ from torch_geometric.data import Data
 import torch.nn as nn
 import torch
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 
 class GConvTest(unittest.TestCase):
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_visualization_3d(self):
         import matplotlib.pyplot as plt
         from matplotlib.animation import FuncAnimation
@@ -37,7 +39,7 @@ class GConvTest(unittest.TestCase):
         ani = FuncAnimation(fig, update, frames=range(tensor.size(0)), interval=300)
         plt.show()
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_visualization_3d2(self):
         import torch
         import matplotlib.pyplot as plt
@@ -51,7 +53,7 @@ class GConvTest(unittest.TestCase):
         plt.tight_layout()
         plt.show()
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_model(self):
         hidden_channels = 256
         pooling_ratio = 0.4
@@ -65,7 +67,7 @@ class GConvTest(unittest.TestCase):
             logging.info(e)
             self.assertTrue(False)
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_training_test(self):
         hidden_channels = 256
         pooling_ratio = 0.4

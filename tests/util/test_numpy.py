@@ -3,11 +3,13 @@ from unittest import TestCase
 import unittest
 import numpy as np
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 
 class TestNumpy(TestCase):
-    @unittest.skip("Not needed")
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_slice(self):
         try:
             x = TestNumpy.__generate_3d_array(32, 4)
@@ -41,7 +43,6 @@ class TestNumpy(TestCase):
         x = np.array([111.0,112.0,121.0,122.0,131.0,132.0,211.0,212.0,221.0,222.0,231.0,232.0])
         y = x.reshape(2, 3, 2)
         logging.info(y)
-
 
     @staticmethod
     def __generate_3d_array(sz: int, width: int):

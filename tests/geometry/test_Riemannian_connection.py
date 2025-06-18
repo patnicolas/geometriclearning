@@ -4,7 +4,7 @@ import numpy as np
 from geometry.Riemannian_connection import RiemannianConnection
 from geometry.manifold_point import ManifoldPoint
 import logging
-import util
+import python
 
 
 class TestRiemannianConnection(unittest.TestCase):

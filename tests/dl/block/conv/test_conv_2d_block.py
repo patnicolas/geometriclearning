@@ -1,8 +1,10 @@
 import unittest
 import logging
-import util
 from dl.block.conv.conv_2d_block import Conv2dBlock
 import torch.nn as nn
+import os
+import python
+from python import SKIP_REASON
 
 
 class Conv2dBlockTest(unittest.TestCase):
@@ -43,7 +45,7 @@ class Conv2dBlockTest(unittest.TestCase):
         logging.info(f'{conv_2d_block=}')
         self.assertTrue(conv_2d_block.attributes is None)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_3(self):
         conv_2d_block = Conv2dBlock.build_from_params(block_id='My_conv_2d',
                                                       in_channels=1,
@@ -77,7 +79,7 @@ class Conv2dBlockTest(unittest.TestCase):
         logging.info(f'{conv_2d_block=}')
         self.assertTrue(len(conv_2d_block.modules_list) == 5)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_transpose(self):
         conv_2d_block = Conv2dBlock.build_from_params(block_id='My_conv_2d',
                                                       in_channels=1,

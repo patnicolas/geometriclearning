@@ -1,11 +1,13 @@
 import unittest
 from fractal.fractal_dim_image import FractalDimImage
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 class FractalDimImageTest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init(self):
         image_path_name = '../../../images/fractal_test_image.jpg'
         fractal_dim_image = FractalDimImage(image_path_name)
@@ -13,7 +15,7 @@ class FractalDimImageTest(unittest.TestCase):
         if fractal_dim_image.image is not None:
             logging.info(fractal_dim_image.image.shape)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_call(self):
         import numpy as np
         image_path_name = '../../../images/fractal_test_image.jpg'
@@ -24,7 +26,7 @@ class FractalDimImageTest(unittest.TestCase):
         trace_str = '/n'.join([str(box_param) for box_param in trace])
         logging.info(f'Fractal dimension: {float(fractal_dim)}\nTrace {trace_str}')
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_timeit(self):
         import timeit
         image_path_name = '../../../images/fractal_test_image.jpg'
@@ -32,8 +34,7 @@ class FractalDimImageTest(unittest.TestCase):
         image_path_name = '../../../images/fractal_test_image_large.jpg'
         timeit.timeit(FractalDimImage(image_path_name))
 
-
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_plots(self):
         import numpy as np
         image_path_name = '../../../images/fractal_test_image.jpg'

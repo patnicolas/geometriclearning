@@ -1,7 +1,9 @@
 import unittest
 import numpy as np
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 class EinSumTest(unittest.TestCase):
 
@@ -39,7 +41,7 @@ class EinSumTest(unittest.TestCase):
             logging.info(f'Failed with {e}')
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_matrix_mul_numpy(self):
         a = np.array([[1.0, 0.5], [2.0, 1.5]])
         b = np.array([[0.1, 2.0], [1.2, 0.5]])

@@ -1,9 +1,10 @@
 import unittest
 import logging
-import util
 from dataset.graph.pyg_datasets import PyGDatasets
-from torch_geometric.data import Data, Dataset
+from torch_geometric.data import Data
 from typing import AnyStr
+import python
+
 
 class PyGDatasetsTest(unittest.TestCase):
 

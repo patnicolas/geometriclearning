@@ -3,7 +3,8 @@ import torch
 import torch.nn as nn
 from dl.loss.vae_kl_loss import VAEKLLoss
 import logging
-import util
+import python
+
 
 class VAEKLLossTest(unittest.TestCase):
 

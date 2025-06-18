@@ -1,10 +1,10 @@
 import unittest
 import logging
-import util
 import torch
 import os
-
 os.environ["GEOMSTATS_BACKEND"] = "pytorch"
+import python
+from python import SKIP_REASON
 
 from geomstats.information_geometry.binomial import BinomialDistributions
 from geomstats.information_geometry.exponential import ExponentialDistributions
@@ -17,14 +17,13 @@ from typing import Tuple, AnyStr
 
 class CFStatisticalManifoldTest(unittest.TestCase):
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init(self):
         exponential_distributions = ExponentialDistributions(equip=True)
         statistical_manifold = CFStatisticalManifold(exponential_distributions, (1.0, 2.0))
         logging.info(f'\n{statistical_manifold=}')
         self.assertTrue(statistical_manifold.fisher_rao_metric.signature == (1, 0))
 
-    # @unittest.skip('ignore')
     def test_random_samples(self):
         exponential_distributions = ExponentialDistributions(equip=True)
         exponential_manifold = CFStatisticalManifold(exponential_distributions, (-2.0, 2.0))
@@ -38,7 +37,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
         logging.info(f'\nExponential Distribution Manifold 8 random samples \n{exponential_samples_str}'
                      f'\nGeometric Distribution Manifold 4 random samples\n{exponential_geometric_str}')
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_some_fisher_metrics(self):
         exponential_manifold = CFStatisticalManifold(ExponentialDistributions(equip=True), (0.0, 2.0))
         poisson_manifold = CFStatisticalManifold(PoissonDistributions(equip=True), (0, 20))
@@ -47,14 +46,14 @@ class CFStatisticalManifoldTest(unittest.TestCase):
         logging.info(f'\nExponential Distribution Fisher metric: {exponential_metric}'
                      f'\nPoisson Distribution Fisher metric: {poisson_metric}')
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_metric_matrix_exponential(self):
         exponential_distributions = ExponentialDistributions(equip=True)
         statistical_manifold = CFStatisticalManifold(exponential_distributions, (1.0, 2.0))
         metric = statistical_manifold.metric_matrix()
         logging.info(f'Fisher-Rao metric for exponential: {metric}')
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_exp_maps(self):
         exponential_manifold = CFStatisticalManifold(ExponentialDistributions(equip=False), (0.0, 2.0))
         tgt_vector = torch.Tensor([0.5])
@@ -68,7 +67,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
         logging.info(f'\nExponential Distribution Manifold End point: {exponential_end_point}'
                      f'\nGeometric Distribution Manifold End point: {geometric_end_point}\n')
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_log_maps(self):
         exponential_manifold = CFStatisticalManifold(ExponentialDistributions(equip=False), (0.0, 2.0))
         random_points = exponential_manifold.samples(2)
@@ -86,8 +85,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
         logging.info(f'\nGeometric Distribution Manifold Tangent Vector\nBase:{base_point} to:{manifold_point}: '
                      f'{geometric_vector}\n')
 
-
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_exp_map_geometric(self):
         geometric_distributions = GeometricDistributions(equip=True)
         statistical_manifold = CFStatisticalManifold(geometric_distributions, (1, 10))
@@ -96,7 +94,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
         end_point = statistical_manifold.exp(tgt_vector, base_point)
         logging.info(end_point)
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_visualize_exponentials(self):
         CFStatisticalManifoldTest.__visualize(distribution=ExponentialDistributions(equip=True),
                                               bounds=(0.0, 2.0),
@@ -104,7 +102,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
                                               param_desc="$ \\theta \in$")
         self.assertTrue(True)
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_visualize_poissons(self):
         CFStatisticalManifoldTest.__visualize(distribution=PoissonDistributions(equip=True),
                                               bounds=(0.0, 20.0),
@@ -112,7 +110,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
                                               param_desc='$\\lambda \in$')
         self.assertTrue(True)
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_visualize_binomial(self):
         n_draws = 40
         CFStatisticalManifoldTest.__visualize(distribution=BinomialDistributions(equip=True, n_draws=n_draws),
@@ -121,7 +119,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
                                               param_desc='n_draws=40,  p $ \in$')
         self.assertTrue(True)
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_visualize_geometric(self):
         CFStatisticalManifoldTest.__visualize(distribution=GeometricDistributions(equip=True),
                                               bounds=(1.0, 10.0),
@@ -129,7 +127,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
                                               param_desc='p $ \in$')
         self.assertTrue(True)
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_animate_geometric(self):
         CFStatisticalManifoldTest.__animate(distribution=GeometricDistributions(equip=True),
                                             bounds=(1.0, 10.0),
@@ -137,7 +135,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
                                             param_desc='p $ \in$')
         self.assertTrue(True)
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_normal_fixed_stddev(self):
         std = 1.0
         x = torch.normal(mean=0.0, std=std, size=(2000,))
@@ -150,7 +148,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
         logging.info(f'Metric={metric}')
         self.assertTrue(-0.02 < metric - 1.0/std**2 < 0.02)
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_visualize_normal(self):
         import numpy as np
         import matplotlib.pyplot as plt

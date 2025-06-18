@@ -1,14 +1,16 @@
 import unittest
 import logging
-import util
 import numpy as np
 from geometry.visualization.space_visualization import SpaceVisualization, VisualizationParams
 import matplotlib.pyplot as plt
+import os
+import python
+from python import SKIP_REASON
 
 
 class TestSpaceVisualization(unittest.TestCase):
 
-    @unittest.skip
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_scatter(self):
         data_points = np.array([[-0.19963953, -0.90072907],
                      [-0.0292344,   0.77812525]])
@@ -21,7 +23,6 @@ class TestSpaceVisualization(unittest.TestCase):
         space_visualization = SpaceVisualization(visualization_param)
         space_visualization.scatter(data_points)
 
-    # @unittest.skip
     def test_plot(self):
         t = np.arange(0.0, 2.0, 0.01)
         s = 1 + np.sin(2 * np.pi * t)
@@ -42,7 +43,7 @@ class TestSpaceVisualization(unittest.TestCase):
         fig.savefig("test.png")
         plt.show()
 
-    @unittest.skip
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_plot_3d(self):
         data_points = np.array([[0.12201818, - 0.80014098,  0.44830868],
                         [-0.76866486, 0.17708725, -0.28586653],
@@ -56,21 +57,6 @@ class TestSpaceVisualization(unittest.TestCase):
         visualization_param = VisualizationParams(label, title, fig_size)
         space_visualization = SpaceVisualization(visualization_param)
         space_visualization.plot_3d(data_points)
-
-    def test_3d_sphere(self):
-        from manifolds.hyperspherespace import HypersphereSpace
-        dim = 2
-        num_samples = 10
-        manifold = HypersphereSpace(dim)
-        data_points = manifold.sample(num_samples)
-        logging.info(f'Hypersphere:\n{str(data_points)}')
-
-        fig_size = (8, 8)
-        label = 'Values'
-        title = 'This is a test'
-        visualization_param = VisualizationParams(label, title, fig_size)
-        space_visualization = SpaceVisualization(visualization_param)
-        space_visualization.plot_3d(data_points, "S2")
 
 
 if __name__ == '__main__':

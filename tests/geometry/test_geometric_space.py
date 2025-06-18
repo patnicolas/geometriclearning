@@ -1,6 +1,6 @@
 import unittest
 import logging
-import util
+import python
 import numpy as np
 from geometry.geometric_space import GeometricSpace
 from geometry.manifold_point import ManifoldPoint

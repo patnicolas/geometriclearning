@@ -4,7 +4,8 @@ from dl.block.mlp_block import MLPBlock
 from dl.model.mlp_model import MLPModel
 from dl.model.denoising_vae_model import DenoisingVAEModel
 import logging
-import util
+import python
+
 
 class DenoisingVAEModelTest(unittest.TestCase):
     def test_init(self):

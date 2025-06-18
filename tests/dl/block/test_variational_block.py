@@ -2,12 +2,14 @@ import unittest
 import torch
 from dl.block.variational_block import VariationalBlock
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 
 class VariationalBlockTest(unittest.TestCase):
 
-    @unittest.skip("Ignore")
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init(self):
         hidden_dim = 8
         latent_size = 6
@@ -15,7 +17,7 @@ class VariationalBlockTest(unittest.TestCase):
         logging.info(repr(variational_block))
         self.assertTrue(variational_block.in_features() == hidden_dim)
 
-    @unittest.skip("Ignore")
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_re_parameterize(self):
         mu = torch.Tensor([1.5, 2.6])
         log_var = torch.Tensor([0.1, 0.6])
@@ -30,7 +32,7 @@ class VariationalBlockTest(unittest.TestCase):
         z = mu + std*eps
         logging.info(f'Second new params: {str(z)}')
 
-    @unittest.skip("Ignore")
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_non_zero_input(self):
         x = torch.zeros(20)
         has_non_zeros = VariationalBlock.input_has_non_zeros(x)
@@ -54,9 +56,6 @@ class VariationalBlockTest(unittest.TestCase):
         self.assertTrue(variational_block.in_features() == hidden_dim)
         (z, mu, log_var) = variational_block(torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0]))
         logging.info(z)
-
-
-
 
 if __name__ == '__main__':
     unittest.main()

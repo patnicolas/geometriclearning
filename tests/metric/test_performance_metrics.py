@@ -3,11 +3,13 @@ import unittest
 from metric.performance_metrics import PerformanceMetrics
 from metric.metric_type import MetricType
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 class PerformanceMetricsTest(unittest.TestCase):
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_add_metric(self):
         performance_metrics = PerformanceMetrics({})
         performance_metrics.add_metric(metric_label=MetricType.Accuracy, encoding_len=-1,is_weighted=False)
@@ -16,14 +18,14 @@ class PerformanceMetricsTest(unittest.TestCase):
         logging.info(performance_metrics.show_metrics())
         self.assertTrue(len(performance_metrics) == 2)
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_build(self):
         attributes = {'Accuracy': True, 'Recall': True}
         performance_metrics = PerformanceMetrics.build(attributes)
         logging.info(performance_metrics.show_metrics())
         self.assertTrue(len(performance_metrics) == 2)
 
-    @unittest.skip('Ignored')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_update(self):
         import numpy as np
         from metric.built_in_metric import BuiltInMetric

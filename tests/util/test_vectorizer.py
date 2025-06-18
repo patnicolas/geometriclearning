@@ -3,11 +3,14 @@ import unittest
 import pandas as pd
 import numpy as np
 import logging
-import util
-from typing import AnyStr, List
+from typing import AnyStr
+import os
+import python
+from python import SKIP_REASON
+
 
 class TestVectorizer(TestCase):
-    @unittest.skip("Not needed")
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_dict_vectorizer(self):
         from sklearn.feature_extraction import DictVectorizer
 
@@ -53,8 +56,7 @@ class TestVectorizer(TestCase):
         g('Numexpr eval')
         h('Numexpr eval 8 threads')
 
-
-    @unittest.skip("Not needed")
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_generator_exp(TestCase):
         values = np.random.rand(8,10)
         # Option 1: Direct iterator

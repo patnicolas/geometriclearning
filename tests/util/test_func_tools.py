@@ -2,7 +2,9 @@ from functools import total_ordering
 from unittest import TestCase
 import unittest
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 @total_ordering
 class Student:

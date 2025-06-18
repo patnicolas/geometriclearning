@@ -3,12 +3,13 @@ import unittest
 from plots.plotter import PlotterParameters, Plotter
 import matplotlib.pyplot as plt
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
 
 
 class PlotterTest(unittest.TestCase):
 
-    # @unittest.skip('Ignore')
     def test_scatter_point(self):
         homophilies = [0.815, 0.815, 0.815, 0.302, 0.302, 0.302]
         precisions = [0.78, 0.81, 0.84, 0.49, 0.65, 0.88]
@@ -38,7 +39,7 @@ class PlotterTest(unittest.TestCase):
         plt.grid(True)
         plt.show()
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_bar_charts(self):
         import numpy as np
         # Sample data
@@ -67,7 +68,7 @@ class PlotterTest(unittest.TestCase):
         plt.tight_layout()
         plt.show()
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_bar_charts_2(self):
         import numpy as np
 
@@ -98,7 +99,7 @@ class PlotterTest(unittest.TestCase):
         plt.tight_layout()
         plt.show()
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_scaling_ticks(self):
         y_lim, x_delta, y_delta = Plotter.arrange_y((23, 2.9))
         logging.info(f'y_lim: {y_lim} x_delta: {x_delta}, y_delta: {y_delta} ')
@@ -113,7 +114,7 @@ class PlotterTest(unittest.TestCase):
         logging.info(f'y_lim: {y_lim} x_delta: {x_delta}, y_delta: {y_delta} ')
         assert y_lim == 5, 'should be 5'
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_multi_plot(self):
         dict_values = {
             'Precision': [0.1, 0.3, 0.6, 0.65, 0.7, 0.76],

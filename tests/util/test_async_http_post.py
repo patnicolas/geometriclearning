@@ -1,4 +1,3 @@
-import random
 from unittest import TestCase
 
 import asyncio
@@ -6,10 +5,13 @@ import unittest
 import time
 from util.async_http_post import execute_request
 import logging
-import util
+import os
+import python
+from python import SKIP_REASON
+
 
 class TestAsyncHttpPost(TestCase):
-    @unittest.skip("Not needed")
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_list_partitioning(self):
         lst = [0, 1, 3, 4, 7, 8, 9, 12, 13, 15, 16, 18, 29, 38, 39, 40, 41, 42]
         num_clients = 4
@@ -27,7 +29,6 @@ class TestAsyncHttpPost(TestCase):
         asyncio.run(execute_request(url, new_headers, in_file, num_clients))
         duration = time.time() - start_time
         logging.info(f'{duration=}')
-
 
     @staticmethod
     def __predict_file() -> str:

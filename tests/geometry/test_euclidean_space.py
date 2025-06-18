@@ -1,6 +1,6 @@
 import unittest
 import logging
-import util
+import python
 from geometry.euclidean_space import EuclideanSpace
 from geometry.geometric_space import GeometricSpace
 from geometry.visualization.space_visualization import VisualizationParams

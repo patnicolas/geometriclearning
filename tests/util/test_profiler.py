@@ -1,7 +1,9 @@
 from unittest import TestCase
 import unittest
 from util.profiler import Profiler
-
+import os
+import python
+from python import SKIP_REASON
 
 def test_func():
     import math
@@ -18,17 +20,17 @@ class TestProfiler(TestCase):
         except Exception as e:
             self.fail(str(e))
 
-    @unittest.skip("Not needed")
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_line_profiler(self):
         profiler = Profiler(test_func)
         profiler.run_line_profiler()
 
-    @unittest.skip("Not needed")
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_memory_profiler_func(self):
         profiler = Profiler(test_func)
         profiler.run_memory_profiler_func()
 
-    @unittest.skip("Not needed")
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_memory_profiler(self):
         profiler = Profiler(test_func)
         profiler.run_memory_profiler()

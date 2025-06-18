@@ -1,21 +1,22 @@
 import unittest
 import logging
-import util
 from geometry.hypersphere_space import HypersphereSpace
 from geometry.manifold_point import ManifoldPoint
-from geometry.visualization.space_visualization import VisualizationParams
+import os
+import python
+from python import SKIP_REASON
 
 
 class TestGeometricSpace(unittest.TestCase):
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_sample_hypersphere(self):
         num_samples = 180
         manifold = HypersphereSpace()
         hypersphere_data = manifold.sample(num_samples)
         logging.info(f'\n{hypersphere_data=}')
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_hypersphere(self):
         num_samples = 8
         style = {'color': 'red', 'linestyle': '--', 'label': 'Edges'}
@@ -24,8 +25,7 @@ class TestGeometricSpace(unittest.TestCase):
         manifold_data = manifold.sample(num_samples)
         manifold.show_manifold(manifold_points=manifold_data)
 
-
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_tangent_vector(self):
         from geometry.geometric_space import GeometricSpace
 
@@ -46,7 +46,6 @@ class TestGeometricSpace(unittest.TestCase):
             logging.info(f'Tangent vector: {vec} End point: {end_point}')
         manifold.show_manifold(manifold_points)
 
-    # @unittest.skip('ignore')
     def test_show_tangent_vector_geodesics(self):
         manifold = HypersphereSpace(True)
 
@@ -61,7 +60,7 @@ class TestGeometricSpace(unittest.TestCase):
             ]
             manifold.show_manifold(manifold_points)
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_euclidean_mean(self):
         manifold = HypersphereSpace(True)
         samples = manifold.sample(3)
@@ -73,7 +72,7 @@ class TestGeometricSpace(unittest.TestCase):
         mean = manifold.euclidean_mean(manifold_points)
         logging.info(mean)
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_frechet_mean(self):
         manifold = HypersphereSpace(True)
         samples = manifold.sample(2)
@@ -104,7 +103,7 @@ class TestGeometricSpace(unittest.TestCase):
         manifold_points.append(frechet_pt)
         manifold.show_manifold(manifold_points, [euclidean_mean])
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_extrinsic_to_intrinsic(self):
         intrinsic = False
         manifold = HypersphereSpace(True, intrinsic)
@@ -120,7 +119,7 @@ class TestGeometricSpace(unittest.TestCase):
         intrinsic_manifold_pts = manifold.extrinsic_to_intrinsic(manifold_pts)
         logging.info(f'To intrinsic Coordinates: {[m_pt.location for m_pt in intrinsic_manifold_pts]}')
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_intrinsic_to_extrinsic(self):
         intrinsic = True
         manifold = HypersphereSpace(True, intrinsic)
@@ -133,7 +132,7 @@ class TestGeometricSpace(unittest.TestCase):
         extrinsic_manifold_pts = manifold.intrinsic_to_extrinsic(manifold_pts)
         logging.info(f'To extrinsic Coordinates:\n{[m_pt.location for m_pt in extrinsic_manifold_pts]}')
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_reciprocate_coordinates(self):
         intrinsic = False
         manifold = HypersphereSpace(True)
@@ -150,7 +149,7 @@ class TestGeometricSpace(unittest.TestCase):
         extrinsic_manifold_pts = manifold.intrinsic_to_extrinsic(intrinsic_manifold_pts)
         logging.info(f'Regenerated extrinsic Coordinates:\n{[m_pt.location for m_pt in extrinsic_manifold_pts]}')
 
-    @unittest.skip('ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_extrinsic_to_spherical(self):
         intrinsic = False
         manifold = HypersphereSpace(True, intrinsic)

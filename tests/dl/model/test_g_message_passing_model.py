@@ -7,7 +7,7 @@ from dl.training.hyper_params import HyperParams
 from torch_geometric.nn import GraphConv
 import torch.nn as nn
 import logging
-import util
+import python
 
 class GNNBaseModelTest(unittest.TestCase):
 

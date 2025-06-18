@@ -1,17 +1,19 @@
 import unittest
 import logging
-import util
 from dl.block.graph.gconv_block import GConvBlock
 from dl.block.mlp_block import MLPBlock
 from dl.model.gconv_model import GConvModel
 from torch_geometric.nn import GraphConv, BatchNorm
 from torch_geometric.nn.pool import TopKPooling
 import torch.nn as nn
+import os
+import python
+from python import SKIP_REASON
 
 
 class GConvModelTest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_1(self):
         import torch_geometric
         from dataset.graph.pyg_datasets import PyGDatasets
