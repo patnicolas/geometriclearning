@@ -31,7 +31,6 @@ def log_size(x: torch.Tensor, comment: AnyStr = "") -> NoReturn:
     logging.info(f'{str(sz)} {comment}')
 
 
-@overload
 def log_size(x: torch.Tensor, y: torch.Tensor, comment: AnyStr = '') -> NoReturn:
     """
     Utility to display the shape of two input_tensor

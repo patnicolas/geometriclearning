@@ -5,7 +5,7 @@ import geomstats.backend as gs
 from geomstats.geometry.special_orthogonal import SpecialOrthogonal
 import torch
 import numpy as np
-from typing import AnyStr, Dict
+from typing import AnyStr, Dict, List
 from geometry import GeometricException
 
 
@@ -68,7 +68,33 @@ class SOnGroup(object):
         @rtype: torch Tensor
         """
         assert 0 < n_samples < 1024, f'Number of random samples {n_samples} should be [1, 1024['
-        return torch.Tensor(self.__group.random_uniform(n_samples))
+        points = torch.Tensor(self.__group.n, n_samples)
+        SOnGroup.validate_points(points, dim=self.__group.n, rtol=self.__atol)
+        return points
+
+    def random_matrix(self) -> torch.Tensor:
+        """
+        Generate a random rotation matrix of group SO(n) for n = 2,3 & 4
+        @return: Random rotation matrix
+        @rtype: Torch tensor
+        """
+        A = torch.rand(self.__group.n, self.__group.n)
+        Q, R = torch.linalg.qr(A)
+        # Force det(Q) = +1 to preserve orientation
+        if torch.linalg.det(Q) < 0:
+            Q[:, 0] *= -1
+        return Q
+
+    def generate_rotation(self, weights: List[float]) -> torch.Tensor:
+        basis_matrices = [v for _, v in SOnGroup.__basis_matrices(self.__group.n).items()]
+        if len(weights) != len(basis_matrices):
+            raise GeometricException(f'Weights for aggregation {weights} are incorrect')
+
+        if len(weights) > 1:
+            return sum([weights[idx]*torch.Tensor(mat) for idx, mat in enumerate(basis_matrices)])
+        else:
+            _, basic_matrix = next(iter(basis_matrices))
+            return weights[0]*torch.Tensor(basic_matrix)
 
     def belongs(self, points: torch.Tensor) -> bool:
         """
@@ -81,24 +107,47 @@ class SOnGroup(object):
         @rtype: bool
         """
         # Validate shape, Orthogonality and Determinant condition
-        self.__validate(points)
+        SOnGroup.validate_points(points, dim=self.__group.n, rtol=self.__atol)
 
         # Test only the first element if dimension or 3
         pt = points[0] if len(points.shape) > 2 else points
         return self.__group.belongs(pt.numpy(), self.__atol)
 
     @staticmethod
-    def validate_son_input(*points: torch.Tensor, dim: int, rtol: float = 1e-5) -> None:
-        SOnGroup.__validate_tensor_shape(*points, dim=dim)
+    def validate_points(*points: torch.Tensor, dim: int, rtol: float = 1e-5) -> None:
+        """
+        Validate the matrix on the SO(n) group in 3 steps
+        1- Correct shape
+        2- Orthogonality   R^T.R = Id
+        3- Orientation preservation   det(R) = +1
+        A GeometricException is thrown if one of the 3 conditions is not met
+
+        @param points: One or more matrices or points on SO(n) group to be validated
+        @type points: torch.Tensor
+        @param dim: Dimension of the group (size of rotation matrix)
+        @type dim: int
+        @param rtol: Error tolerance for validating the condition on preserving the orientation
+        @type rtol: float
+        """
+        from python import tensor_all_close
+
         for pt in points:
-            det = torch.linalg.det(pt)
-            if abs(det - 1.0) > 1e-5:
-                raise GeometricException(f'Determinant {det} should be 1')
-            # id = pt.T @ pt
-            if not torch.allclose(pt.T @ pt, torch.eye(dim), rtol=rtol):
+            _shape = (pt.shape[1], pt.shape[2]) if len(pt.shape) > 2 else pt.shape
+            # Validate of tensor shape
+            if _shape != (dim,  dim):
+                raise GeometricException(f'Shape tensor {_shape} should match({dim}, {dim})')
+
+            # Validate condition of orthogonality   R^T.R = Identity
+            id = pt.T @ pt
+            if not tensor_all_close(pt.T @ pt, torch.eye(dim), rtol=rtol):
                 raise GeometricException(f'Orthogonality R^T.R  failed')
 
-    def exp(self, tgt_vector: torch.Tensor, base_point: torch.Tensor) -> torch.Tensor:
+            # Validate orientation det(R) = +1
+            det = torch.linalg.det(pt)
+            if abs(det - 1.0) > rtol:
+                raise GeometricException(f'Determinant {det} should be +1')
+
+    def exp(self, tgt_vector: torch.Tensor, base_point: torch.Tensor = None) -> torch.Tensor:
         """
         Compute the end point of a tangent vector given a base point on the manifold.
             end_point = base_point + exp(tgt_vector).
@@ -112,10 +161,15 @@ class SOnGroup(object):
         @rtype: torch Tensor
         """
         # First  Validate shape, Orthogonality and Determinant condition
-        self.__validate(tgt_vector, base_point)
-        return torch.Tensor(self.__group.exp(tgt_vector.numpy(), base_point.numpy()))
+        base = base_point.numpy() if base_point is not None else np.eye(self.__group.n)
+        SOnGroup.validate_points(base, dim=self.__group.n, rtol=self.__atol)
+        # Invoke Geomstats library
+        end_point = torch.Tensor(self.__group.exp(tgt_vector.numpy(), base))
+        # Validate the output as SO(n) rotation
+        SOnGroup.validate_points(end_point, dim=self.__group.n, rtol=self.__atol)
+        return end_point
 
-    def log(self, point: torch.Tensor, base_point: torch.Tensor) -> torch.Tensor:
+    def log(self, point: torch.Tensor, base_point: torch.Tensor= None) -> torch.Tensor:
         """
         Compute the tangent vector given a base point and an end point on the manifold.
             tangent_vector = log(end_point) - base_point.
@@ -129,8 +183,31 @@ class SOnGroup(object):
         @rtype: torch Tensor
         """
         # First  Validate shape, Orthogonality and Determinant condition
-        self.__validate(point, base_point)
-        return torch.Tensor(self.__group.log(point.numpy(), base_point.numpy()))
+        base = base_point.numpy() if base_point is not None else np.eye(self.__group.n)
+        # Validate the input
+        SOnGroup.validate_points(point, base, dim=self.__group.n, rtol=self.__atol)
+        # Invoke Geomstats
+        tgt_vector = torch.Tensor(self.__group.log(point.numpy(), base.numpy()))
+        return tgt_vector
+
+    def compose(self, point1: torch.Tensor, point2: torch.Tensor) -> torch.Tensor:
+        """
+        Compose (or multiply) two points or rotations on SO(n) group. A Geometric exception is raised if one
+        of the two input rotation matrices does not belong to so3 or if the composed matrix does not belong to so3
+
+        @param point1: First rotation
+        @type point1: torch Tensor
+        @param point2: Second rotation
+        @type point2: torch Tensor
+        @return: Composed rotations which is also a SO(n) group element
+        @rtype: torch Tensor
+        """
+        # We make sure that the two rotations are actually SO(n) elements
+        SOnGroup.validate_points(point1, point2, dim=self.__group.n, rtol=self.__atol)
+        composed_points = self.__group.compose(point1, point2)
+        # Validate the output as SO(n) element
+        SOnGroup.validate_points(composed_points, dim=self.__group.n, rtol=self.__atol)
+        return composed_points
 
     def inverse(self, point: torch.Tensor) -> torch.Tensor:
         """
@@ -144,18 +221,20 @@ class SOnGroup(object):
         @rtype: torch Tensor
         """
         # First  Validate shape, Orthogonality and Determinant condition
-        self.__validate(point)
+        SOnGroup.validate_points(point, dim=self.__group.n, rtol=self.__atol)
         match self.__group.n:
             # Projection computed using Geomstats
             case 2 | 3:
-                return torch.Tensor(self.__group.inverse(point.numpy()))
+                inverse_point = torch.Tensor(self.__group.inverse(point.numpy()))
+                SOnGroup.validate_points(inverse_point, dim=self.__group.n, rtol=self.__atol)
+                return inverse_point
             # Homegrown computation
             case 4:
                 return point.T
             case _:
                 raise GeometricException(f'Dimension {self.__group.n} is not supported')
 
-    def projection(self, point: torch.Tensor) -> torch.Tensor:
+    def project(self, point: torch.Tensor) -> torch.Tensor:
         """
         The projection of n x n matrix onto SO(n) refers to finding the closest matrix in SO(n). The dimension
         n = 2 and 3 are supported by Geomstats SpecialOrthogonal.projection function and n =4 relies on homegrown
@@ -169,8 +248,6 @@ class SOnGroup(object):
         @return: Projected matrix
         @rtype: Torch Tensor
         """
-        #  Validate shape, Orthogonality and Determinant condition
-        self.__validate(point)
         match self.__group.n:
             # Projection computed using Geomstats
             case 2 | 3: return torch.Tensor(self.__group.projection(point.numpy()))
@@ -193,9 +270,8 @@ class SOnGroup(object):
         @return: True if the two tensors are similar, False otherwise
         @rtype: bool
         """
-        #  Validate shape, Orthogonality and Determinant condition
-        self.__validate(t1, t2)
-        return torch.allclose(t1, t2, rtol=rtol, atol=self.__atol)
+        from python import tensor_all_close
+        return tensor_all_close(t1, t2, rtol=rtol)
 
     """ ------------------------   Private Helper Methods -------------------------------- """
     
@@ -222,7 +298,7 @@ class SOnGroup(object):
                 raise GeometricException(f'SO({dim}) is not supported')
 
     def __validate(self, *points: torch.Tensor) -> None:
-        SOnGroup.validate_son_input(*points, dim=self.__group.n, rtol=self.__atol)
+        SOnGroup.validate_points(*points, dim=self.__group.n, rtol=self.__atol)
 
     @staticmethod
     def __validate_tensor_shape(*points: torch.Tensor, dim: int) -> None:
