@@ -22,10 +22,15 @@ class BaseAnimation(object):
         self.fps = fps
 
     @abstractmethod
-    def draw(self) -> None:
+    def draw(self, mp4_file: bool = False) -> None:
         raise NotImplementedError('draw has to be implemented in subclasses')
 
     def _draw_logo(self, fig) -> None:
+        """
+        Draw Logo on the top of the animation frame
+        @param fig: Matplotlib figure
+        @type fig: Figure
+        """
         img = mpimg.imread('../input/Animation_logo.png')
         inset_ax = fig.add_axes([0.01, 0.73, 0.36, 0.36])
         inset_ax.imshow(img, alpha=1.0)
