@@ -36,7 +36,7 @@ class SO3Animation(BaseAnimation):
     Reference:
     """
     def __init__(self,
-                 chart_pos: List[float],
+                 logo_pos: List[float],
                  interval: int,
                  fps: int,
                  coordinates: (float, float, float),
@@ -45,8 +45,8 @@ class SO3Animation(BaseAnimation):
         """
         Default constructor for the animation of SO3 lie Group.
 
-        @param chart_pos: Define the position of the chart [x, y, width, height]
-        @type chart_pos: List[float]
+        @param logo_pos: Define the position of the chart [x, y, width, height]
+        @type logo_pos: List[float]
         @param interval: Interval in milliseconds between frames
         @type interval: int
         @param fps: Number of frame per seconds for animation
@@ -58,7 +58,7 @@ class SO3Animation(BaseAnimation):
         @param sphere_radius: Radius of the 3D sphere
         @type sphere_radius: float
         """
-        super(SO3Animation, self).__init__(chart_pos, interval, fps)
+        super(SO3Animation, self).__init__(logo_pos, interval, fps)
 
         self.coordinates = coordinates
         self.transform = transform
@@ -69,15 +69,15 @@ class SO3Animation(BaseAnimation):
 
     @classmethod
     def build(cls,
-              chart_pos: List[float],
+              logo_pos: List[float],
               interval: int,
               fps: int,
               transform: Callable[[np.array], np.array] = default_so3_transform,
               sphere_radius: float = 1.0) -> Self:
         """
         Alternative constructor that takes a SE3 transformation as argument
-        @param chart_pos: Define the position of the chart [x, y, width, height]
-        @type chart_pos: List[float]
+        @param logo_pos: Define the position of the chart [x, y, width, height]
+        @type logo_pos: List[float]
         @param interval: Interval in milliseconds between frames
         @type interval: int
         @param fps: Number of frame per seconds for animation
@@ -90,7 +90,7 @@ class SO3Animation(BaseAnimation):
         @rtype: SO3Animation
         """
         x, y, z = SO3Animation._set_coordinates(sphere_radius)
-        return cls(chart_pos=chart_pos,
+        return cls(logo_pos=logo_pos,
                    interval=interval,
                    fps=fps, coordinates=(x, y, z),
                    transform=transform,
@@ -98,8 +98,11 @@ class SO3Animation(BaseAnimation):
 
     def draw(self, mp4_file: bool = False) -> None:
         """
-        Draw and animate a 3D sphere in an ambient Euclidean space. The animation is driven by Mathplotlib
+        Draw and animate a 3D sphere in an ambient Euclidean space. The animation is driven by Matplotlib
         FuncAnimation class that require an update nested function.
+
+        @param mp4_file: Flag to specify if the mp4 file is to be generated (False plot are displayed but not saved)
+        @type mp4_file: boolean
         """
         colors = ['#cffa0d', '#8bfa0d', '#1ffa0d', '#0dfa9d', '#0dfae4', '#0ddafa', '#9cb1fe', '#bb9cfe', '#e59cfe',
                   '#fe9cd6', '#fc9e93', '#fe9cd6', '#e59cfe', '#bb9cfe', '#9cb1fe', '#0ddafa', '#0dfae4', '#0dfa9d',
@@ -166,7 +169,7 @@ class SO3Animation(BaseAnimation):
 
     def __draw_formula(self) -> None:
         import matplotlib.image as mpimg
-        img = mpimg.imread(f'../input/{self._group_name()}_formula.png')
+        img = mpimg.imread(f'../../input/{self._group_name()}_formula.png')
         inset_ax = self.fig.add_axes((0.01, 0.32, 0.26, 0.26))
         inset_ax.imshow(img, alpha=1.0)
         inset_ax.axis('off')
@@ -251,22 +254,21 @@ class SO3Animation(BaseAnimation):
         self.ax.set_xlim(-1.8, 1.8)
         self.ax.set_ylim(-1.8, 1.8)
         self.ax.set_zlim(-1.8, 1.8)
-        group_name = 'SO(3)' if self.__class__.__name__ == 'SO3Animation' else "SE(3)"
-        self.ax.set_title(x=0.5,
+        self.ax.set_title(x=0.6,
                           y=1.0,
-                          label=f"{group_name} Transformation on a 3D Sphere",
-                          fontdict={'fontsize': 21, 'fontweight': 'bold', 'fontname': 'Helvetica', 'color': 'black'})
+                          label=f"{self._group_name()} Transformation on a 3D Sphere",
+                          fontdict={'fontsize': 18, 'fontweight': 'bold', 'fontname': 'Helvetica', 'color': 'black'})
         self.ax.set_xlabel('X', fontdict={'fontsize': 14, 'fontweight': 'bold'})
         self.ax.set_ylabel('Y', fontdict={'fontsize': 14, 'fontweight': 'bold'})
         self.ax.set_zlabel('Z', fontdict={'fontsize': 14, 'fontweight': 'bold'})
 
 
 if __name__ == '__main__':
-    lie_group_simulation = SO3Animation.build(chart_pos=[-0.4, -0.1, 2.2, 1.1],
+    lie_group_simulation = SO3Animation.build(logo_pos=[0.02, 0.72, 0.3, 0.28],
                                               interval=2000,
                                               fps=10,
                                               sphere_radius=2)
-    lie_group_simulation.draw()
+    lie_group_simulation.draw(mp4_file=True)
 
 
 

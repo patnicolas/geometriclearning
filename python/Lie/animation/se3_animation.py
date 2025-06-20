@@ -1,7 +1,7 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-from Lie.so3_animation import SO3Animation
+from Lie.animation.so3_animation import SO3Animation
 import numpy as np
 from typing import List, Self, Callable, AnyStr
 __all__ = ['SE3Animation']
@@ -38,7 +38,7 @@ class SE3Animation(SO3Animation):
     Reference:
     """
     def __init__(self,
-                 chart_pos: List[float],
+                 logo_pos: List[float],
                  interval: int,
                  fps: int,
                  coordinates: (float, float, float),
@@ -46,8 +46,8 @@ class SE3Animation(SO3Animation):
         """
               Default constructor for the animation of SE3 lie Group.
 
-              @param chart_pos: Define the position of the chart [x, y, width, height]
-              @type chart_pos: List[float]
+              @param logo_pos: Define the position of the chart [x, y, width, height]
+              @type logo_pos: List[float]
               @param interval: Interval in milliseconds between frames
               @type interval: int
               @param fps: Number of frame per seconds for animation
@@ -57,19 +57,19 @@ class SE3Animation(SO3Animation):
               @param transform: Rotation (SO3) + Translation transform
               @type transform: Callable
               """
-        super(SE3Animation, self).__init__(chart_pos, interval, fps, coordinates, transform, 1.0)
+        super(SE3Animation, self).__init__(logo_pos, interval, fps, coordinates, transform, 1.0)
 
     @classmethod
     def build(cls,
-              chart_pos: List[float],
+              logo_pos: List[float],
               interval: int,
               fps: int,
               transform: Callable[[np.array], np.array] = default_se3_transform,
               sphere_radius: float = 1.0) -> Self:
         """
         Alternative constructor that takes a SE3 transformation as argument
-        @param chart_pos: Define the position of the chart [x, y, width, height]
-        @type chart_pos: List[float]
+        @param logo_pos: Define the position of the chart [x, y, width, height]
+        @type logo_pos: List[float]
         @param interval: Interval in milliseconds between frames
         @type interval: int
         @param fps: Number of frame per seconds for animation
@@ -82,7 +82,7 @@ class SE3Animation(SO3Animation):
         @rtype: SO3Animation
         """
         x, y, z = SO3Animation._set_coordinates(1.0)
-        return cls(chart_pos=chart_pos,
+        return cls(logo_pos=logo_pos,
                    interval=interval,
                    fps=fps, coordinates=(x, y, z),
                    transform=transform)
@@ -111,26 +111,10 @@ class SE3Animation(SO3Animation):
                              label='Line between points')
 
 
-
 if __name__ == '__main__':
-    """
-    def se3_transform(args: List[np.array]) -> np.array:
-        theta = args[0]
-        t = args[1]
-        R = np.array([
-             [np.cos(theta), -np.sin(theta), 0],
-             [np.sin(theta), np.cos(theta), 0],
-             [0, 0, 1]
-        ])
-        # Assemble the 4x4 SE(3) matrix
-        T = np.eye(4)
-        T[:3, :3] = R
-        T[:3, 3:] = t
-        return T
-    """
-    lie_group_simulation = SE3Animation.build(chart_pos=[-0.4, -0.1, 2.2, 1.1],
-                                              interval=2000,
-                                              fps=10,
-                                              sphere_radius= 1)
-    lie_group_simulation.draw()
+    lie_group_simulation = SE3Animation.build(logo_pos=[0.01, 0.74, 0.34, 0.24],
+                                              interval=1000,
+                                              fps=8,
+                                              sphere_radius=1.6)
+    lie_group_simulation.draw(mp4_file=True)
 

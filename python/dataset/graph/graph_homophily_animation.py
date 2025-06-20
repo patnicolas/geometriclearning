@@ -14,15 +14,15 @@ __all__ = ['GraphHomophilyAnimation']
 
 class GraphHomophilyAnimation(BaseAnimation):
     def __init__(self,
-                 chart_pos: List[float],
+                 logo_pos: List[float],
                  interval: int,
                  fps: int,
                  num_nodes: int,
-                 average_degree: float,) -> None:
+                 average_degree: float, ) -> None:
         """
 
-        @param chart_pos: Position of the chart used in call to plt.set_position or ax.set_position
-        @type chart_pos: 4-dimension array
+        @param logo_pos: Position of the chart used in call to plt.set_position or ax.set_position
+        @type logo_pos: 4-dimension array
         @param interval: Interval in milliseconds between frames
         @type interval: int
         @param fps: Number of frame per seconds for animation
@@ -32,7 +32,7 @@ class GraphHomophilyAnimation(BaseAnimation):
         @param average_degree:
         @type average_degree:
         """
-        super(GraphHomophilyAnimation, self).__init__(chart_pos, interval, fps)
+        super(GraphHomophilyAnimation, self).__init__(logo_pos, interval, fps)
 
         self.G = nx.erdos_renyi_graph(n=num_nodes, p=average_degree, seed=42)
         self.central_node: int = GraphHomophilyAnimation.__get_central_node(self.G)
@@ -148,7 +148,7 @@ class GraphHomophilyAnimation(BaseAnimation):
 
 
 if __name__ == '__main__':
-    graph_homophily_visualization = GraphHomophilyAnimation(chart_pos=[-0.05, -0.1, 1.1, 1.07],
+    graph_homophily_visualization = GraphHomophilyAnimation(logo_pos=[-0.05, -0.1, 1.1, 1.07],
                                                             interval=1400,
                                                             fps=3,
                                                             num_nodes=96,

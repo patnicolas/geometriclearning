@@ -6,18 +6,18 @@ from abc import abstractmethod
 import matplotlib.image as mpimg
 
 class BaseAnimation(object):
-    def __init__(self, chart_pos: List[float], interval: int, fps: int) -> None:
+    def __init__(self, logo_pos: List[float], interval: int, fps: int) -> None:
         """
         Constructor for the base animation
-        @param chart_pos: Position of the chart used in call to plt.set_position or ax.set_position
-        @type chart_pos: 4-dimension array
+        @param logo_pos: Position of the chart used in call to plt.set_position or ax.set_position
+        @type logo_pos: 4-dimension array
         @param interval: Interval in milliseconds between frames
         @type interval: int
         @param fps: Number of frame per seconds for animation
         @type fps: int
         """
-        assert len(chart_pos) == 4, f'Length of chart position {len(chart_pos)} should be 4'
-        self.chart_pos = chart_pos
+        assert len(logo_pos) == 4, f'Length of chart position {len(logo_pos)} should be 4'
+        self.chart_pos = logo_pos
         self.interval = interval
         self.fps = fps
 
@@ -32,7 +32,7 @@ class BaseAnimation(object):
         @type fig: Figure
         """
         img = mpimg.imread('../input/Animation_logo.png')
-        inset_ax = fig.add_axes([0.01, 0.73, 0.36, 0.36])
+        inset_ax = fig.add_axes(self.chart_pos)
         inset_ax.imshow(img, alpha=1.0)
         inset_ax.axis('off')
 
