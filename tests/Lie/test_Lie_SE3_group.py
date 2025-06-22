@@ -1,8 +1,8 @@
 import unittest
 import numpy as np
-from Lie.SE3_visualization import SE3Visualization
-from Lie.Lie_SE3_group import LieSE3Group
-from Lie import u3d
+from lie.se3_visualization import SE3Visualization
+from lie.lie_se3_group import LieSE3Group
+from lie import u3d
 import logging
 import os
 import python
@@ -22,7 +22,7 @@ class LieSE3GroupTest(unittest.TestCase):
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_build_from_unit_elements(self):
-        from Lie import u3d
+        from lie import u3d
 
         lie_se3_group = LieSE3Group(u3d.y_rot, u3d.x_trans)
         logging.info(lie_se3_group)
@@ -96,7 +96,7 @@ class LieSE3GroupTest(unittest.TestCase):
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_commutative(self):
-        from Lie import u3d as u
+        from lie import u3d as u
 
         se3_1 = SE3Visualization(np.array(0.5 * u.x_rot + 2 * u.y_rot),
                                  np.array(u.y_trans + u.z_trans))

@@ -1,5 +1,5 @@
 import unittest
-from informationgeometry.normal_hypersphere import NormalHypersphere
+from information_geometry.normal_hypersphere import NormalHypersphere
 
 
 class NormalHypersphereTest(unittest.TestCase):

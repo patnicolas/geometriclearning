@@ -34,7 +34,7 @@ def default_so3_transform(args: List[np.array]) -> np.array:
 
 class SO3Animation(BaseAnimation):
     """
-    Wrapper for simulation or animation of SO3 Lie group transformation defined as
+    Wrapper for simulation or animation of SO3 lie group transformation defined as
     math::
         \begin{matrix}
         cos(\theta) & -sin(\theta)  & 0 \\

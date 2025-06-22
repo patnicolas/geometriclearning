@@ -1,5 +1,5 @@
 import unittest
-from informationgeometry.beta_hypersphere import BetaHypersphere
+from information_geometry.beta_hypersphere import BetaHypersphere
 
 
 class BetaHypersphereTest(unittest.TestCase):

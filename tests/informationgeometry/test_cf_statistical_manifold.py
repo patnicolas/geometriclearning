@@ -11,7 +11,7 @@ from geomstats.information_geometry.exponential import ExponentialDistributions
 from geomstats.information_geometry.base import InformationManifoldMixin
 from geomstats.information_geometry.geometric import GeometricDistributions
 from geomstats.information_geometry.poisson import PoissonDistributions
-from informationgeometry.cf_statistical_manifold import CFStatisticalManifold
+from information_geometry.cf_statistical_manifold import CFStatisticalManifold
 from typing import Tuple, AnyStr
 
 

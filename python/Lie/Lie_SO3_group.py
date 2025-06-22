@@ -19,7 +19,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 import numpy as np
 from typing import List, Self, AnyStr
-from Lie import LieElement
+from lie import LieElement
 
 
 """
@@ -31,13 +31,13 @@ from Lie import LieElement
 
 
 class LieSO3Group(object):
-    # Lie group as defined in Geomstats library
+    # lie group as defined in Geomstats library
     lie_group = SpecialOrthogonal(n=3, point_type='vector', equip=False)
     identity_matrix = np.eye(3)
 
     def __init__(self, algebra_element: np.array, identity_element: np.array = identity_matrix) -> None:
         """
-        Constructor for the wrapper for key operations on SO3 Special Orthogonal Lie manifold
+        Constructor for the wrapper for key operations on SO3 Special Orthogonal lie manifold
         @param algebra_element: Rotation matrix as a 3 x 3 Numpy matrix
         @type algebra_element: Numpy array
         @param identity_element: Reference element on the manifold (Identity  if not defined)
@@ -59,7 +59,7 @@ class LieSO3Group(object):
     @classmethod
     def build(cls, algebra_element: List[float], identity_matrix: List[float] = None) -> Self:
         """
-        Alternative constructor for the operations on SO3 Lie Manifold
+        Alternative constructor for the operations on SO3 lie Manifold
         @param algebra_element: Tangent vector (Matrix)
         @type algebra_element: List[float] (dim 3 x 3 = 9)
         @param identity_matrix: Base point on the SO3 manifold
@@ -95,8 +95,8 @@ class LieSO3Group(object):
 
     def product(self, lie_so3_group: Self) -> Self:
         """
-        Define the product this LieGroup point or element with another Lie group point using Geomstats compose method
-        @param lie_so3_group Another Lie group
+        Define the product this LieGroup point or element with another lie group point using Geomstats compose method
+        @param lie_so3_group Another lie group
         @type LieSO3Group
         @return: Instance of LieSO3Group
         @rtype: LieSO3Group
@@ -136,7 +136,7 @@ class LieSO3Group(object):
 
     def visualize(self, title: AnyStr, notation_index: int = 0) -> None:
         """
-        Visualize this element on SO3 Lie group. The element is defined through the exponential map
+        Visualize this element on SO3 lie group. The element is defined through the exponential map
         of the tangent vector + base point  (if not identity)
         @param title: Title for the plot
         @type title: str

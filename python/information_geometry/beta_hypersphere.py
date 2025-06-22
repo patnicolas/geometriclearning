@@ -13,7 +13,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from informationgeometry.geometric_distribution import GeometricDistribution
+from information_geometry.geometric_distribution import GeometricDistribution
 import geomstats.backend as gs
 import matplotlib.pyplot as plt
 

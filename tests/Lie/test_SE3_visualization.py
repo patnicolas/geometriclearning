@@ -1,8 +1,8 @@
 
 import unittest
-from Lie.Lie_SE3_group import SE3ElementDescriptor
-from Lie import u3d
-from Lie.SE3_visualization import SE3Visualization
+from lie.lie_se3_group import SE3ElementDescriptor
+from lie import u3d
+from lie.se3_visualization import SE3Visualization
 import numpy as np
 from typing import List
 import geomstats.backend as gs
@@ -17,7 +17,7 @@ class SE3VisualizationTest(unittest.TestCase):
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_animation_one(self):
-        from Lie import u3d
+        from lie import u3d
 
         visualization = SE3Visualization(u3d.y_rot, u3d.x_trans)
         logging.info(visualization)
@@ -41,7 +41,7 @@ class SE3VisualizationTest(unittest.TestCase):
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_animation_two(self):
-        from Lie import u3d
+        from lie import u3d
 
         visualization = SE3Visualization(u3d.y_rot, u3d.x_trans)
         logging.info(visualization)
@@ -73,7 +73,7 @@ class SE3VisualizationTest(unittest.TestCase):
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_visualization_2(self):
-        from Lie import u3d
+        from lie import u3d
 
         logging.info(f'\nRotation matrix:\n{np.reshape(u3d.y_rot, (3, 3))}')
         logging.info(f'Translation vector: {u3d.x_trans}')

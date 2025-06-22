@@ -1,6 +1,6 @@
 import unittest
 
-from Lie.SOn_group import SOnGroup
+from lie.son_group import SOnGroup
 import logging
 import torch
 from geometry import GeometricException

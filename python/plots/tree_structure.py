@@ -9,7 +9,7 @@ class DrawTree(object):
              'Topology': '',
              'Manifolds': '',
              'Algebra & Groups': '',
-             'Lie Groups': '',
+             'lie Groups': '',
              'Equivariant Networks': '',
              'Machine Learning': '',
              'Graph Neural Networks': '',

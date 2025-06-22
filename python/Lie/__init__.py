@@ -30,7 +30,7 @@ class LieElement:
     """
     group_element: np.array     # Point on the Manifold
     identity_element: np.array  # Reference point (Identity by default)
-    descriptor: AnyStr = 'Lie Element'
+    descriptor: AnyStr = 'lie Element'
 
 
 class UnitElements3D:

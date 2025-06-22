@@ -13,14 +13,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from informationgeometry.geometric_distribution import GeometricDistribution
+from information_geometry.geometric_distribution import GeometricDistribution
 import geomstats.backend as gs
 import matplotlib.pyplot as plt
 
 """
 Define a Normal Distribution on an Hypersphere using the Geomstats Python library
 The purpose of this class is to display variants of two Normal distribution on a Hypersphere
-@see informationgeometry.GeometricDistribution
+@see information_geometry.GeometricDistribution
 This implementation relies on the manifold point defined in manifolds.ManifoldPoint
 """
 

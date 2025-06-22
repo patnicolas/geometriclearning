@@ -13,7 +13,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from Lie.animation.so3_animation import SO3Animation
+from lie.animation.so3_animation import SO3Animation
 import numpy as np
 from typing import List, Self, Callable, AnyStr
 __all__ = ['SE3Animation']
@@ -35,7 +35,7 @@ def default_se3_transform(args: List[np.array]) -> np.array:
 
 class SE3Animation(SO3Animation):
     """
-    Wrapper for simulation or animation of SE3 Lie group transformation defined as
+    Wrapper for simulation or animation of SE3 lie group transformation defined as
     math::
         \begin{matrix}
         cos(\theta) & -sin(\theta)  & 0 & t_{1} \\

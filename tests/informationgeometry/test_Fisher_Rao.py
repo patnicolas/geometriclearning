@@ -14,7 +14,7 @@ from geomstats.information_geometry.geometric import GeometricDistributions
 from geomstats.information_geometry.gamma import GammaDistributions
 from geomstats.information_geometry.binomial import BinomialDistributions
 from geomstats.information_geometry.base import InformationManifoldMixin
-from informationgeometry.Fisher_Rao import FisherRao
+from information_geometry.fisher_rao import FisherRao
 import torch
 import python
 from python import SKIP_REASON

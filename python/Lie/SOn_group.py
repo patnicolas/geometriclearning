@@ -26,10 +26,10 @@ class SOnGroup(object):
 
     def __init__(self, dim: int, equip: bool, atol: float = 1e-5) -> None:
         """
-        Constructor for the SO(n) Lie Group of Rotation matrices of dimension 2, 3 or 4
-        @param dim: Dimension of Lie algebra
+        Constructor for the SO(n) lie Group of Rotation matrices of dimension 2, 3 or 4
+        @param dim: Dimension of lie algebra
         @type dim: int
-        @param equip: Flag to specify if this Lie Group is equipped with a Riemannian metric
+        @param equip: Flag to specify if this lie Group is equipped with a Riemannian metric
         @type equip: bool
         @param atol: Error tolerance for tensor value
         @type atol: float
@@ -50,12 +50,12 @@ class SOnGroup(object):
 
     def lie_algebra(self, point: torch.Tensor, identity: torch.Tensor = None) -> torch.Tensor:
         """
-        Compute the Lie algebra (Rotation, skewed matrices) from a point on a manifold. The method leverages Geomstats 
+        Compute the lie algebra (Rotation, skewed matrices) from a point on a manifold. The method leverages Geomstats
         SpecialOrthogonal.lie_algebra method.
         
         @param point: Point on the manifold
         @type point: torch Tensor
-        @param identity: Reference point on the Lie Algebra (Tangent space). Default identity matrix is used if
+        @param identity: Reference point on the lie Algebra (Tangent space). Default identity matrix is used if
                         the argument is not provided
         @type identity: torch Tensor | None
         @return: Rotation matrix associated with the point on the manifold
@@ -165,7 +165,7 @@ class SOnGroup(object):
             end_point = base_point + exp(tgt_vector).
         The method leverages Geomstats SpecialOrthogonal.exp function.
         
-        @param tgt_vector: Vector (Matrix Lie Algebra) on the tangent space
+        @param tgt_vector: Vector (Matrix lie Algebra) on the tangent space
         @type tgt_vector: torch Tensor
         @param base_point: Base point on the manifold
         @type base_point: torch Tensor

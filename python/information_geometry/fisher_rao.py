@@ -14,7 +14,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 from geomstats.information_geometry.base import InformationManifoldMixin
-from informationgeometry.cf_statistical_manifold import CFStatisticalManifold
+from information_geometry.cf_statistical_manifold import CFStatisticalManifold
 from typing import Tuple
 import torch
 
