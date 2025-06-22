@@ -15,8 +15,8 @@ class TestVectorizer(TestCase):
         from sklearn.feature_extraction import DictVectorizer
 
         token_dict =[
-            {'hello':1,'patrick':1,'this':1,'is':1,'not':1,'a':2,'or':1,'joke':1},
-            {'the':1,'joke':1,'is':1,'on':1,'you':1}
+            {'hello': 1, 'patrick': 1, 'this': 1, 'is': 1, 'not': 1, 'a': 2, 'or': 1, 'joke': 1},
+            {'the': 1, 'joke': 1, 'is': 1, 'on': 1, 'you': 1}
         ]
         dv = DictVectorizer()
         dv.fit(token_dict)
