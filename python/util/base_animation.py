@@ -13,7 +13,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List
+from typing import List, AnyStr
 from abc import abstractmethod
 import matplotlib.image as mpimg
 
@@ -34,7 +34,19 @@ class BaseAnimation(object):
         self.fps = fps
 
     @abstractmethod
-    def draw(self, mp4_file: bool = False) -> None:
+    def _group_name(self) -> AnyStr:
+        raise NotImplementedError('_group_name has to be implemented in subclasses')
+
+    @abstractmethod
+    def draw(self, mp4_filename: AnyStr = None) -> None:
+        """
+            Draw and animate Lie group/manifold in ambient Euclidean space. The animation is driven by Matplotlib
+            FuncAnimation class that require an update nested function.
+            This method needs to be overwritten in sub-classes
+
+            @param mp4_filename: Name of the mp4 file is to be generated (False plot are displayed but not saved)
+            @type mp4_filename: str
+        """
         raise NotImplementedError('draw has to be implemented in subclasses')
 
     def _draw_logo(self, fig) -> None:
@@ -43,7 +55,7 @@ class BaseAnimation(object):
         @param fig: Matplotlib figure
         @type fig: Figure
         """
-        img = mpimg.imread('../input/Animation_logo.png')
+        img = mpimg.imread('../../input/Animation_logo.png')
         inset_ax = fig.add_axes(self.chart_pos)
         inset_ax.imshow(img, alpha=1.0)
         inset_ax.axis('off')

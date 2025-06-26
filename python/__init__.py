@@ -16,6 +16,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import torch
 torch.set_default_dtype(torch.float32)
+from typing import AnyStr, List
 
 """
 Environment variable to enable/disable unit test for execution
@@ -66,4 +67,21 @@ def are_tensors_close(t1: torch.Tensor, t2: torch.Tensor, rtol: float = 1e-6) ->
             if val > rtol:
                 is_match = False
     return is_match
+
+
+"""
+    Generic format to print a PyTorch tensor with a given decimals
+"""
+
+def pretty_torch(x: torch.Tensor, w: int = 8, d: int = 4) -> AnyStr:
+    match x.dim():
+        case 0:
+            print(f'{x.item():>{w}.{d}f}')
+        case 1:
+            print(" ".join(f"{_x.item():>{w}.{d}f}" for _x in x))
+        case _:
+            for _x in x:
+                pretty_torch(_x, w, d)
+
+
 

@@ -8,7 +8,6 @@ from typing import List
 import geomstats.backend as gs
 import logging
 import os
-import python
 from python import SKIP_REASON
 
 

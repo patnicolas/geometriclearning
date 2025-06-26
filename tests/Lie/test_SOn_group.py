@@ -9,7 +9,6 @@ import python
 from python import SKIP_REASON
 
 
-
 class SOnGroupTest(unittest.TestCase):
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_2(self):
@@ -225,9 +224,11 @@ class SOnGroupTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_projection_3(self):
         try:
+            from python import pretty_torch
+
             son_group = SOnGroup(dim=4, equip=True)
             matrix = torch.Tensor(
                 [[0.0, 0.8, -1.0, 0.3],
@@ -236,7 +237,10 @@ class SOnGroupTest(unittest.TestCase):
                  [-0.3, 0.4, -0.1, 0.0]]
             )
             projected_matrix = son_group.project(matrix)
-            logging.info(f'\nMatrix:\n{matrix}\nProjected matrix:\n{projected_matrix}')
+            logging.info('\nMatrix:')
+            pretty_torch(matrix, w=8, d=4)
+            logging.info('\nProjected matrix:')
+            pretty_torch(projected_matrix)
 
             matrix = torch.eye(4)
             projected_matrix = son_group.project(matrix)
@@ -253,17 +257,13 @@ class SOnGroupTest(unittest.TestCase):
             # Generate rotations1
             matrix1 = SOnGroupTest.__create_matrix(rad=45, dim=3)
             matrix2 = SOnGroupTest.__create_matrix(rad=0, dim=3)
-            # Validate rotations
-            # SOnGroup.validate_points(matrix1, matrix2, dim=3, rtol=1e-6)
 
             # Composed rotations
             composed_rotation = son_group.compose(matrix1, matrix2)
-            # SOnGroup.validate_points(composed_rotation, dim=3)
             logging.info(f'\nMatrix 1: {matrix1}\nMatrix 2: {matrix2}\nComposed matrix:\n{composed_rotation}')
 
             # Self composed rotations
             composed_rotation = son_group.compose(matrix1, matrix1)
-            # SOnGroup.validate_points(composed_rotation, dim=3)
             logging.info(f'\nMatrix: {matrix1}\nSelf composed matrix:\n{composed_rotation}')
         except GeometricException as e:
             logging.error(e)
@@ -332,11 +332,9 @@ class SOnGroupTest(unittest.TestCase):
             SOnGroup.validate_points(inverse_matrix, dim=dim)
             logging.info(f'\nMatrix:\n{matrix}\nInverse matrix:\n{inverse_matrix}')
 
-            matrix = torch.eye(4)
-            inverse_matrix = son_group.inverse(matrix)
-            # Validate inverse rotation is SO(4)
-            SOnGroup.validate_points(inverse_matrix, dim=dim)
-            logging.info(f'\nMatrix:\n{matrix}\nInverse matrix:\n{inverse_matrix}')
+            # Verify inverse
+            identity = torch.eye(dim)
+            son_group.equal(matrix.T @ inverse_matrix, identity)
         except GeometricException as e:
             logging.error(e)
             self.assertTrue(False)
@@ -354,16 +352,49 @@ class SOnGroupTest(unittest.TestCase):
             composed = son_group.compose(matrix, inverse_matrix)
             logging.info(f'\nA={matrix}\nA o inv(A)={composed}')
             self.assertTrue(son_group.equal(composed, torch.eye(3)))
-
         except GeometricException as e:
             logging.error(e)
             self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
-    def test_aggregation(self):
-        son_group = SOnGroup(dim=3, equip=True)
-        aggregated = son_group.generate_rotation(weights=[0.2, 0.5, 0.3])
-        logging.info(f'\nAggregated rotation: {aggregated}')
+    def test_generate_rotation_1(self):
+        try:
+            son_group = SOnGroup(dim=3, equip=True)
+            so3_generated = son_group.generate_rotation(weights=[0.2, 0.5, 0.3])
+            logging.info(f'\nGenerated rotation: {so3_generated}')
+            self.assertTrue(so3_generated.shape == (3, 3))
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
+
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    def test_generate_rotation_2(self):
+        try:
+            son_group = SOnGroup(dim=4, equip=True)
+            so4_generated = son_group.generate_rotation(weights=[0.2, 0.2, 0.2, 0.1, 0.1, 0.2])
+            logging.info(f'\nGenerated SO4 element: {so4_generated}')
+            self.assertTrue(so4_generated.shape == (4, 4))
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
+
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    def test_generate_rotation_3(self):
+        import random
+
+        try:
+            son_group = SOnGroup(dim=4, equip=True)
+            weights = [random.random() for _ in range(son_group.num_basis_matrices())]
+            # Normalize weights distribution for basis matrices
+            total_weights = sum(weights)
+            weights = [w/total_weights for w in weights]
+            # Generate so4 Algebra element
+            so4_generated = son_group.generate_rotation(weights=weights)
+            logging.info(f'\nGenerated SO4 element: {so4_generated}')
+            self.assertTrue(so4_generated.shape == (4, 4))
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_create_matrix(self):

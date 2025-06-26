@@ -24,14 +24,11 @@ class SO4AnimationScatter(BaseAnimation):
 
     def draw(self, mp4_file: bool = False) -> None:
         points_on_sphere = SO4AnimationScatter.__generate_4d_sphere(self.num_points)
-        # sc = self.ax.plot_wireframe(X=[], Y=[], Z=[], s=8, color='C0', cmap='viridis_r')
-        # sc = self.ax.scatter(xs=[], ys=[], zs=[], s=8, cmap='viridis_r')
 
         self.ax.set_xlim([-1, 1])
         self.ax.set_ylim([-1, 1])
         self.ax.set_zlim([-1, 1])
         self.ax.set_box_aspect([1, 1, 1])
-        self.ax.set_title("SO(4) Rotation: 4D Sphere Projection")
 
         # Animation function
         def update(frame: int) -> None:
@@ -41,7 +38,6 @@ class SO4AnimationScatter(BaseAnimation):
             proj = SO4AnimationScatter.__project_rotation(rotated)
             Z = proj[:, 2]
             self.ax.plot_wireframe(X=proj[:, 0], Y=proj[:, 1], Z=proj[:, 2], s=8, color='C0', cmap='viridis_r')
-            # sc._offsets3d = (proj[:, 0], proj[:, 1], proj[:, 2])
 
         ani = FuncAnimation(self.fig,
                             update,
@@ -115,7 +111,6 @@ if __name__ == '__main__':
     ax.set_ylim([-1.2, 1.2])
     ax.set_zlim([-1.2, 1.2])
     ax.set_box_aspect([1, 1, 1])
-    ax.set_title("Rotating 4D Sphere (SO(4)) Wireframe")
 
     # Create line containers
     wire_u = [ax.plot([], [], [], 'blue', lw=0.5)[0] for _ in range(shape_2d[0])]
@@ -149,4 +144,5 @@ if __name__ == '__main__':
 
 
     ani = FuncAnimation(fig, update, frames=np.linspace(0, 360, 400), interval=50)
-    plt.show()
+    # plt.show()
+    ani.save('SO4_b_animation.mp4', writer='ffmpeg', fps=12, dpi=240)
