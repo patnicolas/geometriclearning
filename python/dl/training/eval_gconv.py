@@ -13,7 +13,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dl import GNNException
+from dl import GraphException
 import torch.nn as nn
 import torch_geometric
 from dataset.graph.graph_data_loader import GraphDataLoader
@@ -82,7 +82,7 @@ class EvalGConv(object):
         pyg_dataset = PyGDatasets(self.training_attributes['dataset_name'])
         flickr_dataset: Flickr = pyg_dataset()
         if flickr_dataset is None:
-            raise GNNException("Failed to load Flickr")
+            raise GraphException("Failed to load Flickr")
 
         _data: torch_geometric.data.Data = flickr_dataset[0]
         logging.info(f'Number of features: {_data.num_node_features}\nNumber of classes: {flickr_dataset.num_classes}'

@@ -18,6 +18,10 @@ from typing import AnyStr
 from dataclasses import dataclass
 
 
+class LieException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(LieException, self).__init__(args, kwargs)
+
 @dataclass
 class LieElement:
     """

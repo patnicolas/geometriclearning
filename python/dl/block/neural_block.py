@@ -15,7 +15,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from torch import nn
 from typing import Self, AnyStr, Optional, List
-from dl import DLException
+from dl import MLPException
 
 
 """
@@ -36,7 +36,7 @@ class NeuralBlock(nn.Module):
         self.block_id = block_id
 
     def transpose(self, extra: Optional[nn.Module] = None) -> Self:
-        raise DLException('Cannot invert abstract Neural block')
+        raise MLPException('Cannot invert abstract Neural block')
 
     def __str__(self) -> AnyStr:
         module_repr = self.__repr__()

@@ -224,7 +224,7 @@ class SOnGroupTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_projection_3(self):
         try:
             from python import pretty_torch
@@ -269,6 +269,19 @@ class SOnGroupTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
+    def test_compose_commutative(self):
+        dimension = 4
+        son_group = SOnGroup(dim=dimension, equip=True)
+        # Generate rotations matrices
+        rand_matrix1 = son_group.random_matrix()
+        rand_matrix2 = son_group.random_matrix()
+
+        composed_rotation1 = son_group.compose(rand_matrix1, rand_matrix2)
+        composed_rotation2 = son_group.compose(rand_matrix2, rand_matrix1)
+        logging.info(f'\nMatrix 1:\n{rand_matrix1}\nMatrix 2:\n{rand_matrix2}'
+                     f'\nComposition Matrix 1 x matrix 2\n{composed_rotation1}'
+                     f'\nComposition Matrix 1 x matrix 2\n{composed_rotation2}')
+
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_compose_2(self):
         try:
@@ -293,24 +306,24 @@ class SOnGroupTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_inverse_1(self):
         try:
             group_dim = 2
-            son_group = SOnGroup(dim=group_dim, equip=True)
+            so2_group = SOnGroup(dim=group_dim, equip=True, atol=1e-4)
             matrix = SOnGroupTest.create_matrix(theta_rad=90, gamma_rad=None)
             # Validate rotation is SO(2)
             SOnGroup.validate_points(matrix, dim=group_dim)
 
-            inverse_matrix = son_group.inverse(matrix)
+            inverse_matrix = so2_group.inverse(matrix)
             # Validate inverse rotation is SO(2)
             SOnGroup.validate_points(inverse_matrix, dim=group_dim)
             logging.info(f'\nMatrix:\n{matrix}\nInverse matrix:\n{inverse_matrix}')
             # Verify inverse
             identity = torch.eye(group_dim)
-            son_group.equal(matrix.T @ inverse_matrix, identity)
-
-            inverse_identity = son_group.inverse(identity)
+            is_equal = so2_group.equal(matrix.T,  inverse_matrix, 1e-5)
+            self.assertTrue( is_equal )
+            inverse_identity = so2_group.inverse(identity)
             # Validate inverse rotation is SO(2)
             SOnGroup.validate_points(inverse_identity, dim=group_dim)
             logging.info(f'\nMatrix:\n{identity}\nInverse matrix:\n{inverse_identity}')

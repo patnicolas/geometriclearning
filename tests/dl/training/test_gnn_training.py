@@ -2,7 +2,7 @@ import unittest
 
 from mpmath import hyper
 
-from dl import GNNException
+from dl import GraphException
 from dataset import DatasetException
 from dl.block.mlp_block import MLPBlock
 from dl.training.hyper_params import HyperParams
@@ -87,7 +87,7 @@ class GNNTrainingTest(unittest.TestCase):
             accuracy_list = network.performance_metrics.performance_values[MetricType.Accuracy]
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
-        except GNNException as e:
+        except GraphException as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except DatasetException as e:
@@ -147,7 +147,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader()
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
 
-        except GNNException as e:
+        except GraphException as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except DatasetException as e:
@@ -184,7 +184,7 @@ class GNNTrainingTest(unittest.TestCase):
             accuracy_list = network.training_summary.metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
-        except GNNException as e:
+        except GraphException as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except DatasetException as e:
@@ -218,7 +218,7 @@ class GNNTrainingTest(unittest.TestCase):
             accuracy_list = network.training_summary.metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
-        except GNNException as e:
+        except GraphException as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except DatasetException as e:
@@ -252,7 +252,7 @@ class GNNTrainingTest(unittest.TestCase):
             accuracy_list = network.training_summary.metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
-        except GNNException as e:
+        except GraphException as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except DatasetException as e:
@@ -288,7 +288,7 @@ class GNNTrainingTest(unittest.TestCase):
             accuracy_list = network.training_summary.metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
-        except GNNException as e:
+        except GraphException as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except DatasetException as e:
@@ -323,7 +323,7 @@ class GNNTrainingTest(unittest.TestCase):
             accuracy_list = network.training_summary.metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
-        except GNNException as e:
+        except GraphException as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except DatasetException as e:
@@ -359,7 +359,7 @@ class GNNTrainingTest(unittest.TestCase):
             accuracy_list = network.training_summary.metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
-        except GNNException as e:
+        except GraphException as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except DatasetException as e:
@@ -395,7 +395,7 @@ class GNNTrainingTest(unittest.TestCase):
             accuracy_list = network.training_summary.metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
-        except GNNException as e:
+        except GraphException as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
         except DatasetException as e:

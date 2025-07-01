@@ -18,7 +18,7 @@ from dl.block.mlp_block import MLPBlock
 from dl.block.graph.g_message_passing_block import GMessagePassingBlock
 from dl.training.neural_training import NeuralTraining
 from dl.training.hyper_params import HyperParams
-from dl import DLException, GNNException
+from dl import MLPException, GraphException
 from typing import List, AnyStr, Optional, Self
 import torch
 from torch_geometric.loader import GraphSAINTRandomWalkSampler
@@ -119,12 +119,12 @@ class GNNBaseModel(NeuralModel):
             network = NeuralTraining.build(hyper_parameters, metric_labels)
             train_dataset, test_dataset = self.load_data_source(data_source)
             network.start_training(self.model_id, self.modules_seq, train_dataset, test_dataset)
-        except GNNException as e:
+        except GraphException as e:
             logger.error(str(e))
-            raise DLException(e)
+            raise MLPException(e)
         except AssertionError as e:
             logger.error(str(e))
-            raise DLException(e)
+            raise MLPException(e)
 
     def load_data_source(self, data_source: Data | Dataset) -> (DataLoader, DataLoader):
         """

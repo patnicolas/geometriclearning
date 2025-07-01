@@ -63,7 +63,8 @@ def are_tensors_close(t1: torch.Tensor, t2: torch.Tensor, rtol: float = 1e-6) ->
     is_match = t1.shape == t2.shape
     if is_match:
         diff = torch.abs(t1 - t2)
-        for val in diff.view(-1):
+        flatten = diff.reshape(-1)
+        for val in flatten:
             if val > rtol:
                 is_match = False
     return is_match

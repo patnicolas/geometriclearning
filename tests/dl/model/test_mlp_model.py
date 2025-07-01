@@ -3,7 +3,7 @@ import torch.nn as nn
 from dl.block.mlp_block import MLPBlock
 from dl.model.mlp_model import MLPModel, MLPBuilder
 from dl.training.neural_training import NeuralTraining
-from dl import DLException
+from dl import MLPException
 import logging
 import python
 
@@ -39,7 +39,7 @@ class MLPModelTest(unittest.TestCase):
             mlp_model = mlp_builder.build()
             logging.info(str(mlp_model))
             assert True
-        except DLException as e:
+        except MLPException as e:
             logging.info(e)
             assert False
 
@@ -67,7 +67,7 @@ class MLPModelTest(unittest.TestCase):
             self.assertTrue(mlp_model.get_out_features() == 1)
             logging.info(repr(mlp_model))
             assert True
-        except DLException as e:
+        except MLPException as e:
             assert False
 
 
@@ -106,7 +106,7 @@ class MLPModelTest(unittest.TestCase):
             self.assertTrue(mlp_model_transposed.in_features == 1)
             self.assertTrue(mlp_model_transposed.out_features == 8)
             assert True
-        except DLException as e:
+        except MLPException as e:
             assert False
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)

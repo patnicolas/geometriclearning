@@ -1,9 +1,11 @@
-
 import unittest
 import numpy as np
 from control.linear_kalman import LinearKalmanFilter
 from typing import NoReturn, List, AnyStr
 from dataclasses import dataclass
+from control import ControlException
+import logging
+import python
 
 @dataclass
 class KalmanPlot:
@@ -13,116 +15,126 @@ class KalmanPlot:
 
 class LinearKalmanFilterTest(unittest.TestCase):
 
-    @unittest.skip('Ignored')
+    # @unittest.skip('Ignored')
     def test_init_2d(self):
-        x0 = np.array([0.0, 0.1])
-        P0 = np.eye(x0.shape[0])
-        A = np.array([[1.0, 0.5], [0.0, 1.0]])
-        H = np.array([[1.0, 0.0]])
-        cov_means = (0.6, 1.0)
-        kf = LinearKalmanFilter.build(x0, P0, A, H, cov_means)
-        logging.info(str(kf))
-        self.assertTrue(kf.A.shape[0] == 2)
+        try:
+            x0 = np.array([0.0, 0.1])
+            P0 = np.eye(x0.shape[0])
+            A = np.array([[1.0, 0.5], [0.0, 1.0]])
+            H = np.array([[1.0, 0.0]])
+            cov_means = (0.6, 1.0)
+            kf = LinearKalmanFilter.build(x0, P0, A, H, cov_means)
+            logging.info(str(kf))
+            self.assertTrue(kf.A.shape[0] == 2)
+        except ControlException as _:
+            self.assertTrue(False)
 
     @unittest.skip('Ignored')
     def test_init_3d(self):
-        x0 = np.array([0.0, 0.1, 0.1])
-        P0 = np.eye(x0.shape[0])
-        A = np.array([[1.0, 0.5, 1.0], [0.0, 1.0, 0.5], [1.0, 0.0, 1.0]])
-        H = np.array([[1.0, 0.0, 0.0]])
-        cov_means = (0.6, 1.0)
-        kf = LinearKalmanFilter.build(x0, P0, A, H, cov_means)
-        logging.info(str(kf))
-        self.assertTrue(kf.A.shape[0] == 3)
+        try:
+            x0 = np.array([0.0, 0.1, 0.1])
+            P0 = np.eye(x0.shape[0])
+            A = np.array([[1.0, 0.5, 1.0], [0.0, 1.0, 0.5], [1.0, 0.0, 1.0]])
+            H = np.array([[1.0, 0.0, 0.0]])
+            cov_means = (0.6, 1.0)
+            kf = LinearKalmanFilter.build(x0, P0, A, H, cov_means)
+            logging.info(str(kf))
+            self.assertTrue(kf.A.shape[0] == 3)
+        except ControlException as _:
+            self.assertTrue(False)
 
     @unittest.skip('Ignored')
     def test_simulate_2d(self):
-        x0 = np.array([0.0, 0.1])
-        P0 = np.eye(x0.shape[0])
-        A = np.array([[1.0, 0.5], [0.0, 1.0]])
-        H = np.array([[1.0, 0.0]])
-        cov_means = (0.6, 1.0)
-        num_points = 200
-        rNoise = 3.4
-        kf = LinearKalmanFilter.build(x0, P0, A, H, cov_means)
-        estimation = kf.simulate(num_points, lambda i: np.array([i + np.random.normal(rNoise, rNoise)]),
-                                 np.array([0.4, 0.6]))
+        try:
+            x0 = np.array([0.0, 0.1])
+            P0 = np.eye(x0.shape[0])
+            A = np.array([[1.0, 0.5], [0.0, 1.0]])
+            H = np.array([[1.0, 0.0]])
+            cov_means = (0.6, 1.0)
+            num_points = 200
+            rNoise = 3.4
+            kf = LinearKalmanFilter.build(x0, P0, A, H, cov_means)
+            estimation = kf.simulate(num_points, lambda i: np.array([i + np.random.normal(rNoise, rNoise)]),
+                                     np.array([0.4, 0.6]))
 
-        import matplotlib.pyplot as plt
+            import matplotlib.pyplot as plt
 
-        fig = plt.figure(figsize=(8, 8))
-        ax1 = fig.add_subplot(121)
-        x: np.array = np.linspace(0, num_points, num_points)
-        _x = x.tolist()
-        ax1.plot(_x, [x[0] for x in estimation])
-        ax1.plot(_x, [x[1][0] for x in estimation])
+            fig = plt.figure(figsize=(8, 8))
+            ax1 = fig.add_subplot(121)
+            x: np.array = np.linspace(0, num_points, num_points)
+            _x = x.tolist()
+            ax1.plot(_x, [x[0] for x in estimation])
+            ax1.plot(_x, [x[1][0] for x in estimation])
 
-        ax2 = fig.add_subplot(122)
-        # ax2.plot([x[0] for x in estimation], [x[1][1] for x in estimation])
-        ax2.plot([x[1][1] for x in estimation], [x[0] for x in estimation])
+            ax2 = fig.add_subplot(122)
+            # ax2.plot([x[0] for x in estimation], [x[1][1] for x in estimation])
+            ax2.plot([x[1][1] for x in estimation], [x[0] for x in estimation])
 
-        plt.legend()
-        plt.tight_layout()
-        plt.show()
+            plt.legend()
+            plt.tight_layout()
+            plt.show()
+        except ControlException as _:
+            self.assertTrue(False)
 
     def test_simulate_trajectory(self):
         import math
+        try:
+            dt = 0.1
+            ac = 0.5*dt*dt
+            x0 = np.array([[0.0], [np.pi], [0.8], [0.2]])
+            P0 = np.eye(x0.shape[0])
+            A = np.array([[1.0, 0.0, dt, 0.0], [0.0, 1.0, 0.0, dt], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]])
+            H = np.array([[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0]])
+            B = np.array([[ac, 0.0], [ac, 0.0], [dt, 0.0], [0.0, dt]])
+            u = np.array([[1.0], [0.8]])
+            Q_means = 0.6
+            R_means = 1.0
+            Q = np.eye(4) * Q_means
+            R = np.eye(1) * R_means
+            kf = LinearKalmanFilter(x0, P0, A, H, Q, R, u, B)
+            num_points = 200
 
-        dt = 0.1
-        ac = 0.5*dt*dt
-        x0 = np.array([[0.0], [np.pi], [0.8], [0.2]])
-        P0 = np.eye(x0.shape[0])
-        A = np.array([[1.0, 0.0, dt, 0.0], [0.0, 1.0, 0.0, dt], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]])
-        H = np.array([[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0]])
-        B = np.array([[ac, 0.0], [ac, 0.0], [dt, 0.0], [0.0, dt]])
-        u = np.array([[1.0], [0.8]])
-        Q_means = 0.6
-        R_means = 1.0
-        Q = np.eye(4) * Q_means
-        R = np.eye(1) * R_means
-        kf = LinearKalmanFilter(x0, P0, A, H, Q, R, u, B)
-        num_points = 200
+            def obs_generator_lin(i: int) -> np.array:
+                return np.array([[i], [i]])
 
-        def obs_generator_lin(i: int) -> np.array:
-            return np.array([[i], [i]])
+            def obs_generator_sqr(i: int) -> np.array:
+                return np.array([[i], [i*i]])
 
-        def obs_generator_sqr(i: int) -> np.array:
-            return np.array([[i], [i*i]])
+            def obs_generator_exp(i: int) -> np.array:
+                return np.array([[i], [math.exp(-i*0.1)]])
 
-        def obs_generator_exp(i: int) -> np.array:
-            return np.array([[i], [math.exp(-i*0.1)]])
+            def obs_generator_sqrt(i: int) -> np.array:
+                return np.array([[i], [math.sqrt(20000.0*i)]])
 
-        def obs_generator_sqrt(i: int) -> np.array:
-            return np.array([[i], [math.sqrt(20000.0*i)]])
+            z_exp = [obs_generator_exp(i) for i in range(num_points)]
+            z_lin = [obs_generator_lin(i) for i in range(num_points)]
+            z_sqr = [obs_generator_sqr(i) for i in range(num_points)]
+            z_sqrt = [obs_generator_sqrt(i) for i in range(num_points)]
 
-        z_exp = [obs_generator_exp(i) for i in range(num_points)]
-        z_lin = [obs_generator_lin(i) for i in range(num_points)]
-        z_sqr = [obs_generator_sqr(i) for i in range(num_points)]
-        z_sqrt = [obs_generator_sqrt(i) for i in range(num_points)]
+            estimation1 = kf.simulate(num_points,
+                                    lambda i: obs_generator_lin(i),
+                                    np.array([[0.4], [0.6], [0.1], [0.2]]))
+            kalman_plot1 = KalmanPlot(estimation1, z_lin, f'x=n, y=n')
 
-        estimation1 = kf.simulate(num_points,
-                                lambda i: obs_generator_lin(i),
-                                np.array([[0.4], [0.6], [0.1], [0.2]]))
-        kalman_plot1 = KalmanPlot(estimation1, z_lin, f'x=n, y=n')
+            estimation2 = kf.simulate(num_points,
+                                    lambda i: obs_generator_sqr(i),
+                                    np.array([[0.4], [0.6], [0.1], [0.2]]))
+            kalman_plot2 = KalmanPlot(estimation2, z_sqr, f'x=n, y=n*n')
 
-        estimation2 = kf.simulate(num_points,
-                                lambda i: obs_generator_sqr(i),
-                                np.array([[0.4], [0.6], [0.1], [0.2]]))
-        kalman_plot2 = KalmanPlot(estimation2, z_sqr, f'x=n, y=n*n')
+            estimation3 = kf.simulate(num_points,
+                                     lambda i: obs_generator_exp(i),
+                                     np.array([[0.4], [0.6], [0.1], [0.2]]))
+            kalman_plot3 = KalmanPlot(estimation3, z_exp, f'x=n, y=exp(-0.1.n)')
 
-        estimation3 = kf.simulate(num_points,
-                                 lambda i: obs_generator_exp(i),
-                                 np.array([[0.4], [0.6], [0.1], [0.2]]))
-        kalman_plot3 = KalmanPlot(estimation3, z_exp, f'x=n, y=exp(-0.1.n)')
+            estimation4 = kf.simulate(num_points,
+                                     lambda i: obs_generator_sqrt(i),
+                                     np.array([[0.4], [0.6], [0.1], [0.2]]))
+            kalman_plot4 = KalmanPlot(estimation4, z_sqrt, f'x=n, y=sqrt(20000.n)')
 
-        estimation4 = kf.simulate(num_points,
-                                 lambda i: obs_generator_sqrt(i),
-                                 np.array([[0.4], [0.6], [0.1], [0.2]]))
-        kalman_plot4 = KalmanPlot(estimation4, z_sqrt, f'x=n, y=sqrt(20000.n)')
-
-        LinearKalmanFilterTest.__plot_observed_estimate(num_points, kalman_plot1, kalman_plot2)
-        # KalmanFilterTest.__plot_trajectories([kalman_plot1, kalman_plot2, kalman_plot3, kalman_plot4])
-
+            LinearKalmanFilterTest.__plot_observed_estimate(num_points, kalman_plot1, kalman_plot2)
+            self.assertTrue(True)
+        except ControlException as _:
+            self.assertTrue(False)
 
     @unittest.skip('Ignored')
     def test_simulate_3d(self):
@@ -146,7 +158,7 @@ class LinearKalmanFilterTest(unittest.TestCase):
     def __plot_observed_estimate(
             num_points: int,
             kalman_plot1: KalmanPlot,
-            kalman_plot2: KalmanPlot) -> NoReturn:
+            kalman_plot2: KalmanPlot) -> None:
         import matplotlib.pyplot as plt
 
         fig, axs = plt.subplots(1, 2, figsize=(8, 6))

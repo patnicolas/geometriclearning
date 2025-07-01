@@ -2,7 +2,7 @@ import unittest
 import logging
 from torch import nn
 from dl.block.mlp_block import MLPBlock
-from dl import DLException
+from dl import MLPException
 import os
 import python
 from python import SKIP_REASON
@@ -24,7 +24,7 @@ class MLPBlockTest(unittest.TestCase):
             self.assertTrue(mlp_block.get_out_features() == 6)
 
             # logging.info(str(mlp_block))
-        except DLException as e:
+        except MLPException as e:
             logging.info(str(e))
             self.assertTrue(False)
 
@@ -42,7 +42,7 @@ class MLPBlockTest(unittest.TestCase):
             self.assertTrue(mlp_block.get_out_features() == out_features)
             logging.info(str(mlp_block))
             self.assertTrue(True)
-        except DLException as e:
+        except MLPException as e:
             logging.info(str(e))
             self.assertTrue(False)
 
@@ -76,7 +76,7 @@ class MLPBlockTest(unittest.TestCase):
             logging.info(str(transposed))
             self.assertTrue(transposed.get_in_features() == 24)
             self.assertTrue(transposed.get_out_features() == 12)
-        except DLException as e:
+        except MLPException as e:
             logging.info(str(e))
             self.assertTrue(False)
 
@@ -92,7 +92,7 @@ class MLPBlockTest(unittest.TestCase):
             transposed = mlp_block.transpose(activation_update=nn.Sigmoid())
             logging.info(f'\nTransposed:\n{str(transposed)}\nwith new activation: {str(transposed.activation_module)}')
             # self.assertTrue(transposed.activation == [Sigmoid()])
-        except DLException as e:
+        except MLPException as e:
             logging.info(str(e))
             self.assertTrue(False)
 

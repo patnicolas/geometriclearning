@@ -19,7 +19,7 @@ from abc import ABC, abstractmethod
 from typing import AnyStr, Self, List, Dict, Any
 from dl.block.conv import ConvDataType
 from torch import Tensor
-from dl import DLException
+from dl import MLPException
 import logging
 logger = logging.getLogger('dl.model.NeuralModel')
 
@@ -63,7 +63,7 @@ class NeuralModel(torch.nn.Module, ABC):
         return '\n'.join(modules)
 
     def get_flatten_output_size(self) -> ConvDataType:
-        raise DLException('Abstract class cannot have a flatten output size')
+        raise MLPException('Abstract class cannot have a flatten output size')
 
     def forward(self, x: Tensor) -> Tensor:
         """
@@ -116,4 +116,4 @@ class NeuralBuilder(ABC):
 
     @abstractmethod
     def build(self) -> NeuralModel:
-        raise DLException('Neural Builder is an abstract class')
+        raise MLPException('Neural Builder is an abstract class')

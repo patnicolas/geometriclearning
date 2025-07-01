@@ -5,7 +5,7 @@ from dataset.graph.graph_data_loader import GraphDataLoader
 from dl.training.gnn_training import GNNTraining
 from dl.training.exec_config import ExecConfig
 from plots.plotter import PlotterParameters
-from dl import GNNException, DLException, TrainingException
+from dl import GraphException, MLPException, TrainingException
 from dl.model.gconv_model import GConvModel
 from dl.training.hyper_params import HyperParams
 from metric.metric import Metric
@@ -63,7 +63,7 @@ class GConvTest(unittest.TestCase):
             flickr_model = GConvTest.flickr_model(hidden_channels, pooling_ratio, dropout_p)
             logging.info(flickr_model)
             self.assertTrue(True)
-        except GNNException as e:
+        except GraphException as e:
             logging.info(e)
             self.assertTrue(False)
 
@@ -115,7 +115,7 @@ class GConvTest(unittest.TestCase):
                           neural_model=flickr_model,
                           train_loader=train_loader,
                           val_loader=val_loader)
-        except (GNNException | DLException | DatasetException | TrainingException) as e:
+        except (GraphException | MLPException | DatasetException | TrainingException) as e:
             logging.info(e)
             self.assertTrue(False)
 
@@ -131,7 +131,7 @@ class GConvTest(unittest.TestCase):
         pyg_dataset = PyGDatasets('Flickr')
         flickr_dataset: Flickr = pyg_dataset()
         if flickr_dataset is None:
-            raise GNNException("Failed to load Flickr")
+            raise GraphException("Failed to load Flickr")
 
         _data: torch_geometric.data.Data = flickr_dataset[0]
         logging.info(f'Number of features: {_data.num_node_features}\nNumber of classes: {flickr_dataset.num_classes}'
