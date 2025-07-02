@@ -20,17 +20,17 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from typing import List, Self, AnyStr
 from lie import LieElement
-
-
-"""
-    Wrapper for the most common operations on SO3 groups using Geomstats library
-    - inverse: Compute the inverse 3D rotation matrix
-    - product: Implement the composition (multiplication) of two 3D rotation matrix
-    - Projection: 
-"""
+__all__ = ['LieSO3Group']
 
 
 class LieSO3Group(object):
+    """
+        Wrapper for the most common operations on SO3 groups using Geomstats library
+        - inverse: Compute the inverse 3D rotation matrix
+        - product: Implement the composition (multiplication) of two 3D rotation matrix
+        - Projection:
+    """
+
     # lie group as defined in Geomstats library
     lie_group = SpecialOrthogonal(n=3, point_type='vector', equip=False)
     identity_matrix = np.eye(3)

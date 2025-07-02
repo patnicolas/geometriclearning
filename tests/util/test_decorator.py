@@ -16,3 +16,8 @@ class TestDecorator(TestCase):
 
     def test_timeit(self):
         logging.info(procedure())
+
+    def test_find_module_specs(self):
+        from util import check_modules_availability
+        modules = ['math', 'os', 'xyz']
+        logging.info(check_modules_availability(modules))

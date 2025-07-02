@@ -29,23 +29,21 @@ from typing import AnyStr, List, Optional, Dict, Self, Tuple
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import torch
-import logging
-logger = logging.getLogger('dl.VAETraining')
+__all__ = ['VAETraining']
 
 EvaluatedImages = Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
 
-"""
-Light weight implementation of the variational auto-encoder using PyTorch and reusable neural block
-The key components are
-- Model (VAEModel) composed of an encoder, decoder as inverted encoder and variational neural block
-- Hyper parameters for training and tuning
-- Early stop logger for early stop and monitoring training and evaluation
-- Dictionary of metrics data
-- Optional set of plotting parameters
-"""
-
 
 class VAETraining(NeuralTraining, ABC):
+    """
+    Lightweight implementation of the variational auto-encoder using PyTorch and reusable neural block
+    The key components are
+    - Model (VAEModel) composed of an encoder, decoder as inverted encoder and variational neural block
+    - Hyper parameters for training and tuning
+    - Early stop logger for early stop and monitoring training and evaluation
+    - Dictionary of metrics data
+    - Optional set of plotting parameters
+    """
     max_debug_images = 3
 
     def __init__(self,
@@ -56,6 +54,7 @@ class VAETraining(NeuralTraining, ABC):
                  plot_parameters: Optional[List[PlotterParameters]] = None):
         """
         Default constructor for this variational auto-encoder
+
         @param hyper_params:  Hyper-parameters for training and optimizatoin
         @type hyper_params: HyperParams
         @param metrics_attributes: Dictionary of metrics and values

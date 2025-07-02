@@ -15,26 +15,30 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from PIL import Image
 import torch
-import constants
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
-
+__all__ = ['ImageTensor']
 default_output_dir = '../output/images'
 
-"""
-    Conversion between a input_tensor into an image
-    to_images Generate images from a list of input_tensors
-    to_image Generate an image from a single input_tensor
-    to_dataset Generate a data loader from a list of images
-    
-    @param images_dir: Directory containing input_tensor images
-    @param img_scale_factor: Scale factor for this image, If scale factor is undefined (None) images are not displayed
-    during processing
-"""
+
 
 
 class ImageTensor(object):
-    def __init__(self, images_dir: str, img_scale_factor: int = None):
+    """
+        Conversion between a input_tensor into an image
+        to_images Generate images from a list of input_tensors
+        to_image Generate an image from a single input_tensor
+        to_dataset Generate a data loader from a list of images
+
+    """
+    def __init__(self, images_dir: str, img_scale_factor: int = None) -> None:
+        """
+        Constructor for the conversion of a tensor into an image
+
+        @param images_dir: Directory containing input_tensor images
+        @param img_scale_factor: Scale factor for this image, If scale factor is undefined (None) images are not displayed
+        during processing
+        """
         (ImageTensor, self).__init__()
         self.images_dir = images_dir
         self.img_scale_factor = img_scale_factor

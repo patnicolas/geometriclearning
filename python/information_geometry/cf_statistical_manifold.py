@@ -18,11 +18,10 @@ from geomstats.information_geometry.fisher_rao_metric import FisherRaoMetric
 from typing import Tuple, AnyStr, List
 import numpy as np
 import torch
-
-
 from geometry import GeometricException
 import os
 os.environ["GEOMSTATS_BACKEND"] = "pytorch"
+__all__ = ['CFStatisticalManifold']
 
 
 class CFStatisticalManifold(object):

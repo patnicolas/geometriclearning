@@ -17,10 +17,7 @@ from typing import AnyStr, Callable
 from dl.model.neural_model import NeuralModel
 from dl.model.vae_model import VAEModel
 import torch
-
-import logging
-logger = logging.getLogger('dl.model.DenoisingVAEModel')
-
+__all__ = ['DenoisingVAEModel']
 
 def noise_func(x: torch.Tensor) -> torch.Tensor:
     noise_factor = 0.2
@@ -33,8 +30,7 @@ class DenoisingVAEModel(VAEModel):
                  model_id: AnyStr,
                  encoder: NeuralModel,
                  latent_dim: int,
-                 noise_func: Callable[[torch.Tensor], torch.Tensor] = None
-                 ) -> None:
+                 noise_func: Callable[[torch.Tensor], torch.Tensor] = None) -> None:
         """
         Constructor for the variational neural network
         @param model_id: Identifier for this model

@@ -20,15 +20,15 @@ from dl.training.exec_config import ExecConfig
 from dl import TrainingException, ValidationException
 from dl.training.hyper_params import HyperParams
 from metric.built_in_metric import BuiltInMetric
-from plots.plotter import PlotterParameters
 from metric.metric import Metric
 from metric.metric_type import MetricType
+from plots.plotter import PlotterParameters
 from metric.performance_metrics import PerformanceMetrics
 from dl.training.early_stopping import EarlyStopping
 import numpy as np
 import torch.nn as nn
 import logging
-logger = logging.getLogger('dl.training.NeuralTraining')
+import python
 __all__ = ['NeuralTraining']
 
 

@@ -19,6 +19,7 @@ import numpy as np
 from typing import Optional, List, AnyStr
 from geometry import GeometricException
 from dataclasses import dataclass
+__all__ = ['PrincipalComponents', 'ManifoldPCA']
 
 
 @dataclass

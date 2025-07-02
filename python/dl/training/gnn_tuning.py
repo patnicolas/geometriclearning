@@ -15,7 +15,6 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import optuna
 from optuna.trial import TrialState
-
 import torch.nn as nn
 from dataset.graph.graph_data_loader import GraphDataLoader
 from torch_geometric.nn import GraphConv
@@ -25,6 +24,7 @@ from metric.metric_type import MetricType
 from typing import Dict, List, AnyStr, Any, Callable
 from dl.training.gnn_training import GNNTraining
 import torch
+__all__ = ['GNNTuning', 'class_weight_distribution', 'neighbor_list_generator']
 
 
 def class_weight_distribution(data: Data) -> List[int]:
@@ -59,15 +59,15 @@ def neighbor_list_generator(num_neighbors_1: int, num_hops: int) -> List[int]:
         return [num_neighbors_1]
 
 
-"""
-Wrapper for tuning a Graph Convolutional Neural Network using the Optima HPO. 
-Optimizing the many parameters involved in training and evaluating a Graph Neural Network can be daunting—even 
-for experienced practitioners. To simplify this process, we divide the search for the optimal 
-architecture and training configuration into three distinct steps,
-This implementation uses accuracy as target metric.
-"""
-
 class GNNTuning(object):
+    """
+    Wrapper for tuning a Graph Convolutional Neural Network using the Optima HPO.
+    Optimizing the many parameters involved in training and evaluating a Graph Neural Network can be daunting—even
+    for experienced practitioners. To simplify this process, we divide the search for the optimal
+    architecture and training configuration into three distinct steps,
+    This implementation uses accuracy as target metric.
+    """
+
     objective_metric = MetricType.Accuracy
     target_device = 'mps'
     # Dynamic (mutable) training parameters

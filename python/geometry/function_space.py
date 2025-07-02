@@ -19,19 +19,18 @@ import geomstats.backend as gs
 from geomstats.geometry.functions import HilbertSphere
 from geometry.manifold_point import ManifoldPoint
 from geometry import GeometricException
-
-
-"""
-    Class wrapper for the Function space using the Hilbert Sphere. The constructor generates the
-    sample for the domain associated with the functions. The Hilbert domain is defined as [0, 1].
-    This class inherit the Hilbert Sphere defined in the Geomstats module
-    
-    :param num_domain_samples Number of samples (equidistant) used to represent the Hilbert interval
-    Throw a GeometricException if the number of samples < 2
-"""
+__all__ = ['FunctionSpace']
 
 
 class FunctionSpace(HilbertSphere):
+    """
+        Class wrapper for the Function space using the Hilbert Sphere. The constructor generates the
+        sample for the domain associated with the functions. The Hilbert domain is defined as [0, 1].
+        This class inherit the Hilbert Sphere defined in the Geomstats module
+
+        :param num_domain_samples Number of samples (equidistant) used to represent the Hilbert interval
+        Throw a GeometricException if the number of samples < 2
+    """
     def __init__(self, num_domain_samples: int):
         if num_domain_samples < 2:
             raise GeometricException(f'Number of samples {num_domain_samples} should be > 1')

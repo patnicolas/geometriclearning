@@ -16,15 +16,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 import numpy as np
 import math
 from scipy import stats
-
-
-"""
-    Base class for the Proposal distribution for the Markov chain q(theta_star | theta(i-1))
-    This base abstract class throws a NotImplementedError for the invocation of any of its methods.
-"""
+__all__ = ['ProposalDistribution']
 
 
 class ProposalDistribution(object):
+    """
+        Base class for the Proposal distribution for the Markov chain q(theta_star | theta(i-1))
+        This base abstract class throws a NotImplementedError for the invocation of any of its methods.
+    """
     from abc import abstractmethod
 
     @abstractmethod

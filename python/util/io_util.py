@@ -16,15 +16,19 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 import pandas as pd
 import json
 import pickle
-
-"""
-    Generic wrapper for logging data 
-    @param path: Path for the local logging file
-"""
+from typing import AnyStr
+__all__ = ['IOUtil']
 
 
 class IOUtil(object):
-    def __init__(self, path):
+    """
+        Generic wrapper for logging data
+    """
+    def __init__(self, path: AnyStr) -> None:
+        """
+        Constructor for a generic utility for I/O operations
+        @param path: Path for the local logging file
+        """
         self.path = path
 
     def to_lines(self) -> list:

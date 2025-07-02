@@ -18,17 +18,15 @@ from dl.model.neural_model import NeuralModel
 import torch.nn as nn
 import torch
 import logging
-logger = logging.getLogger('dl.model.AEModel')
-
-"""
-Define a 'plain vanilla' auto-encoder as an encoder and decoder feed forward neural network. 
-The encoder is provided as the class argument and the decoder is automatically generated 
-through inversion of the neural blocks it contains.
-"""
-
+import python
+__all__ = ['AEModel']
 
 class AEModel(NeuralModel):
-
+    """
+    Define a 'plain vanilla' auto-encoder as an encoder and decoder feed forward neural network.
+    The encoder is provided as the class argument and the decoder is automatically generated
+    through inversion of the neural blocks it contains.
+    """
     def __init__(self,
                  model_id: AnyStr,
                  encoder: NeuralModel,

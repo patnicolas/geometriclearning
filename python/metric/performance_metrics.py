@@ -22,6 +22,7 @@ from metric.metric_type import MetricType
 from plots.plotter import Plotter, PlotterParameters
 import numpy as np
 import logging
+__all__ = ['PerformanceMetrics']
 
 
 class PerformanceMetrics(object):

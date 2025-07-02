@@ -19,6 +19,7 @@ import torch
 import numpy as np
 from typing import AnyStr, Dict, List
 from geometry import GeometricException
+__all__ = ['SOnGroup']
 
 
 class SOnGroup(object):

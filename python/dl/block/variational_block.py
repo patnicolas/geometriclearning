@@ -18,6 +18,7 @@ from torch import nn
 from dl.block.neural_block import NeuralBlock
 from typing import Self, AnyStr, Optional
 from dl import VAEException
+__all__ = ['VariationalBlock']
 
 
 class VariationalBlock(NeuralBlock):

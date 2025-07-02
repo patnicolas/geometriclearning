@@ -15,6 +15,8 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import time
 import logging
+import python
+__all__ = ['timeit']
 
 
 def timeit(func):

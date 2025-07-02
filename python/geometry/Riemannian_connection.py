@@ -20,22 +20,25 @@ import numpy as np
 from typing import AnyStr, Optional, List
 from geometry.manifold_point import ManifoldPoint
 from geometry import GeometricException
-
-"""
-    Create a formal Riemann connection with associated metric from a Manifold or Level set.
-    The metric is automatically selected from the type of manifold. This class is a wrapper of 
-    the Connection, Manifold and RiemannianMetric classes in Geomstats library
-    Initialization sequence:   Manifold (space) => Metric => Connection
-    
-    :param space: Manifold used for the connection
-    :type space: LevelSet inheriting from Geomstats Manifold class
-    :param manifold_type: type of manifold used as descriptor (default None)
-    :type manifold_type: String
- """
-
+__all__ = ['RiemannianConnection']
 
 class RiemannianConnection(object):
+    """
+        Create a formal Riemann connection with associated metric from a Manifold or Level set.
+        The metric is automatically selected from the type of manifold. This class is a wrapper of
+        the Connection, Manifold and RiemannianMetric classes in Geomstats library
+
+        Initialization sequence:   Manifold (space) => Metric => Connection
+     """
     def __init__(self, space: LevelSet, manifold_type: AnyStr):
+        """
+        Constructor for this Riemannian manifold
+
+        @param space: Manifold used for the connection
+        @type space: LevelSet inheriting from Geomstats Manifold class
+        @param manifold_type: type of manifold used as descriptor (default None)
+        @type manifold_type: str
+        """
         self.riemannian_metric = RiemannianConnection.__get_metric(space)
         self.manifold_descriptor = f'{manifold_type}\nDimension: {space.dim}\nShape: {space.shape}' \
                                    f'\nCoordinates type: {space.default_coords_type}'

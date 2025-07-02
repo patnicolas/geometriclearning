@@ -18,7 +18,7 @@ import time
 import urllib3
 import logging
 from util.decorators import timeit
-
+__all__ = ['HttpPost']
 
 
 class HttpPost(object):

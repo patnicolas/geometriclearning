@@ -15,13 +15,13 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 
 import torch
-from models.nnet import NeuralNet
 from ray import tune
 from ray.tune import Trainable
 from ray.tune import ExperimentAnalysis
 from ray.tune.schedulers import ASHAScheduler
 from torch.utils.data import DataLoader
 import os
+__all__ = ['RayHyperParams']
 
 
 class RayHyperParams(object):

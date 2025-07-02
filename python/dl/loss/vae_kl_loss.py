@@ -17,8 +17,8 @@ from torch.nn.modules.loss import _Loss
 import torch
 import torch.nn as nn
 from typing import AnyStr, Optional
-
 from dl import VAEException
+__all__ = ['VAEKLLoss']
 
 
 class VAEKLLoss(_Loss):

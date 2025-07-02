@@ -18,16 +18,17 @@ from dl.block.mlp_block import MLPBlock
 from dl.block.graph.g_message_passing_block import GMessagePassingBlock
 from dl.training.neural_training import NeuralTraining
 from dl.training.hyper_params import HyperParams
-from dl import MLPException, GraphException
-from typing import List, AnyStr, Optional, Self
+from metric.built_in_metric import BuiltInMetric
+from metric.metric_type import MetricType
+from typing import List, AnyStr, Optional, Self, Dict
 import torch
 from torch_geometric.loader import GraphSAINTRandomWalkSampler
 from torch_geometric.data import Data
 from torch.utils.data import DataLoader, Dataset
 import torch.nn as nn
+from dl.block.graph import GraphException
 import logging
-logger = logging.getLogger('dl.model.GNNBaseModel')
-
+import python
 __all__ = ['GNNBaseModel']
 
 
@@ -107,24 +108,24 @@ class GNNBaseModel(NeuralModel):
 
     def do_train(self,
                  hyper_parameters: HyperParams,
-                 metric_labels: List[AnyStr]) -> None:
+                 metrics_attributes: Dict[MetricType, BuiltInMetric],
+                 data_source: Data | Dataset) -> None:
         """
         Execute the training, evaluation and metrics for any model for MNIST data set
         @param hyper_parameters: Hyper-parameters for the execution of the
         @type hyper_parameters: HyperParams
-        @param metric_labels: List of metrics to be used
-        @type metric_labels: List
+        @param metrics_attributes: Dictionary of performance metrices
+        @type metrics_attributes: Dictionary
+        @param data_source: Data source
+        @type data_source: Union[Data, Dataset]
         """
         try:
-            network = NeuralTraining.build(hyper_parameters, metric_labels)
+            network = NeuralTraining(hyper_parameters, metrics_attributes)
             train_dataset, test_dataset = self.load_data_source(data_source)
             network.start_training(self.model_id, self.modules_seq, train_dataset, test_dataset)
-        except GraphException as e:
-            logger.error(str(e))
-            raise MLPException(e)
         except AssertionError as e:
-            logger.error(str(e))
-            raise MLPException(e)
+            logging.error(str(e))
+            raise GraphException(e)
 
     def load_data_source(self, data_source: Data | Dataset) -> (DataLoader, DataLoader):
         """

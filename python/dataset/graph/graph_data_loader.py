@@ -26,7 +26,6 @@ import logging
 __all__ = ['GraphDataLoader']
 
 
-
 class GraphDataLoader(object):
     """
     Universal wrapper for the various Graph Data Loaders to generate the training and evaluation data loader to

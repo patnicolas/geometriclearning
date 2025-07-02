@@ -16,6 +16,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from information_geometry.geometric_distribution import GeometricDistribution
 import geomstats.backend as gs
 import matplotlib.pyplot as plt
+__all__ = ['BetaHypersphere']
 
 
 class BetaHypersphere(GeometricDistribution):

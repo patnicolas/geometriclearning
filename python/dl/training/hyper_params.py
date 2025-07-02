@@ -19,19 +19,18 @@ from torch import nn
 from typing import AnyStr, Optional, List, Dict, Any, Self
 from dataset import DatasetException
 import logging
-
+import python
 from dl import TrainingException
-
-logger = logging.getLogger('dl.HyperParams')
-
-"""
-    Generic class to encapsulate feature_name configuration parameters of training of any Neural Networks. 
-    Not all these parameters are to be tuned during training. The label reshaping function is
-    a not tunable parameters used to width label input_tensor if needed
-"""
+__all__ = ['HyperParams']
 
 
 class HyperParams(object):
+    """
+        Generic class to encapsulate feature_name configuration parameters of training of any Neural Networks.
+        Not all these parameters are to be tuned during training. The label reshaping function is
+        a not tunable parameters used to width label input_tensor if needed
+    """
+
     optim_adam_label: AnyStr = 'adam'
     optim_nesterov_label: AnyStr = 'nesterov'
     default_train_eval_ratio = 0.85
@@ -168,7 +167,7 @@ class HyperParams(object):
                                       momentum=self.momentum,
                                       nesterov=True)
             case _:
-                logger.warn(f'Type of optimization {self.optim_label} not supported: reverted to SGD')
+                logging.warn(f'Type of optimization {self.optim_label} not supported: reverted to SGD')
                 optimizer = optim.SGD(model.parameters(),
                                       lr=self.learning_rate,
                                       momentum=self.momentum,

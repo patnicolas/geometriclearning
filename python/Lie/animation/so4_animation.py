@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from typing import List, Tuple, AnyStr
 from util.base_animation import BaseAnimation
-
+__all__ = ['SO4Animation']
 
 class SO4Animation(BaseAnimation):
     from mpl_toolkits.mplot3d import Axes3D

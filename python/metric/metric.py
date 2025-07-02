@@ -16,15 +16,13 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from abc import abstractmethod
 from typing import List
 import torch
-import logging
-logger = logging.getLogger('metric.Metric')
-
-"""
-Base class for all metrics
-"""
+__all__ = ['Metric']
 
 
 class Metric(object):
+    """
+    Base class for all metrics
+    """
     default_min_loss = -1e-5
     train_loss_label = 'Train loss'
     eval_loss_label = "Eval. loss"

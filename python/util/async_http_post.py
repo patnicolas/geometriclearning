@@ -16,20 +16,24 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 import asyncio
 import requests
 import urllib3
-
-"""
-    Implement Asynchronous/concurrent processing of a list of requests contained in an input file. 
-    Once loaded, the requests are distributed acroass num_client threads to be processed concurrently
-    against a service located in a give URL
-    @param url: URL for the target service to process the requests
-    @param headers: Dictionary of requests header parameters
-    @param input_file: Input file containing the requests, one request per line
-    @param num_clients: Number of concurrent clients
-"""
+__all__ = ['AsyncHttpPost']
 
 
 class AsyncHttpPost(object):
+    """
+        Implement Asynchronous/concurrent processing of a list of requests contained in an input file.
+        Once loaded, the requests are distributed acroass num_client threads to be processed concurrently
+        against a service located in a give URL
+    """
     def __init__(self, url, headers, input_file: str, num_clients):
+        """
+            Constructors for the Asynchronous/concurrent processing of a list of requests contained in an input file.
+
+            @param url: URL for the target service to process the requests
+            @param headers: Dictionary of requests header parameters
+            @param input_file: Input file containing the requests, one request per line
+            @param num_clients: Number of concurrent clients
+        """
         assert 0 < num_clients < 50, f'AsyncHttpPost: num clients ${num_clients} should be ]0, 50['
         self.url = url
         self.headers = headers

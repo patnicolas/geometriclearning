@@ -14,24 +14,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 import numpy as np
-from mcmc import MCMC
-
-
-"""
-    Implementation of Metropolis-Hastings Monte Carlo Markov Chain
-            
-    @param proposal: Proposal distribution 
-    :type proposal: ProposalDistribution
-    @param num_iterations: Number of iterations for the random walk
-    :type num_iterations: int
-    @param burn_in_ratio: Percentage of number of iterations dedicated to burn-in steps
-    :type burn_in_ratio: float
-    @param sigma_delta: Covariance or standard deviation used for each step theta -> theta_star
-    :type sigma_delta: float
-"""
+from mcmc.mcmc import MCMC
+__all__ = ['MetropolisHastings']
 
 
 class MetropolisHastings(MCMC):
+    """
+        Implementation of Metropolis-Hastings Monte Carlo Markov Chain
+    """
     from proposal_distribution import ProposalDistribution
 
     default_sigma_delta = 0.2
@@ -41,6 +31,17 @@ class MetropolisHastings(MCMC):
                  num_iterations: int,
                  burn_in_ratio: float,
                  sigma_delta: float = default_sigma_delta):
+        """
+        @param proposal: Proposal distribution
+        @type proposal: ProposalDistribution
+        @param num_iterations: Number of iterations for the random walk
+        @type num_iterations: int
+        @param burn_in_ratio: Percentage of number of iterations dedicated to burn-in steps
+        @type burn_in_ratio: float
+        @param sigma_delta: Covariance or standard deviation used for each step theta -> theta_star
+        @type sigma_delta: float
+        """
+        super(MetropolisHastings, self).__init__()
         assert 2 <= num_iterations <= 100000, f'Number of iterations {num_iterations} is out of bounds [2, 10000]'
         assert 0.0 < sigma_delta < 1.0, f'Sigma differential {sigma_delta} is out of bounds ]0.0, 1.0['
         assert 0.0 <= burn_in_ratio <= 0.5, f'Burn-in ratio {burn_in_ratio} is out of bounds [0.0, 0.5]'

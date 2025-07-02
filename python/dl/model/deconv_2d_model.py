@@ -19,13 +19,13 @@ from dl.model.neural_model import NeuralModel
 from dl.model.mlp_model import MLPModel
 from dl.block.conv.deconv_2d_block import DeConv2dBlock
 from dl.block.mlp_block import MLPBlock
-from typing import AnyStr, List, Optional, Self, Dict, Any
+from typing import AnyStr, List, Self, Dict, Any
 
-from dl.training.neural_training import NeuralTraining
 import torch.nn as nn
 import torch
 import logging
-logger = logging.getLogger('dl.model.DeConvModel')
+import python
+__all__ = ['DeConv2dModel']
 
 
 class DeConv2dModel(NeuralModel, ABC):

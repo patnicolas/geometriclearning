@@ -8,6 +8,7 @@ import logging
 import line_profiler
 import memory_profiler
 from memory_profiler import profile
+__all__ = ['Profiler']
 
 
 class Profiler(object):

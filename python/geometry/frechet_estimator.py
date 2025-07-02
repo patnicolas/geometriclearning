@@ -19,6 +19,7 @@ from torch import Tensor
 import numpy as np
 from typing import List, Optional
 from geometry import GeometricException
+__all__ = ['FrechetEstimator']
 
 
 class FrechetEstimator(object):

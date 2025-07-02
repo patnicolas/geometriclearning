@@ -19,26 +19,26 @@ from typing import AnyStr, List, NoReturn
 import numpy as np
 import abc
 from abc import ABC
-
-"""
-    Abstract class that defined the key components of a Geometric Space. It lists
-    the various supported manifolds. 
-    
-    Class attributes:
-    manifold_type: Type of manifold
-    supported_manifolds: List of supported manifolds
-    
-    Object attributes:
-    dimension: Dimension of the manifolds embedded in the Euclidean space
-    
-    Methods:
-    sample (pure abstract): Generate random data on a manifold
-    mean (static): Compute the mean value for a group of data on a manifold
-    is_manifold_supported (static): Test if the manifold is supported
-"""
+__all__ = ['GeometricSpace']
 
 
 class GeometricSpace(ABC):
+    """
+        Abstract class that defined the key components of a Geometric Space. It lists
+        the various supported manifolds.
+
+        Class attributes:
+        manifold_type: Type of manifold
+        supported_manifolds: List of supported manifolds
+
+        Object attributes:
+        dimension: Dimension of the manifolds embedded in the Euclidean space
+
+        Methods:
+        sample (pure abstract): Generate random data on a manifold
+        mean (static): Compute the mean value for a group of data on a manifold
+        is_manifold_supported (static): Test if the manifold is supported
+    """
     manifold_type: AnyStr
     supported_manifolds = [
         "SO3_GROUP",  # lie 3D rotation group
@@ -57,7 +57,14 @@ class GeometricSpace(ABC):
         "SPD2",
     ]
 
-    def __init__(self, dimension: int, intrinsic: bool = False):
+    def __init__(self, dimension: int, intrinsic: bool = False) -> None:
+        """
+        Constructor for any Geometric Space
+        @param dimension: Dimension of the space or manifold
+        @type dimension: int
+        @param intrinsic: Flag that specifies if the coordinates system is intrinsic
+        @type intrinsic: bool
+        """
         self.dimension = dimension
         self.intrinsic = intrinsic
 

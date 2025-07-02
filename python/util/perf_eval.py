@@ -15,17 +15,22 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import torch
 import time
-import constants
-
-"""
-    Compute the performance of the execution of a function
-    @param func: Function to execute and timed
-    @param args: Arguments for the function, func
-"""
+import logging
+import python
+__all__ = ['PerfEval']
 
 
 class PerfEval(object):
+    """
+        Compute the performance of the execution of a function
+    """
     def __init__(self, func, args: list = None):
+        """
+        Constructor for the Performance Evaluator
+
+        @param func: Function to execute and timed
+        @param args: Arguments for the function, func
+        """
         self.func = func
         self.args = args
 
@@ -34,10 +39,10 @@ class PerfEval(object):
         self.__time()
         if torch.cuda.is_available():
             torch.set_default_tensor_type(torch.cuda.FloatTensor)
-            constants.log_info(f'Default tensor type: {torch.get_default_dtype()}')
+            logging.info(f'Default tensor type: {torch.get_default_dtype()}')
             self.__time()
         else:
-            constants.log_info(f'CUDA not available')
+            logging.info(f'CUDA not available')
 
     def __time(self):
         start = time.time()
@@ -46,4 +51,4 @@ class PerfEval(object):
         else:
             self.func()
         duration = time.time() - start
-        constants.log_info(f'Duration {duration} for {torch.get_default_dtype()}')
+        logging.info(f'Duration {duration} for {torch.get_default_dtype()}')

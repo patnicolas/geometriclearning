@@ -16,6 +16,8 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from typing import List, AnyStr
 from abc import abstractmethod
 import matplotlib.image as mpimg
+__all__ = ['BaseAnimation']
+
 
 class BaseAnimation(object):
     def __init__(self, logo_pos: List[float], interval: int, fps: int) -> None:

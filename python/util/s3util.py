@@ -19,10 +19,8 @@ from typing import Optional
 import boto3
 import pandas as pd
 from pandas import json_normalize
-import constants
 import pickle
 from collections import OrderedDict
-
 AWS_SHARED_CREDENTIALS_FILE = "~/.aws/credentials2"
 
 
@@ -33,30 +31,32 @@ def get_session() -> boto3.Session:
     """
     return boto3.Session(profile_name='default',
                          region_name='us-east-2',
-                         aws_access_key_id=constants.s3_config['access_key'],
-                         aws_secret_access_key=constants.s3_config['secret_key'])
+                         aws_access_key_id='access_key',
+                         aws_secret_access_key='secret_key')
 
 
 session = get_session()
 s3 = session.resource('s3')
 
-"""
-    Utility class for manipulating S3 data
-    @param s3_bucket: name of bucket
-    @param s3_folder_path: path to the S3 folder containing the file to load
-    @param is_nested: Boolean flag to specify whether the json structure is nested
-    @param num_files: Number of files to be extracted from s3_folder, the entire folder for -1
-"""
-
 
 class S3Util(object):
-    def __init__(self, s3_bucket: str, s3_folder_name: str, is_nested: bool, num_files: int, is_json: bool = True):
-        self.s3_bucket_name = s3_bucket
+    """
+        Utility class for manipulating S3 data
+    """
+    def __init__(self, s3_bucket_name: str, s3_folder_name: str, is_nested: bool, num_files: int, is_json: bool = True):
+        """
+        Constructor for AWS S3 utilitiies
+        @param s3_bucket_name: name of bucket
+        @param s3_folder_name: path to the S3 folder containing the file to load
+        @param is_nested: Boolean flag to specify whether the json structure is nested
+        @param num_files: Number of files to be extracted from s3_folder, the entire folder for -1
+        @param is_json: Boolean flag to specify if the format of the file is JSON
+        """
+        self.s3_bucket_name = s3_bucket_name
         self.s3_folder_name = s3_folder_name
         self.is_nested = is_nested
         self.num_files = num_files
         self.is_json = is_json
-
 
     def s3_file_to_iter(self) -> iter:
         my_bucket = s3.Bucket(self.s3_bucket_name)

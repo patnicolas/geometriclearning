@@ -18,20 +18,20 @@ import torch
 from typing import List, AnyStr, Optional, Self
 from geomstats.geometry.base import LevelSet
 from dataclasses import dataclass
-
-"""
-    Data class for defining a Manifold point as a pair of data point on the manifold and 
-    a vector.
-    :param id: Identifier for the point on a manifold
-    :param data_point: Point on the manifold
-    :param tgt_vector: Optional reference Tangent vector
-    :param geodesic: Enable computation and display of geodesic if True, none otherwise
-    :param intrinsic: Flag if the coordinate for this Manifold point is intrinsic
-"""
+__all__ = ['ManifoldPoint']
 
 
 @dataclass
 class ManifoldPoint:
+    """
+        Data class for defining a Manifold point as a pair of data point on the manifold and
+        a vector.
+        @param id: Identifier for the point on a manifold
+        @param location: Point on the manifold
+        @param tgt_vector: Optional reference Tangent vector
+        @param geodesic: Enable computation and display of geodesic if True, none otherwise
+        @param intrinsic: Flag if the coordinate for this Manifold point is intrinsic
+    """
     id: AnyStr
     location: np.array
     tgt_vector: Optional[List[float]] = None

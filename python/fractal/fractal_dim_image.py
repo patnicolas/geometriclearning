@@ -16,18 +16,18 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from typing import AnyStr, Union, List
 import numpy as np
 import logging
+import python
 from dataclasses import dataclass
-
-
-"""
-Data class that wraps box parameters
-- eps: scaling factor
-- measurements: Number of measurement units (yardstick for 1D, Square in 2D, cube in 3D,..)
-"""
+__all__ = ['BoxParameter', 'FractalDimImage']
 
 
 @dataclass
 class BoxParameter:
+    """
+    Data class that wraps box parameters
+    - eps: scaling factor
+    - measurements: Number of measurement units (yardstick for 1D, Square in 2D, cube in 3D,..)
+    """
     eps: float
     r: int
 
@@ -51,15 +51,13 @@ class BoxParameter:
         return f'Eps: {self.eps}, Count: {self.r}'
 
 
-"""
-Implementation of the computation of the Fractal dimension index of a RGB image converted into 256 grey scale
-using the box counting method.
-A fractal dimension is a measure used to describe the complexity of fractal patterns or sets by 
-quantifying the ratio of change in detail relative to the change in scale.
-"""
-
-
 class FractalDimImage(object):
+    """
+    Implementation of the computation of the Fractal dimension index of a RGB image converted into 256 grey scale
+    using the box counting method.
+    A fractal dimension is a measure used to describe the complexity of fractal patterns or sets by
+    quantifying the ratio of change in detail relative to the change in scale.
+    """
     num_grey_levels: int = 256
     max_plateau_count = 3
 

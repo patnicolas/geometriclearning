@@ -17,6 +17,8 @@ from torch import nn
 import torch
 from typing import Self, AnyStr, Optional, Any, Dict
 from dl.block.neural_block import NeuralBlock
+__all__ = ['MLPBlock']
+
 
 """
 Multi layer perceptron (fully connected) block with appropriate activation and drop out.

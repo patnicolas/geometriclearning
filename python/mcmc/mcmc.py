@@ -13,9 +13,13 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+__all__ = ['MCMC']
 
 class MCMC(object):
     from abc import abstractmethod
+
+    def __init__(self) -> None:
+        super(MCMC, self).__init__(self)
 
     @abstractmethod
     def sample(self, theta: float) -> float:

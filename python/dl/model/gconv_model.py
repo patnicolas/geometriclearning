@@ -20,9 +20,6 @@ from typing import List, AnyStr, Optional, Any, Dict, Self
 import torch
 from torch_geometric.data import Data
 import torch.nn as nn
-import logging
-logger = logging.getLogger('dl.model.GConvModel')
-
 __all__ = ['GConvModel']
 
 
@@ -64,7 +61,6 @@ class GConvModel(NeuralModel):
         gconv_blocks = [GConvBlock.build(gconv_block_attribute) for gconv_block_attribute in gconv_blocks_attribute]
         mlp_blocks = [MLPBlock.build(mlp_block_attribute) for mlp_block_attribute in mlp_blocks_attribute]
         return cls(model_attributes['model_id'], gconv_blocks, mlp_blocks)
-
 
     def forward(self, data: Data) -> torch.Tensor:
         # Step 1: Initiate the graph embedding vector

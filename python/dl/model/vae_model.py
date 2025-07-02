@@ -20,16 +20,14 @@ from dl import ConvException, MLPException, VAEException
 import torch
 import torch.nn as nn
 import logging
-logger = logging.getLogger('dl.model.VAEModel')
+import python
 __all__ = ['VAEModel']
 
-"""
-Variational Autoencoder build from reusable encoders and dimension of the latent space.
-The Neural model can be a feedforward neural network, convolutional neural network....
-"""
-
-
 class VAEModel(NeuralModel):
+    """
+    Variational Autoencoder build from reusable encoders and dimension of the latent space.
+    The Neural model can be a feedforward neural network, convolutional neural network....
+    """
     def __init__(self,
                  model_id: AnyStr,
                  encoder: NeuralModel,
@@ -72,10 +70,10 @@ class VAEModel(NeuralModel):
             # Used to collect distribution/tensor of the latent space
             self.z = None
         except ConvException as e:
-            logger.error(str(e))
+            logging.error(str(e))
             raise VAEException((str(e)))
         except MLPException as e:
-            logger.error(str(e))
+            logging.error(str(e))
             raise VAEException((str(e)))
 
     def get_mu_log_var(self) -> (nn.Module, nn.Module):
@@ -131,17 +129,17 @@ class VAEModel(NeuralModel):
         @return: z
         @rtype: Torch Tensor
         """
-        logger.info(x, 'Input dff_vae')
+        logging.info(x, 'Input dff_vae')
         x = self.encoder(x)
-        logger.info(x, 'after encoder_model')
+        logging.info(x, 'after encoder_model')
         original_shape = x.shape
         x = x.view(x.size(0), -1)
-        logger.info(x, 'flattened')
+        logging.info(x, 'flattened')
         z, mu, log_var = self.variational_block(x)
-        logger.info(z, 'after variational')
+        logging.info(z, 'after variational')
         self.z = z
         z = z.view(original_shape)
-        logger.info(z, 'z.view')
+        logging.info(z, 'z.view')
         z = self.decoder(z)
         return z
 

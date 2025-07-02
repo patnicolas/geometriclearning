@@ -13,12 +13,13 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-    Helper class to manipulate string, characters and bytes
-"""
+__all__ = ['StringEncoding']
 
 
 class StringEncoding(object):
+    """
+        Helper class to manipulate string, characters and bytes
+    """
     @staticmethod
     def to_str(bytes_or_str)-> str:
         """

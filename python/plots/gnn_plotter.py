@@ -16,8 +16,9 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 import networkx as nx
 from networkx import Graph
 from torch_geometric.data import Data
-from typing import Tuple, AnyStr, Callable, Dict, Any, Self, List
+from typing import Tuple, AnyStr, Callable, Dict, Any, Self
 import matplotlib.pyplot as plt
+__all__ = ['GNNPlotter']
 
 
 class GNNPlotter(object):

@@ -20,6 +20,7 @@ import numpy as np
 from geometry.geometric_space import GeometricSpace, ManifoldPoint
 import geomstats.backend as gs
 from geometry import GeometricException
+__all__ = ['HypersphereSpace']
 
 
 class HypersphereSpace(GeometricSpace):

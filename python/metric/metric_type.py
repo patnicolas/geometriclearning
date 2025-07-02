@@ -15,8 +15,8 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from enum import Enum
 from typing import AnyStr, Self
-
 from metric import MetricException
+__all__ = ['MetricType']
 
 
 class MetricType(Enum):

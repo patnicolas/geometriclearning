@@ -13,7 +13,6 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dl import GraphException
 import torch.nn as nn
 import torch_geometric
 from dataset.graph.graph_data_loader import GraphDataLoader
@@ -25,6 +24,10 @@ from torch_geometric.data import Data
 from typing import AnyStr, Dict, Any
 from dl.training.gnn_training import GNNTraining
 from torch.utils.data import DataLoader
+from dl.block.graph import GraphException
+import logging
+import python
+__all__ = ['EvalGConv']
 
 
 class EvalGConv(object):

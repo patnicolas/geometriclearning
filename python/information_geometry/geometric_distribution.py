@@ -14,24 +14,21 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 from geometry.hypersphere_space import HypersphereSpace
-import geomstats.backend as gs
 from typing import List
 from geometry.manifold_point import ManifoldPoint
 import logging
+import python
+__all__ = ['GeometricDistribution']
 
-"""
-Define a generic Geometric Distribution on an Hypersphere using the Geomstats Python library
-The purpose of this class is to display data points and associated tangent vectors on an
-Hypersphere as defined in the class HypersphereSpace.
-"""
 
 
 class GeometricDistribution(object):
-    _ZERO_TGT_VECTOR = [0.0, 0.0, 0.0]
-
-    @staticmethod
-    def zero_tgt_vector() -> List[float]:
-        return GeometricDistribution._ZERO_TGT_VECTOR
+    """
+    Define a generic Geometric Distribution on an Hypersphere using the Geomstats Python library
+    The purpose of this class is to display data points and associated tangent vectors on an
+    Hypersphere as defined in the class HypersphereSpace.
+    """
+    _ZERO_TGT_VECTOR = (0.0, 0.0, 0.0)
 
     def __init__(self) -> None:
         """
@@ -44,7 +41,8 @@ class GeometricDistribution(object):
                     tgt_vector: List[float] = _ZERO_TGT_VECTOR) -> int:
         """
         Display the data points on a manifold (Hypersphere). The tangent vector is displayed if
-        is not defined as the extrinsic origin zero_tgt_vector = [0.0, 0.0, 0.0]
+        is not defined as the extrinsic origin zero_tgt_vector = (0.0, 0.0, 0.0)
+
         @param num_pts: Number of points to be displayed on Hypersphere
         @type num_pts: int
         @param tgt_vector: Tangent vector extrinsic coordinate

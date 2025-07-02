@@ -63,7 +63,17 @@ from typing import List
 import importlib
 
 
-def check_modules_availability(modules: List[AnyStr]) -> None:
+def check_modules_availability(modules: List[AnyStr]) -> AnyStr:
+    """
+    Test if a set of modules is available and loaded
+
+    @param modules: List of Python modules to test
+    @type modules: List[str]
+    @return: Summary of modules available and missing
+    @rtype: AnyStr
+    """
+    assert len(modules) > 0, 'Cannot check availability of undefined set of Python modules'
+
     available = []
     missing = []
 
@@ -73,13 +83,13 @@ def check_modules_availability(modules: List[AnyStr]) -> None:
         else:
             missing.append(name)
 
-    logging.info("Available modules:")
-    for mod in available:
-        logging.info(f"  - {mod}")
-
+    summary = ''
+    if available:
+        summary += '\nAvailable modules:'
+        for mod in available:
+            summary += f" - {mod}"
     if missing:
-        logging.info("\nMissing modules:")
+        summary += "\nMissing modules:"
         for mod in missing:
-            logging.info(f"  - {mod}")
-    else:
-        logging.info("\nAll modules are available!")
+            summary += f" - {mod}"
+    return summary

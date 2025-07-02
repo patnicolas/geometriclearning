@@ -21,17 +21,16 @@ import numpy as np
 from geomstats.geometry.spd_matrices import SPDMatrices
 from geomstats.geometry.riemannian_metric import RiemannianMetric
 import geomstats.backend as gs  # Numpy
-
-
-"""
-Wrapper for the test data for the Symmetric Positive Define matrices
-X- Features data
-y- Label
-"""
+__all__ = ['SPDTestData', 'BinaryLRManifold']
 
 
 @dataclass
 class SPDTestData:
+    """
+    Wrapper for the test data for the Symmetric Positive Define matrices
+    X- Features data
+    y- Label
+    """
     X: np.array
     y: np.array
 
@@ -74,17 +73,15 @@ class SPDTestData:
         return f'X[0]: {self.X[0]}\ny[0]: {self.y[0]}'
 
 
-"""
-Class that wraps the evaluation of Geomstats functions to evaluate the binary logistic regression 
-on a manifold as the group of Symmetric Positive Definite (SPD) matrices and compare with the 
-default logistic regression on the Euclidean space.
-
-The methods evaluate_euclidean and evaluate_spd apply the Scikit-learn cross validation to verify
-that the mean value of cross-validation score for randomly generated SPD matrices is close to 0.5
-"""
-
-
 class BinaryLRManifold(object):
+    """
+    Class that wraps the evaluation of Geomstats functions to evaluate the binary logistic regression
+    on a manifold as the group of Symmetric Positive Definite (SPD) matrices and compare with the
+    default logistic regression on the Euclidean space.
+
+    The methods evaluate_euclidean and evaluate_spd apply the Scikit-learn cross validation to verify
+    that the mean value of cross-validation score for randomly generated SPD matrices is close to 0.5
+    """
     def __init__(self, n_features: int, n_samples: int):
         """
         Constructor for the Binary Logistic Regression classifier

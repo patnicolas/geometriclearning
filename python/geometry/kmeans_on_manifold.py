@@ -19,18 +19,17 @@ from typing import AnyStr, List
 import numpy as np
 from dataclasses import dataclass
 import geomstats.backend as gs
-
-"""
-Data class to collect result associated with a cluster extracted with k-means unsupervised training
-@param center: Centroid
-@type center: Numpy array (3-dimension)
-@param label: Identifier for the cluster
-@type label: Numpy array
-"""
-
+__all__ = ['KMeansCluster', 'KMeansOnManifold']
 
 @dataclass
 class KMeansCluster:
+    """
+    Data class to collect result associated with a cluster extracted with k-means unsupervised training
+    @param center: Centroid
+    @type center: Numpy array (3-dimension)
+    @param label: Identifier for the cluster
+    @type label: Numpy array
+    """
     center: np.array
     label: np.array
 
@@ -38,21 +37,20 @@ class KMeansCluster:
         return f'Center: {self.center}, Label: {self.label}'
 
 
-"""
-Class to wrap the evaluation of k-means algorithm on Euclidean space using Scikit-learn library and
-on the hypersphere (as Riemann manifold) using Geomstats library.
-The evaluation relies on synthetic clustered data on hypersphere following the following steps:
-1. Generate a template cluster by employing a random generator on the manifold.
-2. Generate 4 clusters from the template using a special orthogonal lie group in 3-dimensional space, SO(3).
-
-The synthetic dataset is created through random values generators on the hypersphere following these distributions:
-- Uniform distribution
-- Uniform distribution with constraints
-- von Mises-Fisher distribution
-"""
-
-
 class KMeansOnManifold(object):
+    """
+    Class to wrap the evaluation of k-means algorithm on Euclidean space using Scikit-learn library and
+    on the hypersphere (as Riemann manifold) using Geomstats library.
+
+    The evaluation relies on synthetic clustered data on hypersphere following the following steps:
+    1. Generate a template cluster by employing a random generator on the manifold.
+    2. Generate 4 clusters from the template using a special orthogonal lie group in 3-dimensional space, SO(3).
+
+    The synthetic dataset is created through random values generators on the hypersphere following these distributions:
+    - Uniform distribution
+    - Uniform distribution with constraints
+    - von Mises-Fisher distribution
+    """
     random_von_mises_fisher_label = 'random_von_mises_fisher'
     random_rand_riemann_normal_label = 'random_riemann_normal'
     random_uniform_label = 'random_uniform'

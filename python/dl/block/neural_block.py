@@ -16,14 +16,13 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from torch import nn
 from typing import Self, AnyStr, Optional, List
 from dl import MLPException
-
-
-"""
-Basic Neural block for all deep learning architectures
-"""
+__all__ = ['NeuralBlock']
 
 
 class NeuralBlock(nn.Module):
+    """
+    Basic Neural block for all deep learning architectures
+    """
     supported_activations = ('Sigmoid', 'ReLU', 'Softmax', 'Tanh', 'ELU', 'LeakyReLU')
 
     def __init__(self, block_id: AnyStr):

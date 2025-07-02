@@ -15,15 +15,15 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import torch
 import numpy as np
-from typing import List, Dict, AnyStr
+from typing import List, AnyStr
 from metric.metric_type import MetricType
 from metric.metric import Metric
 from metric import MetricException
-import logging
-logger = logging.getLogger('metric.BuiltInMetric')
+__all__ = ['BuiltInMetric']
 
 
 class BuiltInMetric(Metric):
+
     def __init__(self, metric_type: MetricType, encoding_len: int = -1, is_weighted: bool = False):
         """
         Constructor for the accuracy metrics

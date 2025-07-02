@@ -32,7 +32,7 @@ class ExtendedKalmanFilter(object):
         """
         Constructor for the extended Kalman filter. It differs from the standard linear
         Kalman filter as the two transitions functions f and h are not assumed linear.
-        
+
         @param _x0: Initial value 
         @type _x0: Numpy array
         @param f: State transition function 

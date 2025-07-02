@@ -18,16 +18,14 @@ from dl.block.conv import ConvDataType
 from dl.model.neural_model import NeuralModel, NeuralBuilder
 from dl.block.mlp_block import MLPBlock
 import torch.nn as nn
-import logging
-logger = logging.getLogger('dl.model.FFNNModel')
-
-"""
-Class builder for a feed-forward neural network model using feed-forward neural blocks
-
-"""
+__all__ = ['MLPModel']
 
 
 class MLPModel(NeuralModel):
+    """
+    Class builder for a feed-forward neural network model using feed-forward neural blocks
+    """
+
     def __init__(self, model_id: AnyStr, mlp_blocks: List[MLPBlock]) -> None:
         """
         Constructor for the Feed Forward Neural Network model as a set of Neural blocks

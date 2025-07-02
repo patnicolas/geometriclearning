@@ -20,6 +20,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from typing import AnyStr, List, Tuple
 import geomstats.backend as gs
+__all__ = ['SE3Visualization']
 
 
 class SE3Visualization(LieSE3Group):

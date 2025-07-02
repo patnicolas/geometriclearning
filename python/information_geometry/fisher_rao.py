@@ -22,6 +22,7 @@ from geometry import GeometricException
 ParamType = torch.Tensor | Tuple[torch.Tensor, torch.Tensor]
 import os
 os.environ["GEOMSTATS_BACKEND"] = "pytorch"
+__all__ = ['FisherRao']
 
 
 class FisherRao(CFStatisticalManifold):

@@ -21,6 +21,7 @@ from dl.model.neural_model import NeuralBuilder
 from dl.block.conv import Conv2DataType
 from dl.block.conv.conv_2d_block import Conv2dBlock
 from dl.block.mlp_block import MLPBlock
+__all__ = ['Conv2dModel']
 
 
 class Conv2dModel(ConvModel):

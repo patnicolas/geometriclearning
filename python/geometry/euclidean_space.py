@@ -18,24 +18,24 @@ from geometry.geometric_space import GeometricSpace
 from typing import NoReturn
 import numpy as np
 from geometry.visualization.space_visualization import VisualizationParams, SpaceVisualization
+__all__ = ['EuclideanSpace']
 
-"""
-    Define the Euclidean space and its components
-
-    Class attributes:
-    manifold_type: Type of manifold
-    supported_manifolds: List of supported manifolds
-
-    Object attributes:
-    dimension: Dimension of this Euclidean space
-
-    Methods:
-    sample (pure abstract): Generate random data on a manifold
-    show (abstract method): Display the Euclidean space in 3 dimension
-"""
 
 class EuclideanSpace(GeometricSpace):
+    """
+        Define the Euclidean space and its components
 
+        Class attributes:
+        manifold_type: Type of manifold
+        supported_manifolds: List of supported manifolds
+
+        Object attributes:
+        dimension: Dimension of this Euclidean space
+
+        Methods:
+        sample (pure abstract): Generate random data on a manifold
+        show (abstract method): Display the Euclidean space in 3 dimension
+    """
     def __init__(self, dimension: int):
         super(EuclideanSpace, self).__init__(dimension)
         self.space = Euclidean(dim=self.dimension, equip=False)

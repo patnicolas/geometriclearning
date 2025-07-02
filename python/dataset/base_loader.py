@@ -19,6 +19,7 @@ from typing import AnyStr
 from dataset import DatasetException
 import abc
 from abc import ABC
+__all__ = ['BaseLoader']
 
 
 class BaseLoader(ABC):

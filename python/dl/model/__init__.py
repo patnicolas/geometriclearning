@@ -14,6 +14,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 import torch
+__all__ = ['GrayscaleToRGB', 'OneHotEncoder']
 
 """
 Convert an image from a 1-channel (Black & White) to 3 channel (RGB), using the mode if image

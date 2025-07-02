@@ -15,7 +15,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from dl.training.neural_training import NeuralTraining
 from dl.training.hyper_params import HyperParams
-from dl import GraphException
+from dl.block.graph import GraphException
 from metric.performance_metrics import PerformanceMetrics
 from plots.plotter import PlotterParameters
 from metric.metric_type import MetricType
@@ -27,9 +27,11 @@ import torch.nn as nn
 import torch
 import torch_geometric
 import logging
+import python
 import random
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+__all__ = ['GNNTraining']
 
 
 class GNNTraining(NeuralTraining):

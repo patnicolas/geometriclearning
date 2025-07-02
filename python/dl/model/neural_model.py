@@ -20,19 +20,15 @@ from typing import AnyStr, Self, List, Dict, Any
 from dl.block.conv import ConvDataType
 from torch import Tensor
 from dl import MLPException
-import logging
-logger = logging.getLogger('dl.model.NeuralModel')
-
-
 __all__ = ['NeuralModel', 'NeuralBuilder']
 
-"""
-Abstract base class for Neural network models. The constructors of the sub-classes needs
-to defined the sequence of neural blocks.
-"""
 
 
 class NeuralModel(torch.nn.Module, ABC):
+    """
+    Abstract base class for Neural network models. The constructors of the sub-classes needs
+    to defined the sequence of neural blocks.
+    """
     def __init__(self, model_id: AnyStr, modules_seq: nn.Module) -> None:
         """
         Constructor
