@@ -31,6 +31,7 @@ class VAEKLLoss(_Loss):
         """
         Constructor for the Kullback-Leibler divergence based loss for variational auto-encoder
             Total loss = reconstruction loss + beta* KL loss
+
         @param mu: Linear layer for the normal distribution in the representation layer
         @type mu: nn.Module
         @param log_var: Logarithm of the variance in the linear module the normal distribution in the representation layer
@@ -42,6 +43,8 @@ class VAEKLLoss(_Loss):
         @param beta: Optional beta parameter
         @type beta: float
         """
+        assert 0 < num_records, f'Number of records {num_records} should be > 0'
+
         super(VAEKLLoss, self).__init__(size_average=None, reduce=None, reduction='mean')
         self.mu = mu
         self.log_var = log_var

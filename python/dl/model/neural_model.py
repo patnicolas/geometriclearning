@@ -27,7 +27,7 @@ __all__ = ['NeuralModel', 'NeuralBuilder']
 class NeuralModel(torch.nn.Module, ABC):
     """
     Abstract base class for Neural network models. The constructors of the sub-classes needs
-    to defined the sequence of neural blocks.
+    to define the sequence of neural blocks.
     """
     def __init__(self, model_id: AnyStr, modules_seq: nn.Module) -> None:
         """

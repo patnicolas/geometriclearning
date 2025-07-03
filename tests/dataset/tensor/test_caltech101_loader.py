@@ -25,7 +25,7 @@ class Caltech101LoaderTest(unittest.TestCase):
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_show_samples(self):
         data_path = '../../data/caltech-101'
-        Caltech101Loader.show_samples(data_path, is_random=True)
+        Caltech101Loader.show_samples(data_path)
         self.assertTrue(True)
 
     def test_extract_features_labels(self):

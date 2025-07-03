@@ -56,19 +56,19 @@ class SE3Animation(SO3Animation):
                  coordinates: (float, float, float),
                  transform: Callable[[np.array], np.array] = default_se3_transform) -> None:
         """
-              Default constructor for the animation of SE3 lie Group.
+            Default constructor for the animation of SE3 lie Group.
 
-              @param logo_pos: Define the position of the chart [x, y, width, height]
-              @type logo_pos: List[float]
-              @param interval: Interval in milliseconds between frames
-              @type interval: int
-              @param fps: Number of frame per seconds for animation
-              @type fps: int
-              @param coordinates: Initial coordinate of the sphere used for SE3 transformation
-              @type coordinates: Tuple[float, float,float]
-              @param transform: Rotation (SO3) + Translation transform
-              @type transform: Callable
-              """
+            @param logo_pos: Define the position of the chart [x, y, width, height]
+            @type logo_pos: List[float]
+            @param interval: Interval in milliseconds between frames
+            @type interval: int
+            @param fps: Number of frame per seconds for animation
+            @type fps: int
+            @param coordinates: Initial coordinate of the sphere used for SE3 transformation
+            @type coordinates: Tuple[float, float,float]
+            @param transform: Rotation (SO3) + Translation transform
+            @type transform: Callable
+        """
         super(SE3Animation, self).__init__(logo_pos, interval, fps, coordinates, transform, 1.0)
 
     @classmethod

@@ -41,6 +41,8 @@ class SO4Animation(BaseAnimation):
             @param n_geodesics: Number of geodesics for each of the two 2D rotations
             @type n_geodesics: Tuple
         """
+        assert len(n_geodesics) == 2, f'Number of elements of geodesics {len(n_geodesics)} should be 2'
+
         super(SO4Animation, self).__init__(logo_pos, interval, fps)
 
         self.fig = plt.figure(figsize=(10, 7))

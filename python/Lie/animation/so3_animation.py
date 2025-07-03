@@ -45,7 +45,7 @@ class SO3Animation(BaseAnimation):
     The method uses FuncAnimation frame based simulator with the update (stepping) method implemented
     as a nested function.
 
-    Reference:
+    Reference: https://patricknicolas.substack.com/p/mastering-special-orthogonal-groups
     """
     def __init__(self,
                  logo_pos: List[float],
@@ -182,7 +182,7 @@ class SO3Animation(BaseAnimation):
     def __draw_formula(self) -> None:
         import matplotlib.image as mpimg
         img = mpimg.imread(f'../../input/{self._group_name()}_formula.png')
-        inset_ax = self.fig.add_axes((0.01, 0.32, 0.26, 0.26))
+        inset_ax = self.fig.add_axes((0.01, 0.35, 0.24, 0.24))
         inset_ax.imshow(img, alpha=1.0)
         inset_ax.axis('off')
 
@@ -268,7 +268,7 @@ class SO3Animation(BaseAnimation):
         self.ax.set_zlim(-1.8, 1.8)
         self.ax.set_title(x=0.6,
                           y=1.0,
-                          label=f"{self._group_name()} Transformation on a 3D Sphere",
+                          label='Mastering Special Orthogonal Groups-Python',
                           fontdict={'fontsize': 18, 'fontweight': 'bold', 'fontname': 'Helvetica', 'color': 'black'})
         self.ax.set_xlabel('X', fontdict={'fontsize': 14, 'fontweight': 'bold'})
         self.ax.set_ylabel('Y', fontdict={'fontsize': 14, 'fontweight': 'bold'})
@@ -276,7 +276,7 @@ class SO3Animation(BaseAnimation):
 
 
 if __name__ == '__main__':
-    lie_group_simulation = SO3Animation.build(logo_pos=[0.02, 0.72, 0.3, 0.28],
+    lie_group_simulation = SO3Animation.build(logo_pos=[0.015, 0.725, 0.3, 0.28],
                                               interval=2000,
                                               fps=10,
                                               sphere_radius=2)

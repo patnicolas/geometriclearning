@@ -37,6 +37,9 @@ class MNISTLoader(BaseLoader):
         @param resize_image: Image to be resize if positive value, otherwise the original image is preserved
         @type resize_image: int
         """
+        assert 0 < batch_size <= 8192, f'Batch size {batch_size} should be [1, 8192]'
+        assert 0 < resize_image <= 8192, f'Resize image factor {resize_image} should be [1, 8192]'
+
         super(MNISTLoader, self).__init__(batch_size=batch_size, num_samples=-1)
         self.resize_image = resize_image
 

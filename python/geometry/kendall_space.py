@@ -20,6 +20,7 @@ import numpy as np
 from typing import AnyStr
 __all__ = ['KendallSpace']
 
+
 class KendallSpace(GeometricSpace):
     def __init__(self) -> None:
         m_ambient = 2

@@ -68,6 +68,7 @@ class GraphDataLoader(object):
                  start_index: Optional[int] = -1) -> None:
         """
         Constructor for the Generic Graph Data Loader
+
         @param sampling_attributes: Map for attributes for a given Data loader
         @type sampling_attributes: Dict[AnyStr, Any]
         @param dataset_name: Name of the data set
@@ -80,6 +81,9 @@ class GraphDataLoader(object):
         """
         from dataset.graph.pyg_datasets import PyGDatasets
 
+        assert num_subgraph_nodes is None or -1 <= num_subgraph_nodes <= 8192, \
+            f'Number of subgraph nodes {num_subgraph_nodes} shoudl be [-1, 8192]'
+
         # Validate the attributes against the type of loader-sampler
         GraphDataLoader.__validate(sampling_attributes)
         # Load directly from the dataset
@@ -87,7 +91,8 @@ class GraphDataLoader(object):
         dataset = pyg_datasets()
         # Load a subgraph is specified
         self.data: Data = GraphDataLoader.__extract_subgraph(dataset[0], num_subgraph_nodes, start_index) \
-            if num_subgraph_nodes > 0 else dataset[0]
+            if num_subgraph_nodes is not None and num_subgraph_nodes > 0 else dataset[0]
+
         self.num_classes = dataset.num_classes
         self.attributes_map = sampling_attributes
 

@@ -31,6 +31,9 @@ class BaseAnimation(object):
         @type fps: int
         """
         assert len(logo_pos) == 4, f'Length of chart position {len(logo_pos)} should be 4'
+        assert 1 < interval <= 4096, f'Interval for animation {interval} should be [2, 4096]'
+        assert 0 < fps <= 2048, f'Frame per second for animation {fps} should be [1, 2048]'
+
         self.chart_pos = logo_pos
         self.interval = interval
         self.fps = fps

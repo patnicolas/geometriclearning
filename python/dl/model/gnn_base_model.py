@@ -37,27 +37,28 @@ class GNNBaseModel(NeuralModel):
     def __init__(self,
                  model_id: AnyStr,
                  gnn_blocks: List[GMessagePassingBlock],
-                 ffnn_blocks: Optional[List[MLPBlock]] = None) -> None:
+                 mlp_blocks: Optional[List[MLPBlock]] = None) -> None:
         """
         Constructor for this simple Graph convolutional neural network
         @param model_id: Identifier for this model
         @type model_id: Str
         @param gnn_blocks: List of Graph convolutional neural blocks
         @type gnn_blocks: List[ConvBlock]
-        @param ffnn_blocks: List of Feed-Forward Neural Blocks
-        @type ffnn_blocks: List[MLPBlock]
+        @param mlp_blocks: List of Feed-Forward Neural Blocks
+        @type mlp_blocks: List[MLPBlock]
         """
+        assert len(gnn_blocks) > 0, f'Number of message passing blocks {gnn_blocks} should not be empty'
+
         self.gnn_blocks = gnn_blocks
 
-        modules: List[nn.Module] = [module for block in gnn_blocks
-                                    for module in block.modules]
+        modules: List[nn.Module] = [module for block in gnn_blocks for module in block.modules]
         # If fully connected are provided as CNN
-        if ffnn_blocks is not None:
-            self.ffnn_blocks = ffnn_blocks
+        if mlp_blocks is not None:
+            self.ffnn_blocks = mlp_blocks
             # Flatten
             modules.append(nn.Flatten())
             # Generate
-            [modules.append(module) for block in ffnn_blocks for module in block.modules]
+            [modules.append(module) for block in mlp_blocks for module in block.modules]
         super(GNNBaseModel, self).__init__(model_id, nn.Sequential(*modules))
 
     @classmethod
@@ -71,7 +72,7 @@ class GNNBaseModel(NeuralModel):
         @return: Instance of decoder of type GCNModel
         @rtype: GNNBaseModel
         """
-        return cls(model_id, gnn_blocks=gnn_blocks, ffnn_blocks=None)
+        return cls(model_id, gnn_blocks=gnn_blocks, mlp_blocks=None)
 
     def __repr__(self) -> str:
         modules = [f'{idx}: {str(module)}' for idx, module in enumerate(self.get_modules())]

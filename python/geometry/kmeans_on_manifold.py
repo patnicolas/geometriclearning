@@ -59,13 +59,16 @@ class KMeansOnManifold(object):
     def __init__(self, num_samples: int, num_clusters: int, random_gen: AnyStr = 'random_von_mises_fisher'):
         """
         Constructor for the evaluation of k-means algorithm on Euclidean space and Riemann manifold (Hypersphere)
-        :param num_samples: Number of random samples
-        :type num_samples: int
-        :param num_clusters: Number of clusters used in KMeans
-        :type num_clusters: int
-        :param random_gen: Random generator identifier on the hypersphere
-        :type random_gen: AnyStr
+        @param num_samples: Number of random samples
+        @type num_samples: int
+        @param num_clusters: Number of clusters used in KMeans
+        @type num_clusters: int
+        @param random_gen: Random generator identifier on the hypersphere
+        @type random_gen: AnyStr
         """
+        assert 0 < num_samples <= 19384, f'Number of samples {num_samples} should be [1, 19384]'
+        assert 0 < num_clusters <= 1024, f'Number of clusters {num_clusters} should be [1, 1024]'
+
         # Step 1: Initialize the manifold
         self.hypersphere = Hypersphere(dim=2, equip=True)
 

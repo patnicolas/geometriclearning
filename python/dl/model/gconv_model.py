@@ -30,6 +30,7 @@ class GConvModel(NeuralModel):
                  mlp_blocks: Optional[List[MLPBlock]] = None) -> None:
         """
         Constructor for this simple Graph convolutional neural network
+
         @param model_id: Identifier for this model
         @type model_id: Str
         @param gconv_blocks: List of Graph convolutional neural blocks
@@ -37,6 +38,8 @@ class GConvModel(NeuralModel):
         @param mlp_blocks: List of Feed-Forward Neural Blocks
         @type mlp_blocks: List[MLPBlock]
         """
+        assert len(gconv_blocks) > 0, f'Number of graph convolutional block {gconv_blocks} should not be empty'
+
         self.gconv_blocks = gconv_blocks
         # Extract the torch modules for the convolutional blocks
         # in the appropriate order

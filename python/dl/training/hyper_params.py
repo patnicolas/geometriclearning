@@ -63,6 +63,7 @@ class HyperParams(object):
             @type loss_function: torch.nn.Module
         """
         HyperParams.__check_constructor(lr, momentum, epochs, batch_size, train_eval_ratio, drop_out)
+
         self.learning_rate = lr
         self.epochs = epochs
         self.batch_size = batch_size

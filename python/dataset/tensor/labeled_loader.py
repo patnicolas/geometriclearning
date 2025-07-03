@@ -23,14 +23,15 @@ import numpy as np
 
 __all__ = ['LabeledLoader']
 
-"""
-    Wraps static methods to load public data sets. The methods generate two data loader
-    - Training 
-    - Evaluation
-"""
 
 
 class LabeledLoader(BaseLoader):
+    """
+        Wraps static methods to load public data sets. The methods generate two data loader
+        - Training
+        - Evaluation
+    """
+
     type_dict = {'float64': np.float64, 'float32': np.float32, 'float16': np.float16, 'double': np.float64}
 
     def __init__(self,
@@ -49,6 +50,10 @@ class LabeledLoader(BaseLoader):
         @param split_ratio: Training-validation random split ratio
         @type split_ratio: float
         """
+        assert 0 < batch_size <= 8192, f'Batch size {batch_size} should be [1, 8192]'
+        assert 0.5 <= split_ratio <= 0.95, f'Training-validation split ratio {split_ratio} should be [0.5, 0.95]'
+        assert -2 < num_samples <= 1e+6 and num_samples != 0, f'Resize image factor {num_samples} should be [1, 1e+6]'
+
         super(LabeledLoader, self).__init__(batch_size, num_samples)
         self.create_dataset = create_dataset
         self.split_ratio = split_ratio

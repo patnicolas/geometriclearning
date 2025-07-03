@@ -559,4 +559,4 @@ class GNNTrainingTest(unittest.TestCase):
                               activation_module=nn.LogSoftmax(dim=-1))
         return GNNBaseModel(model_id='Flickr',
                             gnn_blocks=[gnn_block_1, gnn_block_2, gnn_block_3],
-                            ffnn_blocks=[ffnn_block])
+                            mlp_blocks=[ffnn_block])

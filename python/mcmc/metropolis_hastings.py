@@ -32,6 +32,8 @@ class MetropolisHastings(MCMC):
                  burn_in_ratio: float,
                  sigma_delta: float = default_sigma_delta):
         """
+        Constructor for the Metropolis-Hastings algorithm
+
         @param proposal: Proposal distribution
         @type proposal: ProposalDistribution
         @param num_iterations: Number of iterations for the random walk
@@ -41,11 +43,11 @@ class MetropolisHastings(MCMC):
         @param sigma_delta: Covariance or standard deviation used for each step theta -> theta_star
         @type sigma_delta: float
         """
-        super(MetropolisHastings, self).__init__()
         assert 2 <= num_iterations <= 100000, f'Number of iterations {num_iterations} is out of bounds [2, 10000]'
         assert 0.0 < sigma_delta < 1.0, f'Sigma differential {sigma_delta} is out of bounds ]0.0, 1.0['
         assert 0.0 <= burn_in_ratio <= 0.5, f'Burn-in ratio {burn_in_ratio} is out of bounds [0.0, 0.5]'
 
+        super(MetropolisHastings, self).__init__()
         self.proposal = proposal
         self.num_iterations = num_iterations
         self.sigma_delta = sigma_delta

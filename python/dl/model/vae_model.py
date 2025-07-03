@@ -43,6 +43,8 @@ class VAEModel(NeuralModel):
         @type latent_dim: int
         """
         try:
+            assert latent_dim > 1, f'Dimension of latent space {latent_dim} should be > 1'
+
             # Create a decoder as inverted from the encoder (i.e. Deconvolution)
             decoder = encoder.transpose(decoder_out_activation) if decoder_out_activation is not None \
                 else encoder.transpose()

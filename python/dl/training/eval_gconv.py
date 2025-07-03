@@ -34,6 +34,9 @@ class EvalGConv(object):
     def __init__(self,
                  _training_attributes: Dict[AnyStr, Any],
                  _sampling_attributes: Dict[AnyStr, Any]) -> None:
+        assert len(_training_attributes) > 0, 'Training attributes are undefined'
+        assert len(_sampling_attributes) > 0, 'Sampling attributes are undefined'
+
         self.training_attributes = _training_attributes
         self.sampling_attributes = _sampling_attributes
 

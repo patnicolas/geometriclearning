@@ -17,6 +17,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 from typing import Self, Callable, List, Tuple
+from control import ControlException
 
 
 class ExtendedKalmanFilter(object):
@@ -102,3 +103,14 @@ class ExtendedKalmanFilter(object):
         self.predict(noise)
         self.update(z)
         return z, self.x
+
+    @staticmethod
+    def __validate(_x0: np.array, _P0: np.array) -> None:
+        import logging
+        import python
+
+        try:
+            assert _x0.shape[0] == _P0.shape[1], f'Shape A {_x0.shape} is inconsistent with P0 shape {_P0.shape}'
+        except AssertionError as e:
+            logging.error(e)
+            raise ControlException(e)

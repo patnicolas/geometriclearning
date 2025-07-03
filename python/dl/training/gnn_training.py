@@ -55,6 +55,8 @@ class GNNTraining(NeuralTraining):
         @param plot_parameters: Optional plotting parameters
         @type plot_parameters: List[PlotterParameters]
         """
+        assert len(metrics_attributes) > 0, 'Metric attributes are undefined'
+
         super(GNNTraining, self).__init__(hyper_params,
                                           metrics_attributes,
                                           early_stopping,

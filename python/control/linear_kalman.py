@@ -58,7 +58,7 @@ class LinearKalmanFilter(object):
         @param _B :  Optional control matrix (No control if None)
         @type _B: Numpy array
         """
-        self.__validate(_x0, _H, _A, _P0)
+        LinearKalmanFilter.__validate(_x0, _H, _A, _P0)
 
         self.x = _x0
         self.P = _P0
@@ -144,14 +144,15 @@ class LinearKalmanFilter(object):
         return [self.__estimate_next_state(i, measure, cov_means) for i in range(num_measurements)]
 
     """ -------------------------------------   Private supporting methods ------------------- """
+
     def __estimate_next_state(self, state_index: int, observed: Callable[[int], np.array], noise: np.array) -> np.array:
         z = observed(state_index)
         self.predict(noise)
         self.update(z)
         return self.x
 
-    def __validate(self,
-                   _x0: np.array,
+    @staticmethod
+    def __validate(_x0: np.array,
                    _P0: np.array,
                    _A: np.array,
                    _H: np.array) -> None:

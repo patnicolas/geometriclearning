@@ -17,8 +17,6 @@ from typing import AnyStr, Self, Any
 from dl.model.neural_model import NeuralModel
 import torch.nn as nn
 import torch
-import logging
-import python
 __all__ = ['AEModel']
 
 class AEModel(NeuralModel):

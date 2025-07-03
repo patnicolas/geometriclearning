@@ -60,6 +60,8 @@ class PlotterParameters:
 
     @classmethod
     def build(cls, attributes: Dict[AnyStr, Any]) -> Self:
+        assert attributes.__contains__('count'), 'count is undefined as plot attributes'
+        
         count = attributes['count']
         x_label = attributes.get('x_label', 'X')
         y_label = attributes.get('y_label', 'Y')

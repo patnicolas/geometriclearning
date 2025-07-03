@@ -37,6 +37,7 @@ class EarlyStopping(object):
         @type min_diff_loss: float
         """
         assert 1 <= patience <= 10, f'Patience for early stopping {patience} should be [1, 10]'
+
         self.patience = patience
         self.min_diff_loss = min_diff_loss
 

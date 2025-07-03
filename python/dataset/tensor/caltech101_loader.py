@@ -36,20 +36,20 @@ class Caltech101Loader(BaseLoader):
         @param resize_image: Size of image to be resized. The image is not resized if -1
         @type resize_image: int
         """
+        assert 0 < batch_size <= 8192, f'Batch size {batch_size} should be [1, 8192]'
         assert 0.5 <= split_ratio <= 0.95, f'Training-validation split ratio {split_ratio} should be [0.5, 0.95]'
+        assert 0 < resize_image <= 8192, f'Resize image factor {resize_image} should be [1, 8192]'
 
         super(Caltech101Loader, self).__init__(batch_size=batch_size, num_samples=-1)
         self.split_ratio = split_ratio
         self.resize_image = resize_image
 
     @staticmethod
-    def show_samples(data_path: AnyStr, is_random: bool = True) -> None:
+    def show_samples(data_path: AnyStr) -> None:
         """
         Show a random sample of images from a given dataset
         @param data_path: Path for the Caltech 101 images
         @type data_path: str
-        @param is_random: Flag to specify the images have to be randomly selected
-        @type is_random: bool
         """
         import matplotlib.pyplot as plt
         from PIL import Image

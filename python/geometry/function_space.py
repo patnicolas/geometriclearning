@@ -32,8 +32,7 @@ class FunctionSpace(HilbertSphere):
         Throw a GeometricException if the number of samples < 2
     """
     def __init__(self, num_domain_samples: int):
-        if num_domain_samples < 2:
-            raise GeometricException(f'Number of samples {num_domain_samples} should be > 1')
+        assert num_domain_samples < 2, f'Number of samples {num_domain_samples} should be > 1'
 
         domain_samples = gs.linspace(0, 1, num=num_domain_samples)
         super(FunctionSpace, self).__init__(domain_samples, True)

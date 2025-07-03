@@ -48,6 +48,8 @@ class PerformanceMetrics(object):
         @param metrics: Dictionary { metric_name, built in metric}
         @type metrics: Dictionary
         """
+        assert len(metrics) > 0, 'Performance metrics are undefined'
+
         self.metrics: Dict[MetricType, BuiltInMetric] = metrics
         self.performance_values: Dict[MetricType, List[np.array]] = {}
 
