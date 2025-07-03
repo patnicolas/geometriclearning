@@ -185,7 +185,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
         ax.set_zlabel('PDF value')
         ani = FuncAnimation(fig, update, frames=num, interval=8, repeat=False, blit=False)
         # plt.show()
-        ani.save('normal_manifold.mp4', writer='ffmpeg', fps=32, dpi=240)
+        ani.save('normal_manifold_animation.mp4', writer='ffmpeg', fps=32, dpi=240)
 
     """ ---------------------------   Support methods ---------------------------  """
 

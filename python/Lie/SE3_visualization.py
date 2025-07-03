@@ -125,7 +125,7 @@ class SE3Visualization(LieSE3Group):
                         text_obj)
         ani = FuncAnimation(fig, update, frames=num_points, interval=interval, repeat=False, blit=False)
         #plt.show()
-        ani.save('SE3_visualization.mp4', writer='ffmpeg', fps=fps, dpi=240)
+        ani.save('se3_visualization.mp4', writer='ffmpeg', fps=fps, dpi=240)
 
     """ -----------------------  Private Helper Methods --------------------- """
 

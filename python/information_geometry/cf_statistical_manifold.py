@@ -271,5 +271,5 @@ class CFStatisticalManifold(object):
 
         ani = FuncAnimation(fig, update, frames=len(parameters), interval=12, repeat=False, blit=False)
         # plt.show()
-        ani.save('cf_statistical_manifolds.mp4', writer='ffmpeg', fps=20, dpi=240)
+        ani.save('statistical_manifold_animation.mp4', writer='ffmpeg', fps=20, dpi=240)
 
