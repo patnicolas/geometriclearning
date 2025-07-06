@@ -18,7 +18,7 @@ from geomstats.geometry.special_orthogonal import SpecialOrthogonal
 import torch
 import numpy as np
 from typing import AnyStr, Dict, List
-from geometry import GeometricException
+from lie import LieException
 __all__ = ['SOnGroup']
 
 
@@ -61,7 +61,7 @@ class SOnGroup(object):
         @return: Rotation matrix associated with the point on the manifold
         @rtype: torch Tensor
         """
-        self.__validate_tensor_shape(point)
+        self.__validate_tensor_shape(point, dim=self.__group.n)
 
         # Use the default identity if none is provided
         identity = identity.numpy() if identity is not None else np.eye(self.__group.n)
@@ -116,7 +116,7 @@ class SOnGroup(object):
         """
         basis_matrices = [v for _, v in SOnGroup.__basis_matrices(self.__group.n).items()]
         if len(weights) != len(basis_matrices):
-            raise GeometricException(
+            raise LieException(
                 f'Number of weights {len(weights)} should match '
                 f'number of basis matrices {len(basis_matrices)}'
             )
@@ -177,16 +177,16 @@ class SOnGroup(object):
             _shape = (pt.shape[1], pt.shape[2]) if len(pt.shape) > 2 else pt.shape
             # Validate of tensor shape
             if _shape != (dim,  dim):
-                raise GeometricException(f'Shape tensor {_shape} should match({dim}, {dim})')
+                raise LieException(f'Shape tensor {_shape} should match({dim}, {dim})')
 
             # Validate condition of orthogonality   R^T.R = Identity
             if not are_tensors_close(pt.T @ pt, torch.eye(dim), rtol=rtol):
-                raise GeometricException(f'Orthogonality R^T.R  failed')
+                raise LieException(f'Orthogonality R^T.R  failed')
 
             # Validate orientation det(R) = +1
             det = torch.linalg.det(pt)
             if abs(det - 1.0) > rtol:
-                raise GeometricException(f'Determinant {det} should be +1')
+                raise LieException(f'Determinant {det} should be +1')
 
     def exp(self, tgt_vector: torch.Tensor, base_point: torch.Tensor = None) -> torch.Tensor:
         """
@@ -336,7 +336,7 @@ class SOnGroup(object):
                 'B3': np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, -1], [0, 0, 1, 0]])
             }
             case _:
-                raise GeometricException(f'SO({dim}) is not supported')
+                raise LieException(f'SO({dim}) is not supported')
 
     def __validate(self, *points: torch.Tensor) -> None:
         SOnGroup.validate_points(*points, dim=self.__group.n, rtol=self.__atol)
@@ -346,7 +346,7 @@ class SOnGroup(object):
         for x in points:
             sh = (x.shape[1], x.shape[2]) if len(x.shape) > 2 else x.shape
             if sh != (dim,  dim):
-                raise GeometricException(f'Shape tensor {sh} should match({dim}, {dim})')
+                raise LieException(f'Shape tensor {sh} should match({dim}, {dim})')
 
     @staticmethod
     def __projection_so4(point: torch.Tensor) -> torch.Tensor:

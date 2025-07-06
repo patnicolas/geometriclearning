@@ -149,7 +149,7 @@ class SE3VisualizationTest(unittest.TestCase):
         se3_group_2 = SE3Visualization(rot_matrix=u3d.z_rot, trans_matrix=second_trans)
 
         # Composition
-        se3_composed_group = se3_group_1.multiply(se3_group_2)
+        se3_composed_group = se3_group_1.compose(se3_group_2)
         self.assertTrue(se3_composed_group.belongs())
         logging.info(f'\nFirst element:\n{se3_group_1}\nSecond element\n{se3_group_2}'
               f'\nComposed element: {se3_composed_group}')
@@ -195,7 +195,7 @@ class SE3VisualizationTest(unittest.TestCase):
         se3_group = SE3Visualization(rot_matrix=u3d.x_rot, trans_matrix=u3d.y_trans)
 
         # Composition
-        se3_composed_group = se3_group.multiply(se3_group)
+        se3_composed_group = se3_group.compose(se3_group)
         self.assertTrue(se3_composed_group.belongs())
 
         vec_descriptor = ("              Algebra\n0.000 0.000  0.000 0.000\n0.000 0.000 -1.000 1.000"

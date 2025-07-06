@@ -3,7 +3,7 @@ import unittest
 from lie.son_group import SOnGroup
 import logging
 import torch
-from geometry import GeometricException
+from lie import LieException
 import os
 import python
 from python import SKIP_REASON
@@ -12,22 +12,43 @@ from python import SKIP_REASON
 class SOnGroupTest(unittest.TestCase):
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_2(self):
-        logging.info('Start test')
-        son_group = SOnGroup(dim=2, equip=False)
-        logging.info(son_group)
+        try:
+            son_group = SOnGroup(dim=2, equip=False)
+            logging.info(son_group)
+            self.assertTrue(True)
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except NotImplementedError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_3(self):
-        son_group = SOnGroup(dim=3, equip=False)
-        logging.info(son_group)
-        sampled_points = son_group.sample_points(6)
-        self.assertTrue(son_group.belongs(sampled_points))
+        try:
+            son_group = SOnGroup(dim=3, equip=False)
+            logging.info(son_group)
+            sampled_points = son_group.sample_points(6)
+            self.assertTrue(son_group.belongs(sampled_points))
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_4(self):
-        son_group = SOnGroup(dim=4, equip=False)
-        logging.info(son_group)
-        logging.info(f'\n{son_group.sample_points(3)}')
+        try:
+            son_group = SOnGroup(dim=4, equip=False)
+            logging.info(son_group)
+            logging.info(f'\n{son_group.sample_points(3)}')
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_exp_3(self):
@@ -46,7 +67,10 @@ class SOnGroupTest(unittest.TestCase):
             self.assertTrue(son_group.belongs(sampled_point))
             end_point = son_group.exp(tgt_vector, sampled_point)
             logging.info(f'End point:\n{end_point}')
-        except GeometricException as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -73,7 +97,10 @@ class SOnGroupTest(unittest.TestCase):
                          f'\nso2 computed algebra log(exp(A)):\n{computed_tgt_vector}')
             # Verify the vector recomputed from the end point using the log map is similar to the original vector
             self.assertTrue(son_group.equal(tgt_vector, computed_tgt_vector))
-        except GeometricException as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -98,7 +125,10 @@ class SOnGroupTest(unittest.TestCase):
             computed_tgt_vector = son_group.log(end_point, identity)
             logging.info(f'so3 algebra A:\n{tgt_vector}\nso3 computed algebra log(exp(A)):\n{computed_tgt_vector}')
             self.assertTrue(son_group.equal(tgt_vector, computed_tgt_vector))
-        except GeometricException as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -118,7 +148,10 @@ class SOnGroupTest(unittest.TestCase):
             self.assertTrue(son_group.belongs(sampled_point))
             end_point = son_group.exp(tgt_vector, sampled_point)
             logging.info(f'End point:\n{end_point}')
-        except GeometricException as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -138,7 +171,10 @@ class SOnGroupTest(unittest.TestCase):
             end_point = son_group.exp(tgt_vector, sampled_point)
             rotation_matrix = son_group.lie_algebra(end_point)
             logging.info(f'Algebra SO(3): {rotation_matrix}')
-        except GeometricException as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -157,7 +193,10 @@ class SOnGroupTest(unittest.TestCase):
             end_point = son_group.exp(tgt_vector, sampled_point)
             rotation_matrix = son_group.lie_algebra(end_point)
             logging.info(f'Algebra SO(2): {rotation_matrix}')
-        except GeometricException as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -170,7 +209,10 @@ class SOnGroupTest(unittest.TestCase):
             self.assertTrue(son_group.belongs(sampled_point))
             algebra = son_group.lie_algebra(sampled_point)
             logging.info(f'Algebra SO(4): {algebra}')
-        except GeometricException as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -197,7 +239,10 @@ class SOnGroupTest(unittest.TestCase):
             matrix = torch.eye(2)
             projected_matrix = son_group.project(matrix)
             logging.info(f'\nMatrix\n{matrix}\nProjected matrix:\n{projected_matrix}')
-        except GeometricException as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -220,7 +265,10 @@ class SOnGroupTest(unittest.TestCase):
             identity = torch.eye(3)
             projected_identity = son_group.project(identity)
             logging.info(f'\nIdentity:\n{identity}\nProjected identity:\n{projected_identity}')
-        except GeometricException as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -246,7 +294,10 @@ class SOnGroupTest(unittest.TestCase):
             projected_matrix = son_group.project(matrix)
             SOnGroup.validate_points(projected_matrix, dim=4)
             logging.info(f'\nMatrix:\n{matrix}\nProjected matrix:\n{projected_matrix}')
-        except GeometricException as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -265,22 +316,33 @@ class SOnGroupTest(unittest.TestCase):
             # Self composed rotations
             composed_rotation = son_group.compose(matrix1, matrix1)
             logging.info(f'\nMatrix: {matrix1}\nSelf composed matrix:\n{composed_rotation}')
-        except GeometricException as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
             logging.error(e)
             self.assertTrue(False)
 
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_compose_commutative(self):
-        dimension = 4
-        son_group = SOnGroup(dim=dimension, equip=True)
-        # Generate rotations matrices
-        rand_matrix1 = son_group.random_matrix()
-        rand_matrix2 = son_group.random_matrix()
+        try:
+            dimension = 4
+            son_group = SOnGroup(dim=dimension, equip=True)
+            # Generate rotations matrices
+            rand_matrix1 = son_group.random_matrix()
+            rand_matrix2 = son_group.random_matrix()
 
-        composed_rotation1 = son_group.compose(rand_matrix1, rand_matrix2)
-        composed_rotation2 = son_group.compose(rand_matrix2, rand_matrix1)
-        logging.info(f'\nMatrix 1:\n{rand_matrix1}\nMatrix 2:\n{rand_matrix2}'
-                     f'\nComposition Matrix 1 x matrix 2\n{composed_rotation1}'
-                     f'\nComposition Matrix 1 x matrix 2\n{composed_rotation2}')
+            composed_rotation1 = son_group.compose(rand_matrix1, rand_matrix2)
+            composed_rotation2 = son_group.compose(rand_matrix2, rand_matrix1)
+            logging.info(f'\nMatrix 1:\n{rand_matrix1}\nMatrix 2:\n{rand_matrix2}'
+                         f'\nComposition Matrix 1 x matrix 2\n{composed_rotation1}'
+                         f'\nComposition Matrix 1 x matrix 2\n{composed_rotation2}')
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_compose_2(self):
@@ -302,16 +364,19 @@ class SOnGroupTest(unittest.TestCase):
             composed_rotation = son_group.compose(rand_matrix1, rand_matrix1)
             SOnGroup.validate_points(composed_rotation, dim=dimension)
             logging.info(f'\nMatrix 1: {rand_matrix1}\nSelf composed matrix:\n{composed_rotation}')
-        except GeometricException as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
             logging.error(e)
             self.assertTrue(False)
 
-    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_inverse_1(self):
         try:
             group_dim = 2
             so2_group = SOnGroup(dim=group_dim, equip=True, atol=1e-4)
-            matrix = SOnGroupTest.create_matrix(theta_rad=90, gamma_rad=None)
+            matrix = SOnGroupTest.create_so_matrix(theta_rad=90, gamma_rad=None)
             # Validate rotation is SO(2)
             SOnGroup.validate_points(matrix, dim=group_dim)
 
@@ -327,7 +392,10 @@ class SOnGroupTest(unittest.TestCase):
             # Validate inverse rotation is SO(2)
             SOnGroup.validate_points(inverse_identity, dim=group_dim)
             logging.info(f'\nMatrix:\n{identity}\nInverse matrix:\n{inverse_identity}')
-        except GeometricException as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -348,7 +416,10 @@ class SOnGroupTest(unittest.TestCase):
             # Verify inverse
             identity = torch.eye(dim)
             son_group.equal(matrix.T @ inverse_matrix, identity)
-        except GeometricException as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -365,7 +436,10 @@ class SOnGroupTest(unittest.TestCase):
             composed = son_group.compose(matrix, inverse_matrix)
             logging.info(f'\nA={matrix}\nA o inv(A)={composed}')
             self.assertTrue(son_group.equal(composed, torch.eye(3)))
-        except GeometricException as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -376,7 +450,10 @@ class SOnGroupTest(unittest.TestCase):
             so3_generated = son_group.generate_rotation(weights=[0.2, 0.5, 0.3])
             logging.info(f'\nGenerated rotation: {so3_generated}')
             self.assertTrue(so3_generated.shape == (3, 3))
-        except GeometricException as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -387,7 +464,10 @@ class SOnGroupTest(unittest.TestCase):
             so4_generated = son_group.generate_rotation(weights=[0.2, 0.2, 0.2, 0.1, 0.1, 0.2])
             logging.info(f'\nGenerated SO4 element: {so4_generated}')
             self.assertTrue(so4_generated.shape == (4, 4))
-        except GeometricException as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -405,15 +485,18 @@ class SOnGroupTest(unittest.TestCase):
             so4_generated = son_group.generate_rotation(weights=weights)
             logging.info(f'\nGenerated SO4 element: {so4_generated}')
             self.assertTrue(so4_generated.shape == (4, 4))
-        except GeometricException as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except LieException as e:
             logging.error(e)
             self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_create_matrix(self):
-        matrix = SOnGroupTest.create_matrix(theta_rad=90)
+        matrix = SOnGroupTest.create_so_matrix(theta_rad=90)
         logging.info(f'\nSO(2) matrix read=45:\n{matrix}')
-        matrix = SOnGroupTest.create_matrix(theta_rad=90, gamma_rad=45)
+        matrix = SOnGroupTest.create_so_matrix(theta_rad=90, gamma_rad=45)
         logging.info(f'\nSO(3) matrix read=90:\n{matrix}')
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
@@ -450,7 +533,19 @@ class SOnGroupTest(unittest.TestCase):
                 ])
 
     @staticmethod
-    def create_matrix(theta_rad: int, gamma_rad: int = None) -> torch.Tensor:
+    def create_so_matrix(theta_rad: int, gamma_rad: int = None) -> torch.Tensor:
+        """
+        Generate a SO(2) if gamma_rad is undefined/None or SO(3) matrix given two
+        rotation angle theta and gamma
+
+        Generate a SO2-SO3 matrix with theta and Gamma angles
+        @param theta_rad: First angle in radians
+        @type theta_rad: int
+        @param gamma_rad: Second angle variable in radians
+        type gamma_rad: int
+        return: SO(2) or SO(3) matrix
+        rtype: Torch Tensor
+        """
         import numpy as np
         theta = np.radians(theta_rad)
         if gamma_rad is None:

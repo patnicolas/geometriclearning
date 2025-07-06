@@ -75,6 +75,18 @@ class SE3Element:
 
 class LieSE3Group(object):
 
+    """
+    Class Dedicated to LIE Special Euclidean group of dimension 3. Contrary to the generic
+    SOnGroup class which process Torch tensor, this class and method processes Numpy arrays.
+    This class leverage the Geomstats library.
+
+    Key functionality
+        - inverse: Compute the inverse 3D rotation matrix
+        - compose: Implement the composition (multiplication) of two 3D rotation matrix
+        - Projection: Project of any given array to the closest 3D rotation matrix
+        - lie_algebra: Lie algebra as the tangent vector at identity
+        - bracket: Implement Lie commutator for so3 algebra
+    """
     def __init__(self,
                  rot_matrix: np.array,
                  trans_matrix: np.array,
@@ -83,6 +95,7 @@ class LieSE3Group(object):
         """
         Constructor for the wrapper for key operations on SE3 Special Euclidean lie manifold. A point on
         SE3 manifold is computed by composing the rotation and translation matrices
+
         @param rot_matrix: 3 x 3 rotation matrix
         @type rot_matrix: Numpy array
         @param trans_matrix: 1 x 3 translation matrix
@@ -142,13 +155,14 @@ class LieSE3Group(object):
         return cls(rotation_matrix, translation_matrix, epsilon, point_type)
 
     from functools import partialmethod
-    """ Minimalist build method leveraging default values """
+    # Minimalist build method leveraging default values
     build_default = partialmethod(build, epsilon=0.001, point_type='matrix')
 
     @staticmethod
     def get_tangent_vector(rotation: np.array, translation: np.array) -> np.array:
         """
         Generates a (6, ) vector from a (3, 3) rotation matrix and (1, 3) translation matrix on tangent space.
+
         @param rotation: (3, 3) matrix
         @type rotation: Numpy array
         @param translation: (1, 3) matrix
@@ -188,14 +202,17 @@ class LieSE3Group(object):
         translation = np.array(inverse_group_element[:3, -1])
         return LieSE3Group(rot_matrix=rotation, trans_matrix=translation, point_type=self.point_type)
 
-    def multiply(self, lie_se3_group: Self) -> Self:
+    def compose(self, lie_se3_group: Self) -> Self:
         """
-        Define the product this LieGroup point or element with another lie group point using Geomstats compose method
+        Define the product or composition of this LieGroup point or element with another
+        lie group point using Geomstats compose method.
+
         @param lie_se3_group Another lie group
         @type lie_se3_group LieSE3Group
         @return: Instance of LieSE3Group
-        @rtype: SE3Visualization
+        @rtype: LieSE3Group
         """
+
         # Invoke Geomstats method
         composed_group_point = self.lie_group.compose(self.se3_element.group_element,
                                                       lie_se3_group.se3_element.group_element)
@@ -236,7 +253,6 @@ class LieSE3Group(object):
 
     def __repr__(self) -> AnyStr:
         return f'\nSE3 element:\n{str(self.se3_element)}'
-
 
     def visualize_tangent_space(self, rot_matrix: np.array, trans_vec: np.array) -> None:
         import matplotlib.pyplot as plt
