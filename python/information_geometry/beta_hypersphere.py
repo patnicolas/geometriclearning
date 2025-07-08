@@ -33,6 +33,7 @@ class BetaHypersphere(GeometricDistribution):
         """
         Display the Beta distribution for multiple random points on a hypersphere. The data points are
         randomly generated using the Von-mises random generator.
+
         @param num_manifold_pts: Number of data points on the hypersphere
         @type num_manifold_pts: int
         @param num_interpolations: Number of interpolation points to draw the Beta distributions
@@ -40,6 +41,9 @@ class BetaHypersphere(GeometricDistribution):
         @return: True if number of Beta density functions displayed is correct, False else
         @rtype: bool
         """
+        assert num_manifold_pts > 1, f'Number of manifold points {num_manifold_pts} should be > 1'
+        assert num_interpolations > 1, f'Number of interpolation {num_interpolations} should be > 1'
+
         # Generate random points on Hypersphere using Von Mises algorithm
         manifold_pts = self._random_manifold_points(num_manifold_pts)
         t = gs.linspace(0, 1.1, num_interpolations)[1:]

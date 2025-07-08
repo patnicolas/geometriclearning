@@ -4,6 +4,7 @@ import logging
 from mcmc.metropolis_hastings import MetropolisHastings
 from mcmc.proposal_distribution import ProposalBeta, ProposalDistribution
 from typing import AnyStr
+from mcmc import MCMCException
 import os
 import python
 from python import SKIP_REASON
@@ -13,67 +14,89 @@ class TestMetropolisHastings(TestCase):
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_mh_sample_high_burn_in(self):
-        num_iterations = 12000
-        burn_in_ratio = 0.2
-        sigma_delta = 0.5
-        theta0 = 0.8
+        try:
+            num_iterations = 12000
+            burn_in_ratio = 0.2
+            sigma_delta = 0.5
+            theta0 = 0.8
 
-        alpha = 4
-        beta = 6
-        num_trails = 96
-        successes = 24
-        normal_McMc = ProposalBeta(alpha, beta, num_trails, successes)
-        TestMetropolisHastings.execute_metropolis_hastings(
-            normal_McMc,
-            num_iterations,
-            burn_in_ratio,
-            sigma_delta,
-            theta0,
-            f"Beta({alpha}, {beta}) {burn_in_ratio=}, {theta0=}, {sigma_delta=}"
-        )
+            alpha = 4
+            beta = 6
+            num_trails = 96
+            successes = 24
+            normal_McMc = ProposalBeta(alpha, beta, num_trails, successes)
+            TestMetropolisHastings.execute_metropolis_hastings(
+                normal_McMc,
+                num_iterations,
+                burn_in_ratio,
+                sigma_delta,
+                theta0,
+                f"Beta({alpha}, {beta}) {burn_in_ratio=}, {theta0=}, {sigma_delta=}"
+            )
+            self.assertTrue(True)
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except MCMCException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     def test_mh_sample_no_burn_in(self):
-        num_iterations = 12000
-        burn_in_ratio = 0.2
-        sigma_delta = 0.4
-        theta0 = 0.8
+        try:
+            num_iterations = 12000
+            burn_in_ratio = 0.2
+            sigma_delta = 0.4
+            theta0 = 0.8
 
-        alpha = 4
-        beta = 6
-        num_trails = 100
-        h = 10
-        proposal = ProposalBeta(alpha, beta, num_trails, h)
+            alpha = 4
+            beta = 6
+            num_trails = 100
+            h = 10
+            proposal = ProposalBeta(alpha, beta, num_trails, h)
 
-        TestMetropolisHastings.execute_metropolis_hastings(
-            proposal,
-            num_iterations,
-            burn_in_ratio,
-            sigma_delta,
-            theta0,
-            f"Beta({alpha}, {beta}) {burn_in_ratio=}, {theta0=}"
-        )
+            TestMetropolisHastings.execute_metropolis_hastings(
+                proposal,
+                num_iterations,
+                burn_in_ratio,
+                sigma_delta,
+                theta0,
+                f"Beta({alpha}, {beta}) {burn_in_ratio=}, {theta0=}"
+            )
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except MCMCException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_mh_sample_burn_in_beta(self):
-        num_iterations = 12000
-        burn_in_ratio = 0.1
-        sigma_delta = 0.4
-        theta0 = 0.95
+        try:
+            num_iterations = 12000
+            burn_in_ratio = 0.1
+            sigma_delta = 0.4
+            theta0 = 0.95
 
-        alpha = 4
-        beta = 2
-        num_trails = 96
-        h = 10
-        normal_McMc = ProposalBeta(alpha, beta, num_trails, h)
+            alpha = 4
+            beta = 2
+            num_trails = 96
+            h = 10
+            normal_McMc = ProposalBeta(alpha, beta, num_trails, h)
 
-        TestMetropolisHastings.execute_metropolis_hastings(
-            normal_McMc,
-            num_iterations,
-            burn_in_ratio,
-            sigma_delta,
-            theta0,
-            f"Beta({alpha}, {beta}) {burn_in_ratio=}, {theta0=}"
-        )
+            TestMetropolisHastings.execute_metropolis_hastings(
+                normal_McMc,
+                num_iterations,
+                burn_in_ratio,
+                sigma_delta,
+                theta0,
+                f"Beta({alpha}, {beta}) {burn_in_ratio=}, {theta0=}"
+            )
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except MCMCException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @staticmethod
     def execute_metropolis_hastings(
