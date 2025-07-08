@@ -29,7 +29,7 @@ class VAEKLLoss(_Loss):
                  loss_func: nn.Module,
                  beta: Optional[float] = 1.0) -> None:
         """
-        Constructor for the Kullback-Leibler divergence based loss for variational auto-encoder
+        Constructor for the ELBO - Kullback-Leibler divergence based loss for variational auto-encoder
             Total loss = reconstruction loss + beta* KL loss
 
         @param mu: Linear layer for the normal distribution in the representation layer

@@ -25,7 +25,6 @@ from typing import List, AnyStr, Dict, Any, Self, Optional
 import torch
 import torch.nn as nn
 import logging
-logger = logging.getLogger('dl.model.ConvModel')
 __all__ = ['ConvModel']
 
 
@@ -173,6 +172,7 @@ class ConvModel(NeuralModel, ABC):
             return False
 
     """ ----------------------------   Private helper methods --------------------------- """
+
     def __linear_layer_input_size(self, last_conv_block: ConvBlock) -> int:
         from dl.block.conv.conv_output_size import SeqConvOutputSize
 

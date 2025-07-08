@@ -14,13 +14,11 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 from torch import nn
-from typing import Tuple, Any, AnyStr, Optional, Dict, List
+from typing import Any, AnyStr, Optional, List
 
 from dl import ConvException
 from dl.block.neural_block import NeuralBlock
 from dl.block.conv.conv_output_size import ConvOutputSize
-import logging
-logger = logging.getLogger('dl.block.ConvBlock')
 __all__ = ['ConvBlock']
 
 

@@ -14,7 +14,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 import logging
-import util
+import python
 from dataset import DatasetException
 from dataset.base_loader import BaseLoader
 from typing import AnyStr, List
@@ -106,7 +106,7 @@ class Caltech101Loader(BaseLoader):
             return torch.utils.data.random_split(caltech_101_dataset, lengths=[train_size, test_size])
 
         except RuntimeError as e:
-            logger.error(str(e))
+            logging.error(str(e))
             raise DatasetException(str(e))
 
     @staticmethod
