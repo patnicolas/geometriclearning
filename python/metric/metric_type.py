@@ -27,6 +27,7 @@ class MetricType(Enum):
     AuROC = 'AuROC'
     TrainLoss = 'TrainLoss'
     EvalLoss = 'EvalLoss'
+    All = 'All'
 
     @staticmethod
     def get_metric_type(metric_type_str: AnyStr) -> Self:
@@ -43,5 +44,7 @@ class MetricType(Enum):
                 return MetricType.EvalLoss
             case 'TrainLoss':
                 return MetricType.TrainLoss
+            case 'All':
+                return MetricType.All
             case _:
                 raise MetricException(f'{metric_type_str} metric is not supported')

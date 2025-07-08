@@ -25,16 +25,22 @@ __all__ = ['LieSO3Group']
 
 class LieSO3Group(object):
     """
-        Wrapper for the most common operations on SO3 groups using Geomstats library
-        - inverse: Compute the inverse 3D rotation matrix
-        - product: Implement the composition (multiplication) of two 3D rotation matrix
-        - Projection:
-    """
+        Wrapper for the most common operations on Special Orthogonal groups of dimension 3
+        using Geomstats library.
+        Contrary to the generic SOnGroup class which process Torch tensor, this class and
+        methods processes Numpy arrays.
 
+        Key functionality
+        - inverse: Compute the inverse 3D rotation matrix
+        - compose: Implement the composition (multiplication) of two 3D rotation matrix
+        - Projection: Project of any given array to the closest 3D rotation matrix
+        - lie_algebra: lie algebra as the tangent vector at identity
+        - bracket: Implement lie commutator for so3 algebra
+       """
     # lie group as defined in Geomstats library
     lie_group = SpecialOrthogonal(n=3, point_type='vector', equip=False)
     identity_matrix = np.eye(3)
-cd ..
+
     def __init__(self, algebra_element: np.array, identity_element: np.array = identity_matrix) -> None:
         """
         Constructor for the wrapper for key operations on SO3 Special Orthogonal lie manifold
@@ -59,7 +65,7 @@ cd ..
     @classmethod
     def build(cls, algebra_element: List[float], identity_matrix: List[float] = None) -> Self:
         """
-        Alternative constructor for the operations on SO3 lie Manifold
+        Alternative constructor for the operations on SO3 lie Manifold.
         @param algebra_element: Tangent vector (Matrix)
         @type algebra_element: List[float] (dim 3 x 3 = 9)
         @param identity_matrix: Base point on the SO3 manifold
@@ -87,15 +93,16 @@ cd ..
     def lie_algebra(self) -> np.array:
         """
         Define the Algebra (tangent space) for a matrix and base point in SO3 group using the log
-        (inverse exponentiation) method defined in Geomstats
+        (inverse exponentiation) method defined in Geomstats.
         @return: Rotation matrix on tangent space
         @rtype: Numpy array
         """
         return LieSO3Group.lie_group.log(self.group_element, self.identity_element)
 
-    def product(self, lie_so3_group: Self) -> Self:
+    def compose(self, lie_so3_group: Self) -> Self:
         """
-        Define the product this LieGroup point or element with another lie group point using Geomstats compose method
+        Define the product or multip this LieGroup point or element with another lie group point using Geomstats compose method.
+        
         @param lie_so3_group Another lie group
         @type LieSO3Group
         @return: Instance of LieSO3Group
@@ -125,13 +132,13 @@ cd ..
 
     def bracket(self,  element: np.array) -> np.array:
         """
-        Compute the bracket [X, Y] = X.Y - Y.X of two tangent vectors
+        Compute the bracket or cummutator [X, Y] = X.Y - Y.X of two tangent vectors
+
         @param element: Second tangent vector
         @type element: List of 3x3 float values
         @return: Value of the bracket
         @rtype: Numpy array
         """
-
         return np.dot(self.algebra_element, element) - np.dot(element, self.algebra_element)
 
     def visualize(self, title: AnyStr, notation_index: int = 0) -> None:

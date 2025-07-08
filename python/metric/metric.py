@@ -21,7 +21,7 @@ __all__ = ['Metric']
 
 class Metric(object):
     """
-    Base class for all metrics
+    Base, abstract class for all metrics
     """
     default_min_loss = -1e-5
     train_loss_label = 'Train loss'

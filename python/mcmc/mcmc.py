@@ -14,8 +14,9 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 __all__ = ['MCMC']
+from abc import ABC
 
-class MCMC(object):
+class MCMC(ABC):
     from abc import abstractmethod
 
     def __init__(self) -> None:

@@ -15,7 +15,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import torch
 import numpy as np
-from typing import List, AnyStr
+from typing import List, AnyStr, Dict
 from metric.metric_type import MetricType
 from metric.metric import Metric
 from metric import MetricException
@@ -45,6 +45,7 @@ class BuiltInMetric(Metric):
     def from_numpy(self, predicted: np.array, labeled: np.array) -> np.array:
         """
         Compute the accuracy for prediction values defined in Numpy arrays
+
         @param predicted: Batch of predicted values
         @type predicted: Numpy array
         @param labeled: Batch of labeled values
@@ -52,8 +53,6 @@ class BuiltInMetric(Metric):
         @return metric Numpy array
         @rtype Numpy array
         """
-        from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-
         if len(predicted.shape) > 2:
             raise MetricException(f'Cannot compute metric with shape {predicted.shape}')
 
@@ -65,28 +64,24 @@ class BuiltInMetric(Metric):
 
         match self.metric_type:
             case MetricType.Accuracy:
-                return accuracy_score(_labeled, _predicted, normalize=True, sample_weight=None) \
-                    if self.is_weighted \
-                    else accuracy_score(_labeled, _predicted, normalize=True)
+                return self.__accuracy(_labeled, _predicted)
 
             case MetricType.Precision:
-                return precision_score(_labeled, _predicted, average='macro', zero_division=1.0) if self.is_weighted \
-                        else precision_score(_labeled, _predicted, average='macro', zero_division=1.0)
+                return self.__precision(_labeled, _predicted)
 
             case MetricType.Recall:
-                return recall_score(_labeled, _predicted, average='macro', zero_division=1.0) if self.is_weighted \
-                        else recall_score(_labeled, _predicted, average='macro', zero_division=1.0)
+                return self.__recall(_labeled, _predicted)
 
             case MetricType.F1:
-                return f1_score(_labeled, _predicted, average='macro', zero_division=1.0) if self.is_weighted \
-                        else f1_score(_labeled, _predicted, average=None, zero_division=1.0)
+                return self.__f1(_labeled, _predicted)
 
             case _:
                 raise MetricException(f'Metric type {self.metric_type} is not supported')
 
     def from_float(self, predicted: List[float], labels: List[float]) -> float:
         """
-           Compute the accuracy for prediction values defined in float values
+           Compute a given metric for predicted values defined in float values.
+
            @param predicted: Batch of predicted values
            @type predicted: List of floats
            @param labels: Batch of labeled values
@@ -101,11 +96,12 @@ class BuiltInMetric(Metric):
         np_predicted = np.array(predicted)
         np_labels = np.array(labels)
         np_metric = self.from_numpy(np_predicted, np_labels)
-        return float(np_metric)
+        return np_metric
 
     def from_torch(self, predicted: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
         """
         Compute the accuracy for prediction values defined in Torch tensor
+
         @param predicted: Batch of predicted values
         @type predicted: Torch tensor
         @param labels: Batch of labeled values
@@ -121,7 +117,60 @@ class BuiltInMetric(Metric):
         np_metric = self.from_numpy(np_predicted, np_labels)
         return torch.tensor(np_metric)
 
-    def __call__(self, predicted: List[float], labels: List[float]) -> torch.Tensor:
-        # Need transfer prediction and labels to CPU for using numpy
-        np_metric = self.from_numpy(predicted, labels)
-        return torch.tensor(np_metric)
+    def __call__(self, predicted: List[float], labeled: List[float]) -> np.array:
+        value = self.from_float(predicted, labeled)
+        return np.array(value)
+
+    def default(self, predicted: List[float], labeled: List[float]) -> Dict[MetricType, torch.Tensor]:
+        """
+        Generic computation of a metric
+        @param predicted: Batch of predicted values
+        @type predicted: List[float]
+        @param labeled: Batch of labeled values
+        @type labeled:List[float]
+        @return: One or multiple metric values
+        @rtype: Torch Tensor
+        """
+        if len(predicted) != len(labeled):
+            raise MetricException(f'Number of predicted values {len(predicted)} != Number of labels {len(labeled)}')
+
+        _predicted = np.array(predicted)
+        _labeled = np.array(labeled)
+
+        return {
+            MetricType.Accuracy: torch.from_numpy(self.__accuracy(_labeled, _predicted)),
+            MetricType.Precision: torch.from_numpy(self.__precision(_labeled, _predicted)),
+            MetricType.Recall: torch.from_numpy(self.__recall(_labeled, _predicted)),
+            MetricType.F1: torch.from_numpy(self.__f1(_labeled, _predicted))
+        }
+
+    """ ------------------------  Private methods -------------------------  """
+
+    def __accuracy(self, _labeled: np.array, _predicted: np.array) -> np.array:
+        from sklearn.metrics import accuracy_score
+
+        score = accuracy_score(_labeled, _predicted, normalize=True, sample_weight=None) \
+            if self.is_weighted \
+            else accuracy_score(_labeled, _predicted, normalize=True)
+        return np.array([score])
+
+    def __precision(self, _labeled: np.array, _predicted: np.array) -> np.array:
+        from sklearn.metrics import precision_score
+
+        score = precision_score(_labeled, _predicted, average='macro', zero_division=1.0) if self.is_weighted \
+            else precision_score(_labeled, _predicted, average='macro', zero_division=1.0)
+        return np.array([score])
+
+    def __recall(self, _labeled: np.array, _predicted: np.array) -> np.array:
+        from sklearn.metrics import recall_score
+
+        score = recall_score(_labeled, _predicted, average='macro', zero_division=1.0) if self.is_weighted \
+            else recall_score(_labeled, _predicted, average='macro', zero_division=1.0)
+        return np.array([score])
+
+    def __f1(self, _labeled: np.array, _predicted: np.array) -> np.array:
+        from sklearn.metrics import f1_score
+
+        return f1_score(_labeled, _predicted, average='macro', zero_division=1.0) if self.is_weighted \
+            else f1_score(_labeled, _predicted, average=None, zero_division=1.0)
+

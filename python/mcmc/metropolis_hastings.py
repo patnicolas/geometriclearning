@@ -15,6 +15,9 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import numpy as np
 from mcmc.mcmc import MCMC
+from mcmc import MCMCException
+import logging
+import python
 __all__ = ['MetropolisHastings']
 
 
@@ -46,12 +49,15 @@ class MetropolisHastings(MCMC):
         assert 2 <= num_iterations <= 100000, f'Number of iterations {num_iterations} is out of bounds [2, 10000]'
         assert 0.0 < sigma_delta < 1.0, f'Sigma differential {sigma_delta} is out of bounds ]0.0, 1.0['
         assert 0.0 <= burn_in_ratio <= 0.5, f'Burn-in ratio {burn_in_ratio} is out of bounds [0.0, 0.5]'
+        burn_ins = int(num_iterations*burn_in_ratio)
+        assert num_iterations > burn_ins, \
+            f'Number of iterations {num_iterations} should be > number of burn-ins {burn_ins}'
 
         super(MetropolisHastings, self).__init__()
         self.proposal = proposal
         self.num_iterations = num_iterations
         self.sigma_delta = sigma_delta
-        self.burn_ins = int(num_iterations*burn_in_ratio)
+        self.burn_ins = burn_ins
 
     def sample(self, theta_0: float) -> (np.array, float):
         """
@@ -94,11 +100,13 @@ class MetropolisHastings(MCMC):
                         if i > self.burn_ins:
                             theta_walk[j + 1] = theta_walk[j]
                             j += 1
-
             except ArithmeticError as e:
-                logging.info(f'Arithmetic error: {e}')
+                logging.error(f'Arithmetic error: {e}')
+                raise MCMCException(e)
             except ValueError as e:
-                logging.info(f'Value error: {e}')
+                logging.error(f'Value error: {e}')
+                raise MCMCException(e)
+
         return theta_walk, float(accepted_count) / num_valid_thetas
 
         # --------------  Supporting methods -----------------------
@@ -107,11 +115,14 @@ class MetropolisHastings(MCMC):
         """
         Implement the acceptance/rejection criteria for a new sample
         @param currentValue: Value of the last sample
-        :type currentValue: float
+        @type currentValue: float
         @param newValue: Value of the new sample
-        :type newValue: float
+        @type newValue: float
         @return: True if new sample is accepted, False otherwise
-        :rtype: float
+        @rtype: float
         """
+        if newValue < currentValue:
+            raise MCMCException(f'New value {newValue} should be >  current value {currentValue}')
+
         residual = newValue - currentValue
         return True if newValue > currentValue else np.random.uniform(0, 1) < np.exp(residual)

@@ -20,202 +20,280 @@ import python
 from python import SKIP_REASON
 
 
+
 class FisherRaoTest(unittest.TestCase):
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init(self):
-        exponential_distributions = ExponentialDistributions(equip=True)
-        fisher_rao = FisherRao(exponential_distributions, (1.0, 2.0))
-        logging.info(f'Fisher-Rao:\n{str(fisher_rao)}')
-        self.assertTrue(fisher_rao.fisher_rao_metric.signature == (1, 0))
+        try:
+            exponential_distributions = ExponentialDistributions(equip=True)
+            fisher_rao = FisherRao(exponential_distributions, (1.0, 2.0))
+            logging.info(f'Fisher-Rao:\n{str(fisher_rao)}')
+            self.assertTrue(fisher_rao.fisher_rao_metric.signature == (1, 0))
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_samples(self):
-        FisherRaoTest.__sample_distribution(ExponentialDistributions(equip=True), (-2.0, 2.0), 8)
-        FisherRaoTest.__sample_distribution(GeometricDistributions(equip=True), (1.0, 12.0), 8)
-        FisherRaoTest.__sample_distribution(PoissonDistributions(equip=True), (0.0, 20.0), 6)
-        FisherRaoTest.__sample_distribution(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), 6)
-        self.assertTrue(True)
+        try:
+            FisherRaoTest.__sample_distribution(ExponentialDistributions(equip=True), (-2.0, 2.0), 8)
+            FisherRaoTest.__sample_distribution(GeometricDistributions(equip=True), (1.0, 12.0), 8)
+            FisherRaoTest.__sample_distribution(PoissonDistributions(equip=True), (0.0, 20.0), 6)
+            FisherRaoTest.__sample_distribution(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), 6)
+            self.assertTrue(True)
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_distances(self):
-        FisherRaoTest.__distance(ExponentialDistributions(equip=True), (-2.0, 2.0))
-        FisherRaoTest.__distance(GeometricDistributions(equip=True), (1.0, 12.0))
-        FisherRaoTest.__distance(PoissonDistributions(equip=True), (0.0, 20.0))
-        FisherRaoTest.__distance(BinomialDistributions(equip=True, n_draws=8), (0.0, 20.0))
+        try:
+            FisherRaoTest.__distance(ExponentialDistributions(equip=True), (-2.0, 2.0))
+            FisherRaoTest.__distance(GeometricDistributions(equip=True), (1.0, 12.0))
+            FisherRaoTest.__distance(PoissonDistributions(equip=True), (0.0, 20.0))
+            FisherRaoTest.__distance(BinomialDistributions(equip=True, n_draws=8), (0.0, 20.0))
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_inner_products_1(self):
-        v = torch.Tensor([1.0])
-        w = torch.Tensor([-1.0])
-        FisherRaoTest.__inner_product(ExponentialDistributions(equip=True), (-2.0, 2.0), v, w)
-        FisherRaoTest.__inner_product(GeometricDistributions(equip=True), (1.0, 12.0), v, w)
-        FisherRaoTest.__inner_product(PoissonDistributions(equip=True), (0.0, 20.0), v, w)
-        FisherRaoTest.__inner_product(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), v, w)
+        try:
+            v = torch.Tensor([1.0])
+            w = torch.Tensor([-1.0])
+            FisherRaoTest.__inner_product(ExponentialDistributions(equip=True), (-2.0, 2.0), v, w)
+            FisherRaoTest.__inner_product(GeometricDistributions(equip=True), (1.0, 12.0), v, w)
+            FisherRaoTest.__inner_product(PoissonDistributions(equip=True), (0.0, 20.0), v, w)
+            FisherRaoTest.__inner_product(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), v, w)
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_inner_products_2(self):
-        v = torch.Tensor([2.0])
-        w = torch.Tensor([0.5])
-        FisherRaoTest.__inner_product(ExponentialDistributions(equip=True), (-2.0, 2.0), v, w)
-        FisherRaoTest.__inner_product(GeometricDistributions(equip=True), (1.0, 12.0), v, w)
-        FisherRaoTest.__inner_product(PoissonDistributions(equip=True), (0.0, 20.0), v, w)
-        FisherRaoTest.__inner_product(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), v, w)
+        try:
+            v = torch.Tensor([2.0])
+            w = torch.Tensor([0.5])
+            FisherRaoTest.__inner_product(ExponentialDistributions(equip=True), (-2.0, 2.0), v, w)
+            FisherRaoTest.__inner_product(GeometricDistributions(equip=True), (1.0, 12.0), v, w)
+            FisherRaoTest.__inner_product(PoissonDistributions(equip=True), (0.0, 20.0), v, w)
+            FisherRaoTest.__inner_product(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), v, w)
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_inner_products_3(self):
-        v = torch.Tensor([1.0])
-        w = torch.Tensor([0.0])
-        FisherRaoTest.__inner_product(ExponentialDistributions(equip=True), (-2.0, 2.0), v, w)
-        FisherRaoTest.__inner_product(GeometricDistributions(equip=True), (1.0, 12.0), v, w)
-        FisherRaoTest.__inner_product(PoissonDistributions(equip=True), (0.0, 20.0), v, w)
-        FisherRaoTest.__inner_product(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), v, w)
+        try:
+            v = torch.Tensor([1.0])
+            w = torch.Tensor([0.0])
+            FisherRaoTest.__inner_product(ExponentialDistributions(equip=True), (-2.0, 2.0), v, w)
+            FisherRaoTest.__inner_product(GeometricDistributions(equip=True), (1.0, 12.0), v, w)
+            FisherRaoTest.__inner_product(PoissonDistributions(equip=True), (0.0, 20.0), v, w)
+            FisherRaoTest.__inner_product(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), v, w)
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     def test_inner_norm_1(self):
-        v = torch.Tensor([0.5])
-        FisherRaoTest.__norm(ExponentialDistributions(equip=True), (-2.0, 2.0), v)
-        FisherRaoTest.__norm(GeometricDistributions(equip=True), (1.0, 12.0), v)
-        FisherRaoTest.__norm(PoissonDistributions(equip=True), (0.0, 20.0), v)
-        FisherRaoTest.__norm(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), v)
+        try:
+            v = torch.Tensor([0.5])
+            FisherRaoTest.__norm(ExponentialDistributions(equip=True), (-2.0, 2.0), v)
+            FisherRaoTest.__norm(GeometricDistributions(equip=True), (1.0, 12.0), v)
+            FisherRaoTest.__norm(PoissonDistributions(equip=True), (0.0, 20.0), v)
+            FisherRaoTest.__norm(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), v)
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     def test_inner_norm_2(self):
-        v = torch.Tensor([1.0])
-        FisherRaoTest.__norm(ExponentialDistributions(equip=True), (-2.0, 2.0), v)
-        FisherRaoTest.__norm(GeometricDistributions(equip=True), (1.0, 12.0), v)
-        FisherRaoTest.__norm(PoissonDistributions(equip=True), (0.0, 20.0), v)
-        FisherRaoTest.__norm(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), v)
+        try:
+            v = torch.Tensor([1.0])
+            FisherRaoTest.__norm(ExponentialDistributions(equip=True), (-2.0, 2.0), v)
+            FisherRaoTest.__norm(GeometricDistributions(equip=True), (1.0, 12.0), v)
+            FisherRaoTest.__norm(PoissonDistributions(equip=True), (0.0, 20.0), v)
+            FisherRaoTest.__norm(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), v)
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_gamma_samples(self):
-        gamma_distributions = GammaDistributions(equip=True)
-        fisher_rao = FisherRao(gamma_distributions, (-2.0, 2.0))
-        logging.info(str(fisher_rao))
-        samples = fisher_rao.samples(n_samples=4)
-        logging.info('\n'.join([str(x) for x in samples]))
-        self.assertTrue(fisher_rao.belongs(samples))
+        try:
+            gamma_distributions = GammaDistributions(equip=True)
+            fisher_rao = FisherRao(gamma_distributions, (-2.0, 2.0))
+            logging.info(str(fisher_rao))
+            samples = fisher_rao.samples(n_samples=4)
+            logging.info('\n'.join([str(x) for x in samples]))
+            self.assertTrue(fisher_rao.belongs(samples))
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_metric_matrix_exponential(self):
-        exponential_distributions = ExponentialDistributions(equip=True)
-        fisher_rao = FisherRao(exponential_distributions, (1.0, 2.0))
-        metric = fisher_rao.metric_matrix()
-        logging.info(f'Fisher-Rao metric for exponential: {metric}')
+        try:
+            exponential_distributions = ExponentialDistributions(equip=True)
+            fisher_rao = FisherRao(exponential_distributions, (1.0, 2.0))
+            metric = fisher_rao.metric_matrix()
+            logging.info(f'Fisher-Rao metric for exponential: {metric}')
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_metric_matrix_gamma(self):
-        gamma_distributions = GammaDistributions(equip=True)
-        fisher_rao = FisherRao(gamma_distributions, (1.0, 2.0))
-        metric = fisher_rao.metric_matrix()
-        logging.info(f'Fisher-Rao metric for exponential: {metric}')
+        try:
+            gamma_distributions = GammaDistributions(equip=True)
+            fisher_rao = FisherRao(gamma_distributions, (1.0, 2.0))
+            metric = fisher_rao.metric_matrix()
+            logging.info(f'Fisher-Rao metric for exponential: {metric}')
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_distance_exponential(self):
-        import torch
+        try:
+            import torch
 
-        low_bound = 0.0
-        upper_bound = 10.0
-        fisher_rao = FisherRao(ExponentialDistributions(equip=True), bounds=(low_bound, upper_bound))
-        values = fisher_rao.samples(2)
-        metrics = [fisher_rao.metric_matrix(x) for x in values]
-        logging.info(f'Exponential Metrics:\n{metrics[0]}, {metrics[1]}')
-        inputs = [torch.Tensor(x) for x in values]
-        distance = fisher_rao.distance(inputs[0], inputs[1])
-        logging.info(f'Exponential Distance {distance}')
-        fisher_rao.visualize_diff(values[0], values[1], r"$\theta$")
+            low_bound = 0.0
+            upper_bound = 10.0
+            fisher_rao = FisherRao(ExponentialDistributions(equip=True), bounds=(low_bound, upper_bound))
+            values = fisher_rao.samples(2)
+            metrics = [fisher_rao.metric_matrix(x) for x in values]
+            logging.info(f'Exponential Metrics:\n{metrics[0]}, {metrics[1]}')
+            inputs = [torch.Tensor(x) for x in values]
+            distance = fisher_rao.distance(inputs[0], inputs[1])
+            logging.info(f'Exponential Distance {distance}')
+            fisher_rao.visualize_diff(values[0], values[1], r"$\theta$")
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_visualize_exponentials(self):
-        import torch
+        try:
+            import torch
 
-        low_bound = 0.0
-        upper_bound = 2.0
-        fisher_rao = FisherRao(ExponentialDistributions(equip=True), bounds =(low_bound, upper_bound))
-        values = fisher_rao.samples(128)
-        min_theta = f'{float(torch.min(values)):.4f}'
-        max_theta = f'{float(torch.max(values)):.4f}'
-        fisher_rao.visualize_pdfs(values,
-                                  rf"Exp. Distribution Manifold $\theta$ 128 samples [{min_theta}, {max_theta}]")
+            low_bound = 0.0
+            upper_bound = 2.0
+            fisher_rao = FisherRao(ExponentialDistributions(equip=True), bounds =(low_bound, upper_bound))
+            values = fisher_rao.samples(128)
+            min_theta = f'{float(torch.min(values)):.4f}'
+            max_theta = f'{float(torch.max(values)):.4f}'
+            fisher_rao.visualize_pdfs(values,
+                                      rf"Exp. Distribution Manifold $\theta$ 128 samples [{min_theta}, {max_theta}]")
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_visualize_normal_mu(self):
-        import torch
+        try:
+            import torch
 
-        low_bound = 0.0
-        upper_bound = 2.0
-        fisher_rao = FisherRao(UnivariateNormalDistributions(equip=True), bounds=(low_bound, upper_bound))
-        values = fisher_rao.samples(48)
-        min_mu = f'{float(torch.min(values[:, 0])):.4f}'
-        max_mu = f'{float(torch.max(values[:, 0])):.4f}'
-        fisher_rao.visualize_pdfs(values,
-                                  rf"Normal Distribution Manifold $\mu$ 48 samples [{min_mu}, {max_mu}]")
-        min_sigma = f'{float(torch.min(values[:, 1])):.4f}'
-        max_sigma = f'{float(torch.max(values[:, 1])):.4f}'
-        fisher_rao.visualize_pdfs(values,
-                                  rf"Normal Distribution Manifold  $\sigma$ 48 samples [{min_sigma}, {max_sigma}]")
+            low_bound = 0.0
+            upper_bound = 2.0
+            fisher_rao = FisherRao(UnivariateNormalDistributions(equip=True), bounds=(low_bound, upper_bound))
+            values = fisher_rao.samples(48)
+            min_mu = f'{float(torch.min(values[:, 0])):.4f}'
+            max_mu = f'{float(torch.max(values[:, 0])):.4f}'
+            fisher_rao.visualize_pdfs(values,
+                                      rf"Normal Distribution Manifold $\mu$ 48 samples [{min_mu}, {max_mu}]")
+            min_sigma = f'{float(torch.min(values[:, 1])):.4f}'
+            max_sigma = f'{float(torch.max(values[:, 1])):.4f}'
+            fisher_rao.visualize_pdfs(values,
+                                      rf"Normal Distribution Manifold  $\sigma$ 48 samples [{min_sigma}, {max_sigma}]")
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_distance_univariate_normal(self):
-        import torch
-        fisher_rao = FisherRao(UnivariateNormalDistributions(equip=True), (1.0, 2.0))
-        # values = fisher_rao.samples(2)
-        # metrics = [fisher_rao.metric_matrix(x) for x in values]
-        metrics = fisher_rao.metric_matrix()
-        logging.info(f'Univariate Normal Metrics:\n{metrics[0]}, {metrics[1]}')
-        inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
-        distance = fisher_rao.distance(inputs[0], inputs[1])
-        logging.info(f'Univariate Normal  Distance  {distance}')
+        try:
+            import torch
+            fisher_rao = FisherRao(UnivariateNormalDistributions(equip=True), (1.0, 2.0))
+            # values = fisher_rao.samples(2)
+            # metrics = [fisher_rao.metric_matrix(x) for x in values]
+            metrics = fisher_rao.metric_matrix()
+            logging.info(f'Univariate Normal Metrics:\n{metrics[0]}, {metrics[1]}')
+            inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
+            distance = fisher_rao.distance(inputs[0], inputs[1])
+            logging.info(f'Univariate Normal  Distance  {distance}')
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_distance_geometric(self):
-        import torch
-        fisher_rao = FisherRao(GeometricDistributions(equip=True), (1.0, 2.0))
-        # values = fisher_rao.samples(2)
-        # metrics = [fisher_rao.metric_matrix(x) for x in values]
-        metrics = fisher_rao.metric_matrix()
-        logging.info(f'Geometric Metrics:\n{metrics[0]}')
-        inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
-        distance = fisher_rao.distance(inputs[0], inputs[1])
-        logging.info(f'Geometric Distance  {distance}')
+        try:
+            import torch
+            fisher_rao = FisherRao(GeometricDistributions(equip=True), (1.0, 2.0))
+            # values = fisher_rao.samples(2)
+            # metrics = [fisher_rao.metric_matrix(x) for x in values]
+            metrics = fisher_rao.metric_matrix()
+            logging.info(f'Geometric Metrics:\n{metrics[0]}')
+            inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
+            distance = fisher_rao.distance(inputs[0], inputs[1])
+            logging.info(f'Geometric Distance  {distance}')
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_inner_product(self):
-        import torch
+        try:
+            import torch
 
-        fisher_rao = FisherRao(GeometricDistributions(equip=True), (1.0, 2.0))
-        # inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
-        inputs = fisher_rao.samples(2)
-        inner_product = fisher_rao.inner_product(inputs[0], torch.Tensor([1.0]), torch.Tensor([0.2]))
-        logging.info(f'Geometric inner product  {inner_product}')
+            fisher_rao = FisherRao(GeometricDistributions(equip=True), (1.0, 2.0))
+            # inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
+            inputs = fisher_rao.samples(2)
+            inner_product = fisher_rao.inner_product(inputs[0], torch.Tensor([1.0]), torch.Tensor([0.2]))
+            logging.info(f'Geometric inner product  {inner_product}')
 
-        fisher_rao = FisherRao(BetaDistributions(equip=True), (0.2, 0.8))
-        inputs = fisher_rao.samples(2)
-        # inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
-        inner_product = fisher_rao.inner_product(inputs[0], torch.Tensor([0.5, 0.8]), torch.Tensor([0.2, 0.6]))
-        logging.info(f'Beta inner product  {inner_product}')
+            fisher_rao = FisherRao(BetaDistributions(equip=True), (0.2, 0.8))
+            inputs = fisher_rao.samples(2)
+            # inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
+            inner_product = fisher_rao.inner_product(inputs[0], torch.Tensor([0.5, 0.8]), torch.Tensor([0.2, 0.6]))
+            logging.info(f'Beta inner product  {inner_product}')
 
-        fisher_rao = FisherRao(UnivariateNormalDistributions(equip=True), (0.0, 1.0))
-        # inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
-        inputs = fisher_rao.samples(2)
-        inner_product = fisher_rao.inner_product(inputs[0], torch.Tensor([0.5, 0.8]), torch.Tensor([0.2, 0.6]))
-        logging.info(f'Univariate Normal inner product  {inner_product}')
+            fisher_rao = FisherRao(UnivariateNormalDistributions(equip=True), (0.0, 1.0))
+            # inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
+            inputs = fisher_rao.samples(2)
+            inner_product = fisher_rao.inner_product(inputs[0], torch.Tensor([0.5, 0.8]), torch.Tensor([0.2, 0.6]))
+            logging.info(f'Univariate Normal inner product  {inner_product}')
 
-        fisher_rao = FisherRao(GeometricDistributions(equip=True), (1.0, 2.0))
-        inputs = fisher_rao.samples(2)
-        # inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
-        inner_product = fisher_rao.inner_product(inputs[0], torch.Tensor([1.0]), torch.Tensor([0.2]))
-        logging.info(f'Exponential inner product  {inner_product}')
+            fisher_rao = FisherRao(GeometricDistributions(equip=True), (1.0, 2.0))
+            inputs = fisher_rao.samples(2)
+            # inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
+            inner_product = fisher_rao.inner_product(inputs[0], torch.Tensor([1.0]), torch.Tensor([0.2]))
+            logging.info(f'Exponential inner product  {inner_product}')
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_distance_beta(self):
-        import torch
-        fisher_rao = FisherRao(BetaDistributions(equip=False), (0.2, 0.5))
-        values = fisher_rao.samples(6)
-        # metrics = [fisher_rao.metric_matrix(x) for x in values[4:6]]
-        metrics = fisher_rao.metric_matrix()
-        logging.info(f'Beta Metrics:\n{metrics[0]}, {metrics[1]}')
-        inputs = [torch.Tensor(x) for x in values]
-        distance = fisher_rao.distance(inputs[0], inputs[1])
-        logging.info(f'Beta  Distance  {distance}')
+        try:
+            import torch
+            fisher_rao = FisherRao(BetaDistributions(equip=False), (0.2, 0.5))
+            values = fisher_rao.samples(6)
+            # metrics = [fisher_rao.metric_matrix(x) for x in values[4:6]]
+            metrics = fisher_rao.metric_matrix()
+            logging.info(f'Beta Metrics:\n{metrics[0]}, {metrics[1]}')
+            inputs = [torch.Tensor(x) for x in values]
+            distance = fisher_rao.distance(inputs[0], inputs[1])
+            logging.info(f'Beta  Distance  {distance}')
+        except GeometricException as e:
+            logging.error(e)
+            self.assertTrue(False)
+
+    """ ---------------------  Supporting methods ---------------------------  """
 
     @staticmethod
     def __sample_distribution(stats_manifold: InformationManifoldMixin,

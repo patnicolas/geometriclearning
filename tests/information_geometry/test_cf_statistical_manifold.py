@@ -13,86 +13,117 @@ from geomstats.information_geometry.geometric import GeometricDistributions
 from geomstats.information_geometry.poisson import PoissonDistributions
 from information_geometry.cf_statistical_manifold import CFStatisticalManifold
 from typing import Tuple, AnyStr
+import logging
+import python
+
 
 
 class CFStatisticalManifoldTest(unittest.TestCase):
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init(self):
-        exponential_distributions = ExponentialDistributions(equip=True)
-        statistical_manifold = CFStatisticalManifold(exponential_distributions, (1.0, 2.0))
-        logging.info(f'\n{statistical_manifold=}')
-        self.assertTrue(statistical_manifold.fisher_rao_metric.signature == (1, 0))
+        try:
+            exponential_distributions = ExponentialDistributions(equip=True)
+            statistical_manifold = CFStatisticalManifold(exponential_distributions, (1.0, 2.0))
+            logging.info(f'\n{statistical_manifold=}')
+            self.assertTrue(statistical_manifold.fisher_rao_metric.signature == (1, 0))
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     def test_random_samples(self):
-        exponential_distributions = ExponentialDistributions(equip=True)
-        exponential_manifold = CFStatisticalManifold(exponential_distributions, (-2.0, 2.0))
-        exponential_samples = exponential_manifold.samples(n_samples=8)
-        assert exponential_manifold.belongs(exponential_samples)
-        geometric_distributions = GeometricDistributions(equip=True)
-        geometric_manifold = CFStatisticalManifold(geometric_distributions, (1, 10))
-        geometric_samples = geometric_manifold.samples(n_samples=4)
-        exponential_samples_str = '\n'.join([str(x) for x in exponential_samples])
-        exponential_geometric_str = '\n'.join([str(x) for x in geometric_samples])
-        logging.info(f'\nExponential Distribution Manifold 8 random samples \n{exponential_samples_str}'
-                     f'\nGeometric Distribution Manifold 4 random samples\n{exponential_geometric_str}')
+        try:
+            exponential_distributions = ExponentialDistributions(equip=True)
+            exponential_manifold = CFStatisticalManifold(exponential_distributions, (-2.0, 2.0))
+            exponential_samples = exponential_manifold.samples(n_samples=8)
+            assert exponential_manifold.belongs(exponential_samples)
+            geometric_distributions = GeometricDistributions(equip=True)
+            geometric_manifold = CFStatisticalManifold(geometric_distributions, (1, 10))
+            geometric_samples = geometric_manifold.samples(n_samples=4)
+            exponential_samples_str = '\n'.join([str(x) for x in exponential_samples])
+            exponential_geometric_str = '\n'.join([str(x) for x in geometric_samples])
+            logging.info(f'\nExponential Distribution Manifold 8 random samples \n{exponential_samples_str}'
+                         f'\nGeometric Distribution Manifold 4 random samples\n{exponential_geometric_str}')
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_some_fisher_metrics(self):
-        exponential_manifold = CFStatisticalManifold(ExponentialDistributions(equip=True), (0.0, 2.0))
-        poisson_manifold = CFStatisticalManifold(PoissonDistributions(equip=True), (0, 20))
-        exponential_metric = exponential_manifold.metric_matrix()
-        poisson_metric = poisson_manifold.metric_matrix()
-        logging.info(f'\nExponential Distribution Fisher metric: {exponential_metric}'
-                     f'\nPoisson Distribution Fisher metric: {poisson_metric}')
+        try:
+            exponential_manifold = CFStatisticalManifold(ExponentialDistributions(equip=True), (0.0, 2.0))
+            poisson_manifold = CFStatisticalManifold(PoissonDistributions(equip=True), (0, 20))
+            exponential_metric = exponential_manifold.metric_matrix()
+            poisson_metric = poisson_manifold.metric_matrix()
+            logging.info(f'\nExponential Distribution Fisher metric: {exponential_metric}'
+                         f'\nPoisson Distribution Fisher metric: {poisson_metric}')
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_metric_matrix_exponential(self):
-        exponential_distributions = ExponentialDistributions(equip=True)
-        statistical_manifold = CFStatisticalManifold(exponential_distributions, (1.0, 2.0))
-        metric = statistical_manifold.metric_matrix()
-        logging.info(f'Fisher-Rao metric for exponential: {metric}')
+        try:
+            exponential_distributions = ExponentialDistributions(equip=True)
+            statistical_manifold = CFStatisticalManifold(exponential_distributions, (1.0, 2.0))
+            metric = statistical_manifold.metric_matrix()
+            logging.info(f'Fisher-Rao metric for exponential: {metric}')
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_exp_maps(self):
-        exponential_manifold = CFStatisticalManifold(ExponentialDistributions(equip=False), (0.0, 2.0))
-        tgt_vector = torch.Tensor([0.5])
-        base_point = exponential_manifold.samples(1)
-        exponential_end_point = exponential_manifold.exp(tgt_vector, base_point)
+        try:
+            exponential_manifold = CFStatisticalManifold(ExponentialDistributions(equip=False), (0.0, 2.0))
+            tgt_vector = torch.Tensor([0.5])
+            base_point = exponential_manifold.samples(1)
+            exponential_end_point = exponential_manifold.exp(tgt_vector, base_point)
 
-        geometric_manifold = CFStatisticalManifold(GeometricDistributions(equip=False), (1.0, 10.0))
-        tgt_vector = torch.Tensor([0.5])
-        base_point = geometric_manifold.samples(1)
-        geometric_end_point = geometric_manifold.exp(tgt_vector, base_point)
-        logging.info(f'\nExponential Distribution Manifold End point: {exponential_end_point}'
-                     f'\nGeometric Distribution Manifold End point: {geometric_end_point}\n')
+            geometric_manifold = CFStatisticalManifold(GeometricDistributions(equip=False), (1.0, 10.0))
+            tgt_vector = torch.Tensor([0.5])
+            base_point = geometric_manifold.samples(1)
+            geometric_end_point = geometric_manifold.exp(tgt_vector, base_point)
+            logging.info(f'\nExponential Distribution Manifold End point: {exponential_end_point}'
+                         f'\nGeometric Distribution Manifold End point: {geometric_end_point}\n')
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_log_maps(self):
-        exponential_manifold = CFStatisticalManifold(ExponentialDistributions(equip=False), (0.0, 2.0))
-        random_points = exponential_manifold.samples(2)
-        base_point = random_points[0]
-        manifold_point = random_points[1]
-        exponential_vector = exponential_manifold.log(manifold_point, base_point)
-        logging.info(f'\nExponential Distribution Manifold Tangent Vector\nBase:{base_point} to:{manifold_point}: '
-                     f'{exponential_vector}')
+        try:
+            exponential_manifold = CFStatisticalManifold(ExponentialDistributions(equip=False), (0.0, 2.0))
+            random_points = exponential_manifold.samples(2)
+            base_point = random_points[0]
+            manifold_point = random_points[1]
+            exponential_vector = exponential_manifold.log(manifold_point, base_point)
+            logging.info(f'\nExponential Distribution Manifold Tangent Vector\nBase:{base_point} to:{manifold_point}: '
+                         f'{exponential_vector}')
 
-        geometric_manifold = CFStatisticalManifold(GeometricDistributions(equip=False), (1.0, 10.0))
-        random_points = geometric_manifold.samples(2)
-        base_point = random_points[0]
-        manifold_point = random_points[1]
-        geometric_vector = geometric_manifold.log(manifold_point, base_point)
-        logging.info(f'\nGeometric Distribution Manifold Tangent Vector\nBase:{base_point} to:{manifold_point}: '
-                     f'{geometric_vector}\n')
+            geometric_manifold = CFStatisticalManifold(GeometricDistributions(equip=False), (1.0, 10.0))
+            random_points = geometric_manifold.samples(2)
+            base_point = random_points[0]
+            manifold_point = random_points[1]
+            geometric_vector = geometric_manifold.log(manifold_point, base_point)
+            logging.info(f'\nGeometric Distribution Manifold Tangent Vector\nBase:{base_point} to:{manifold_point}: '
+                         f'{geometric_vector}\n')
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_exp_map_geometric(self):
-        geometric_distributions = GeometricDistributions(equip=True)
-        statistical_manifold = CFStatisticalManifold(geometric_distributions, (1, 10))
-        tgt_vector = torch.Tensor([0.5])
-        base_point = statistical_manifold.samples(1)
-        end_point = statistical_manifold.exp(tgt_vector, base_point)
-        logging.info(end_point)
+        try:
+            geometric_distributions = GeometricDistributions(equip=True)
+            statistical_manifold = CFStatisticalManifold(geometric_distributions, (1, 10))
+            tgt_vector = torch.Tensor([0.5])
+            base_point = statistical_manifold.samples(1)
+            end_point = statistical_manifold.exp(tgt_vector, base_point)
+            logging.info(end_point)
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_visualize_exponentials(self):
@@ -177,7 +208,6 @@ class CFStatisticalManifoldTest(unittest.TestCase):
                 mu = MU[0:frame]
                 sigma = SIGMA[0:frame]
                 surf = ax.plot_surface(mu, sigma, Z[0:frame], cmap='viridis', edgecolor='none')
-            #fig.colorbar(surf, shrink=0.5, aspect=10)
 
         ax.set_title('PDF of Normal Distribution at origin')
         ax.set_xlabel('Mean (μ)')
