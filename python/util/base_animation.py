@@ -45,7 +45,7 @@ class BaseAnimation(object):
     @abstractmethod
     def draw(self, mp4_filename: AnyStr = None) -> None:
         """
-            Draw and animate Lie group/manifold in ambient Euclidean space. The animation is driven by Matplotlib
+            Draw and animate lie group/manifold in ambient Euclidean space. The animation is driven by Matplotlib
             FuncAnimation class that require an update nested function.
             This method needs to be overwritten in sub-classes
 

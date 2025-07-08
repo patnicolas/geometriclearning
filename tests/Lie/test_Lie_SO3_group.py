@@ -1,10 +1,10 @@
 import unittest
 
-from Lie.lie_so3_group import LieSO3Group
-from Lie.lie_so3_group import LieElement
+from lie.lie_so3_group import LieSO3Group
+from lie.lie_so3_group import LieElement
 import numpy as np
 from typing import AnyStr, List
-from Lie import u3d
+from lie import u3d
 import logging
 import os
 import python
@@ -203,11 +203,11 @@ class LieSO3GroupTest(unittest.TestCase):
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_algebra2(self):
         try:
-            # The SO3 element is computed at identity (to conform to Lie Algebra)
+            # The SO3 element is computed at identity (to conform to lie Algebra)
             so3_group = LieSO3Group(algebra_element=u3d.z_rot)
             logging.info(f'SO3 point:\n{so3_group}')
             lie_algebra = so3_group.lie_algebra()
-            logging.info(f'\nLie algebra:\n{lie_algebra}')
+            logging.info(f'\nlie algebra:\n{lie_algebra}')
         except AssertionError as e:
             logging.error(e)
             self.assertTrue(False)
@@ -272,7 +272,7 @@ class LieSO3GroupTest(unittest.TestCase):
             so3_bracket_element = LieElement(
                 group_element=bracket,
                 identity_element=LieSO3Group.identity_matrix,
-                descriptor='Lie Bracket')
+                descriptor='lie Bracket')
             LieSO3Group.visualize_all([so3_bracket_element], 0)
         except AssertionError as e:
             logging.error(e)

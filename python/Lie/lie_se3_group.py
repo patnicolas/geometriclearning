@@ -84,8 +84,8 @@ class LieSE3Group(object):
         - inverse: Compute the inverse 3D rotation matrix
         - compose: Implement the composition (multiplication) of two 3D rotation matrix
         - Projection: Project of any given array to the closest 3D rotation matrix
-        - lie_algebra: Lie algebra as the tangent vector at identity
-        - bracket: Implement Lie commutator for so3 algebra
+        - lie_algebra: lie algebra as the tangent vector at identity
+        - bracket: Implement lie commutator for so3 algebra
     """
     def __init__(self,
                  rot_matrix: np.array,
@@ -93,7 +93,7 @@ class LieSE3Group(object):
                  epsilon: float = 0.001,
                  point_type: AnyStr = 'matrix') -> None:
         """
-        Constructor for the wrapper for key operations on SE3 Special Euclidean Lie manifold. A point on
+        Constructor for the wrapper for key operations on SE3 Special Euclidean lie manifold. A point on
         SE3 manifold is computed by composing the rotation and translation matrices
 
         @param rot_matrix: 3 x 3 rotation matrix
@@ -205,9 +205,9 @@ class LieSE3Group(object):
     def compose(self, lie_se3_group: Self) -> Self:
         """
         Define the product or composition of this LieGroup point or element with another
-        Lie group point using Geomstats compose method.
+        lie group point using Geomstats compose method.
 
-        @param lie_se3_group Another Lie group
+        @param lie_se3_group Another lie group
         @type lie_se3_group LieSE3Group
         @return: Instance of LieSE3Group
         @rtype: LieSE3Group
@@ -295,13 +295,13 @@ class LieSE3Group(object):
     @staticmethod
     def reshape(rotation_matrix: np.array, translation_matrix: np.array) -> (np.array, np.array):
         """
-        Constructor for the wrapper for key operations on SE3 Special Euclidean Lie manifold
+        Constructor for the wrapper for key operations on SE3 Special Euclidean lie manifold
         @param rotation_matrix: 3x3 Rotation matrix (see. LieSO3Group)
         @type rotation_matrix: Numpy array
         @param translation_matrix: 1x3 matrix for translation
         @type translation_matrix: Numpy array
         """
-        from Lie import u3d
+        from lie import u3d
         rotation_matrix = gs.array(rotation_matrix)
         translation_matrix = gs.array(translation_matrix)
         rotation_matrix = np.concatenate([rotation_matrix, u3d.extend_rotation], axis=0)

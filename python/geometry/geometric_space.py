@@ -41,7 +41,7 @@ class GeometricSpace(ABC):
     """
     manifold_type: AnyStr
     supported_manifolds = [
-        "SO3_GROUP",  # Lie 3D rotation group
+        "SO3_GROUP",  # lie 3D rotation group
         "SE3_GROUP",  # 3D rotation and translation Euclidean group
         "SE2_GROUP",  # 2D rotation and translation group
         "S1",  # Circle in 2D space
