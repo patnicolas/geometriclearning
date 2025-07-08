@@ -37,11 +37,11 @@ class SO3LieGroupOnSphere(ThreeDScene):
 
         self.add(axes, sphere)
 
-        # Axis labels and lie algebra matrices
+        # Axis labels and Lie algebra matrices
         x_label = MathTex(r"Rotation \ X \ Axis \ \ \begin{bmatrix} 0 & 0 & 0 \\ 0 & 0 & -1 \\ 0 & 1 & 0 \end{bmatrix}")
         y_label = MathTex(r"Rotation \ Y \ Axis  \ \ \begin{bmatrix} 0 & 0 & 1 \\ 0 & 0 & 0 \\ -1 & 0 & 0 \end{bmatrix}")
         z_label = MathTex(r"Rotation \ Z \ Axis \begin{bmatrix} 0 & -1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 0 \end{bmatrix}")
-        eq_label = MathTex(r"lie \ Group: \ \  SO(3)=\left\{ A \in \mathbb{R}^{3 \ast 3} \ | \ R.R^{-1}=I_{d}, \    \ det(R)=1 \right\}")
+        eq_label = MathTex(r"Lie \ Group: \ \  SO(3)=\left\{ A \in \mathbb{R}^{3 \ast 3} \ | \ R.R^{-1}=I_{d}, \    \ det(R)=1 \right\}")
         composition_label = MathTex(r"Composition \ Rotations")
 
         x_label.to_corner(UL).scale(0.5)
@@ -75,7 +75,7 @@ class SO3LieGroupOnSphere(ThreeDScene):
         self.play(Unwrite(z_label))
         self.wait(1)
 
-        # Compose rotations (lie group composition)
+        # Compose rotations (Lie group composition)
         self.add_fixed_in_frame_mobjects(composition_label)
         self.wait(0.5)
         composite_rotation = Rotate(sphere, angle=PI / 2, axis=RIGHT)

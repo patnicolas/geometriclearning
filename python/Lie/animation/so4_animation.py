@@ -30,7 +30,7 @@ class SO4Animation(BaseAnimation):
                  fps: int,
                  n_geodesics: Tuple[int, int]) -> None:
         """
-            Default constructor for the SO(4) lie group designed at two 2D rotations
+            Default constructor for the SO(4) Lie group designed at two 2D rotations
 
             @param logo_pos: Define the position of the chart [x, y, width, height]
             @type logo_pos: List[float]

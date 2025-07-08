@@ -44,7 +44,7 @@ class KMeansOnManifold(object):
 
     The evaluation relies on synthetic clustered data on hypersphere following the following steps:
     1. Generate a template cluster by employing a random generator on the manifold.
-    2. Generate 4 clusters from the template using a special orthogonal lie group in 3-dimensional space, SO(3).
+    2. Generate 4 clusters from the template using a special orthogonal Lie group in 3-dimensional space, SO(3).
 
     The synthetic dataset is created through random values generators on the hypersphere following these distributions:
     - Uniform distribution
@@ -94,7 +94,7 @@ class KMeansOnManifold(object):
                 cluster = self.hypersphere.random_uniform(n_samples=num_samples)
 
         # Step 3: Generate other clusters using SO(3) manifolds
-        # Use the symmetric rotation lie group in dimension 3
+        # Use the symmetric rotation Lie group in dimension 3
         so3_lie_group = SpecialOrthogonal(3, equip=False)
         # Generate the clusters
         self.clusters = [cluster @ so3_lie_group.random_uniform() for _ in range(num_clusters)]

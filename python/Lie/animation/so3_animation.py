@@ -34,7 +34,7 @@ def default_so3_transform(args: List[np.array]) -> np.array:
 
 class SO3Animation(BaseAnimation):
     """
-    Wrapper for simulation or animation of SO3 lie group transformation defined as
+    Wrapper for simulation or animation of SO3 Lie group transformation defined as
     math::
         \begin{matrix}
         cos(\theta) & -sin(\theta)  & 0 \\
@@ -55,7 +55,7 @@ class SO3Animation(BaseAnimation):
                  transform: Callable[[np.array], np.array] = default_so3_transform,
                  sphere_radius: float = 1.0) -> None:
         """
-        Default constructor for the animation of SO3 lie Group.
+        Default constructor for the animation of SO3 Lie Group.
 
         @param logo_pos: Define the position of the chart [x, y, width, height]
         @type logo_pos: List[float]

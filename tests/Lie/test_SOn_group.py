@@ -1,9 +1,9 @@
 import unittest
 
-from lie.son_group import SOnGroup
+from Lie.son_group import SOnGroup
 import logging
 import torch
-from lie import LieException
+from Lie import LieException
 import os
 import python
 from python import SKIP_REASON

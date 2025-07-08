@@ -29,7 +29,7 @@ class SE3LieGroupRotation(ThreeDScene):
             r"Translation \ X \ Axis  \ \ [0, 0, 1]")
         z_label = MathTex(
             r"Rotation \ Y \ Axis  \ \ \begin{bmatrix} 0 & -1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 0 \end{bmatrix}")
-        eq_label = MathTex(r"lie \ Group: \ \ SE(3)=\left\{ \begin{vmatrix} R & t \\ 0 & 1 \end{vmatrix} \in \mathbb{R}^{4 \ast 4} \ \ | \ R \in SO(3), t \in \mathbb{R}^{3} \right\}")
+        eq_label = MathTex(r"Lie \ Group: \ \ SE(3)=\left\{ \begin{vmatrix} R & t \\ 0 & 1 \end{vmatrix} \in \mathbb{R}^{4 \ast 4} \ \ | \ R \in SO(3), t \in \mathbb{R}^{3} \right\}")
         y_label.to_corner(UL).scale(0.5)
         x_translation.to_corner(UL).scale(0.5)
         z_translation.to_corner(UL).scale(0.5)
