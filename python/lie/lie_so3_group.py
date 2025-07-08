@@ -66,7 +66,6 @@ class LieSO3Group(object):
     def build(cls, algebra_element: List[float], identity_matrix: List[float] = None) -> Self:
         """
         Alternative constructor for the operations on SO3 lie Manifold.
-
         @param algebra_element: Tangent vector (Matrix)
         @type algebra_element: List[float] (dim 3 x 3 = 9)
         @param identity_matrix: Base point on the SO3 manifold
@@ -95,7 +94,6 @@ class LieSO3Group(object):
         """
         Define the Algebra (tangent space) for a matrix and base point in SO3 group using the log
         (inverse exponentiation) method defined in Geomstats.
-
         @return: Rotation matrix on tangent space
         @rtype: Numpy array
         """
@@ -104,7 +102,7 @@ class LieSO3Group(object):
     def compose(self, lie_so3_group: Self) -> Self:
         """
         Define the product or multip this LieGroup point or element with another lie group point using Geomstats compose method.
-
+        
         @param lie_so3_group Another lie group
         @type LieSO3Group
         @return: Instance of LieSO3Group

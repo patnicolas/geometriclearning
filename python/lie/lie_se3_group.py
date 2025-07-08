@@ -74,7 +74,6 @@ class SE3Element:
 
 
 class LieSE3Group(object):
-
     """
     Class Dedicated to LIE Special Euclidean group of dimension 3. Contrary to the generic
     SOnGroup class which process Torch tensor, this class and method processes Numpy arrays.
@@ -162,7 +161,6 @@ class LieSE3Group(object):
     def get_tangent_vector(rotation: np.array, translation: np.array) -> np.array:
         """
         Generates a (6, ) vector from a (3, 3) rotation matrix and (1, 3) translation matrix on tangent space.
-
         @param rotation: (3, 3) matrix
         @type rotation: Numpy array
         @param translation: (1, 3) matrix
@@ -212,7 +210,6 @@ class LieSE3Group(object):
         @return: Instance of LieSE3Group
         @rtype: LieSE3Group
         """
-
         # Invoke Geomstats method
         composed_group_point = self.lie_group.compose(self.se3_element.group_element,
                                                       lie_se3_group.se3_element.group_element)

@@ -18,7 +18,7 @@ from information_geometry.fisher_rao import FisherRao
 import torch
 import python
 from python import SKIP_REASON
-from geometry import GeometricException
+
 
 
 class FisherRaoTest(unittest.TestCase):

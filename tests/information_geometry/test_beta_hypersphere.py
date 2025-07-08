@@ -15,3 +15,4 @@ class BetaHypersphereTest(unittest.TestCase):
         except AssertionError as e:
             logging.error(e)
             self.assertTrue(False)
+
