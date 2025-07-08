@@ -84,7 +84,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.performance_metrics.performance_values[MetricType.Accuracy]
+            accuracy_list = network.performance_metrics.current_perf_metrics[MetricType.Accuracy]
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GraphException as e:
@@ -181,7 +181,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.training_summary.metrics['Accuracy']
+            accuracy_list = network.training_summary.registered_perf_metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GraphException as e:
@@ -215,7 +215,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.training_summary.metrics['Accuracy']
+            accuracy_list = network.training_summary.registered_perf_metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GraphException as e:
@@ -249,7 +249,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.training_summary.metrics['Accuracy']
+            accuracy_list = network.training_summary.registered_perf_metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GraphException as e:
@@ -285,7 +285,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.training_summary.metrics['Accuracy']
+            accuracy_list = network.training_summary.registered_perf_metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GraphException as e:
@@ -320,7 +320,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.training_summary.metrics['Accuracy']
+            accuracy_list = network.training_summary.registered_perf_metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GraphException as e:
@@ -356,7 +356,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.training_summary.metrics['Accuracy']
+            accuracy_list = network.training_summary.registered_perf_metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GraphException as e:
@@ -392,7 +392,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.training_summary.metrics['Accuracy']
+            accuracy_list = network.training_summary.registered_perf_metrics['Accuracy']
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
         except GraphException as e:
