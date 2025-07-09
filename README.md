@@ -1,12 +1,12 @@
-# Geometric Deep Learning - Hands-on
-Classes and methods for Geometric Deep Learning and related topics.
 
-#### Patrick Nicolas - Last update 05.27.2025   [Substack - Newsletter](https://patricknicolas.substack.com)
-![Banner](images/GeometricLearning.png)
+![Banner](images/README_Banner.png)
+
+#### Classes and methods for Geometric Deep Learning and related topics.      
+#### _Patrick Nicolas - Last update 06.08.2025_   [Substack - Newsletter](https://patricknicolas.substack.com)
 
 # Why it Matters
 ### Purpose:      
-Facing challenges with high-dimensional, densely packed but limited data, and complex distributions?     
+_Facing challenges with high-dimensional, densely packed but limited data, and complex distributions_?     
 Geometric Deep Learning (GDL) offers a solution by enabling data scientists to grasp the true shape and distribution of data. This newsletter explores the diverse techniques and frameworks shaping the field of Geometric Deep Learning.
 
 ### Audience:       
