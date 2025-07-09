@@ -29,6 +29,7 @@ class Caltech101Loader(BaseLoader):
     def __init__(self, batch_size: int, split_ratio: float, resize_image: int = -1) -> None:
         """
         Constructor for the Caltech-101 data set
+
         @param batch_size: size of batch for loading the Caltech101 data set
         @param batch_size: 1
         @param split_ratio: Training-validation random split ratio
