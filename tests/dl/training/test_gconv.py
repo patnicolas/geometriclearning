@@ -5,7 +5,8 @@ from dataset.graph.graph_data_loader import GraphDataLoader
 from dl.training.gnn_training import GNNTraining
 from dl.training.exec_config import ExecConfig
 from plots.plotter import PlotterParameters
-from dl import GraphException, MLPException, TrainingException
+from dl import MLPException, TrainingException
+from dl.block.graph import GraphException
 from dl.model.gconv_model import GConvModel
 from dl.training.hyper_params import HyperParams
 from metric.metric import Metric
@@ -60,7 +61,7 @@ class GConvTest(unittest.TestCase):
         dropout_p = 0.2
 
         try:
-            flickr_model = GConvTest.flickr_model(hidden_channels, pooling_ratio, dropout_p)
+            flickr_model = GConvTest.flickr_model(hidden_channels, dropout_p)
             logging.info(flickr_model)
             self.assertTrue(True)
         except GraphException as e:
@@ -120,7 +121,7 @@ class GConvTest(unittest.TestCase):
             self.assertTrue(False)
 
     @staticmethod
-    def flickr_model(hidden_channels: int, pooling_ratio: float, dropout_p: float) -> (GConvModel, torch.Tensor):
+    def flickr_model(hidden_channels: int, dropout_p: float) -> (GConvModel, torch.Tensor):
         import torch_geometric
         from dataset.graph.pyg_datasets import PyGDatasets
         from torch_geometric.nn import GraphConv

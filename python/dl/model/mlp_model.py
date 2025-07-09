@@ -18,7 +18,7 @@ from dl.block.conv import ConvDataType
 from dl.model.neural_model import NeuralModel, NeuralBuilder
 from dl.block.mlp_block import MLPBlock
 import torch.nn as nn
-__all__ = ['MLPModel']
+__all__ = ['MLPModel', 'MLPBuilder']
 
 
 class MLPModel(NeuralModel):
@@ -84,16 +84,15 @@ class MLPModel(NeuralModel):
         raise NotImplementedError('NeuralModel.save is an abstract method')
 
 
-"""
-    Builder for the Multi-layer Perceptron (MLP) model.
-    The MLP model is built from a dictionary of configuration parameters for which 
-    the keys are predefined. The model is iteratively created by call to method set 
-    defined in the base class NeuralBuilder
-    The constructor define defaults value for activation (nn.ReLU()) and drop_out (no dropout)
-"""
-
-
 class MLPBuilder(NeuralBuilder):
+    """
+        Builder for the Multi-layer Perceptron (MLP) model.
+        The MLP model is built from a dictionary of configuration parameters for which
+        the keys are predefined. The model is iteratively created by call to method set
+        defined in the base class NeuralBuilder
+        The constructor define defaults value for activation (nn.ReLU()) and drop_out (no dropout)
+    """
+
     keys = ['in_features_list', 'activation', 'drop_out', 'output_activation']
 
     def __init__(self, model_attributes: Dict[AnyStr, Any]) -> None:

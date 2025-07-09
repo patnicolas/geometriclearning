@@ -21,7 +21,6 @@ import python
 __all__ = ['GeometricDistribution']
 
 
-
 class GeometricDistribution(object):
     """
     Define a generic Geometric Distribution on an Hypersphere using the Geomstats Python library

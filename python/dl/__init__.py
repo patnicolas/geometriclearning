@@ -30,11 +30,11 @@ class VAEException(Exception):
         super(VAEException, self).__init__(args, kwargs)
 
 
-class TrainingException(MLPException):
+class TrainingException(Exception):
     def __init__(self, *args, **kwargs):
         super(TrainingException, self).__init__(args, kwargs)
 
 
-class ValidationException(MLPException):
+class ValidationException(Exception):
     def __init__(self, *args, **kwargs):
         super(ValidationException, self).__init__(args, kwargs)
