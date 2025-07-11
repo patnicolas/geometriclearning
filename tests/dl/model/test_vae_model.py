@@ -34,6 +34,9 @@ class VAEModelTest(unittest.TestCase):
             vae_model = VAEModel(model_id='vae_ffnn', encoder=ffnn_model, latent_dim=latent_size)
             logging.info(str(vae_model))
             self.assertTrue(True)
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
         except VAEException as e:
             logging.info(f'ERROR: {str(e)}')
             self.assertTrue(True)
@@ -71,6 +74,9 @@ class VAEModelTest(unittest.TestCase):
             latent_size = 6
             vae_model = VAEModel(model_id='vae_ffnn', encoder=conv_model, latent_dim=latent_size, noise_func=None)
             logging.info(repr(vae_model))
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
         except VAEException as e:
             logging.info(f'ERROR: {str(e)}')
             self.assertTrue(True)
@@ -117,6 +123,9 @@ class VAEModelTest(unittest.TestCase):
             net_training = VAEModelTest.create_executor()
             net_training.train(vae_model.model_id, vae_model, train_loader, eval_loader)
             self.assertTrue(True)
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
         except ConvException as e:
             logging.info(str(e))
             self.assertTrue(False)

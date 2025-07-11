@@ -22,7 +22,7 @@ import torchvision.transforms as transforms
 from dl.model import GrayscaleToRGB
 from dataset import DatasetException
 import logging
-logger = logging.getLogger('dataset.MNISTLoader')
+import python
 
 
 class MNISTLoader(BaseLoader):
@@ -42,7 +42,6 @@ class MNISTLoader(BaseLoader):
 
         super(MNISTLoader, self).__init__(batch_size=batch_size, num_samples=-1)
         self.resize_image = resize_image
-
 
     @staticmethod
     def show_samples(images_set: Dataset, is_random: bool = True) -> None:
@@ -75,7 +74,6 @@ class MNISTLoader(BaseLoader):
     def extract_features(self, root_path: AnyStr) -> (Dataset, Dataset):
         train_dataset, eval_dataset = self._extract_datasets(root_path)
         return train_dataset, eval_dataset
-
 
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):
         """
@@ -115,5 +113,5 @@ class MNISTLoader(BaseLoader):
             return train_dataset, eval_dataset
 
         except RuntimeError as e:
-            logger.error(str(e))
+            logging.error(str(e))
             raise DatasetException(str(e))

@@ -1,12 +1,12 @@
-# Geometric Deep Learning - Hands-on
-Classes and methods for Geometric Deep Learning and related topics.
 
-#### Patrick Nicolas - Last update 05.27.2025   [Substack - Newsletter](https://patricknicolas.substack.com)
-![Banner](images/GeometricLearning.png)
+![Banner](images/ReadMeBanner.png)
+
+#### Classes and methods for Geometric Deep Learning and related topics.      
+#### _Patrick Nicolas - Last update 06.08.2025_   [Substack - Newsletter](https://patricknicolas.substack.com)
 
 # Why it Matters
 ### Purpose:      
-Facing challenges with high-dimensional, densely packed but limited data, and complex distributions?     
+_Facing challenges with high-dimensional, densely packed but limited data, and complex distributions_?     
 Geometric Deep Learning (GDL) offers a solution by enabling data scientists to grasp the true shape and distribution of data. This newsletter explores the diverse techniques and frameworks shaping the field of Geometric Deep Learning.
 
 ### Audience:       
@@ -456,6 +456,15 @@ The current class hierarchy for Neural models is defined as:
 | Jax | 0.4.34  |
 | PyTest | 8.3.3   |
 | matplotlib | 3.10.0  |
+| ffmpeg | 1.14  |
+| latex | 0.7.0  |
+| manim | 0.19.0  |
+| memory-profiler | 0.61.0  |
+| networkx | 3.4.2 |
+| optuna | 4.4.0 |
+| pillow | 11.1.0 |
+| pytorch-lightning | 2.5.1 |
+   
 
 # Modules
 ![Modules Navigation Map](images/Geometric_Learning_Modules_Diagram.png)   

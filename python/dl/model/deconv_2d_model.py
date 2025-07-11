@@ -83,17 +83,17 @@ class DeConv2dModel(NeuralModel, ABC):
         @return: A tensor output from last layer
         @rtype; Torch tensor
         """
-        logger.info(x, 'Input Conv model')
+        logging.debug(x, 'Input Conv model')
         x = self.modules_seq(x)
-        logger.info(x, 'Output Conv model')
+        logging.debug(x, 'Output Conv model')
         # If a full connected network is appended to the convolutional layers
         if self.ffnn_blocks is not None and len(self.ffnn_blocks) > 0:
-            logger.info(x, 'Before width Conv')
+            logging.debug(x, 'Before width Conv')
             sz = x.shape[0]
             x = DeConv2dModel.reshape(x, sz)
-            logger.info(x, 'After width Conv')
+            logging.debug(x, 'After width Conv')
             x = self.dff_model(x)
-            logger.info(x, 'Output connected Conv')
+            logging.debug(x, 'Output connected Conv')
         return x
 
     def list_modules(self, index: int = 0) -> AnyStr:

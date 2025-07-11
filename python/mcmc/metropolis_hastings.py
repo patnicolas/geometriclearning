@@ -23,7 +23,7 @@ __all__ = ['MetropolisHastings']
 
 class MetropolisHastings(MCMC):
     """
-        Implementation of Metropolis-Hastings Monte Carlo Markov Chain
+        Implementation of Metropolis-Hastings Markov Chain Monte Carlo method
     """
     from proposal_distribution import ProposalDistribution
 

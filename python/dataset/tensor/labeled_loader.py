@@ -24,7 +24,6 @@ import numpy as np
 __all__ = ['LabeledLoader']
 
 
-
 class LabeledLoader(BaseLoader):
     """
         Wraps static methods to load public data sets. The methods generate two data loader
