@@ -105,8 +105,7 @@ class Caltech101Loader(BaseLoader):
             train_size = int(self.split_ratio * len(caltech_101_dataset))
             test_size = len(caltech_101_dataset) - train_size
             return torch.utils.data.random_split(caltech_101_dataset, lengths=[train_size, test_size])
-
-        except RuntimeError as e:
+        except (RuntimeError | ValueError | TypeError) as e:
             logging.error(str(e))
             raise DatasetException(str(e))
 

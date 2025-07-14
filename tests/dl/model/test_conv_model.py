@@ -48,11 +48,8 @@ class ConvModelTest(unittest.TestCase):
                                    mlp_blocks=[mlp_block])
             logging.info(repr(conv_model))
             self.assertTrue(True)
-        except AssertionError as e:
+        except (AssertionError | ConvException) as e:
             logging.error(e)
-            self.assertTrue(False)
-        except ConvException as e:
-            logging.info(str(e))
             self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
@@ -79,11 +76,8 @@ class ConvModelTest(unittest.TestCase):
             conv_model = conv_builder.build()
             logging.info(repr(conv_model))
             self.assertTrue(True)
-        except AssertionError as e:
+        except (AssertionError | ConvException) as e:
             logging.error(e)
-            self.assertTrue(False)
-        except ConvException as e:
-            logging.info(str(e))
             self.assertTrue(False)
 
     def test_mnist_small_3(self):
@@ -108,11 +102,8 @@ class ConvModelTest(unittest.TestCase):
             conv_model = conv_builder.build()
             logging.info(repr(conv_model))
             self.assertTrue(True)
-        except AssertionError as e:
+        except (AssertionError | ConvException) as e:
             logging.error(e)
-            self.assertTrue(False)
-        except ConvException as e:
-            logging.info(str(e))
             self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
@@ -154,11 +145,8 @@ class ConvModelTest(unittest.TestCase):
                                                             drop_out=0.25)
             Conv2dBuilder.validate_conv(conv_blocks=[conv_2d_block_1, conv_2d_block_2, conv_2d_block_3],
                                         input_size=(28, 28))
-        except AssertionError as e:
+        except (AssertionError | ConvException) as e:
             logging.error(e)
-            self.assertTrue(False)
-        except ConvException as e:
-            logging.info(str(e))
             self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
@@ -213,11 +201,8 @@ class ConvModelTest(unittest.TestCase):
                                    mlp_blocks=[mlp_block_1, mlp_block_2])
             logging.info(repr(conv_model))
             self.assertTrue(True)
-        except AssertionError as e:
+        except (AssertionError | ConvException) as e:
             logging.error(e)
-            self.assertTrue(False)
-        except ConvException as e:
-            logging.info(str(e))
             self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
@@ -239,11 +224,8 @@ class ConvModelTest(unittest.TestCase):
             conv_2d_Builder = Conv2dBuilder(conv_attributes)
             conv_2d_model = conv_2d_Builder.build()
             logging.info(str(conv_2d_model))
-        except AssertionError as e:
+        except (AssertionError | ConvException) as e:
             logging.error(e)
-            self.assertTrue(False)
-        except ConvException as e:
-            logging.info(str(e))
             self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
@@ -290,11 +272,8 @@ class ConvModelTest(unittest.TestCase):
             de_conv_model = conv_model.transpose(extra=nn.Sigmoid())
             logging.info(f'\nDe conv modules: ----\n{repr(de_conv_model)}')
             self.assertTrue(True)
-        except AssertionError as e:
+        except (AssertionError | ConvException) as e:
             logging.error(e)
-            self.assertTrue(False)
-        except ConvException as e:
-            logging.info(str(e))
             self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
@@ -342,11 +321,8 @@ class ConvModelTest(unittest.TestCase):
             net_training = ConvModelTest.create_executor()
             net_training.train(conv_model.model_id, conv_model, train_loader, eval_loader)
             self.assertTrue(True)
-        except AssertionError as e:
+        except (AssertionError | ConvException) as e:
             logging.error(e)
-            self.assertTrue(False)
-        except ConvException as e:
-            logging.info(str(e))
             self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
@@ -412,11 +388,8 @@ class ConvModelTest(unittest.TestCase):
             logging.info(f'Network training:\n{net_training}')
             net_training.train(conv_model.model_id, conv_model, train_loader, eval_loader)
             self.assertTrue(True)
-        except AssertionError as e:
+        except (AssertionError | ConvException) as e:
             logging.error(e)
-            self.assertTrue(False)
-        except ConvException as e:
-            logging.info(str(e))
             self.assertTrue(False)
 
     @staticmethod

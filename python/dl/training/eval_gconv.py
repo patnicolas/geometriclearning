@@ -24,7 +24,7 @@ from torch_geometric.data import Data
 from typing import AnyStr, Dict, Any
 from dl.training.gnn_training import GNNTraining
 from torch.utils.data import DataLoader
-from dl.block.graph import GraphException
+from dl.block import GraphException
 import logging
 import python
 __all__ = ['EvalGConv']

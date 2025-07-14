@@ -20,7 +20,7 @@ class MNISTLoaderTest(unittest.TestCase):
             first_data = next(train_iter)
             logging.info(str(first_data))
             self.assertTrue(len(train_loader) > 0)
-        except AssertionError as e:
+        except (AssertionError | FileNotFoundError) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -34,7 +34,7 @@ class MNISTLoaderTest(unittest.TestCase):
             )
             ds = train_loader.dataset
             MNISTLoader.show_samples(ds.dataset, is_random=True)
-        except AssertionError as e:
+        except (AssertionError | FileNotFoundError) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -42,7 +42,7 @@ class MNISTLoaderTest(unittest.TestCase):
         try:
             mnist_loader = MNISTLoader(batch_size=8, resize_image=-1)
             mnist_loader.extract_features(root_path='../../../data/MNIST')
-        except AssertionError as e:
+        except (AssertionError | FileNotFoundError) as e:
             logging.error(e)
             self.assertTrue(False)
 

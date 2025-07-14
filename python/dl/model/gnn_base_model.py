@@ -26,7 +26,7 @@ from torch_geometric.loader import GraphSAINTRandomWalkSampler
 from torch_geometric.data import Data
 from torch.utils.data import DataLoader, Dataset
 import torch.nn as nn
-from dl.block.graph import GraphException
+from dl.block import GraphException
 import logging
 import python
 __all__ = ['GNNBaseModel']

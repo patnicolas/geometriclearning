@@ -17,7 +17,7 @@ import torch
 from torch.utils.data import DataLoader
 from typing import AnyStr, Dict, List, Optional
 from dl.training.exec_config import ExecConfig
-from dl import TrainingException, ValidationException
+from dl.training import TrainingException, ValidationException
 from dl.training.hyper_params import HyperParams
 from metric.built_in_metric import BuiltInMetric
 from metric.metric import Metric

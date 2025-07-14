@@ -15,7 +15,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from dl.training.neural_training import NeuralTraining
 from dl.training.hyper_params import HyperParams
-from dl.block.graph import GraphException
+from dl.block import GraphException
 from metric.performance_metrics import PerformanceMetrics
 from plots.plotter import PlotterParameters
 from metric.metric_type import MetricType
@@ -167,6 +167,7 @@ class GNNTraining(NeuralTraining):
                 idx += 1
             except (RuntimeError | AttributeError | ValueError | Exception) as e:
                 raise GraphException(str(e))
+
         _ave_training_loss = total_loss/num_batches
         ave_training_loss = (0.91 - random.uniform(a=-0.02, b=0.02))*_ave_training_loss
         self.performance_metrics.update_metric(MetricType.TrainLoss, ave_training_loss)

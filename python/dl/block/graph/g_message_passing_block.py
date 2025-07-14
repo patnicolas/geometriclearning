@@ -20,16 +20,16 @@ import torch.nn as nn
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.typing import Adj
 
-"""
-Implementation of a very simple Graph Convolutional Neural block which consists of 
-- Message passing operator
-- Optional activation function
-- Optional batch norm 1-dimension
-- Optional drop-out
-"""
-
 
 class GMessagePassingBlock(NeuralBlock):
+    """
+    Implementation of a very simple Graph Convolutional Neural block which consists of
+    - Message passing operator
+    - Optional activation function
+    - Optional batch norm 1-dimension
+    - Optional drop-out
+    """
+
     def __init__(self,
                  block_id: AnyStr,
                  message_passing_module: MessagePassing,
@@ -65,7 +65,8 @@ class GMessagePassingBlock(NeuralBlock):
             modules.append(graph_pooling_module)
         if drop_out_module is not None:
             modules.append(drop_out_module)
-        super(GMessagePassingBlock, self).__init__(block_id, modules)
+        super(GMessagePassingBlock, self).__init__(block_id)
+        self.modules = modules
 
     def forward(self,
                 x: torch.Tensor,

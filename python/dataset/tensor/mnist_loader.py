@@ -112,6 +112,6 @@ class MNISTLoader(BaseLoader):
             )
             return train_dataset, eval_dataset
 
-        except RuntimeError as e:
+        except (RuntimeError | ValueError | TypeError) as e:
             logging.error(str(e))
             raise DatasetException(str(e))

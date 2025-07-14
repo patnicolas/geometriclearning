@@ -41,11 +41,8 @@ class MLPModelTest(unittest.TestCase):
             mlp_model = mlp_builder.build()
             logging.info(str(mlp_model))
             self.assertTrue(True)
-        except AssertionError as e:
+        except (AssertionError | MLPException) as e:
             logging.error(e)
-            self.assertTrue(False)
-        except MLPException as e:
-            logging.info(e)
             self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
@@ -72,25 +69,25 @@ class MLPModelTest(unittest.TestCase):
             self.assertTrue(mlp_model.get_out_features() == 1)
             logging.info(repr(mlp_model))
             self.assertTrue(True)
-        except AssertionError as e:
+        except (AssertionError | MLPException) as e:
             logging.error(e)
             self.assertTrue(False)
-        except MLPException as e:
-            logging.error(e)
-            self.assertTrue(False)
-
 
     def test_builder(self):
-        model_attributes = {
-            'model_id': 'my_mlp',
-            'in_features_list': [8, 1, 16],
-            'activation': nn.ReLU(),
-            'drop_out': 0.3,
-            'output_activation': nn.Softmax()
-        }
-        mlp_builder = MLPBuilder(model_attributes)
-        mlp_model = mlp_builder.build()
-        logging.info(mlp_model)
+        try:
+            model_attributes = {
+                'model_id': 'my_mlp',
+                'in_features_list': [8, 1, 16],
+                'activation': nn.ReLU(),
+                'drop_out': 0.3,
+                'output_activation': nn.Softmax()
+            }
+            mlp_builder = MLPBuilder(model_attributes)
+            mlp_model = mlp_builder.build()
+            logging.info(mlp_model)
+        except (KeyError | MLPException) as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_transpose(self):
@@ -115,10 +112,7 @@ class MLPModelTest(unittest.TestCase):
             self.assertTrue(mlp_model_transposed.in_features == 1)
             self.assertTrue(mlp_model_transposed.out_features == 8)
             self.assertTrue(True)
-        except AssertionError as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except MLPException as e:
+        except (AssertionError | MLPException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -156,10 +150,7 @@ class MLPModelTest(unittest.TestCase):
                                                                        exec_config=ExecConfig.default())
             net_training = MLPModelTest.create_executor()
             net_training.train(mlp_model.model_id, mlp_model, train_loader, eval_loader)
-        except AssertionError as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except MLPException as e:
+        except (AssertionError | MLPException) as e:
             logging.error(e)
             self.assertTrue(False)
 

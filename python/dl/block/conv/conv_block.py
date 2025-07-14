@@ -16,7 +16,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from torch import nn
 from typing import Any, AnyStr, Optional, List
 
-from dl import ConvException
+from dl.block import ConvException
 from dl.block.neural_block import NeuralBlock
 from dl.block.conv.conv_output_size import ConvOutputSize
 __all__ = ['ConvBlock']

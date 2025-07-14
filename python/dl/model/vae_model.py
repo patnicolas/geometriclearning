@@ -16,7 +16,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from typing import AnyStr, Self, Optional
 from dl.model.neural_model import NeuralModel
 from dl.block.variational_block import VariationalBlock
-from dl import ConvException, MLPException, VAEException
+from dl.block import ConvException, MLPException, VAEException
 import torch
 import torch.nn as nn
 import logging

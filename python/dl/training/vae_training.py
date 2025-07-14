@@ -23,7 +23,7 @@ from plots.plotter import PlotterParameters
 from metric.built_in_metric import BuiltInMetric
 from metric.metric_type import MetricType
 from dl.training.exec_config import ExecConfig
-from dl import ConvException, VAEException
+from dl.block import ConvException, VAEException
 from dl.loss.vae_kl_loss import VAEKLLoss
 from typing import AnyStr, List, Optional, Dict, Self, Tuple
 from torch.utils.data import DataLoader

@@ -30,10 +30,7 @@ class Conv2dBlockTest(unittest.TestCase):
             attributes = {}
             conv_2d_block.validate(attributes)
             self.assertTrue(len(conv_2d_block.attributes) == 5)
-        except AssertionError as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except ConvException as e:
+        except (AssertionError | ConvException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -54,12 +51,10 @@ class Conv2dBlockTest(unittest.TestCase):
             conv_2d_block.validate()
             logging.info(f'{conv_2d_block=}')
             self.assertTrue(conv_2d_block.attributes is None)
-        except AssertionError as e:
+        except (AssertionError | ConvException)  as e:
             logging.error(e)
             self.assertTrue(False)
-        except ConvException as e:
-            logging.error(e)
-            self.assertTrue(False)
+
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_3(self):
@@ -77,12 +72,10 @@ class Conv2dBlockTest(unittest.TestCase):
                                                           drop_out=0.0)
             logging.info(f'{conv_2d_block=}')
             self.assertTrue(len(conv_2d_block.attributes) == 0)
-        except AssertionError as e:
+        except (AssertionError | ConvException)  as e:
             logging.error(e)
             self.assertTrue(False)
-        except ConvException as e:
-            logging.error(e)
-            self.assertTrue(False)
+
 
     def test_init_4(self):
         try:
@@ -102,12 +95,10 @@ class Conv2dBlockTest(unittest.TestCase):
             conv_2d_block = Conv2dBlock.build(block_attributes)
             logging.info(f'{conv_2d_block=}')
             self.assertTrue(len(conv_2d_block.modules_list) == 5)
-        except AssertionError as e:
+        except (AssertionError | ConvException)  as e:
             logging.error(e)
             self.assertTrue(False)
-        except ConvException as e:
-            logging.error(e)
-            self.assertTrue(False)
+
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_transpose(self):
@@ -127,9 +118,6 @@ class Conv2dBlockTest(unittest.TestCase):
             de_conv_2d_block = conv_2d_block.transpose(output_activation=nn.Sigmoid())
             logging.info(f'{de_conv_2d_block=}')
             self.assertTrue(str(conv_2d_block.attributes['activation']) == 'Sigmoid()')
-        except AssertionError as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except ConvException as e:
+        except (AssertionError | ConvException)  as e:
             logging.error(e)
             self.assertTrue(False)

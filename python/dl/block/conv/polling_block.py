@@ -16,7 +16,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from dl.block.neural_block import NeuralBlock
 import torch.nn as nn
 from typing import Self, AnyStr, List, Optional
-from dl import ConvException
+from dl.block import ConvException
 
 
 class PoolingBlock(NeuralBlock):

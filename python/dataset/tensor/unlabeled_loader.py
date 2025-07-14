@@ -20,6 +20,9 @@ from torchvision import transforms
 from typing import Tuple, AnyStr, Callable
 from torchvision.transforms import Compose
 from dataset.base_loader import BaseLoader
+import logging
+import python
+from dataset import DatasetException
 
 __all__ = ['UnlabeledLoader']
 
@@ -66,15 +69,19 @@ class UnlabeledLoader(BaseLoader):
             @return: Pair of Data loader for training data and validation data
             @rtype: Tuple of data loader
         """
-        transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((norm_factors[0],), (norm_factors[1],)),
-        ])
-        dataset: Dataset = self.create_dataset(data, transform)
-        return DefaultLoaderGenerator.generate_loader(dataset=dataset,
-                                                      num_samples=self.num_samples,
-                                                      batch_size=self.batch_size,
-                                                      split_ratio=self.split_ratio)
+        try:
+            transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize((norm_factors[0],), (norm_factors[1],)),
+            ])
+            dataset: Dataset = self.create_dataset(data, transform)
+            return DefaultLoaderGenerator.generate_loader(dataset=dataset,
+                                                          num_samples=self.num_samples,
+                                                          batch_size=self.batch_size,
+                                                          split_ratio=self.split_ratio)
+        except (RuntimeError | ValueError | TypeError) as e:
+            logging.error(str(e))
+            raise DatasetException(str(e))
 
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):
         raise NotImplementedError(f'Failed to load data from path {root_path}')

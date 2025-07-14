@@ -16,7 +16,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 import optuna
 from optuna.trial import TrialState
 from torch_geometric.nn.pool import TopKPooling
-from dl.block.graph import GraphException
+from dl.block import GraphException
 import torch.nn as nn
 import torch_geometric
 from dataset.graph.graph_data_loader import GraphDataLoader

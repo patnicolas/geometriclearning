@@ -18,6 +18,7 @@ import torch
 from typing import List, AnyStr, Optional, Self
 from geomstats.geometry.base import LevelSet
 from dataclasses import dataclass
+from geometry import GeometricException
 __all__ = ['ManifoldPoint']
 
 

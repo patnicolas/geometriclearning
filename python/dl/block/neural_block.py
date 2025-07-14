@@ -15,7 +15,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from torch import nn
 from typing import Self, AnyStr, Optional, List
-from dl import MLPException
+from dl.block import MLPException
 __all__ = ['NeuralBlock']
 
 

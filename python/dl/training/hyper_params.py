@@ -20,7 +20,7 @@ from typing import AnyStr, Optional, List, Dict, Any, Self
 from dataset import DatasetException
 import logging
 import python
-from dl import TrainingException
+from dl.trainoing import TrainingException
 __all__ = ['HyperParams']
 
 
