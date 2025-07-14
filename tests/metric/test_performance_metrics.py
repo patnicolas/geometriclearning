@@ -50,10 +50,8 @@ class PerformanceMetricsTest(unittest.TestCase):
             performance_metrics.update_perf_metrics(np_pred, np_lab)
             performance_metrics.update_metric(MetricType.EvalLoss, sum(val_loss)/len(val_loss))
             logging.info(f'\n{performance_metrics=}')
-        except AssertionError as e:
+        except (AssertionError | MetricException) as e:
             logging.error(e)
-            self.assertTrue(False)
-        except MetricException as _:
             self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
@@ -82,10 +80,8 @@ class PerformanceMetricsTest(unittest.TestCase):
             output_file_name = 'results'
             performance_metrics.plot_summary(output_file_name)
             self.assertTrue(True)
-        except AssertionError as e:
+        except (AssertionError | MetricException) as e:
             logging.error(e)
-            self.assertTrue(False)
-        except MetricException as _:
             self.assertTrue(False)
 
 

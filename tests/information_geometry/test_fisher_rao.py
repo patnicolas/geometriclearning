@@ -15,7 +15,7 @@ from geomstats.information_geometry.gamma import GammaDistributions
 from geomstats.information_geometry.binomial import BinomialDistributions
 from geomstats.information_geometry.base import InformationManifoldMixin
 from information_geometry.fisher_rao import FisherRao
-from geometry import GeometricException
+from geometry import InformationGeometricException
 import torch
 import python
 from python import SKIP_REASON
@@ -31,10 +31,7 @@ class FisherRaoTest(unittest.TestCase):
             fisher_rao = FisherRao(exponential_distributions, (1.0, 2.0))
             logging.info(f'Fisher-Rao:\n{str(fisher_rao)}')
             self.assertTrue(fisher_rao.fisher_rao_metric.signature == (1, 0))
-        except AssertionError as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except GeometricException as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -46,7 +43,7 @@ class FisherRaoTest(unittest.TestCase):
             FisherRaoTest.__sample_distribution(PoissonDistributions(equip=True), (0.0, 20.0), 6)
             FisherRaoTest.__sample_distribution(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), 6)
             self.assertTrue(True)
-        except GeometricException as e:
+        except InformationGeometricException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -57,7 +54,7 @@ class FisherRaoTest(unittest.TestCase):
             FisherRaoTest.__distance(GeometricDistributions(equip=True), (1.0, 12.0))
             FisherRaoTest.__distance(PoissonDistributions(equip=True), (0.0, 20.0))
             FisherRaoTest.__distance(BinomialDistributions(equip=True, n_draws=8), (0.0, 20.0))
-        except GeometricException as e:
+        except InformationGeometricException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -70,7 +67,7 @@ class FisherRaoTest(unittest.TestCase):
             FisherRaoTest.__inner_product(GeometricDistributions(equip=True), (1.0, 12.0), v, w)
             FisherRaoTest.__inner_product(PoissonDistributions(equip=True), (0.0, 20.0), v, w)
             FisherRaoTest.__inner_product(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), v, w)
-        except GeometricException as e:
+        except InformationGeometricException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -83,7 +80,7 @@ class FisherRaoTest(unittest.TestCase):
             FisherRaoTest.__inner_product(GeometricDistributions(equip=True), (1.0, 12.0), v, w)
             FisherRaoTest.__inner_product(PoissonDistributions(equip=True), (0.0, 20.0), v, w)
             FisherRaoTest.__inner_product(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), v, w)
-        except GeometricException as e:
+        except InformationGeometricException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -96,7 +93,7 @@ class FisherRaoTest(unittest.TestCase):
             FisherRaoTest.__inner_product(GeometricDistributions(equip=True), (1.0, 12.0), v, w)
             FisherRaoTest.__inner_product(PoissonDistributions(equip=True), (0.0, 20.0), v, w)
             FisherRaoTest.__inner_product(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), v, w)
-        except GeometricException as e:
+        except InformationGeometricException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -107,7 +104,7 @@ class FisherRaoTest(unittest.TestCase):
             FisherRaoTest.__norm(GeometricDistributions(equip=True), (1.0, 12.0), v)
             FisherRaoTest.__norm(PoissonDistributions(equip=True), (0.0, 20.0), v)
             FisherRaoTest.__norm(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), v)
-        except GeometricException as e:
+        except InformationGeometricException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -118,7 +115,7 @@ class FisherRaoTest(unittest.TestCase):
             FisherRaoTest.__norm(GeometricDistributions(equip=True), (1.0, 12.0), v)
             FisherRaoTest.__norm(PoissonDistributions(equip=True), (0.0, 20.0), v)
             FisherRaoTest.__norm(BinomialDistributions(equip=True, n_draws=10), (0.0, 20.0), v)
-        except GeometricException as e:
+        except InformationGeometricException as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -131,7 +128,7 @@ class FisherRaoTest(unittest.TestCase):
             samples = fisher_rao.samples(n_samples=4)
             logging.info('\n'.join([str(x) for x in samples]))
             self.assertTrue(fisher_rao.belongs(samples))
-        except GeometricException as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -142,7 +139,7 @@ class FisherRaoTest(unittest.TestCase):
             fisher_rao = FisherRao(exponential_distributions, (1.0, 2.0))
             metric = fisher_rao.metric_matrix()
             logging.info(f'Fisher-Rao metric for exponential: {metric}')
-        except GeometricException as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -153,7 +150,7 @@ class FisherRaoTest(unittest.TestCase):
             fisher_rao = FisherRao(gamma_distributions, (1.0, 2.0))
             metric = fisher_rao.metric_matrix()
             logging.info(f'Fisher-Rao metric for exponential: {metric}')
-        except GeometricException as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -172,7 +169,7 @@ class FisherRaoTest(unittest.TestCase):
             distance = fisher_rao.distance(inputs[0], inputs[1])
             logging.info(f'Exponential Distance {distance}')
             fisher_rao.visualize_diff(values[0], values[1], r"$\theta$")
-        except GeometricException as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -189,7 +186,7 @@ class FisherRaoTest(unittest.TestCase):
             max_theta = f'{float(torch.max(values)):.4f}'
             fisher_rao.visualize_pdfs(values,
                                       rf"Exp. Distribution Manifold $\theta$ 128 samples [{min_theta}, {max_theta}]")
-        except GeometricException as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -210,7 +207,7 @@ class FisherRaoTest(unittest.TestCase):
             max_sigma = f'{float(torch.max(values[:, 1])):.4f}'
             fisher_rao.visualize_pdfs(values,
                                       rf"Normal Distribution Manifold  $\sigma$ 48 samples [{min_sigma}, {max_sigma}]")
-        except GeometricException as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -226,7 +223,7 @@ class FisherRaoTest(unittest.TestCase):
             inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
             distance = fisher_rao.distance(inputs[0], inputs[1])
             logging.info(f'Univariate Normal  Distance  {distance}')
-        except GeometricException as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -242,7 +239,7 @@ class FisherRaoTest(unittest.TestCase):
             inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
             distance = fisher_rao.distance(inputs[0], inputs[1])
             logging.info(f'Geometric Distance  {distance}')
-        except GeometricException as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -274,7 +271,7 @@ class FisherRaoTest(unittest.TestCase):
             # inputs = [torch.Tensor(x) for x in fisher_rao.samples(2)]
             inner_product = fisher_rao.inner_product(inputs[0], torch.Tensor([1.0]), torch.Tensor([0.2]))
             logging.info(f'Exponential inner product  {inner_product}')
-        except GeometricException as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -290,7 +287,7 @@ class FisherRaoTest(unittest.TestCase):
             inputs = [torch.Tensor(x) for x in values]
             distance = fisher_rao.distance(inputs[0], inputs[1])
             logging.info(f'Beta  Distance  {distance}')
-        except GeometricException as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 

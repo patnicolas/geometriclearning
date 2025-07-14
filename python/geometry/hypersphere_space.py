@@ -19,7 +19,7 @@ from typing import List
 import numpy as np
 from geometry.geometric_space import GeometricSpace, ManifoldPoint
 import geomstats.backend as gs
-from geometry import GeometricException
+from geometry import InformationGeometricException
 __all__ = ['HypersphereSpace']
 
 
@@ -221,12 +221,12 @@ class HypersphereSpace(GeometricSpace):
     def __cartesian_to_polar(c_coordinates: np.array) -> np.array:
         import math
         if len(c_coordinates) != 2:
-            raise GeometricException(f'Number of coordinates {len(c_coordinates)} should be 2')
+            raise InformationGeometricException(f'Number of coordinates {len(c_coordinates)} should be 2')
 
         x = c_coordinates[0]
         y = c_coordinates[1]
         if x == 0.0 and y == 0.0:
-            raise GeometricException(f'x {x} and y {y} should not be 0')
+            raise InformationGeometricException(f'x {x} and y {y} should not be 0')
         r = math.sqrt(x ** 2 + y ** 2)
         theta = math.acos(x/r) if y >= 0.0 else -math.acos(x/r)
         return np.array([r, theta])

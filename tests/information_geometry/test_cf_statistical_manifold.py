@@ -2,6 +2,9 @@ import unittest
 import logging
 import torch
 import os
+
+from geometry import InformationGeometricException
+
 os.environ["GEOMSTATS_BACKEND"] = "pytorch"
 import python
 from python import SKIP_REASON
@@ -26,7 +29,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
             statistical_manifold = CFStatisticalManifold(exponential_distributions, (1.0, 2.0))
             logging.info(f'\n{statistical_manifold=}')
             self.assertTrue(statistical_manifold.fisher_rao_metric.signature == (1, 0))
-        except AssertionError as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -43,7 +46,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
             exponential_geometric_str = '\n'.join([str(x) for x in geometric_samples])
             logging.info(f'\nExponential Distribution Manifold 8 random samples \n{exponential_samples_str}'
                          f'\nGeometric Distribution Manifold 4 random samples\n{exponential_geometric_str}')
-        except AssertionError as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -56,7 +59,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
             poisson_metric = poisson_manifold.metric_matrix()
             logging.info(f'\nExponential Distribution Fisher metric: {exponential_metric}'
                          f'\nPoisson Distribution Fisher metric: {poisson_metric}')
-        except AssertionError as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -67,7 +70,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
             statistical_manifold = CFStatisticalManifold(exponential_distributions, (1.0, 2.0))
             metric = statistical_manifold.metric_matrix()
             logging.info(f'Fisher-Rao metric for exponential: {metric}')
-        except AssertionError as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -85,7 +88,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
             geometric_end_point = geometric_manifold.exp(tgt_vector, base_point)
             logging.info(f'\nExponential Distribution Manifold End point: {exponential_end_point}'
                          f'\nGeometric Distribution Manifold End point: {geometric_end_point}\n')
-        except AssertionError as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -107,7 +110,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
             geometric_vector = geometric_manifold.log(manifold_point, base_point)
             logging.info(f'\nGeometric Distribution Manifold Tangent Vector\nBase:{base_point} to:{manifold_point}: '
                          f'{geometric_vector}\n')
-        except AssertionError as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -120,7 +123,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
             base_point = statistical_manifold.samples(1)
             end_point = statistical_manifold.exp(tgt_vector, base_point)
             logging.info(end_point)
-        except AssertionError as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 

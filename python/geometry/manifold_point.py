@@ -18,7 +18,7 @@ import torch
 from typing import List, AnyStr, Optional, Self
 from geomstats.geometry.base import LevelSet
 from dataclasses import dataclass
-from geometry import GeometricException
+from geometry import InformationGeometricException
 __all__ = ['ManifoldPoint']
 
 
@@ -89,14 +89,14 @@ class ManifoldPoint:
         import math
         # Make sure that the cartesian coordinates are defined in 2-dimension space
         if len(cartesian_coordinates) != 2:
-            raise GeometricException(f'Number of coordinates {len(cartesian_coordinates)} should be 2')
+            raise InformationGeometricException(f'Number of coordinates {len(cartesian_coordinates)} should be 2')
 
         x = cartesian_coordinates[0]
         y = cartesian_coordinates[1]
 
         # The intrinsic cartesian point cannot be the origin
         if x == 0.0 and y == 0.0:
-            raise GeometricException(f'x {x} and y {y} should not be 0')
+            raise InformationGeometricException(f'x {x} and y {y} should not be 0')
 
         r = math.sqrt(x ** 2 + y ** 2)
         theta = math.acos(x / r) if y >= 0.0 else -math.acos(x / r)

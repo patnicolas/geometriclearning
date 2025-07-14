@@ -18,7 +18,7 @@ from geomstats.learning.frechet_mean import FrechetMean, BaseGradientDescent
 from torch import Tensor
 import numpy as np
 from typing import List, Optional
-from geometry import GeometricException
+from geometry import InformationGeometricException
 __all__ = ['FrechetEstimator']
 
 
@@ -51,19 +51,19 @@ class FrechetEstimator(object):
         @rtype: List
         """
         if num_samples < 2:
-            raise GeometricException(f'Need at least 2 data point to compute the Frechet mean')
+            raise InformationGeometricException(f'Need at least 2 data point to compute the Frechet mean')
         from geomstats.geometry.hypersphere import Hypersphere
         from geomstats.geometry.special_orthogonal import _SpecialOrthogonalMatrices
 
         # Test if this manifold is supported
         if not (isinstance(self.space, Hypersphere) or isinstance(self.space, _SpecialOrthogonalMatrices)):
-            raise GeometricException('Cannot generate random values on unsupported manifold')
+            raise InformationGeometricException('Cannot generate random values on unsupported manifold')
         X = self.space.random_uniform(num_samples)
 
         # Validate the randomly generated belongs to the manifold 'self.space'
         are_points_valid = all([self.space.belongs(x) for x in X])
         if not are_points_valid:
-            raise GeometricException('Some generated points do not belong to the manifold')
+            raise InformationGeometricException('Some generated points do not belong to the manifold')
         return X
 
     @staticmethod

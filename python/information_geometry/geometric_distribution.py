@@ -49,6 +49,9 @@ class GeometricDistribution(object):
         @return: Number of points from exponential map
         @rtype: int
         """
+        assert num_pts > 0, f'Number of random points in manifold {num_pts} should be > 0'
+        assert len(tgt_vector) == 3, f'Size of tangent vector {len(tgt_vector)} should be 3'
+
         manifold_pts = self._random_manifold_points(num_pts, tgt_vector)
         exp_map = self.manifold.tangent_vectors(manifold_pts)
         for tangent_vector, end_pt in exp_map:
@@ -60,6 +63,9 @@ class GeometricDistribution(object):
     """ --------------------  Protected Helper Method ---------------------------  """
 
     def _random_manifold_points(self, num_pts: int, tgt_vector: List[float]) -> List[ManifoldPoint]:
+        assert num_pts > 0, f'Number of random points in manifold {num_pts} should be > 0'
+        assert len(tgt_vector) == 3, 'Cannot generate random points on manifold with undefined dimension'
+
         p = self.manifold.sample(num_pts)
         return [
             ManifoldPoint(
