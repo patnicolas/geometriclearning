@@ -145,12 +145,12 @@ class VAEModel(NeuralModel):
         z = self.decoder(z)
         return z
 
-    def transpose(self, extra: Optional[nn.Module] = None) -> Self:
+    def transpose(self, activation_update: Optional[nn.Module] = None) -> Self:
         """
         Variational autoencoder is composed of an encoder and mirror decoder but cannot itself be inverted
         It throws a NotImplemented error
         """
-        raise NotImplementedError('Cannot invert an Variational Autoencoder model')
+        raise VAEException('Cannot invert an Variational Autoencoder model')
 
     def save(self, extra_params: dict = None):
         raise NotImplementedError('NeuralModel.save is an abstract method')

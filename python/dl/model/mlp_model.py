@@ -41,16 +41,17 @@ class MLPModel(NeuralModel):
         modules = [module for block in mlp_blocks for module in block.modules_list]
         super(MLPModel, self).__init__(model_id, nn.Sequential(*modules))
 
-    def transpose(self, output_activation: nn.Module = None) -> Self:
+    def transpose(self, activation_update: nn.Module = None) -> Self:
         """
         Generate the inverted neural layout for this Multi-layer perceptron
+
+        @param activation_update: Optional activation module to override the original one
+        @type activation_update: nn.Module
         @return: This Multi-layer perceptron with an inverted layout
         @rtype: MLPModel
         """
-        neural_blocks = [block.transpose(output_activation)
-                         for block in self.neural_blocks[::-1]]
-        return MLPModel(model_id=f'_{self.model_id}',
-                        mlp_blocks=neural_blocks)
+        neural_blocks = [block.transpose(activation_update) for block in self.neural_blocks[::-1]]
+        return MLPModel(model_id=f'_{self.model_id}', mlp_blocks=neural_blocks)
 
     def get_in_features(self) -> int:
         """

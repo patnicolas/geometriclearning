@@ -13,8 +13,6 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from abc import ABC
-
 import torch.nn as nn
 from dl.training.neural_training import NeuralTraining
 from dl.training.hyper_params import HyperParams
@@ -34,7 +32,7 @@ __all__ = ['VAETraining']
 EvaluatedImages = Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
 
 
-class VAETraining(NeuralTraining, ABC):
+class VAETraining(NeuralTraining):
     """
     Lightweight implementation of the variational auto-encoder using PyTorch and reusable neural block
     The key components are
@@ -98,6 +96,7 @@ class VAETraining(NeuralTraining, ABC):
               train_loader: DataLoader,
               eval_loader: DataLoader) -> None:
         """
+        Polymorphic call
         Train and evaluation of a neural network given a data loader for a training set, a
         data loader for the evaluation/test1 set and a encoder_model. The weights of the various linear modules
         (neural_blocks) will be initialized if self.hyper_params using a Normal distribution

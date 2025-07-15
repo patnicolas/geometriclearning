@@ -128,6 +128,16 @@ class GNNBaseModel(NeuralModel):
             logging.error(str(e))
             raise GraphException(e)
 
+    def transpose(self, activation_update: nn.Module = None) -> Self:
+        """
+        Transpose this graph neural network
+
+        @param activation_update: Optional activation module to override the original one
+        @type activation_update: nn.Module
+        @return: Instance of this sub-class of Neural model
+        """
+        raise GraphException('Transposition of Generic Graph Neural Network is not implemented')
+
     def load_data_source(self, data_source: Data | Dataset) -> (DataLoader, DataLoader):
         """
         Implement a generic loader for

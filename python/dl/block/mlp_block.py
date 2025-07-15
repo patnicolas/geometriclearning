@@ -135,6 +135,8 @@ class MLPBlock(NeuralBlock):
     def transpose(self, activation_update: Optional[nn.Module] = None) -> Self:
         """
         Transpose the layer size (in_feature <-> out_feature) and remove drop_out for decoder
+        @param activation_update: Last activation to be overridden
+        @type activation_update: nn.Module
         @return: Inverted feed forward neural network block
         @rtype: MLPBlock
         """

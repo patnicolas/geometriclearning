@@ -105,11 +105,12 @@ class DeConv2dBlock(NeuralBlock):
             logging.error(e)
             raise ConvException(e)
 
-    def transpose(self, extra: Optional[nn.Module] = None) -> Self:
+    def transpose(self, activation_update: Optional[nn.Module] = None) -> Self:
         """
         Cannot build an inverted de-convolutional neural block.
-        @param extra: Extra module to be added to the inverted neural structure
-        @type extra: nn.Module
+
+        @param activation_update: Extra module to be added to the inverted neural structure
+        @type activation_update: nn.Module
         @return: ConvException
         """
         raise ConvException('Cannot invert a de-convolutional neural block')

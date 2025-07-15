@@ -90,8 +90,17 @@ class NeuralModel(torch.nn.Module, ABC):
     def get_latent_features(self) -> int:
         raise NotImplementedError('NeuralModel.get_latent_features undefined for abstract neural model')
 
-    def transpose(self, extra: nn.Module = None) -> Self:
-        raise NotImplementedError('NeuralModel.invert is an abstract method')
+    @abstractmethod
+    def transpose(self, activation_update: nn.Module = None) -> Self:
+        """
+        Transpose a model sub-class from encoder to decoder
+
+        @param activation_update: Optional activation module to override the original one
+        @type activation_update: nn.Module
+        @return: Instance of this sub-class of Neural model
+        """
+        pass
+
 
     def __str__(self) -> AnyStr:
         return f'\n{self.model_id}\n{str(self.modules_seq)}'

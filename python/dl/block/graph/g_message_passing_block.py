@@ -14,12 +14,12 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 from dl.block.neural_block import NeuralBlock
-from typing import AnyStr, List, Optional
+from typing import AnyStr, List, Optional, Self
 import torch
 import torch.nn as nn
+from dl.block import GraphException
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.typing import Adj
-
 
 class GMessagePassingBlock(NeuralBlock):
     """
@@ -79,6 +79,15 @@ class GMessagePassingBlock(NeuralBlock):
         for module in self.modules[1:]:
             x = module(x)
         return x
+
+    def transpose(self, activation_update: Optional[nn.Module] = None) -> Self:
+        """
+        Transposing a Graph Neural Network does not make sense
+
+        @param activation_update: Optional activation module to override the original one
+        @type activation_update: nn.Module
+        """
+        raise GraphException('Cannot invert a Graph neural block')
 
     def __repr__(self) -> AnyStr:
         modules_str = '\n'.join([str(module) for module in self.modules])

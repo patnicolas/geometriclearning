@@ -188,6 +188,15 @@ class Conv3dBlock(ConvBlock):
                    max_pooling_module,
                    drop_out_module)
 
+    def transpose(self, activation_update: Optional[nn.Module] = None) -> Self:
+        """
+        Transposing a 3D convolutional network
+
+        @param activation_update: Optional activation module to override the original one
+        @type activation_update: nn.Module
+        """
+        raise ConvException('Transposition of 3D convolutional network is not implemented')
+
     def validate(self, attributes: Dict[AnyStr, nn.Module] = None) -> Dict[AnyStr, nn.Module]:
         from dl.block.neural_block import NeuralBlock
 

@@ -115,7 +115,7 @@ class Conv2dBlockTest(unittest.TestCase):
                                                           bias=False,
                                                           drop_out=0.2)
             logging.info(conv_2d_block.get_attributes())
-            de_conv_2d_block = conv_2d_block.transpose(output_activation=nn.Sigmoid())
+            de_conv_2d_block = conv_2d_block.transpose(activation_update=nn.Sigmoid())
             logging.info(f'{de_conv_2d_block=}')
             self.assertTrue(str(conv_2d_block.attributes['activation']) == 'Sigmoid()')
         except (AssertionError | ConvException)  as e:

@@ -13,14 +13,12 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from abc import ABC
-
 from dl.model.neural_model import NeuralModel
 from dl.model.mlp_model import MLPModel
 from dl.block.conv.deconv_2d_block import DeConv2dBlock
 from dl.block.mlp_block import MLPBlock
-from typing import AnyStr, List, Self, Dict, Any
-
+from typing import AnyStr, List, Self, Dict, Any, Optional
+from dl.block import ConvException
 import torch.nn as nn
 import torch
 import logging
@@ -28,7 +26,7 @@ import python
 __all__ = ['DeConv2dModel']
 
 
-class DeConv2dModel(NeuralModel, ABC):
+class DeConv2dModel(NeuralModel):
     def __init__(self,
                  model_id: AnyStr,
                  deconv_blocks: List[DeConv2dBlock]) -> None:
@@ -60,6 +58,13 @@ class DeConv2dModel(NeuralModel, ABC):
         @rtype: DeConv2dModel
         """
         return cls(model_id, de_conv_blocks, [])
+
+    def transpose(self, activation_update: Optional[nn.Module] = None) -> Self:
+        """
+        Transposition or inversion of a de-convolutional neural network does not make sense
+        It throws a NotImplemented error
+        """
+        raise ConvException('Cannot invert a De-convolutional neural model')
 
     def has_fully_connected(self) -> bool:
         """

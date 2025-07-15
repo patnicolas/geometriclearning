@@ -1,6 +1,8 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
+from abc import abstractmethod
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +16,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 from torch import nn
-from typing import Any, AnyStr, Optional, List
+from typing import Any, AnyStr, Optional, List, Self
 
 from dl.block import ConvException
 from dl.block.neural_block import NeuralBlock
@@ -51,8 +53,15 @@ class ConvBlock(NeuralBlock):
     def is_deconvolution_enabled(self) -> bool:
         return self.model_attributes is not None
 
-    def transpose(self, extra: Optional[nn.Module] = None) -> Any:
-        raise ConvException('Cannot transpose abstract Convolutional block')
+    @abstractmethod
+    def transpose(self, activation_update: Optional[nn.Module] = None) -> Self:
+        """
+        Abstract transposition
+
+        @param activation_update: Optional activation module to override the original one
+        @type activation_update: nn.Module
+        """
+        pass
 
     def get_conv_output_size(self) -> ConvOutputSize:
         raise ConvException('Cannot transpose abstract Convolutional block')

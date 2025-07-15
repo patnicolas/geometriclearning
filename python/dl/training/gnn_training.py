@@ -98,9 +98,10 @@ class GNNTraining(NeuralTraining):
               model_id: AnyStr,
               neural_model: nn.Module,
               train_loader: DataLoader,
-              val_loader: DataLoader,
-              val_enabled: bool = True) -> None:
+              val_loader: DataLoader) -> None:
         """
+        Polymorphic call
+
         Train and evaluation of a neural network given a data loader for a training set, a
         data loader for the evaluation/test1 set and an encoder_model. The weights of the various linear modules
         (neural_blocks) will be initialized if self.hyper_params using a Normal distribution
@@ -113,8 +114,6 @@ class GNNTraining(NeuralTraining):
         @type train_loader: torch_geometric.loader.DataLoader
         @param val_loader: Data loader for the evaluation set
         @param val_loader: torch_geometric.loader.DataLoader
-        @param val_enabled: Enable validation
-        @param val_enabled: bool
         """
         torch.manual_seed(42)
 
@@ -127,7 +126,7 @@ class GNNTraining(NeuralTraining):
             self.__train_epoch(neural_model, epoch, train_loader)
 
             # Set mode and execute evaluation
-            if val_enabled:
+            if val_loader is not None:
                 self.__val_epoch(neural_model, epoch, val_loader)
 
             logging.info(f'Performance: {epoch=}\n{self.performance_metrics=}')

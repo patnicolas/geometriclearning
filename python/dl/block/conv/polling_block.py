@@ -30,7 +30,13 @@ class PoolingBlock(NeuralBlock):
     def default(cls, block_id: AnyStr, pooling_type: AnyStr, pooling_kernel: int) -> Self:
         return cls(block_id, pooling_type, pooling_kernel, pooling_stride=1)
 
-    def transpose(self, extra: Optional[nn.Module] = None) -> Self:
+    def transpose(self, activation_update: Optional[nn.Module] = None) -> Self:
+        """
+        Transposition of a polling block, unpolling block is not implemented neural block.
+
+        @param activation_update: Extra module to be added to the inverted neural structure
+        @type activation_update: nn.Module
+        """
         raise ConvException('Cannot invert a pooling block')
 
     def get_modules(self) -> List[nn.Module]:

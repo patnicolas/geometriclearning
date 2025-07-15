@@ -269,7 +269,7 @@ class ConvModelTest(unittest.TestCase):
                                    conv_blocks=[conv_2d_block_1, conv_2d_block_2, conv_2d_block_3],
                                    mlp_blocks=None)
             logging.info(f'\nConv modules:---\n{repr(conv_model)}')
-            de_conv_model = conv_model.transpose(extra=nn.Sigmoid())
+            de_conv_model = conv_model.transpose(activation_update=nn.Sigmoid())
             logging.info(f'\nDe conv modules: ----\n{repr(de_conv_model)}')
             self.assertTrue(True)
         except (AssertionError | ConvException) as e:

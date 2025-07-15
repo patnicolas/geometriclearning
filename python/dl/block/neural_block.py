@@ -16,16 +16,20 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from torch import nn
 from typing import Self, AnyStr, Optional, List
 from dl.block import MLPException
+from abc import ABC
+from abc import abstractmethod
 __all__ = ['NeuralBlock']
 
 
-class NeuralBlock(nn.Module):
+class NeuralBlock(nn.Module, ABC):
     """
-    Basic Neural block for all deep learning architectures
+    Basic Neural block for all deep learning architectures. This class cannot be directly instantiated and
+    requires sub-classing
     """
+    # List of supported activation method
     supported_activations = ('Sigmoid', 'ReLU', 'Softmax', 'Tanh', 'ELU', 'LeakyReLU')
 
-    def __init__(self, block_id: AnyStr):
+    def __init__(self, block_id: AnyStr) -> None:
         """
         Constructor for basic Neural block
         @param block_id: Optional identifier for the Neural block
@@ -34,8 +38,18 @@ class NeuralBlock(nn.Module):
         super(NeuralBlock, self).__init__()
         self.block_id = block_id
 
-    def transpose(self, extra: Optional[nn.Module] = None) -> Self:
-        raise MLPException('Cannot invert abstract Neural block')
+    @abstractmethod
+    def transpose(self, activation_update: Optional[nn.Module] = None) -> Self:
+        """
+        Transpose this block from encoder to decoder
+        Example: Auto-encoder, convolutional to de-convolutional network
+
+        @param activation_update: Optional activation module to override the original one
+        @type activation_update: nn.Module
+        @return: Instance of this sub-class of Neural block
+        @rtype: NeuralBlock
+        """
+        pass
 
     def __str__(self) -> AnyStr:
         module_repr = self.__repr__()

@@ -191,17 +191,19 @@ class Conv2dBlock(ConvBlock):
                    max_pooling_module=max_pooling_module,
                    drop_out_module=drop_out_module)
 
-    def transpose(self, output_activation: Optional[nn.Module] = None) -> DeConv2dBlock:
+    def transpose(self, activation_update: Optional[nn.Module] = None) -> DeConv2dBlock:
         """
-        Build a de-convolutional neural block from an existing convolutional block
-        @param output_activation: Optional last activation function
-        @type output_activation: nn.Module
+        Polymorphic call
+        Build a de-convolutional neural block from an existing convolutional block.
+        
+        @param activation_update: Optional last activation function
+        @type activation_update: nn.Module
         @return: Instance of 2D de-convolutional block
         @rtype: DeConv2dBlock
         """
         if self.attributes is not None:
-            if output_activation is not None:
-                self.attributes['activation'] = output_activation
+            if activation_update is not None:
+                self.attributes['activation'] = activation_update
             self.attributes['block_id'] = f'de_{self.block_id}'
             return DeConv2dBlock.build(block_attributes=self.attributes)
         else:
