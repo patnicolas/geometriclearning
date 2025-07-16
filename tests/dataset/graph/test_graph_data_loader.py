@@ -30,12 +30,10 @@ class GraphDataLoaderTest(unittest.TestCase):
             logging.info(graph_data)
             # Request validation of the graph parameters
             self.assertTrue(graph_data.validate(raise_on_error=True))
-        except AssertionError as e:
+        except (AssertionError | DatasetException) as e:
             logging.error(e)
             self.assertTrue(False)
-        except DatasetException as e:
-            logging.error(e)
-            self.assertTrue(False)
+
 
     def test_random_node_flickr(self):
         try:
@@ -55,12 +53,10 @@ class GraphDataLoaderTest(unittest.TestCase):
                       for idx, batch in enumerate(train_data_loader) if idx < 3]
             logging.info('\n'.join(result))
             self.assertTrue(True)
-        except AssertionError as e:
+        except (AssertionError | DatasetException) as e:
             logging.error(e)
             self.assertTrue(False)
-        except DatasetException as e:
-            logging.error(e)
-            self.assertTrue(False)
+
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_random_node_flickr_2(self):
@@ -84,10 +80,7 @@ class GraphDataLoaderTest(unittest.TestCase):
             logging.info('\nTrain data')
             logging.info('\n'.join(result))
             self.assertTrue(True)
-        except AssertionError as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except DatasetException as e:
+        except  (AssertionError | DatasetException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -113,10 +106,7 @@ class GraphDataLoaderTest(unittest.TestCase):
                       for idx, batch in enumerate(train_data_loader) if idx < 3]
             logging.info('\n'.join(result))
             self.assertTrue(True)
-        except AssertionError as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except DatasetException as e:
+        except  (AssertionError | DatasetException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -142,12 +132,10 @@ class GraphDataLoaderTest(unittest.TestCase):
                       for idx, batch in enumerate(train_data_loader) if idx < 3]
             logging.info('\n'.join(result))
             self.assertTrue(True)
-        except AssertionError as e:
+        except (AssertionError | DatasetException) as e:
             logging.error(e)
             self.assertTrue(False)
-        except DatasetException as e:
-            logging.error(e)
-            self.assertTrue(False)
+
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_neighbor_node_facebook(self):
@@ -171,10 +159,7 @@ class GraphDataLoaderTest(unittest.TestCase):
                       for idx, batch in enumerate(train_data_loader) if idx < 3]
             logging.info('\n'.join(result))
             self.assertTrue(True)
-        except AssertionError as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except DatasetException as e:
+        except (AssertionError | DatasetException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -198,12 +183,10 @@ class GraphDataLoaderTest(unittest.TestCase):
                       for idx, batch in enumerate(train_data_loader) if idx < 3]
             logging.info('\n'.join(result))
             self.assertTrue(True)
-        except AssertionError as e:
+        except (AssertionError | DatasetException) as e:
             logging.error(e)
             self.assertTrue(False)
-        except DatasetException as e:
-            logging.error(e)
-            self.assertTrue(False)
+
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_cluster_proteins(self):
@@ -225,10 +208,7 @@ class GraphDataLoaderTest(unittest.TestCase):
                       for idx, batch in enumerate(train_data_loader) if idx < 3]
             logging.info('\n'.join(result))
             self.assertTrue(True)
-        except AssertionError as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except DatasetException as e:
+        except (AssertionError | DatasetException) as e:
             logging.error(e)
             self.assertTrue(False)
 

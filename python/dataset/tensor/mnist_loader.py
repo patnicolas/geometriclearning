@@ -23,6 +23,7 @@ from dl.model import GrayscaleToRGB
 from dataset import DatasetException
 import logging
 import python
+import abc
 
 
 class MNISTLoader(BaseLoader):
@@ -77,7 +78,9 @@ class MNISTLoader(BaseLoader):
 
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):
         """
+        Polymorphic call
         Extract the training data and labels and test data and labels for this convolutional network.
+
         @param root_path: Root path to CIFAR10 data
         @type root_path: AnyStr
         @return Tuple (train data, labels, test data, labels)
@@ -112,6 +115,6 @@ class MNISTLoader(BaseLoader):
             )
             return train_dataset, eval_dataset
 
-        except RuntimeError as e:
+        except (RuntimeError | ValueError | TypeError) as e:
             logging.error(str(e))
             raise DatasetException(str(e))

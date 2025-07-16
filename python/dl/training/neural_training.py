@@ -17,7 +17,7 @@ import torch
 from torch.utils.data import DataLoader
 from typing import AnyStr, Dict, List, Optional
 from dl.training.exec_config import ExecConfig
-from dl import TrainingException, ValidationException
+from dl.training import TrainingException, ValidationException
 from dl.training.hyper_params import HyperParams
 from metric.built_in_metric import BuiltInMetric
 from metric.metric import Metric
@@ -77,6 +77,8 @@ class NeuralTraining(object):
               train_loader: DataLoader,
               eval_loader: DataLoader) -> None:
         """
+        Polymorphic call
+
         Train and evaluation of a neural network given a data loader for a training set, a
         data loader for the evaluation/test1 set and a encoder_model. The weights of the various linear modules
         (neural_blocks) will be initialized if self.hyper_params using a Normal distribution

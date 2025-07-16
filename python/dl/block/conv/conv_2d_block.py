@@ -19,7 +19,9 @@ from dl.block.conv.conv_output_size import ConvOutputSize
 from typing import AnyStr, Tuple, Optional, Self, Dict, Any
 import torch.nn as nn
 from dl.block.conv import Conv2DataType
-from dl import ConvException
+from dl.block import ConvException
+import logging
+import python
 __all__ = ['Conv2dBlock']
 
 
@@ -105,28 +107,32 @@ class Conv2dBlock(ConvBlock):
         @return: Instance of a Conv2dBlock
         @rtype: Conv2dBlock
         """
-        block_id = block_attributes['block_id']
-        in_channels = block_attributes['in_channels']
-        out_channels = block_attributes['out_channels']
-        kernel_size = block_attributes['kernel_size']
-        stride = block_attributes['stride']
-        padding = block_attributes['padding']
-        bias = block_attributes['bias']
-        batch_norm_module = block_attributes['batch_norm']
-        activation_module = block_attributes['activation']
-        max_pooling_module = block_attributes['max_pooling']
-        dropout_ratio = block_attributes['dropout_ratio']
-        return cls(block_id=block_id,
-                   conv_layer_module=nn.Conv2d(in_channels=in_channels,
-                                               out_channels=out_channels,
-                                               kernel_size=kernel_size,
-                                               stride=stride,
-                                               padding=padding,
-                                               bias=bias),
-                   batch_norm_module=batch_norm_module,
-                   activation_module=activation_module,
-                   max_pooling_module=max_pooling_module,
-                   drop_out_module=nn.Dropout2d(dropout_ratio))
+        try:
+            block_id = block_attributes['block_id']
+            in_channels = block_attributes['in_channels']
+            out_channels = block_attributes['out_channels']
+            kernel_size = block_attributes['kernel_size']
+            stride = block_attributes['stride']
+            padding = block_attributes['padding']
+            bias = block_attributes['bias']
+            batch_norm_module = block_attributes['batch_norm']
+            activation_module = block_attributes['activation']
+            max_pooling_module = block_attributes['max_pooling']
+            dropout_ratio = block_attributes['dropout_ratio']
+            return cls(block_id=block_id,
+                       conv_layer_module=nn.Conv2d(in_channels=in_channels,
+                                                   out_channels=out_channels,
+                                                   kernel_size=kernel_size,
+                                                   stride=stride,
+                                                   padding=padding,
+                                                   bias=bias),
+                       batch_norm_module=batch_norm_module,
+                       activation_module=activation_module,
+                       max_pooling_module=max_pooling_module,
+                       drop_out_module=nn.Dropout2d(dropout_ratio))
+        except KeyError as e:
+            logging.error(e)
+            raise ConvException(e)
 
     @classmethod
     def build_from_params(cls,
@@ -185,17 +191,19 @@ class Conv2dBlock(ConvBlock):
                    max_pooling_module=max_pooling_module,
                    drop_out_module=drop_out_module)
 
-    def transpose(self, output_activation: Optional[nn.Module] = None) -> DeConv2dBlock:
+    def transpose(self, activation_update: Optional[nn.Module] = None) -> DeConv2dBlock:
         """
-        Build a de-convolutional neural block from an existing convolutional block
-        @param output_activation: Optional last activation function
-        @type output_activation: nn.Module
+        Polymorphic call
+        Build a de-convolutional neural block from an existing convolutional block.
+        
+        @param activation_update: Optional last activation function
+        @type activation_update: nn.Module
         @return: Instance of 2D de-convolutional block
         @rtype: DeConv2dBlock
         """
         if self.attributes is not None:
-            if output_activation is not None:
-                self.attributes['activation'] = output_activation
+            if activation_update is not None:
+                self.attributes['activation'] = activation_update
             self.attributes['block_id'] = f'de_{self.block_id}'
             return DeConv2dBlock.build(block_attributes=self.attributes)
         else:

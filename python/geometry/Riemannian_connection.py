@@ -19,7 +19,7 @@ from geomstats.geometry.base import LevelSet
 import numpy as np
 from typing import AnyStr, Optional, List
 from geometry.manifold_point import ManifoldPoint
-from geometry import GeometricException
+from geometry import InformationGeometricException
 __all__ = ['RiemannianConnection']
 
 class RiemannianConnection(object):
@@ -63,7 +63,7 @@ class RiemannianConnection(object):
         :rtype:  Numpy array
         """
         if len(tgt_vec1) != len(tgt_vec2):
-            raise GeometricException(f'Inner product of vector size {len(tgt_vec1)} and vector size {len(tgt_vec1)}')
+            raise InformationGeometricException(f'Inner product of vector size {len(tgt_vec1)} and vector size {len(tgt_vec1)}')
 
         return 0 if len(tgt_vec1) == 0 or len(tgt_vec2) == 0 \
             else self.riemannian_metric.inner_product(tgt_vec1, tgt_vec2, base_pt)
@@ -80,7 +80,7 @@ class RiemannianConnection(object):
         :rtype: Numpy array
         """
         if len(vector1) != len(vector2):
-            raise GeometricException(f'Inner product of vector size {len(vector1)} and vector size {len(vector2)}')
+            raise InformationGeometricException(f'Inner product of vector size {len(vector1)} and vector size {len(vector2)}')
 
         return 0 if len(vector1) == 0 or len(vector2) == 0 else np.inner(vector1, vector2)
 
@@ -110,7 +110,7 @@ class RiemannianConnection(object):
         :rtype: Numpy array
         """
         if len(vector) != len(base_pt):
-            raise GeometricException(f'Norm of vector size {len(vector)} at base point of size {len(base_pt)}')
+            raise InformationGeometricException(f'Norm of vector size {len(vector)} at base point of size {len(base_pt)}')
 
         return 0 if len(vector) == 0 else self.riemannian_metric.norm(vector, base_pt)
 
@@ -134,7 +134,7 @@ class RiemannianConnection(object):
         :rtype: Numpy array
         """
         if manifold_base_pt.ndim() != self.ndim:
-            raise GeometricException(f'Base pt dimension {manifold_base_pt.ndim()} should be {self.ndim}')
+            raise InformationGeometricException(f'Base pt dimension {manifold_base_pt.ndim()} should be {self.ndim}')
 
         return self.riemannian_metric.parallel_transport(
             manifold_base_pt.tgt_vector,
@@ -152,7 +152,7 @@ class RiemannianConnection(object):
         :rtype: Numpy array
         """
         if len(base_pt) != self.ndim:
-            raise GeometricException(f'Base pt dimension {len(base_pt)} should be {self.ndim}')
+            raise InformationGeometricException(f'Base pt dimension {len(base_pt)} should be {self.ndim}')
         return self.riemannian_metric.christoffels(base_pt)
 
     def curvature_tensor(self, tgt_vectors: List[np.array], base_pt: np.array) -> np.array:
@@ -169,7 +169,7 @@ class RiemannianConnection(object):
         :rtype: Numpy array
         """
         if len(tgt_vectors) != 3 or any(vec is None for vec in tgt_vectors):
-            raise GeometricException(f'Tangent vectors for the curvature {str(tgt_vectors)} is not properly defined')
+            raise InformationGeometricException(f'Tangent vectors for the curvature {str(tgt_vectors)} is not properly defined')
 
         return self.riemannian_metric.curvature(tgt_vectors[0], tgt_vectors[1], tgt_vectors[2], base_pt)
 
@@ -185,9 +185,9 @@ class RiemannianConnection(object):
         :rtype:Numpy array
         """
         if len(tgt_vectors) != 4 or any(vec is None or len(vec) != len(tgt_vectors[0]) for vec in tgt_vectors):
-            raise GeometricException(f'Tangent vectors for curvature derivative are undefined')
+            raise InformationGeometricException(f'Tangent vectors for curvature derivative are undefined')
         if len(base_pt) != len(tgt_vectors[0]):
-            raise GeometricException(f'Dimension of base point {len(base_pt)} should be equal to dimension tangent '
+            raise InformationGeometricException(f'Dimension of base point {len(base_pt)} should be equal to dimension tangent '
                                      f'vectors {len(tgt_vectors[0])}')
 
         return self.riemannian_metric.curvature_derivative(
@@ -213,7 +213,7 @@ class RiemannianConnection(object):
         :rtype:
         """
         if len(tgt_vec1) != len(tgt_vec2):
-            raise GeometricException(f'Dimension of tangent vectors for sectional curvature {len(tgt_vec1)} '
+            raise InformationGeometricException(f'Dimension of tangent vectors for sectional curvature {len(tgt_vec1)} '
                                      f'and {len(tgt_vec2)} should be identical')
 
         return self.riemannian_metric.sectional_curvature(tgt_vec1, tgt_vec2, base_pt)

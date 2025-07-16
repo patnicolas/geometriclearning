@@ -136,7 +136,7 @@ class GConvTest(unittest.TestCase):
 
         _data: torch_geometric.data.Data = flickr_dataset[0]
         logging.info(f'Number of features: {_data.num_node_features}\nNumber of classes: {flickr_dataset.num_classes}'
-              f'\nSize of training: {_data.train_mask.sum()}')
+                     f'\nSize of training: {_data.train_mask.sum()}')
 
         conv_1 = GraphConv(in_channels=_data.num_node_features, out_channels=hidden_channels)
 

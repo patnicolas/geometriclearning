@@ -19,7 +19,9 @@ from abc import ABC, abstractmethod
 from typing import AnyStr, Self, List, Dict, Any
 from dl.block.conv import ConvDataType
 from torch import Tensor
-from dl import MLPException
+from dl.block import MLPException
+import logging
+import python
 __all__ = ['NeuralModel', 'NeuralBuilder']
 
 
@@ -69,9 +71,9 @@ class NeuralModel(torch.nn.Module, ABC):
         @return: Prediction for the input
         @rtype: Torch tensor
         """
-        # logging.info(f'{self.model_id=}\n{x.shape=}')
+        logging.debug(f'{self.model_id=}\n{x.shape=}')
         x = self.modules_seq(x)
-        # logging.info(f'Output {self.model_id=}\n{x.shape=}')
+        logging.debug(f'Output {self.model_id=}\n{x.shape=}')
         return x
 
     def get_in_features(self) -> int:
@@ -88,8 +90,17 @@ class NeuralModel(torch.nn.Module, ABC):
     def get_latent_features(self) -> int:
         raise NotImplementedError('NeuralModel.get_latent_features undefined for abstract neural model')
 
-    def transpose(self, extra: nn.Module = None) -> Self:
-        raise NotImplementedError('NeuralModel.invert is an abstract method')
+    @abstractmethod
+    def transpose(self, activation_update: nn.Module = None) -> Self:
+        """
+        Transpose a model sub-class from encoder to decoder
+
+        @param activation_update: Optional activation module to override the original one
+        @type activation_update: nn.Module
+        @return: Instance of this sub-class of Neural model
+        """
+        pass
+
 
     def __str__(self) -> AnyStr:
         return f'\n{self.model_id}\n{str(self.modules_seq)}'
@@ -103,6 +114,7 @@ class NeuralModel(torch.nn.Module, ABC):
 
 class NeuralBuilder(ABC):
     def __init__(self, model_attributes: Dict[AnyStr, Any]) -> None:
+        assert len(model_attributes) > 0, 'Cannot build a neural networks without attributes'
         self.model_attributes = model_attributes
 
     # Add/update dynamically the torch module as value of attributes dict.

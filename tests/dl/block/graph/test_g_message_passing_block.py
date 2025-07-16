@@ -20,10 +20,7 @@ class GMessagePassingBlockTest(unittest.TestCase):
             gcn_conv = GMessagePassingBlock('K1', conv, activation_module=nn.ReLU(), batch_norm_module=None, drop_out_module=0.0)
             logging.info(repr(gcn_conv))
             self.assertTrue(True)
-        except AssertionError as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except GraphException as e:
+        except (AssertionError | GraphException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -42,10 +39,7 @@ class GMessagePassingBlockTest(unittest.TestCase):
                                             drop_out_module=nn.Dropout(0.2))
             logging.info(repr(gcn_conv))
             self.assertTrue(True)
-        except AssertionError as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except GraphException as e:
+        except (AssertionError | GraphException) as e:
             logging.error(e)
             self.assertTrue(False)
 

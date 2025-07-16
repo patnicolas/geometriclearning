@@ -1,6 +1,7 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
+from dl.block import GraphException
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -82,5 +83,15 @@ class GConvModel(NeuralModel):
             # Invoke the forward method for the MLP block
             x = mlp_block(x)
         return x
+
+    def transpose(self, activation_update: nn.Module = None) -> Self:
+        """
+        Transpose this graph convolutional network
+
+        @param activation_update: Optional activation module to override the original one
+        @type activation_update: nn.Module
+        @return: Instance of this sub-class of Neural model
+        """
+        raise GraphException('Transposition of Graph Convolutional Network is not implemented')
 
 

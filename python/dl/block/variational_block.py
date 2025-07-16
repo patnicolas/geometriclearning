@@ -17,7 +17,7 @@ import torch
 from torch import nn
 from dl.block.neural_block import NeuralBlock
 from typing import Self, AnyStr, Optional
-from dl import VAEException
+from dl.block import VAEException
 __all__ = ['VariationalBlock']
 
 
@@ -53,7 +53,13 @@ class VariationalBlock(NeuralBlock):
         sampler = nn.Linear(in_features=latent_size, out_features=hidden_dim, bias=True)
         return cls(mu, log_var, sampler)
 
-    def transpose(self, extra: Optional[nn.Module] = None) -> Self:
+    def transpose(self, activation_update: Optional[nn.Module] = None) -> Self:
+        """
+        Transposing an auto-encoder or variational auto-encoder does not make sense
+
+        @param activation_update: Optional activation module to override the original one
+        @type activation_update: nn.Module
+        """
         raise VAEException('Cannot invert variational Neural block')
 
     def in_features(self) -> int:

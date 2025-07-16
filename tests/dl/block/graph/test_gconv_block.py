@@ -23,10 +23,7 @@ class GConvBlockTest(unittest.TestCase):
             modules = list(gconv_block.modules_list)
             self.assertTrue(len(modules) == 5)
             logging.info(f'\n{gconv_block}')
-        except AssertionError as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except GraphException as e:
+        except (AssertionError | GraphException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -41,10 +38,7 @@ class GConvBlockTest(unittest.TestCase):
             modules = list(gconv_block.modules_list)
             self.assertTrue(len(modules) == 2)
             logging.info(f'\n{gconv_block}')
-        except AssertionError as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except GraphException as e:
+        except (AssertionError | GraphException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -65,11 +59,7 @@ class GConvBlockTest(unittest.TestCase):
             modules = list(gconv_block.modules_list)
             self.assertTrue(len(modules) == 4)
             logging.info(f'\n{gconv_block}')
-        except AssertionError as e:
+        except (AssertionError | GraphException) as e:
             logging.error(e)
             self.assertTrue(False)
-        except GraphException as e:
-            logging.error(e)
-            self.assertTrue(False)
-
 

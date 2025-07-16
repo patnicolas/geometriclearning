@@ -22,14 +22,8 @@ class MLPBlockTest(unittest.TestCase):
             self.assertTrue(len(params_list) == 2)
             self.assertTrue(mlp_block.get_in_features() == 12)
             self.assertTrue(mlp_block.get_out_features() == 6)
-
-        except AssertionError as e:
+        except (AssertionError | MLPException) as e:
             logging.error(e)
-            self.assertTrue(False)
-
-            # logging.info(str(mlp_block))
-        except MLPException as e:
-            logging.info(str(e))
             self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
@@ -46,12 +40,10 @@ class MLPBlockTest(unittest.TestCase):
             self.assertTrue(mlp_block.get_out_features() == out_features)
             logging.info(str(mlp_block))
             self.assertTrue(True)
-        except AssertionError as e:
+        except (AssertionError | MLPException) as e:
             logging.error(e)
             self.assertTrue(False)
-        except MLPException as e:
-            logging.info(str(e))
-            self.assertTrue(False)
+
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_3(self):
@@ -83,11 +75,8 @@ class MLPBlockTest(unittest.TestCase):
             logging.info(str(transposed))
             self.assertTrue(transposed.get_in_features() == 24)
             self.assertTrue(transposed.get_out_features() == 12)
-        except AssertionError as e:
+        except (AssertionError | MLPException) as e:
             logging.error(e)
-            self.assertTrue(False)
-        except MLPException as e:
-            logging.info(str(e))
             self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
@@ -102,11 +91,8 @@ class MLPBlockTest(unittest.TestCase):
             transposed = mlp_block.transpose(activation_update=nn.Sigmoid())
             logging.info(f'\nTransposed:\n{str(transposed)}\nwith new activation: {str(transposed.activation_module)}')
             self.assertTrue(True)
-        except AssertionError as e:
+        except (AssertionError | MLPException) as e:
             logging.error(e)
-            self.assertTrue(False)
-        except MLPException as e:
-            logging.info(str(e))
             self.assertTrue(False)
 
 

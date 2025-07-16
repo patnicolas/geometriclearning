@@ -18,7 +18,7 @@ import numpy as np
 import geomstats.backend as gs
 from geomstats.geometry.functions import HilbertSphere
 from geometry.manifold_point import ManifoldPoint
-from geometry import GeometricException
+from geometry import InformationGeometricException
 __all__ = ['FunctionSpace']
 
 
@@ -46,7 +46,7 @@ class FunctionSpace(HilbertSphere):
             :throw GeometricException If the base point does not belong to the Hilbert space
         """
         if not self.belongs(base_point):
-            raise GeometricException(f'{base_point} does not belong to this function sphere space')
+            raise InformationGeometricException(f'{base_point} does not belong to this function sphere space')
 
         # Compute the tangent vector using the direction 'vector' and point 'base_point'
         tgt_vector = self.to_tangent(vector, base_point)
@@ -59,7 +59,7 @@ class FunctionSpace(HilbertSphere):
             :throw GeometricException If the Number of random points is not positive
         """
         if n_samples < 1:
-            raise GeometricException(f'Number of random points {n_samples} should be >0')
+            raise InformationGeometricException(f'Number of random points {n_samples} should be >0')
 
         return [ManifoldPoint(
             id=f'rand_{n+1}',
@@ -74,7 +74,7 @@ class FunctionSpace(HilbertSphere):
             :return Exponential or projection of the vector onto the Hilbert Sphere
         """
         if not self.belongs(manifold_base_pt.location):
-            raise GeometricException(f'{manifold_base_pt.id} does not belong to this function sphere space')
+            raise InformationGeometricException(f'{manifold_base_pt.id} does not belong to this function sphere space')
 
         return self.metric.exp(tangent_vec=vector, base_point=manifold_base_pt.location)
 
@@ -88,9 +88,9 @@ class FunctionSpace(HilbertSphere):
                     of 'target_pt' at the base point.
         """
         if not self.belongs(manifold_base_pt.location):
-            raise GeometricException(f'{manifold_base_pt.id} does not belong to this function sphere space')
+            raise InformationGeometricException(f'{manifold_base_pt.id} does not belong to this function sphere space')
         if not self.belongs(target_pt.location):
-            raise GeometricException(f'{target_pt.id} does not belong to this function sphere space')
+            raise InformationGeometricException(f'{target_pt.id} does not belong to this function sphere space')
 
         return self.metric.log(point=manifold_base_pt.location, base_point=target_pt.location)
 
@@ -103,7 +103,7 @@ class FunctionSpace(HilbertSphere):
             :throw GeometricException if the tangent vectors have different length
             """
         if len(tgt_vector1) is not len(tgt_vector2):
-            raise GeometricException(f'Length tgt vector1 {len(tgt_vector1)} != length tgt vector2 {len(tgt_vector2)}')
+            raise InformationGeometricException(f'Length tgt vector1 {len(tgt_vector1)} != length tgt vector2 {len(tgt_vector2)}')
         return self.metric.inner_product(tgt_vector1,tgt_vector2)
 
     def manifold_point_inner_product(self, manifold_base_pt: ManifoldPoint, manifold_pt: ManifoldPoint) -> np.array:
@@ -115,11 +115,11 @@ class FunctionSpace(HilbertSphere):
             :throw GeometricException if tangent vectors are undefined or have different length
         """
         if manifold_base_pt.tgt_vector is None:
-            raise GeometricException(f'Tangent vector for {manifold_base_pt.id} is undefined')
+            raise InformationGeometricException(f'Tangent vector for {manifold_base_pt.id} is undefined')
         if manifold_pt.tgt_vector is None:
-            raise GeometricException(f'Tangent vector for {manifold_pt.id} is undefined')
+            raise InformationGeometricException(f'Tangent vector for {manifold_pt.id} is undefined')
         if len(manifold_base_pt.tgt_vector) is not len(manifold_pt.tgt_vector):
-            raise GeometricException(f'Length tgt vector1 {len(manifold_base_pt.tgt_vector)} != length tgt vector2 '
+            raise InformationGeometricException(f'Length tgt vector1 {len(manifold_base_pt.tgt_vector)} != length tgt vector2 '
                                      f'{len(manifold_pt.tgt_vector)}')
 
         return self.metric.inner_product(

@@ -16,7 +16,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_validate
 from dataclasses import dataclass
-from typing import AnyStr, NoReturn
+from typing import AnyStr, Dict
 import numpy as np
 from geomstats.geometry.spd_matrices import SPDMatrices
 from geomstats.geometry.riemannian_metric import RiemannianMetric
@@ -50,16 +50,19 @@ class SPDTestData:
         """
         return len(self.X)
 
-    def flatten(self) -> NoReturn:
+    def flatten(self) -> None:
         """
         Flatten the 2 dimension feature into a single dimension feature
         """
         shape = self.X.shape
         assert(len(shape) == 3, f'Incorrect shape {len(shape)} for the SPD Training data')
-        shape2= shape[1]*shape[2]
+        shape2 = shape[1]*shape[2]
         self.X = self.X.reshape(shape[0], shape2)
 
-    def load_indexed_data(self, features_path: AnyStr, label_path: AnyStr) -> NoReturn:
+    def load_indexed_data(self, features_path: AnyStr, label_path: AnyStr) -> None:
+        import logging
+        import python
+
         train_data = np.genfromtxt(features_path, delimiter=',', skip_header=0)
         train_pairs = [(x[0], x[1:]) for x in train_data]
         labels = np.genfromtxt(label_path, delimiter=',', skip_header=0)
@@ -67,6 +70,7 @@ class SPDTestData:
         labeled_data = []
         for index, features in train_pairs:
             label = label_map[index]
+            logging.debug(f'Label: {label}')
             labeled_data.append(features)
 
     def __str__(self) -> AnyStr:

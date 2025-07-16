@@ -18,7 +18,7 @@ from information_geometry.cf_statistical_manifold import CFStatisticalManifold
 from typing import Tuple
 import torch
 
-from geometry import GeometricException
+from geometry import InformationGeometricException
 ParamType = torch.Tensor | Tuple[torch.Tensor, torch.Tensor]
 import os
 os.environ["GEOMSTATS_BACKEND"] = "pytorch"
@@ -54,6 +54,7 @@ class FisherRao(CFStatisticalManifold):
                         \partial_{kj}^2 f\partial_i f \frac{1}{f} - \
                         \partial_i f \partial_j f \partial_k f \frac{1}{f^2}
 
+    REFERENCE: https://patricknicolas.substack.com/p/shape-your-models-with-the-fisher
     """
 
     def __init__(self, info_manifold: InformationManifoldMixin, bounds: Tuple[float, float]) -> None:
@@ -94,7 +95,7 @@ class FisherRao(CFStatisticalManifold):
                 m = math.sqrt(n) * torch.abs(torch.arcsin(2 * point2 - 1) - torch.arcsin(2 * point1 - 1))
                 return m
             case _:
-                raise GeometricException(f'Distance for {self.info_manifold.__class__.__name__} not supported')
+                raise InformationGeometricException(f'Distance for {self.info_manifold.__class__.__name__} not supported')
 
     def inner_product(self, point: torch.Tensor, v: torch.Tensor, w: torch.Tensor) -> torch.Tensor:
         """
@@ -120,7 +121,7 @@ class FisherRao(CFStatisticalManifold):
                 n = self.info_manifold.n_draws
                 return n*v*w/(point - point*point)
             case _:
-                raise GeometricException(f'inner product for {self.info_manifold.__class__.__name__} not supported')
+                raise InformationGeometricException(f'inner product for {self.info_manifold.__class__.__name__} not supported')
 
     def norm(self, point: torch.Tensor, v: torch.Tensor) -> torch.Tensor:
         """
@@ -145,7 +146,7 @@ class FisherRao(CFStatisticalManifold):
         mu2 = point2[0]
         sigma2 = point2[1]
         if sigma1 < 1e-12 or sigma2 < 1e-12:
-            raise GeometricException(f'Normal distribution sigma {torch.min(sigma1, sigma2)} out of bounds')
+            raise InformationGeometricException(f'Normal distribution sigma {torch.min(sigma1, sigma2)} out of bounds')
         t1 = (mu1 - mu2) ** 2  # (mu1 - mu2)**2
         t2 = (sigma1 - sigma2) ** 2  # (sigma1 - sigma2)**2
         c = 1 + 0.5 * (t1 + t2) / (sigma1 * sigma2)

@@ -48,6 +48,7 @@ class NormalHypersphere(GeometricDistribution):
         @rtype: bool
         """
         manifold_pts = self._random_manifold_points(num_manifold_pts)
+
         # Apply the Fisher metric for the two manifold points on a Hypersphere
         geodesic_ab_fisher = self.normal.metric.geodesic(manifold_pts[0].location, manifold_pts[1].location)
         t = gs.linspace(0, 1, 100)

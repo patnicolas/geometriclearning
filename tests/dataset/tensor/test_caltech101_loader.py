@@ -7,7 +7,6 @@ import python
 from python import SKIP_REASON
 
 
-
 class Caltech101LoaderTest(unittest.TestCase):
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
@@ -22,7 +21,7 @@ class Caltech101LoaderTest(unittest.TestCase):
             first_data = next(train_iter)
             logging.info(str(first_data))
             self.assertTrue(len(train_loader) > 0)
-        except AssertionError as e:
+        except (AssertionError | FileNotFoundError) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -32,7 +31,7 @@ class Caltech101LoaderTest(unittest.TestCase):
             data_path = '../../data/caltech-101'
             Caltech101Loader.show_samples(data_path)
             self.assertTrue(True)
-        except AssertionError as e:
+        except (AssertionError | FileNotFoundError) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -46,6 +45,6 @@ class Caltech101LoaderTest(unittest.TestCase):
             for batch in train_loader:
                 images, labels = batch
                 logging.info(labels)
-        except AssertionError as e:
+        except (AssertionError | FileNotFoundError) as e:
             logging.error(e)
             self.assertTrue(False)

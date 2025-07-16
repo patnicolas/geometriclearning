@@ -1,7 +1,9 @@
 import unittest
 import logging
 
-from dl import MLPException, TrainingException
+from dl.block import MLPException
+from dl.training import TrainingException
+from dataset import DatasetException
 from dl.model.mlp_model import MLPModel
 from dl.block.mlp_block import MLPBlock
 from dl.training.hyper_params import HyperParams
@@ -49,13 +51,7 @@ class NeuralTrainingTest(unittest.TestCase):
                                   MetricType.Precision: BuiltInMetric(metric_type=MetricType.Precision)}
             network_training = NeuralTraining(hyper_params, metrics_attributes)
             logging.info(str(network_training))
-        except AssertionError as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except MLPException as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except TrainingException as e:
+        except (AssertionError | MLPException | DatasetException | TrainingException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -112,13 +108,7 @@ class NeuralTrainingTest(unittest.TestCase):
                 df['Top_player'],
                 MinMaxScaler())
             network.train(train_loader, eval_loader)
-        except AssertionError as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except MLPException as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except TrainingException as e:
+        except (AssertionError | MLPException | DatasetException | TrainingException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -174,13 +164,7 @@ class NeuralTrainingTest(unittest.TestCase):
             dataset_loader = LabeledLoader(batch_size, train_eval_split_ratio)
             train_loader, eval_loader = dataset_loader.from_dataframes(features_df,labels_df,min_max_scaler,'float32')
             network.train(train_loader, eval_loader)
-        except AssertionError as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except MLPException as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except TrainingException as e:
+        except (AssertionError | MLPException | DatasetException | TrainingException) as e:
             logging.error(e)
             self.assertTrue(False)
 

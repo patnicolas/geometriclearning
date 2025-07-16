@@ -17,7 +17,9 @@ import torch.nn as nn
 from typing import Self, Optional, AnyStr, Dict, Any
 
 from dl.block.neural_block import NeuralBlock
-from dl import ConvException
+from dl.block import ConvException
+import logging
+import python
 __all_ = ['DeConv2dBlock']
 
 
@@ -87,23 +89,28 @@ class DeConv2dBlock(NeuralBlock):
         @param block_attributes: Attributes for the Convolutional network
         @type block_attributes: Dict[str, Any]
         """
-        de_conv_module = nn.ConvTranspose2d(in_channels=block_attributes['in_channels'],
-                                            out_channels=block_attributes['out_channels'],
-                                            kernel_size=block_attributes['kernel_size'],
-                                            stride=block_attributes['stride'],
-                                            padding=block_attributes['padding'],
-                                            bias=block_attributes['bias'])
-        return cls(block_id=block_attributes['block_id'],
-                   de_conv_2d_module=de_conv_module,
-                   batch_norm_module=block_attributes['batch_norm'],
-                   activation_module=block_attributes['activation'],
-                   drop_out_module=block_attributes['drop_out'])
+        try:
+            de_conv_module = nn.ConvTranspose2d(in_channels=block_attributes['in_channels'],
+                                                out_channels=block_attributes['out_channels'],
+                                                kernel_size=block_attributes['kernel_size'],
+                                                stride=block_attributes['stride'],
+                                                padding=block_attributes['padding'],
+                                                bias=block_attributes['bias'])
+            return cls(block_id=block_attributes['block_id'],
+                       de_conv_2d_module=de_conv_module,
+                       batch_norm_module=block_attributes['batch_norm'],
+                       activation_module=block_attributes['activation'],
+                       drop_out_module=block_attributes['drop_out'])
+        except KeyError as e:
+            logging.error(e)
+            raise ConvException(e)
 
-    def transpose(self, extra: Optional[nn.Module] = None) -> Self:
+    def transpose(self, activation_update: Optional[nn.Module] = None) -> Self:
         """
         Cannot build an inverted de-convolutional neural block.
-        @param extra: Extra module to be added to the inverted neural structure
-        @type extra: nn.Module
+
+        @param activation_update: Extra module to be added to the inverted neural structure
+        @type activation_update: nn.Module
         @return: ConvException
         """
         raise ConvException('Cannot invert a de-convolutional neural block')

@@ -19,10 +19,7 @@ class DenoisingVAEModelTest(unittest.TestCase):
             logging.info(f'\nDenoising variational auto-encoder:\n{repr(vae_model)}')
             modules = list(vae_model.modules_seq.modules())
             self.assertTrue(len(modules) == 12)
-        except AssertionError as e:
-            logging.error(e)
-            self.assertTrue(False)
-        except VAEException as e:
+        except (AssertionError | VAEException) as e:
             logging.error(e)
             self.assertTrue(False)
 

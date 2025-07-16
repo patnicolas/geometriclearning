@@ -21,6 +21,9 @@ from dl.model.neural_model import NeuralBuilder
 from dl.block.conv import Conv2DataType
 from dl.block.conv.conv_2d_block import Conv2dBlock
 from dl.block.mlp_block import MLPBlock
+from dl.block import ConvException
+import logging
+import python
 __all__ = ['Conv2dModel']
 
 
@@ -76,15 +79,19 @@ class Conv2dBuilder(NeuralBuilder):
         @return: 2-dimensional convolutional model instance
         @rtype: Conv2dModel
         """
-        # Instantiate the model from the dictionary of Configuration parameters
-        model_id = self.model_attributes['model_id']
-        # Generate the convolutional neural blocks from the configuration attributes dictionary
-        conv_blocks = self.__create_conv_blocks()
-        # Generate the fully connected blocks from the configuration attributes dictionary
-        mlp_blocks = self.__create_mlp_blocks()
-        # Validation
-        Conv2dBuilder.__validate(conv_blocks, mlp_blocks, self.model_attributes['input_size'])
-        return Conv2dModel(model_id, self.model_attributes['input_size'], conv_blocks, mlp_blocks)
+        try:
+            # Instantiate the model from the dictionary of Configuration parameters
+            model_id = self.model_attributes['model_id']
+            # Generate the convolutional neural blocks from the configuration attributes dictionary
+            conv_blocks = self.__create_conv_blocks()
+            # Generate the fully connected blocks from the configuration attributes dictionary
+            mlp_blocks = self.__create_mlp_blocks()
+            # Validation
+            Conv2dBuilder.__validate(conv_blocks, mlp_blocks, self.model_attributes['input_size'])
+            return Conv2dModel(model_id, self.model_attributes['input_size'], conv_blocks, mlp_blocks)
+        except KeyError as e:
+            logging.error(e)
+            raise ConvException(e)
 
     def __create_conv_blocks(self) -> List[Conv2dBlock]:
         conv_2d_blocks = []

@@ -24,11 +24,8 @@ class DeConvModelTest(unittest.TestCase):
             self.assertTrue(de_conv_model.out_channels == out_channels)
             logging.info(repr(de_conv_model))
             self.assertTrue(True)
-        except AssertionError as e:
+        except (AssertionError | ConvException) as e:
             logging.error(e)
-            self.assertTrue(False)
-        except ConvException as e:
-            logging.info(str(e))
             self.assertTrue(False)
 
     def test_init_failed(self):
@@ -45,13 +42,9 @@ class DeConvModelTest(unittest.TestCase):
             self.assertTrue(de_conv_model.out_channels == out_channels)
             logging.info(repr(de_conv_model))
             self.assertTrue(False)
-        except AssertionError as e:
+        except (AssertionError | ConvException) as e:
             logging.error(e)
             self.assertTrue(True)
-        except ConvException as e:
-            logging.info(str(e))
-            self.assertTrue(True)
-
 
     @staticmethod
     def __create_de_conv_block_2(in_channels: int, out_channels: int, kernel_size: Tuple[int, int]) -> DeConvBlock:
