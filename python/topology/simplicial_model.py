@@ -22,21 +22,52 @@ import torch
 class SimplicialModel(object):
 
     def __init__(self, feature_set: np.array, edge_set: np.array, face_set: np.array) -> None:
+        """
+        Constructor for the Simplicial Complex Model. Shape of Numpy array for the edge and face sets
+        are evaluated for consistency.
+        
+        @param feature_set: Feature set or feature vector 
+        @type feature_set: Numpy array
+        @param edge_set:  Edge set an array of pair of node indices
+        @type edge_set: Numpy array
+        @param face_set:  Face set as an array of 3 node indices
+        @type face_set: Numpy array
+        """
         # Validate the shape of indices of the simplicial complex
         SimplicialModel.__validate(edge_set, face_set)
+        
         self.feature_set = feature_set
+        # Converts to Python array as required by TopoNetX API
         self.edge_set = edge_set.tolist()
         self.face_set = face_set.tolist()
         self.simplicial_indices = self.edge_set + self.face_set
 
     @classmethod
-    def build(cls, feature_set: torch.Tensor, edge_set: np.array, face_set: np.array) -> Self:
-        return cls(feature_set.numpy(), edge_set, face_set)
+    def build(cls, feature_set: torch.Tensor, edge_set: torch.Tensor, face_set: torch.Tensor) -> Self:
+        """
+        Alternative constructor for the Simplicial model
+        @param feature_set: Feature set or feature vector 
+        @type feature_set: Torch tensor
+        @param edge_set: Edge set as a tensor of pair of node indice
+        @type edge_set: Torch tensor
+        @param face_set:  Face set as a tensor of tensor with 3 node indices
+        @type face_set: Torch tensor
+        @return: Instance of Simplicial model
+        @rtype: SimplicialModel
+        """
+        return cls(feature_set.numpy(), edge_set.numpy(), face_set.numpy())
 
     def __str__(self) -> AnyStr:
         return f'\nFeatures:\n{self.feature_set}\nEdges:\n{self.edge_set}\nFaces:\n{self.face_set}'
 
-    def adjacency_matrix(self, undirected: bool = True) -> np.array:
+    def adjacency_matrix(self, directed_graph: bool = False) -> np.array:
+        """
+        Computation of the adjacency matrix (edges - nodes)
+        @param directed_graph: Flag that specify if the graph is directed or not (Default Undirected graph)
+        @type directed_graph: bool
+        @return: Adjacency matrix as a dense matrix
+        @rtype: Numpy array
+        """
         # Initialize adjacency matrix
         n = len(self.feature_set)
         A = np.zeros((n, n), dtype=int)
@@ -44,11 +75,20 @@ class SimplicialModel(object):
         # Fill in edges
         for u, v in self.edge_set:
             A[u-1, v-1] = 1
-            if undirected:
+            if directed_graph:
                 A[v-1, u-1] = 1
         return A
 
     def incidence_matrix(self, rank: int = 1, directed_graph: bool = True) -> np.array:
+        """
+        Extract the incidence matrix for a given rank and directed/undirected graph
+        @param rank: Rank of the Simplicial complex
+        @type rank: int
+        @param directed_graph: Flag that specifies if the graph is directed
+        @type directed_graph: bool
+        @return: Incidence matrix 
+        @rtype: Numpy array
+        """
         assert 0 <= rank < 3, f'Rank of incidence matrix {rank} should be [0, 2]'
 
         sc = tnx.SimplicialComplex(self.simplicial_indices)
@@ -56,6 +96,9 @@ class SimplicialModel(object):
         return incidence.todense()
 
     def show(self) -> None:
+        """
+        Display this simplicial domain with node, fecture vectors, edges and faces.
+        """
         import networkx as nx
         import matplotlib.pyplot as plt
 
@@ -96,6 +139,8 @@ class SimplicialModel(object):
                      s=f'Face {idx + 1}',
                      fontdict={'fontsize': 16})
         plt.show()
+        
+    """ -------------------------  Private Supporting methods ------------------ """
 
     @staticmethod
     def __validate(edge_set: np.array, face_set: np.array) -> None:
