@@ -1,7 +1,6 @@
 import unittest
 
-from mpmath import hyper
-
+from dataset.graph.graph_visualization import GraphVisualization, SubgraphExtractor
 from dl import GraphException
 from dataset import DatasetException
 from dl.block.mlp_block import MLPBlock
@@ -12,7 +11,6 @@ from dataset.graph.graph_data_loader import GraphDataLoader
 from metric.metric_type import MetricType
 from metric.built_in_metric import BuiltInMetric
 import torch.nn as nn
-import os
 from typing import Dict, Any, AnyStr
 import logging
 import os
@@ -87,13 +85,7 @@ class GNNTrainingTest(unittest.TestCase):
             accuracy_list = network.performance_metrics.performance_values[MetricType.Accuracy]
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
-        except GraphException as e:
-            logging.info(f'Error: {str(e)}')
-            self.assertTrue(False)
-        except DatasetException as e:
-            logging.info(f'Error: {str(e)}')
-            self.assertTrue(False)
-        except Exception as e:
+        except (GraphException | DatasetException | AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
@@ -147,13 +139,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader()
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
 
-        except GraphException as e:
-            logging.info(f'Error: {str(e)}')
-            self.assertTrue(False)
-        except DatasetException as e:
-            logging.info(f'Error: {str(e)}')
-            self.assertTrue(False)
-        except Exception as e:
+        except (GraphException | DatasetException | AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
@@ -181,16 +167,10 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.training_summary.metrics['Accuracy']
+            accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
-        except GraphException as e:
-            logging.info(f'Error: {str(e)}')
-            self.assertTrue(False)
-        except DatasetException as e:
-            logging.info(f'Error: {str(e)}')
-            self.assertTrue(False)
-        except Exception as e:
+        except (GraphException | DatasetException | AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
@@ -215,18 +195,13 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.training_summary.metrics['Accuracy']
+            accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
-            self.assertTrue(accuracy_list[-1].float() > 0.2)
-        except GraphException as e:
+            self.assertTrue(float(accuracy_list[-1]) > 0.2)
+        except (GraphException | DatasetException | AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
-        except DatasetException as e:
-            logging.info(f'Error: {str(e)}')
-            self.assertTrue(False)
-        except Exception as e:
-            logging.info(f'Error: {str(e)}')
-            self.assertTrue(False)
+
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_train_random_loader_2(self):
@@ -249,16 +224,10 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.training_summary.metrics['Accuracy']
+            accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
-            self.assertTrue(accuracy_list[-1].float() > 0.2)
-        except GraphException as e:
-            logging.info(f'Error: {str(e)}')
-            self.assertTrue(False)
-        except DatasetException as e:
-            logging.info(f'Error: {str(e)}')
-            self.assertTrue(False)
-        except Exception as e:
+            self.assertTrue(float(accuracy_list[-1]) > 0.2)
+        except (GraphException | DatasetException | AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
@@ -285,16 +254,10 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.training_summary.metrics['Accuracy']
+            accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
-            self.assertTrue(accuracy_list[-1].float() > 0.2)
-        except GraphException as e:
-            logging.info(f'Error: {str(e)}')
-            self.assertTrue(False)
-        except DatasetException as e:
-            logging.info(f'Error: {str(e)}')
-            self.assertTrue(False)
-        except Exception as e:
+            self.assertTrue(float(accuracy_list[-1]) > 0.2)
+        except (GraphException | DatasetException | AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
@@ -320,16 +283,10 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.training_summary.metrics['Accuracy']
+            accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
-            self.assertTrue(accuracy_list[-1].float() > 0.2)
-        except GraphException as e:
-            logging.info(f'Error: {str(e)}')
-            self.assertTrue(False)
-        except DatasetException as e:
-            logging.info(f'Error: {str(e)}')
-            self.assertTrue(False)
-        except Exception as e:
+            self.assertTrue(float(accuracy_list[-1]) > 0.2)
+        except (GraphException | DatasetException | AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
@@ -356,16 +313,10 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.training_summary.metrics['Accuracy']
+            accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
-            self.assertTrue(accuracy_list[-1].float() > 0.2)
-        except GraphException as e:
-            logging.info(f'Error: {str(e)}')
-            self.assertTrue(False)
-        except DatasetException as e:
-            logging.info(f'Error: {str(e)}')
-            self.assertTrue(False)
-        except Exception as e:
+            self.assertTrue(float(accuracy_list[-1]) > 0.2)
+        except (GraphException | DatasetException | AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
@@ -392,16 +343,10 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader()
 
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-            accuracy_list = network.training_summary.metrics['Accuracy']
+            accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
-            self.assertTrue(accuracy_list[-1].float() > 0.2)
-        except GraphException as e:
-            logging.info(f'Error: {str(e)}')
-            self.assertTrue(False)
-        except DatasetException as e:
-            logging.info(f'Error: {str(e)}')
-            self.assertTrue(False)
-        except Exception as e:
+            self.assertTrue(float(accuracy_list[-1]) > 0.2)
+        except (GraphException | DatasetException | AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
@@ -419,10 +364,9 @@ class GNNTrainingTest(unittest.TestCase):
                 'batch_size': 2048,
                 'keep_inter_cluster_edges': False
             }
-            graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
-            graph_data_loader.draw_sample(
-                first_node_index=10,
-                last_node_index=26,
+            subgraph_extractor = SubgraphExtractor('ClusterLoader', first_node_index=10, last_node_index=26)
+            graph_visualization = GraphVisualization(subgraph_extractor, _data)
+            graph_visualization.draw(
                 node_color='blue',
                 node_size=30,
                 label=f'Flickr - ClusterLoader,num_parts:256,batch_size:2048,range:[10,25]')
@@ -433,6 +377,7 @@ class GNNTrainingTest(unittest.TestCase):
 
     def test_draw_sample_2(self):
         from torch_geometric.datasets.flickr import Flickr
+
         try:
             path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
             _dataset = Flickr(path)
@@ -452,61 +397,6 @@ class GNNTrainingTest(unittest.TestCase):
         except DatasetException as e:
             logging.info(str(e))
             self.assertTrue(False)
-
-    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
-    def test_compare_accuracy(self):
-        from plots.plotter import PlotterParameters, Plotter
-
-        try:
-            file_neighbor_loader = 'Flickr: NeighborLoader,neighbors:[6, 4],batch:1024'
-            neighbor_loader_dict = TrainingMonitor.load_summary(TrainingMonitor.output_folder, file_neighbor_loader)
-            accuracy_neighbor = [float(x) for x in neighbor_loader_dict['Accuracy']]
-
-            file_random_loader = 'Flickr: RandomNodeLoader,num_parts=256'
-            random_loader_dict = TrainingMonitor.load_summary(TrainingMonitor.output_folder, file_random_loader)
-            accuracy_random = [float(x) for x in random_loader_dict['Accuracy']]
-
-            file_graph_saint_random_walk_loader = 'GraphSAINTRandomWalkSampler,walk_length:3,steps:12,batch:4096'
-            graph_saint_random_walk_dict = TrainingMonitor.load_summary(TrainingMonitor.output_folder,
-                                                                        file_graph_saint_random_walk_loader)
-            accuracy_graph_saint_random_walk = [float(x) for x in graph_saint_random_walk_dict['Accuracy']]
-            plotter_params = PlotterParameters(0,
-                                               x_label='epochs',
-                                               y_label='Accuracy',
-                                               title='Comparison Accuracy Graph Data Loader',
-                                               fig_size=(11, 8))
-            Plotter.plot(values=[accuracy_neighbor[0:40], accuracy_random[0:40], accuracy_graph_saint_random_walk[0:40]],
-                         labels=['NeighborLoader', 'RandomLoader', 'GraphsSAINTRandomWalk'],
-                         plotter_parameters=plotter_params)
-            self.assertTrue(True)
-        except DatasetException as e:
-            logging.info(str(e))
-            self.assertTrue(False)
-
-    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
-    def test_compare_precision(self):
-        from plots.plotter import PlotterParameters, Plotter
-
-        file_neighbor_loader = 'Flickr: NeighborLoader,neighbors:[6, 4],batch:1024'
-        neighbor_loader_dict = TrainingMonitor.load_summary(TrainingMonitor.output_folder, file_neighbor_loader)
-        precision_neighbor = [float(x) for x in neighbor_loader_dict['Precision']]
-
-        file_random_loader = 'Flickr: RandomNodeLoader,num_parts=256'
-        random_loader_dict = TrainingMonitor.load_summary(TrainingMonitor.output_folder, file_random_loader)
-        precision_random = [float(x) for x in random_loader_dict['Precision']]
-
-        file_graph_saint_random_walk_loader = 'Flickr: GraphSAINTRandomWalkSampler,walk_length:3,steps:12,batch:4096'
-        graph_saint_random_walk_dict = TrainingMonitor.load_summary(TrainingMonitor.output_folder,
-                                                                    file_graph_saint_random_walk_loader)
-        precision_graph_saint_random_walk = [float(x) for x in graph_saint_random_walk_dict['Precision']]
-        plotter_params = PlotterParameters(0,
-                                           x_label='epochs',
-                                           y_label='Precision',
-                                           title='Comparison Precision Graph Data Loader',
-                                           fig_size=(11, 8))
-        Plotter.plot(values=[precision_neighbor[0:60], precision_random[0:60], precision_graph_saint_random_walk[0:60]],
-                     labels=['NeighborLoader', 'RandomLoader', 'GraphsSAINTRandomWalk'],
-                     plotter_parameters=plotter_params)
 
     """ --------------------------  Supporting methods --------------------  """
 
