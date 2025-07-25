@@ -14,13 +14,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 import logging
-import util
+import python
 from dataset import DatasetException
 from dataset.base_loader import BaseLoader
 from typing import AnyStr, List
 from torch.utils.data import Dataset
 from dl.model import GrayscaleToRGB
 from torchvision.transforms import InterpolationMode
+import abc
 
 
 class Caltech101Loader(BaseLoader):
@@ -29,6 +30,7 @@ class Caltech101Loader(BaseLoader):
     def __init__(self, batch_size: int, split_ratio: float, resize_image: int = -1) -> None:
         """
         Constructor for the Caltech-101 data set
+
         @param batch_size: size of batch for loading the Caltech101 data set
         @param batch_size: 1
         @param split_ratio: Training-validation random split ratio
@@ -74,7 +76,9 @@ class Caltech101Loader(BaseLoader):
 
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):
         """
+        Polymorphic call
         Extract the training data and labels and test data and labels for this convolutional network.
+
         @param root_path: Root path to CIFAR10 data
         @type root_path: AnyStr
         @return Tuple (train data, labels, test data, labels)
@@ -104,10 +108,11 @@ class Caltech101Loader(BaseLoader):
             train_size = int(self.split_ratio * len(caltech_101_dataset))
             test_size = len(caltech_101_dataset) - train_size
             return torch.utils.data.random_split(caltech_101_dataset, lengths=[train_size, test_size])
-
-        except RuntimeError as e:
-            logger.error(str(e))
+        except (RuntimeError | ValueError | TypeError) as e:
+            logging.error(str(e))
             raise DatasetException(str(e))
+
+    """ -------------------  Private Helper Methods -----------------------  """
 
     @staticmethod
     def __extract_images_and_labels(category_path: AnyStr, is_random: bool) -> (List[AnyStr], List[AnyStr]):

@@ -18,7 +18,9 @@ from geomstats.information_geometry.fisher_rao_metric import FisherRaoMetric
 from typing import Tuple, AnyStr, List
 import numpy as np
 import torch
-from geometry import GeometricException
+import logging
+import python
+from geometry import InformationGeometricException
 import os
 os.environ["GEOMSTATS_BACKEND"] = "pytorch"
 __all__ = ['CFStatisticalManifold']
@@ -40,7 +42,7 @@ class CFStatisticalManifold(object):
         - Although other classes relies on Numpy binding for back-end computations, Statistical manifolds reqyire
           PyTorch be selected as back-end
 
-    REFERENCE:
+    REFERENCE: https://patricknicolas.substack.com/p/geometry-of-closed-form-statistical
     """
     closed_form_manifolds = [
         'ExponentialDistributions', 'PoissonDistributions', 'BinomialDistributions', 'GeometricDistributions'
@@ -56,6 +58,8 @@ class CFStatisticalManifold(object):
         @param bounds: Tuple of values which set the bounds of input to probability density function
         @type bounds: Tuple[float, float]
         """
+        assert len(bounds) == 2, f'Bounds {str(bounds)}for the information manifold is incorrect'
+
         class_name = info_manifold.__class__.__name__
         assert class_name in CFStatisticalManifold.closed_form_manifolds, \
             f'Information Geometry for {class_name} is not supported'
@@ -138,21 +142,26 @@ class CFStatisticalManifold(object):
         @return: Value of exp(v) or end point on the manifold
         @rtype: torch.Tensor
         """
-        match self.info_manifold.__class__.__name__:
-            case 'ExponentialDistributions':
-                return base_point + tangent_vec
-            case 'GeometricDistributions':
-                phi_base_point = -2.0*torch.arctanh(torch.sqrt(1.0 - base_point))
-                return 1.0 - torch.tanh(0.5*(phi_base_point+tangent_vec))**2
-            case 'PoissonDistributions':
-                return (torch.sqrt(base_point) + 0.5*tangent_vec)**2
-            case 'BinomialDistributions':
-                # Fixed the number of draws for analytical solution
-                import math
-                n_sqrt = math.sqrt(self.info_manifold.n_draws)
-                return (torch.arcsin(torch.sqrt(base_point)) + 0.5 * tangent_vec/n_sqrt) ** 2
-            case _:
-                raise GeometricException(f'Exponential map for {self.info_manifold.__class__.__name__} not supported')
+        try:
+            match self.info_manifold.__class__.__name__:
+                case 'ExponentialDistributions':
+                    return base_point + tangent_vec
+                case 'GeometricDistributions':
+                    phi_base_point = -2.0*torch.arctanh(torch.sqrt(1.0 - base_point))
+                    return 1.0 - torch.tanh(0.5*(phi_base_point+tangent_vec))**2
+                case 'PoissonDistributions':
+                    return (torch.sqrt(base_point) + 0.5*tangent_vec)**2
+                case 'BinomialDistributions':
+                    # Fixed the number of draws for analytical solution
+                    import math
+                    n_sqrt = math.sqrt(self.info_manifold.n_draws)
+                    return (torch.arcsin(torch.sqrt(base_point)) + 0.5 * tangent_vec/n_sqrt) ** 2
+                case _:
+                    dist_id = self.info_manifold.__class__.__name__
+                    raise InformationGeometricException(f'Exponential map for {dist_id} not supported')
+        except (RuntimeError | ValueError) as e:
+            logging.error(e)
+            raise InformationGeometricException(e)
 
     def log(self, manifold_point: torch.Tensor, base_point: torch.Tensor) -> torch.Tensor:
         """
@@ -168,20 +177,25 @@ class CFStatisticalManifold(object):
         @return: Tangent vector v
         @rtype: torch.Tensor
         """
-        match self.info_manifold.__class__.__name__:
-            case 'ExponentialDistributions':
-                return base_point*torch.log(manifold_point/base_point)
-            case 'GeometricDistributions':
-                return -20*(torch.arctanh(torch.sqrt(1.0 - manifold_point)) -
-                            torch.arctanh(torch.sqrt(1.0 - base_point)))
-            case 'PoissonDistribution':
-                return 2.0*(torch.sqrt(manifold_point) - torch.sqrt(base_point))
-            case 'BinomialDistribution':
-                # Fixed the number of draws for analytical solution
-                n_sqrt = torch.sqrt(self.info_manifold.n_draws)
-                return 2.0 * n_sqrt*(torch.arcsin(torch.sqrt(manifold_point)) - torch.arcsin(torch.sqrt(base_point)))
-            case _:
-                raise GeometricException(f'Logarithm map for {self.info_manifold.__class__.__name__} not supported')
+        try:
+            match self.info_manifold.__class__.__name__:
+                case 'ExponentialDistributions':
+                    return base_point*torch.log(manifold_point/base_point)
+                case 'GeometricDistributions':
+                    return -20*(torch.arctanh(torch.sqrt(1.0 - manifold_point)) -
+                                torch.arctanh(torch.sqrt(1.0 - base_point)))
+                case 'PoissonDistribution':
+                    return 2.0*(torch.sqrt(manifold_point) - torch.sqrt(base_point))
+                case 'BinomialDistribution':
+                    # Fixed the number of draws for analytical solution
+                    n_sqrt = torch.sqrt(self.info_manifold.n_draws)
+                    return 2.0 * n_sqrt*(torch.arcsin(torch.sqrt(manifold_point)) - torch.arcsin(torch.sqrt(base_point)))
+                case _:
+                    dist_id = self.info_manifold.__class__.__name__
+                    raise InformationGeometricException(f'Logarithm map for {dist_id} not supported')
+        except (RuntimeError | ValueError) as e:
+            logging.error(e)
+            raise InformationGeometricException(e)
 
     """ ----------------------------  Visualization methods -------------------------------------------   """
 

@@ -17,7 +17,10 @@ from typing import AnyStr, Self, Any
 from dl.model.neural_model import NeuralModel
 import torch.nn as nn
 import torch
+import logging
+import python
 __all__ = ['AEModel']
+
 
 class AEModel(NeuralModel):
     """
@@ -61,9 +64,9 @@ class AEModel(NeuralModel):
         @return: z
         @rtype: Torch Tensor
         """
-        logger.info(x, 'Input dff_vae')
+        logging.debug(x, 'Input dff_vae')
         x = self.encoder_model(x)
-        logger.info(x, 'after encoder_model')
+        logging.debug(x, 'after encoder_model')
         return self.decoder_model(x)
 
     def get_latent_features(self) -> int:

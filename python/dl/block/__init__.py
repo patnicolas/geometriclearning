@@ -19,3 +19,23 @@ Conv2DataType = Tuple[int, int]
 Conv3DataType = Tuple[int, int, int]
 ConvDataType = int | Conv2DataType | Conv3DataType
 
+__all__ = ['MLPException', 'ConvException', 'VAEException', 'GraphException']
+
+class MLPException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(MLPException, self).__init__(args, kwargs)
+
+
+class ConvException(Exception):
+    def __init__(self, *args, ** kwargs):
+        super(ConvException, self).__init__(args, kwargs)
+
+
+class VAEException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(VAEException, self).__init__(args, kwargs)
+
+class GraphException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(GraphException, self).__init__(args, kwargs)
+

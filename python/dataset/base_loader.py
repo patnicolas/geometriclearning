@@ -16,7 +16,6 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from torch.utils.data import DataLoader, Dataset
 from dl.training.exec_config import ExecConfig
 from typing import AnyStr
-from dataset import DatasetException
 import abc
 from abc import ABC
 __all__ = ['BaseLoader']
@@ -87,4 +86,4 @@ class BaseLoader(ABC):
         @return: Pair of training and validation data sets
         @rtype: Tuple[Dataset, Dataset]
         """
-        raise DatasetException(f'Failed to load data from path {root_path}')
+        pass

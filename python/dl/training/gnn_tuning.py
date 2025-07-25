@@ -1,6 +1,8 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
+from decimal import DivisionByZero
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,12 +20,16 @@ from optuna.trial import TrialState
 import torch.nn as nn
 from dataset.graph.graph_data_loader import GraphDataLoader
 from torch_geometric.nn import GraphConv
+
+from dl.block import GraphException
 from dl.model.gconv_model import GConvModel
 from torch_geometric.data import Data
 from metric.metric_type import MetricType
 from typing import Dict, List, AnyStr, Any, Callable
 from dl.training.gnn_training import GNNTraining
 import torch
+import logging
+import python
 __all__ = ['GNNTuning', 'class_weight_distribution', 'neighbor_list_generator']
 
 
@@ -35,10 +41,14 @@ def class_weight_distribution(data: Data) -> List[int]:
     @return: Weights for each class as a 1 dimension Torch tensor
     @rtype: torch.Tensor
     """
-    class_distribution = data.y[data.train_mask]
-    raw_distribution = torch.bincount(class_distribution)
-    raw_weights = 1.0 / raw_distribution
-    return raw_weights / raw_weights.sum()
+    try:
+        class_distribution = data.y[data.train_mask]
+        raw_distribution = torch.bincount(class_distribution)
+        raw_weights = 1.0 / raw_distribution
+        return raw_weights / raw_weights.sum()
+    except DivisionByZero as e:
+        logging.error(e)
+        raise GraphException
 
 
 def neighbor_list_generator(num_neighbors_1: int, num_hops: int) -> List[int]:
@@ -123,8 +133,8 @@ class GNNTuning(object):
 
         # For debugging purpose
         logging.info(f'Number of features: {graph_loader.data.num_node_features}n'
-              f'\nNumber of classes: {graph_loader.num_classes}'
-              f'\nSize of training: {graph_loader.data.train_mask.sum()}')
+                     f'\nNumber of classes: {graph_loader.num_classes}'
+                     f'\nSize of training: {graph_loader.data.train_mask.sum()}')
 
         # Step 5: Initialize the model using the JSON descriptive format
         gnn_conv_model = GNNTuning.__get_model(data=graph_loader.data,

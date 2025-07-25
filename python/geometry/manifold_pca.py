@@ -17,7 +17,7 @@ from geomstats.geometry.hypersphere import Hypersphere
 from geomstats.geometry.manifold import Manifold
 import numpy as np
 from typing import Optional, List, AnyStr
-from geometry import GeometricException
+from geometry import InformationGeometricException
 from dataclasses import dataclass
 __all__ = ['PrincipalComponents', 'ManifoldPCA']
 
@@ -89,7 +89,7 @@ class ManifoldPCA(object):
 
         # For now, we generate geodesics only for spheres
         if not isinstance(self.space, Hypersphere):
-            raise GeometricException(f'Cannot extract geodesics from this type of manifold {str(self.space)}')
+            raise InformationGeometricException(f'Cannot extract geodesics from this type of manifold {str(self.space)}')
 
         # Extract the geodesic for each of the principal components
         base_point = tangent_component.base_point

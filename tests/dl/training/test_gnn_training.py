@@ -138,10 +138,10 @@ class GNNTrainingTest(unittest.TestCase):
             graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
             train_loader, eval_loader = graph_data_loader()
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
-
         except (GraphException | DatasetException | AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
+
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_train_neighbor_loader_2(self):
@@ -371,7 +371,7 @@ class GNNTrainingTest(unittest.TestCase):
                 node_size=30,
                 label=f'Flickr - ClusterLoader,num_parts:256,batch_size:2048,range:[10,25]')
             self.assertTrue(True)
-        except DatasetException as e:
+        except (AssertionError | KeyError | GraphException | DatasetException) as e:
             logging.info(str(e))
             self.assertTrue(False)
 
@@ -394,7 +394,7 @@ class GNNTrainingTest(unittest.TestCase):
                                                 start_index=6)
             logging.info(f'Number of nodes {_data.num_nodes}')
             self.assertTrue(_data.num_nodes > 0)
-        except DatasetException as e:
+        except (AssertionError | KeyError | GraphException | DatasetException) as e:
             logging.info(str(e))
             self.assertTrue(False)
 

@@ -34,7 +34,7 @@ class PyGDatasets(object):
             data = _dataset[0]
     """
     base_dir = '../../data'
-    dataset_dict = {
+    valid_dataset_dict = {
         'Cora': lambda pyg: pyg.__load_planetoid(),
         'PubMed': lambda pyg: pyg.__load_planetoid(),
         'CiteSeer': lambda pyg: pyg.__load_planetoid(),
@@ -58,10 +58,13 @@ class PyGDatasets(object):
 
     def __init__(self, dataset_name: AnyStr) -> None:
         """
-        Constructor for the interface to PyTorch Geometric dataset
+        Constructor for the interface to PyTorch Geometric dataset.
+
         @param dataset_name: Name of the dataset loaded from PyTorch Geometric
         @type dataset_name: AnyStr
         """
+        assert dataset_name in PyGDatasets.valid_dataset_dict, \
+            f'Data set {dataset_name} is not supported for Graph Neural Networks'
         self.name = dataset_name
 
     def __call__(self) -> Optional[Dataset]:
@@ -71,7 +74,7 @@ class PyGDatasets(object):
         @rtype torch.util.Dataset
         """
         try:
-            func = PyGDatasets.dataset_dict[self.name]
+            func = PyGDatasets.valid_dataset_dict[self.name]
             return func(self)
         except KeyError as err:
             raise DatasetException(f'Dataset {self.name} not supported {err}')

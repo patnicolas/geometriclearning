@@ -22,7 +22,8 @@ import torchvision.transforms as transforms
 from dl.model import GrayscaleToRGB
 from dataset import DatasetException
 import logging
-logger = logging.getLogger('dataset.MNISTLoader')
+import python
+import abc
 
 
 class MNISTLoader(BaseLoader):
@@ -42,7 +43,6 @@ class MNISTLoader(BaseLoader):
 
         super(MNISTLoader, self).__init__(batch_size=batch_size, num_samples=-1)
         self.resize_image = resize_image
-
 
     @staticmethod
     def show_samples(images_set: Dataset, is_random: bool = True) -> None:
@@ -76,10 +76,11 @@ class MNISTLoader(BaseLoader):
         train_dataset, eval_dataset = self._extract_datasets(root_path)
         return train_dataset, eval_dataset
 
-
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):
         """
+        Polymorphic call
         Extract the training data and labels and test data and labels for this convolutional network.
+
         @param root_path: Root path to CIFAR10 data
         @type root_path: AnyStr
         @return Tuple (train data, labels, test data, labels)
@@ -114,6 +115,6 @@ class MNISTLoader(BaseLoader):
             )
             return train_dataset, eval_dataset
 
-        except RuntimeError as e:
-            logger.error(str(e))
+        except (RuntimeError | ValueError | TypeError) as e:
+            logging.error(str(e))
             raise DatasetException(str(e))

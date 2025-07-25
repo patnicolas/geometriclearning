@@ -43,3 +43,4 @@ class TrainingException(MLPException):
 class ValidationException(MLPException):
     def __init__(self, *args, **kwargs):
         super(ValidationException, self).__init__(args, kwargs)
+        

@@ -10,6 +10,7 @@ import python
 class ConvBlockTest(unittest.TestCase):
 
     def test_init_conv1(self):
+
         try:
             conv_block = ConvBlockTest.__create_conv_block(dimension=1, out_channels=33)
             self.assertTrue(conv_block.conv_block_config.out_channels == 33)

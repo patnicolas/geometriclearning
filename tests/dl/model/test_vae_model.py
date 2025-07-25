@@ -34,9 +34,9 @@ class VAEModelTest(unittest.TestCase):
             vae_model = VAEModel(model_id='vae_ffnn', encoder=ffnn_model, latent_dim=latent_size)
             logging.info(str(vae_model))
             self.assertTrue(True)
-        except VAEException as e:
-            logging.info(f'ERROR: {str(e)}')
-            self.assertTrue(True)
+        except (AssertionError | VAEException) as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_2(self):
@@ -71,9 +71,9 @@ class VAEModelTest(unittest.TestCase):
             latent_size = 6
             vae_model = VAEModel(model_id='vae_ffnn', encoder=conv_model, latent_dim=latent_size, noise_func=None)
             logging.info(repr(vae_model))
-        except VAEException as e:
-            logging.info(f'ERROR: {str(e)}')
-            self.assertTrue(True)
+        except (AssertionError | VAEException) as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     def test_mnist_train(self):
         from dataset.tensor.mnist_loader import MNISTLoader
@@ -117,12 +117,10 @@ class VAEModelTest(unittest.TestCase):
             net_training = VAEModelTest.create_executor()
             net_training.train(vae_model.model_id, vae_model, train_loader, eval_loader)
             self.assertTrue(True)
-        except ConvException as e:
-            logging.info(str(e))
+        except (AssertionError | VAEException | ConvException) as e:
+            logging.error(e)
             self.assertTrue(False)
-        except VAEException as e:
-            logging.info(str(e))
-            self.assertTrue(False)
+
 
     @staticmethod
     def create_executor() -> VAETraining:

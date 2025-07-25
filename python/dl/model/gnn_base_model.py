@@ -26,7 +26,7 @@ from torch_geometric.loader import GraphSAINTRandomWalkSampler
 from torch_geometric.data import Data
 from torch.utils.data import DataLoader, Dataset
 import torch.nn as nn
-from dl.block.graph import GraphException
+from dl.block import GraphException
 import logging
 import python
 __all__ = ['GNNBaseModel']
@@ -127,6 +127,16 @@ class GNNBaseModel(NeuralModel):
         except AssertionError as e:
             logging.error(str(e))
             raise GraphException(e)
+
+    def transpose(self, activation_update: nn.Module = None) -> Self:
+        """
+        Transpose this graph neural network
+
+        @param activation_update: Optional activation module to override the original one
+        @type activation_update: nn.Module
+        @return: Instance of this sub-class of Neural model
+        """
+        raise GraphException('Transposition of Generic Graph Neural Network is not implemented')
 
     def load_data_source(self, data_source: Data | Dataset) -> (DataLoader, DataLoader):
         """

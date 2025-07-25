@@ -2,6 +2,9 @@ import unittest
 import logging
 import torch
 import os
+
+from geometry import InformationGeometricException
+
 os.environ["GEOMSTATS_BACKEND"] = "pytorch"
 import python
 from python import SKIP_REASON
@@ -17,7 +20,6 @@ import logging
 import python
 
 
-
 class CFStatisticalManifoldTest(unittest.TestCase):
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
@@ -27,7 +29,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
             statistical_manifold = CFStatisticalManifold(exponential_distributions, (1.0, 2.0))
             logging.info(f'\n{statistical_manifold=}')
             self.assertTrue(statistical_manifold.fisher_rao_metric.signature == (1, 0))
-        except AssertionError as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -44,7 +46,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
             exponential_geometric_str = '\n'.join([str(x) for x in geometric_samples])
             logging.info(f'\nExponential Distribution Manifold 8 random samples \n{exponential_samples_str}'
                          f'\nGeometric Distribution Manifold 4 random samples\n{exponential_geometric_str}')
-        except AssertionError as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -57,7 +59,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
             poisson_metric = poisson_manifold.metric_matrix()
             logging.info(f'\nExponential Distribution Fisher metric: {exponential_metric}'
                          f'\nPoisson Distribution Fisher metric: {poisson_metric}')
-        except AssertionError as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -68,7 +70,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
             statistical_manifold = CFStatisticalManifold(exponential_distributions, (1.0, 2.0))
             metric = statistical_manifold.metric_matrix()
             logging.info(f'Fisher-Rao metric for exponential: {metric}')
-        except AssertionError as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -86,7 +88,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
             geometric_end_point = geometric_manifold.exp(tgt_vector, base_point)
             logging.info(f'\nExponential Distribution Manifold End point: {exponential_end_point}'
                          f'\nGeometric Distribution Manifold End point: {geometric_end_point}\n')
-        except AssertionError as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -108,7 +110,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
             geometric_vector = geometric_manifold.log(manifold_point, base_point)
             logging.info(f'\nGeometric Distribution Manifold Tangent Vector\nBase:{base_point} to:{manifold_point}: '
                          f'{geometric_vector}\n')
-        except AssertionError as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -121,7 +123,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
             base_point = statistical_manifold.samples(1)
             end_point = statistical_manifold.exp(tgt_vector, base_point)
             logging.info(end_point)
-        except AssertionError as e:
+        except (AssertionError | InformationGeometricException) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -179,21 +181,22 @@ class CFStatisticalManifoldTest(unittest.TestCase):
         logging.info(f'Metric={metric}')
         self.assertTrue(-0.02 < metric - 1.0/std**2 < 0.02)
 
-    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_visualize_normal(self):
         import numpy as np
         import matplotlib.pyplot as plt
         from mpl_toolkits.mplot3d import Axes3D
         from scipy.stats import norm
         from matplotlib.animation import FuncAnimation
+        import matplotlib.image as mpimg
 
         # Fixed value of x at which we evaluate the PDF
         x_val = 0.0
         num = 100
 
         # Grid of mean (mu) and standard deviation (sigma)
-        mu_vals = np.linspace(-10, 10, num)
-        sigma_vals = np.linspace(0.0, 1.5, num)
+        mu_vals = np.linspace(-1, 1, num)
+        sigma_vals = np.linspace(0.0, 2, num)
         MU, SIGMA = np.meshgrid(mu_vals, sigma_vals)
 
         # Evaluate normal PDF at x_val for each (mu, sigma) pair
@@ -204,18 +207,26 @@ class CFStatisticalManifoldTest(unittest.TestCase):
         ax = fig.add_subplot(111, projection='3d')
 
         def update(frame: int) -> None:
-            if frame > 1 and frame % 3 == 0:
+            import math
+            if 1 < frame < 40:
                 mu = MU[0:frame]
                 sigma = SIGMA[0:frame]
-                surf = ax.plot_surface(mu, sigma, Z[0:frame], cmap='viridis', edgecolor='none')
+                z = Z[0:frame] * 0.06 * math.sin(frame*0.08)
+                surf = ax.plot_surface(mu, sigma, z, cmap='viridis', edgecolor='none')
 
-        ax.set_title('PDF of Normal Distribution at origin')
+        ax.set_title(x=0.5, y=0.85, label='Normal Distribution Manifold', fontdict={'fontsize': 24, 'fontname': 'Helvetica'})
         ax.set_xlabel('Mean (μ)')
         ax.set_ylabel('Standard Deviation (σ)')
         ax.set_zlabel('PDF value')
+        img = mpimg.imread('../../python/input/Animation_logo.png')
+        inset_ax = fig.add_axes((0.24, 0.63, 0.32, 0.34))
+        fig.patch.set_facecolor('#f0f9ff')
+        ax.set_facecolor('#f0f9ff')
+        inset_ax.imshow(img, alpha=1.0)
+        inset_ax.axis('off')
         ani = FuncAnimation(fig, update, frames=num, interval=8, repeat=False, blit=False)
         # plt.show()
-        ani.save('normal_manifold_animation.mp4', writer='ffmpeg', fps=32, dpi=240)
+        ani.save('normal_manifold_animation.mp4', writer='ffmpeg', fps=20, dpi=240)
 
     """ ---------------------------   Support methods ---------------------------  """
 

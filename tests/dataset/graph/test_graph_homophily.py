@@ -11,103 +11,143 @@ from python import SKIP_REASON
 class GraphHomophilyTest(unittest.TestCase):
 
     def test_init_1(self):
-        homophily_flickr = GraphHomophily.build(dataset_name='Flickr', homophily_type=GraphHomophilyType.Node)
-        logging.info(homophily_flickr)
+        try:
+            homophily_flickr = GraphHomophily.build(dataset_name='Flickr', homophily_type=GraphHomophilyType.Node)
+            logging.info(homophily_flickr)
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     def test_init_2(self):
-        homophily_cora = GraphHomophily.build(dataset_name='Cora', homophily_type=GraphHomophilyType.Node)
-        logging.info(homophily_cora)
+        try:
+            homophily_cora = GraphHomophily.build(dataset_name='Cora', homophily_type=GraphHomophilyType.Node)
+            logging.info(homophily_cora)
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_homegrown_edge_homophily(self):
-        labels = torch.Tensor([0, 0, 1, 1, 0])
-        data = Data(y=labels,
-                    edge_index=torch.tensor([
-                                        [0, 1, 2, 3],
-                                        [1, 2, 3, 4]]),
-                    num_nodes=len(labels)
-                    )
-        homophily = GraphHomophily(data=data, homophily_type=GraphHomophilyType.Edge)
-        edge_homophily = homophily.compute()
-        logging.info(f'Edge homophily: {edge_homophily}')
+        try:
+            labels = torch.Tensor([0, 0, 1, 1, 0])
+            data = Data(y=labels,
+                        edge_index=torch.tensor([
+                                            [0, 1, 2, 3],
+                                            [1, 2, 3, 4]]),
+                        num_nodes=len(labels)
+                        )
+            homophily = GraphHomophily(data=data, homophily_type=GraphHomophilyType.Edge)
+            edge_homophily = homophily.compute()
+            logging.info(f'Edge homophily: {edge_homophily}')
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_homegrown_node_homophily(self):
-        labels = torch.Tensor([0, 0, 1, 1, 0])
-        data = Data(y=labels,
-                    edge_index=torch.tensor([
-                                        [0, 1, 2, 3],
-                                        [1, 2, 3, 4]]),
-                    num_nodes=len(labels)
-                    )
-        homophily = GraphHomophily(data=data, homophily_type=GraphHomophilyType.Node)
-        node_homophily = homophily.compute()
-        logging.info(f'Node homophily: {node_homophily}')
+        try:
+            labels = torch.Tensor([0, 0, 1, 1, 0])
+            data = Data(y=labels,
+                        edge_index=torch.tensor([
+                                            [0, 1, 2, 3],
+                                            [1, 2, 3, 4]]),
+                        num_nodes=len(labels)
+                        )
+            homophily = GraphHomophily(data=data, homophily_type=GraphHomophilyType.Node)
+            node_homophily = homophily.compute()
+            logging.info(f'Node homophily: {node_homophily}')
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_edge_homophily(self):
-        labels = torch.Tensor([0, 0, 1, 1, 0])
-        data = Data(y=labels,
-                    edge_index=torch.tensor([
-                                        [0, 1, 2, 3],
-                                        [1, 2, 3, 4]]),
-                    num_nodes=len(labels)
-                    )
-        homophily = GraphHomophily(data=data, homophily_type=GraphHomophilyType.Edge)
-        edge_homophily = homophily()
-        logging.info(f'Edge homophily: {edge_homophily}')
+        try:
+            labels = torch.Tensor([0, 0, 1, 1, 0])
+            data = Data(y=labels,
+                        edge_index=torch.tensor([
+                                            [0, 1, 2, 3],
+                                            [1, 2, 3, 4]]),
+                        num_nodes=len(labels)
+                        )
+            homophily = GraphHomophily(data=data, homophily_type=GraphHomophilyType.Edge)
+            edge_homophily = homophily()
+            logging.info(f'Edge homophily: {edge_homophily}')
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_node_homophily(self):
-        labels = torch.Tensor([0, 0, 1, 1, 0])
-        data = Data(y=labels,
-                    edge_index=torch.tensor([
-                                        [0, 1, 2, 3],
-                                        [1, 2, 3, 4]]),
-                    num_nodes=len(labels)
-                    )
-        homophily = GraphHomophily(data=data, homophily_type=GraphHomophilyType.Node)
-        node_homophily = homophily()
-        logging.info(f'Node homophily: {node_homophily}')
+        try:
+            labels = torch.Tensor([0, 0, 1, 1, 0])
+            data = Data(y=labels,
+                        edge_index=torch.tensor([
+                                            [0, 1, 2, 3],
+                                            [1, 2, 3, 4]]),
+                        num_nodes=len(labels)
+                        )
+            homophily = GraphHomophily(data=data, homophily_type=GraphHomophilyType.Node)
+            node_homophily = homophily()
+            logging.info(f'Node homophily: {node_homophily}')
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     def test_node_homophily_datasets(self):
-        homophily = GraphHomophily.build(dataset_name='Flickr', homophily_type=GraphHomophilyType.Node)
-        node_homophily = homophily()
-        logging.info(f'Flickr node homophily: {node_homophily:.3f}')
+        try:
+            homophily = GraphHomophily.build(dataset_name='Flickr', homophily_type=GraphHomophilyType.Node)
+            node_homophily = homophily()
+            logging.info(f'Flickr node homophily: {node_homophily:.3f}')
 
-        homophily = GraphHomophily.build(dataset_name='Cora', homophily_type=GraphHomophilyType.Node)
-        node_homophily = homophily()
-        logging.info(f'Cora node homophily: {node_homophily:.3f}')
+            homophily = GraphHomophily.build(dataset_name='Cora', homophily_type=GraphHomophilyType.Node)
+            node_homophily = homophily()
+            logging.info(f'Cora node homophily: {node_homophily:.3f}')
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_edge_homophily_datasets(self):
-        homophily = GraphHomophily.build(dataset_name='Flickr', homophily_type=GraphHomophilyType.Edge)
-        edge_homophily = homophily()
-        logging.info(f'Flickr edge homophily: {edge_homophily:.3f}')
+        try:
+            homophily = GraphHomophily.build(dataset_name='Flickr', homophily_type=GraphHomophilyType.Edge)
+            edge_homophily = homophily()
+            logging.info(f'Flickr edge homophily: {edge_homophily:.3f}')
 
-        homophily = GraphHomophily.build(dataset_name='Cora', homophily_type=GraphHomophilyType.Edge)
-        edge_homophily = homophily()
-        logging.info(f'Cora edge homophily: {edge_homophily:.3f}')
+            homophily = GraphHomophily.build(dataset_name='Cora', homophily_type=GraphHomophilyType.Edge)
+            edge_homophily = homophily()
+            logging.info(f'Cora edge homophily: {edge_homophily:.3f}')
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_class_insensitive_edge_homophily_datasets(self):
-        homophily = GraphHomophily.build(dataset_name='Flickr', homophily_type=GraphHomophilyType.ClassInsensitiveEdge)
-        edge_homophily = homophily()
-        logging.info(f'Flickr class insensitive edge homophily: {edge_homophily:.3f}')
+        try:
+            homophily = GraphHomophily.build(dataset_name='Flickr', homophily_type=GraphHomophilyType.ClassInsensitiveEdge)
+            edge_homophily = homophily()
+            logging.info(f'Flickr class insensitive edge homophily: {edge_homophily:.3f}')
 
-        homophily = GraphHomophily.build(dataset_name='Cora', homophily_type=GraphHomophilyType.ClassInsensitiveEdge)
-        edge_homophily = homophily()
-        logging.info(f'Cora class insensitive edge homophily: {edge_homophily:.3f}')
+            homophily = GraphHomophily.build(dataset_name='Cora', homophily_type=GraphHomophilyType.ClassInsensitiveEdge)
+            edge_homophily = homophily()
+            logging.info(f'Cora class insensitive edge homophily: {edge_homophily:.3f}')
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_all(self):
-        dataset_names = ['Cora', 'PubMed', 'CiteSeer', 'Wikipedia', 'Flickr']
-        homophily_types = [GraphHomophilyType.Node, GraphHomophilyType.Edge, GraphHomophilyType.ClassInsensitiveEdge]
-        for dataset_name in dataset_names:
-            for homophily_type in homophily_types:
-                homophily = GraphHomophily.build(dataset_name=dataset_name, homophily_type=homophily_type)
-                homophily_factor = homophily()
-                logging.info(f'{dataset_name} {homophily_type.value} homophily: {homophily_factor:.3f}')
+        try:
+            dataset_names = ['Cora', 'PubMed', 'CiteSeer', 'Wikipedia', 'Flickr']
+            homophily_types = [GraphHomophilyType.Node, GraphHomophilyType.Edge, GraphHomophilyType.ClassInsensitiveEdge]
+            for dataset_name in dataset_names:
+                for homophily_type in homophily_types:
+                    homophily = GraphHomophily.build(dataset_name=dataset_name, homophily_type=homophily_type)
+                    homophily_factor = homophily()
+                    logging.info(f'{dataset_name} {homophily_type.value} homophily: {homophily_factor:.3f}')
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_message_propagation(self):

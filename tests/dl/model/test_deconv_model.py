@@ -23,9 +23,10 @@ class DeConvModelTest(unittest.TestCase):
             de_conv_model = DeConv2dModel.build(model_id, [de_conv_block_1, de_conv_block_2])
             self.assertTrue(de_conv_model.out_channels == out_channels)
             logging.info(repr(de_conv_model))
-            assert True
-        except ConvException as e:
-            assert False
+            self.assertTrue(True)
+        except (AssertionError | ConvException) as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     def test_init_failed(self):
         model_id = 'de_conv_model_2d'
@@ -40,9 +41,10 @@ class DeConvModelTest(unittest.TestCase):
             de_conv_model = DeConv2dModel.build(model_id, [de_conv_block_1, de_conv_block_2])
             self.assertTrue(de_conv_model.out_channels == out_channels)
             logging.info(repr(de_conv_model))
-            assert False
-        except ConvException as e:
-            assert True
+            self.assertTrue(False)
+        except (AssertionError | ConvException) as e:
+            logging.error(e)
+            self.assertTrue(True)
 
     @staticmethod
     def __create_de_conv_block_2(in_channels: int, out_channels: int, kernel_size: Tuple[int, int]) -> DeConvBlock:

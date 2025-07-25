@@ -25,7 +25,6 @@ from typing import List, AnyStr, Dict, Any, Self, Optional
 import torch
 import torch.nn as nn
 import logging
-logger = logging.getLogger('dl.model.ConvModel')
 __all__ = ['ConvModel']
 
 
@@ -81,11 +80,12 @@ class ConvModel(NeuralModel, ABC):
 
         super(ConvModel, self).__init__(model_id, nn.Sequential(*modules))
 
-    def transpose(self, extra: nn.Module = None) -> DeConv2dModel:
+    def transpose(self, activation_update: nn.Module = None) -> DeConv2dModel:
         """
-         Build a de-convolutional neural model from an existing convolutional nodel
-         @param extra: Extra module to be added to the inverted neural structure
-         @type extra: nn.Module
+         Build a de-convolutional neural model from an existing convolutional nodel.
+         
+         @param activation_update: Extra module to be added to the inverted neural structure
+         @type activation_update: nn.Module
          @return: Instance of de convolutional model
          @rtype: DeConv2dModel
          """
@@ -173,6 +173,7 @@ class ConvModel(NeuralModel, ABC):
             return False
 
     """ ----------------------------   Private helper methods --------------------------- """
+
     def __linear_layer_input_size(self, last_conv_block: ConvBlock) -> int:
         from dl.block.conv.conv_output_size import SeqConvOutputSize
 

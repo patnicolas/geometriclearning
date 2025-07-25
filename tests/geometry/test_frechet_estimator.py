@@ -6,7 +6,7 @@ from geomstats.learning.frechet_mean import GradientDescent
 from torch import Tensor
 
 from geometry.frechet_estimator import FrechetEstimator
-from geometry import GeometricException
+from geometry import InformationGeometricException
 
 from geometry.visualization.hypersphere_plot import HyperspherePlot
 from geometry.visualization.euclidean_plot import EuclideanPlot
@@ -29,7 +29,7 @@ class FrechetEstimatorTest(unittest.TestCase):
             mean = frechet_estimator.estimate(X)
             logging.info(mean)
             self.assertTrue(False)
-        except GeometricException as e:
+        except InformationGeometricException as e:
             logging.info(str(e))
             self.assertTrue(True)
 
@@ -49,7 +49,7 @@ class FrechetEstimatorTest(unittest.TestCase):
             logging.info(f'\nFrechet mean:   {frechet_mean}\nEuclidean mean: {euclidean_mean}')
 
             self.assertTrue(True)
-        except GeometricException as e:
+        except InformationGeometricException as e:
             logging.info(str(e))
             self.assertTrue(False)
 
@@ -64,7 +64,7 @@ class FrechetEstimatorTest(unittest.TestCase):
             euclidean_mean = FrechetEstimator.euclidean_mean(np_points)
             logging.info(f'\nEuclidean mean: {euclidean_mean}')
             self.assertTrue(True)
-        except GeometricException as e:
+        except InformationGeometricException as e:
             logging.info(str(e))
             self.assertTrue(False)
 
@@ -82,7 +82,7 @@ class FrechetEstimatorTest(unittest.TestCase):
             logging.info(f'\nFrechet mean:   {frechet_mean}\nEuclidean mean: {euclidean_mean}')
 
             self.assertTrue(True)
-        except GeometricException as e:
+        except InformationGeometricException as e:
             logging.info(str(e))
             self.assertTrue(False)
 

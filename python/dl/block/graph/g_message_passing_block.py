@@ -14,22 +14,22 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 from dl.block.neural_block import NeuralBlock
-from typing import AnyStr, List, Optional
+from typing import AnyStr, List, Optional, Self
 import torch
 import torch.nn as nn
+from dl.block import GraphException
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.typing import Adj
 
-"""
-Implementation of a very simple Graph Convolutional Neural block which consists of 
-- Message passing operator
-- Optional activation function
-- Optional batch norm 1-dimension
-- Optional drop-out
-"""
-
-
 class GMessagePassingBlock(NeuralBlock):
+    """
+    Implementation of a very simple Graph Convolutional Neural block which consists of
+    - Message passing operator
+    - Optional activation function
+    - Optional batch norm 1-dimension
+    - Optional drop-out
+    """
+
     def __init__(self,
                  block_id: AnyStr,
                  message_passing_module: MessagePassing,
@@ -65,7 +65,8 @@ class GMessagePassingBlock(NeuralBlock):
             modules.append(graph_pooling_module)
         if drop_out_module is not None:
             modules.append(drop_out_module)
-        super(GMessagePassingBlock, self).__init__(block_id, modules)
+        super(GMessagePassingBlock, self).__init__(block_id)
+        self.modules = modules
 
     def forward(self,
                 x: torch.Tensor,
@@ -78,6 +79,15 @@ class GMessagePassingBlock(NeuralBlock):
         for module in self.modules[1:]:
             x = module(x)
         return x
+
+    def transpose(self, activation_update: Optional[nn.Module] = None) -> Self:
+        """
+        Transposing a Graph Neural Network does not make sense
+
+        @param activation_update: Optional activation module to override the original one
+        @type activation_update: nn.Module
+        """
+        raise GraphException('Cannot invert a Graph neural block')
 
     def __repr__(self) -> AnyStr:
         modules_str = '\n'.join([str(module) for module in self.modules])

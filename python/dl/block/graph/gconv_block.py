@@ -19,6 +19,10 @@ import torch.nn as nn
 from torch_geometric.nn import BatchNorm, GraphConv
 from torch_geometric.nn.pool import TopKPooling, SAGPooling
 from torch_geometric.typing import Adj
+import logging
+from dl.block import GraphException
+import python
+
 
 
 class GConvBlock(nn.Module):
@@ -64,18 +68,22 @@ class GConvBlock(nn.Module):
         @return: Instance of GConvBlock
         @rtype: GConvBlock
         """
-        block_id = block_attributes['block_id']
-        conv_layer_attribute = block_attributes['conv_layer']
-        activation_attribute = block_attributes['activation']
-        batch_norm_attribute = block_attributes['batch_norm']
-        pooling_attribute = block_attributes['pooling']
-        dropout_attribute = block_attributes['dropout']
-        return cls(block_id,
-                   conv_layer_attribute,
-                   batch_norm_attribute,
-                   activation_attribute,
-                   pooling_attribute,
-                   nn.Dropout(dropout_attribute) if dropout_attribute > 0 else None)
+        try:
+            block_id = block_attributes['block_id']
+            conv_layer_attribute = block_attributes['conv_layer']
+            activation_attribute = block_attributes['activation']
+            batch_norm_attribute = block_attributes['batch_norm']
+            pooling_attribute = block_attributes['pooling']
+            dropout_attribute = block_attributes['dropout']
+            return cls(block_id,
+                       conv_layer_attribute,
+                       batch_norm_attribute,
+                       activation_attribute,
+                       pooling_attribute,
+                       nn.Dropout(dropout_attribute) if dropout_attribute > 0 else None)
+        except KeyError as e:
+            logging.error(e)
+            raise GraphException(e)
 
     def forward(self,
                 x: torch.Tensor,

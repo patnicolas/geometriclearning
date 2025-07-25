@@ -23,7 +23,7 @@ __all__ = ['MetropolisHastings']
 
 class MetropolisHastings(MCMC):
     """
-        Implementation of Metropolis-Hastings Monte Carlo Markov Chain
+        Implementation of Metropolis-Hastings Markov Chain Monte Carlo method
     """
     from proposal_distribution import ProposalDistribution
 
@@ -100,11 +100,8 @@ class MetropolisHastings(MCMC):
                         if i > self.burn_ins:
                             theta_walk[j + 1] = theta_walk[j]
                             j += 1
-            except ArithmeticError as e:
-                logging.error(f'Arithmetic error: {e}')
-                raise MCMCException(e)
-            except ValueError as e:
-                logging.error(f'Value error: {e}')
+            except (ArithmeticError | ValueError | IndexError) as e:
+                logging.error(e)
                 raise MCMCException(e)
 
         return theta_walk, float(accepted_count) / num_valid_thetas

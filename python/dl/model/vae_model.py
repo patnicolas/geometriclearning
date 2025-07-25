@@ -16,7 +16,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from typing import AnyStr, Self, Optional
 from dl.model.neural_model import NeuralModel
 from dl.block.variational_block import VariationalBlock
-from dl import ConvException, MLPException, VAEException
+from dl.block import ConvException, MLPException, VAEException
 import torch
 import torch.nn as nn
 import logging
@@ -145,12 +145,12 @@ class VAEModel(NeuralModel):
         z = self.decoder(z)
         return z
 
-    def transpose(self, extra: Optional[nn.Module] = None) -> Self:
+    def transpose(self, activation_update: Optional[nn.Module] = None) -> Self:
         """
         Variational autoencoder is composed of an encoder and mirror decoder but cannot itself be inverted
         It throws a NotImplemented error
         """
-        raise NotImplementedError('Cannot invert an Variational Autoencoder model')
+        raise VAEException('Cannot invert an Variational Autoencoder model')
 
     def save(self, extra_params: dict = None):
         raise NotImplementedError('NeuralModel.save is an abstract method')

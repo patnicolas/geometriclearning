@@ -27,7 +27,12 @@ share/python-wheels/
 MANIFEST
 .idea
 python/.idea
-
+__pycache__
+*.log
+*.npy
+*.pt
+output/
+output_images/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

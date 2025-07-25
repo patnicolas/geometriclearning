@@ -20,9 +20,7 @@ from torchvision import transforms
 from dataset.base_loader import BaseLoader
 from dataset.default_loader_generator import DefaultLoaderGenerator
 import numpy as np
-
 __all__ = ['LabeledLoader']
-
 
 
 class LabeledLoader(BaseLoader):
