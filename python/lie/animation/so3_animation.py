@@ -186,7 +186,6 @@ class SO3Animation(BaseAnimation):
         inset_ax.imshow(img, alpha=1.0)
         inset_ax.axis('off')
 
-
     @staticmethod
     def __trajectory(t: np.array) -> np.array:
         import math
