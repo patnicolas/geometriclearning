@@ -88,29 +88,33 @@ class HyperParams(object):
         """
         assert len(attributes), 'Attributes for hyper parameters are undefined'
 
-        learning_rate = attributes['learning_rate']
-        epochs = attributes['epochs']
-        batch_size = attributes['batch_size']
-        loss_function = attributes.get('loss_function', nn.CrossEntropyLoss())
-        momentum = attributes['momentum']
-        encoding_len = attributes['encoding_len']
-        train_eval_ratio = attributes['train_eval_ratio']
-        weight_initialization = attributes['weight_initialization']
-        optim_label = attributes['optim_label']
-        drop_out = attributes['drop_out']
-        class_weights = attributes['class_weights'] if 'class_weights' in attributes else None
+        try:
+            learning_rate = attributes['learning_rate']
+            epochs = attributes['epochs']
+            batch_size = attributes['batch_size']
+            loss_function = attributes.get('loss_function', nn.CrossEntropyLoss())
+            momentum = attributes['momentum']
+            encoding_len = attributes['encoding_len']
+            train_eval_ratio = attributes['train_eval_ratio']
+            weight_initialization = attributes['weight_initialization']
+            optim_label = attributes['optim_label']
+            drop_out = attributes['drop_out']
+            class_weights = attributes['class_weights'] if 'class_weights' in attributes else None
 
-        return cls(learning_rate,
-                   momentum,
-                   epochs,
-                   optim_label,
-                   batch_size,
-                   loss_function,
-                   drop_out,
-                   train_eval_ratio,
-                   encoding_len,
-                   weight_initialization,
-                   class_weights)
+            return cls(learning_rate,
+                       momentum,
+                       epochs,
+                       optim_label,
+                       batch_size,
+                       loss_function,
+                       drop_out,
+                       train_eval_ratio,
+                       encoding_len,
+                       weight_initialization,
+                       class_weights)
+        except KeyError as e:
+            logging.error(e)
+            raise TrainingException(e)
 
     @staticmethod
     def test_conversion(label_conversion_func) -> torch.Tensor:
@@ -210,6 +214,7 @@ class HyperParams(object):
             self.weight_initialization) for lr in lr_rates for batch_size in batch_sizes)
 
     # ---------------------  Helper private methods -----------------------
+
     @staticmethod
     def __check_constructor(lr: float,
                             momentum: float,

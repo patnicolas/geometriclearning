@@ -40,7 +40,7 @@ class BaseAnimation(object):
 
     @abstractmethod
     def _group_name(self) -> AnyStr:
-        raise NotImplementedError('_group_name has to be implemented in subclasses')
+        pass
 
     @abstractmethod
     def draw(self, mp4_filename: AnyStr = None) -> None:
@@ -52,7 +52,7 @@ class BaseAnimation(object):
             @param mp4_filename: Name of the mp4 file is to be generated (False plot are displayed but not saved)
             @type mp4_filename: str
         """
-        raise NotImplementedError('draw has to be implemented in subclasses')
+        pass
 
     def _draw_logo(self, fig) -> None:
         """

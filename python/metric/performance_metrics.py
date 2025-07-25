@@ -79,6 +79,7 @@ class PerformanceMetrics(object):
         @return: Instance of PerformanceMetrics
         @rtype: PerformanceMetrics
         """
+        assert len(metrics_list) > 0, 'The list of performance metrics is undefined'
 
         metrics = {MetricType.get_metric_type(metric): BuiltInMetric(metric_type=MetricType.get_metric_type(metric),
                                                                      is_weighted=is_class_imbalance)
@@ -210,6 +211,5 @@ class PerformanceMetrics(object):
 
     def __record(self, epoch: int, metrics: Dict[MetricType, torch.Tensor]):
         metric_str = '\n'.join([f'   {k.value}: {v}' for k, v in metrics.items()])
-        status_msg = f'>> Epoch: {epoch}\n{metric_str}'
-        logging.info(status_msg)
+        logging.info(f'>> Epoch: {epoch}\n{metric_str}')
         self.update_all_metrics(metrics)
