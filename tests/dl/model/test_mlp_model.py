@@ -5,6 +5,7 @@ from dl.model.mlp_model import MLPModel, MLPBuilder
 from dl.training.neural_training import NeuralTraining
 from dl import MLPException
 import logging
+import os
 import python
 
 
@@ -69,7 +70,6 @@ class MLPModelTest(unittest.TestCase):
             assert True
         except MLPException as e:
             assert False
-
 
     def test_builder(self):
         model_attributes = {
