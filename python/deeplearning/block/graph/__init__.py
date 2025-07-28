@@ -1,6 +1,7 @@
 __author__ = "Patrick R. Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,6 +14,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-class GeometricException(Exception):
-    def __init__(self, *args, **kwargs):  # real signature unknown
-        super(GeometricException, self).__init__(args, kwargs)
+
+class GraphException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(GraphException, self).__init__(args, kwargs)

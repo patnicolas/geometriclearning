@@ -1,4 +1,4 @@
-__author__ = "Patrick Nicolas"
+__author__ = "Patrick R. Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@ from typing import List, AnyStr, Optional
 
 from matplotlib.collections import PathCollection
 from mpl_toolkits.mplot3d import Axes3D
-from geometry import InformationGeometricException
+from geometry import GeometricException
 import numpy as np
 
 
@@ -30,7 +30,7 @@ class ManifoldPlot(ABC):
         @type manifold_points: List of Numpy arrays representing points on the manifold
         """
         if len(manifold_points) < 1:
-            raise InformationGeometricException('Cannot display undefined number of data points')
+            raise GeometricException('Cannot display undefined number of data points')
         self.manifold_points = manifold_points
 
     @abstractmethod

@@ -13,6 +13,21 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-class GeometricException(Exception):
-    def __init__(self, *args, **kwargs):  # real signature unknown
-        super(GeometricException, self).__init__(args, kwargs)
+from typing import AnyStr, List, Optional
+from deeplearning.model.conv_model import ConvModel
+from deeplearning.block.conv import Conv3DataType
+from deeplearning.block.conv.conv_3d_block import Conv3dBlock
+from deeplearning.block.mlp.mlp_block import MLPBlock
+__all__ = ['Conv3dModel']
+
+
+
+class Conv3dModel(ConvModel):
+    def __init__(self,
+                 model_id: AnyStr,
+                 input_size: Conv3DataType,
+                 conv_blocks: List[Conv3dBlock],
+                 mlp_blocks: Optional[List[MLPBlock]] = None) -> None:
+        super(Conv3dModel, self).__init__(model_id, input_size, conv_blocks, mlp_blocks)
+
+

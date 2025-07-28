@@ -1,4 +1,4 @@
-__author__ = "Patrick Nicolas"
+__author__ = "Patrick R. Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,14 +14,13 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 import matplotlib.pyplot as plt
-import geomstats.backend as gs
 
 from typing import Tuple, NoReturn, AnyStr, List
 import numpy as np
 import geomstats.visualization as visualization
 from dataclasses import dataclass
-from geometry.manifold_point import ManifoldPoint
-from geometry import InformationGeometricException
+from geometry.manifold.manifold_point import ManifoldPoint
+from geometry import GeometricException
 
 
 @dataclass
@@ -56,7 +55,7 @@ class SpaceVisualization(object):
             elif space == 'S32' or space == 'M32' or space == 'S33':
                 visualization.plot(data_points, ax=self.ax, space=space, label=self.label, s=5)
             else:
-                raise InformationGeometricException(f'Space {space} is not supported')
+                raise GeometricException(f'Space {space} is not supported')
 
         if self.style is not None:
             self.ax.plot(
@@ -88,7 +87,7 @@ class SpaceVisualization(object):
             ax.legend()
             plt.show()
         else:
-            raise InformationGeometricException(f'Space {space} is not supported')
+            raise GeometricException(f'Space {space} is not supported')
 
 
 

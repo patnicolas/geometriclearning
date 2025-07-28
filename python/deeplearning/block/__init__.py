@@ -13,6 +13,9 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-class GeometricException(Exception):
-    def __init__(self, *args, **kwargs):  # real signature unknown
-        super(GeometricException, self).__init__(args, kwargs)
+from typing import Tuple
+
+Conv2DataType = Tuple[int, int]
+Conv3DataType = Tuple[int, int, int]
+ConvDataType = int | Conv2DataType | Conv3DataType
+

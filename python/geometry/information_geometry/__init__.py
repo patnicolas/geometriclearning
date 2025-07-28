@@ -13,6 +13,6 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-class GeometricException(Exception):
+class InformationGeometryException(Exception):
     def __init__(self, *args, **kwargs):  # real signature unknown
-        super(GeometricException, self).__init__(args, kwargs)
+        super(InformationGeometryException, self).__init__(args, kwargs)
