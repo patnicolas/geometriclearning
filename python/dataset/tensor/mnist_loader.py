@@ -1,4 +1,4 @@
-__author__ = "Patrick Nicolas"
+__author__ = "Patrick R. Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision.transforms import InterpolationMode
 from torchvision.datasets import MNIST
 import torchvision.transforms as transforms
-from dl.model import GrayscaleToRGB
+from deeplearning.model import GrayscaleToRGB
 from dataset import DatasetException
 import logging
 logger = logging.getLogger('dataset.MNISTLoader')

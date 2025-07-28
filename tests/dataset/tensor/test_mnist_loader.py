@@ -1,7 +1,7 @@
 import unittest
 import logging
 from dataset.tensor.mnist_loader import MNISTLoader
-from dl.training.exec_config import ExecConfig
+from deeplearning.training.exec_config import ExecConfig
 import os
 import python
 from python import SKIP_REASON

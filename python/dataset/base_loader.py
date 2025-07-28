@@ -1,4 +1,4 @@
-__author__ = "Patrick Nicolas"
+__author__ = "Patrick R. Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 from torch.utils.data import DataLoader, Dataset
-from dl.training.exec_config import ExecConfig
+from deeplearning.training.exec_config import ExecConfig
 from typing import AnyStr
 from dataset import DatasetException
 import abc

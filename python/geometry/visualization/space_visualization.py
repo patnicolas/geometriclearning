@@ -1,4 +1,4 @@
-__author__ = "Patrick Nicolas"
+__author__ = "Patrick R. Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +14,12 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 import matplotlib.pyplot as plt
-import geomstats.backend as gs
 
 from typing import Tuple, NoReturn, AnyStr, List
 import numpy as np
 import geomstats.visualization as visualization
 from dataclasses import dataclass
-from geometry.manifold_point import ManifoldPoint
+from geometry.manifold.manifold_point import ManifoldPoint
 from geometry import GeometricException
 
 
