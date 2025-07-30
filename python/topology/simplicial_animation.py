@@ -1,6 +1,8 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
+from sympy.combinatorics import tetrahedron
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -38,37 +40,68 @@ from matplotlib.patches import Polygon
 from matplotlib.animation import FuncAnimation
 
 # Example vertices
-vertices = np.array([[0, 0], [1, 0], [0.5, 1]])
-edges = [(0, 1), (1, 2), (0, 2)]
-triangle = [0, 1, 2]
+#                      0       1       2          3      4        5          6         7           8
+vertices = np.array([[0, 0], [1, 0], [0.5, 1], [1, 1], [0, 1], [0, 0.5], [1, 1.5], [1.5, 1.5], [1.5, 0]])
+edges = [(0, 1), (1, 2), (0, 2), (1, 3), (3, 4), (3, 7), (6, 7), (4, 6), (3, 5), (7, 8), (4, 5), (1, 8), (1, 7), [2, ]]
+triangles = [[0, 1, 2], [4, 5, 3], [1, 8, 7]]
+tetrahedrons = [[1, 8, 7, 3]]
+colors = ['cyan', 'red', 'green', 'purple']
 
 fig, ax = plt.subplots()
-points = ax.scatter([], [], c='blue')
 lines = []
 patches = []
 
 def init():
-    ax.set_xlim(-0.5, 1.5)
-    ax.set_ylim(-0.5, 1.5)
+    ax.set_xlim(-0.1, 1.6)
+    ax.set_ylim(-0.1, 1.7)
+    plt.axis('off')
     return []
 
 def update(frame):
     ax.clear()
-    ax.set_xlim(-0.5, 1.5)
-    ax.set_ylim(-0.5, 1.5)
-
+    ax.set_xlim(-0.1, 1.6)
+    ax.set_ylim(-0.1, 1.7)
+    plt.axis('off')
+    offset = 12
+    start_edges = len(vertices) + offset
+    start_triangles = start_edges + len(edges) + offset
+    start_tetrahedrons = start_triangles + len(triangles) + offset
+    title = ''
     if frame >= 0:
-        ax.scatter(vertices[:frame+1, 0], vertices[:frame+1, 1], c='blue')
+        title = 'Topological Set - Point Cloud'
+        ax.scatter(vertices[:frame+1, 0], vertices[:frame+1, 1], s=300, c='blue')
 
-    if frame >= 3:
-        for (i, j) in edges:
-            ax.plot(*zip(vertices[i], vertices[j]), c='gray')
+    if frame >= start_edges:
+        title = 'Undirected Graph'
+        num_items = frame - start_edges
+        if num_items >= len(edges):
+            num_items = len(edges)
+        for idx in range(num_items):
+            i = edges[idx][0]
+            j = edges[idx][1]
+            ax.plot(*zip(vertices[i], vertices[j]), c='grey', linewidth=2)
 
-    if frame >= 5:
-        poly = Polygon(vertices[triangle], closed=True, alpha=0.4, color='orange')
-        ax.add_patch(poly)
+    if frame >= start_triangles:
+        title = 'Simplicial Complex'
+        num_items = frame - start_triangles
+        if num_items >= len(triangles):
+            num_items = len(triangles)
+        for idx in range(num_items):
+            poly = Polygon(vertices[triangles[idx]], closed=True, alpha=0.2, color=colors[idx])
+            ax.add_patch(poly)
+
+    if frame >= start_tetrahedrons:
+        title = 'Simplicial Complex'
+        num_items = frame - start_tetrahedrons
+        if num_items >= len(tetrahedrons):
+            num_items = len(tetrahedrons)
+        for idx in range(num_items):
+            poly = Polygon(vertices[tetrahedrons[idx]], closed=True, alpha=0.5, color='darkgrey')
+            ax.add_patch(poly)
+
+    ax.set_title(title, fontdict={'fontsize': 22, 'fontname': 'Helvetica'})
     return []
 
 
-ani = FuncAnimation(fig, update, frames=7, init_func=init, blit=False, interval=1000)
+ani = FuncAnimation(fig, update, frames=110, init_func=init, blit=False, interval=100, repeat=False)
 plt.show()

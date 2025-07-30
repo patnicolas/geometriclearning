@@ -1,4 +1,4 @@
-_author__ = "Patrick Nicolas"
+__author__ = "Patrick R. Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,59 +13,12 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Self, AnyStr, List, Dict, Tuple
+from typing import Self, AnyStr, List, Dict
 import toponetx as tnx
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from enum import Enum
-from dataclasses import dataclass
-from topology import TopologyException
-
-class SimplicialLaplacianType(Enum):
-    UpLaplacian = 'Upper-Laplacian'
-    DownLaplacian = 'Lower-Laplacian'
-    HodgeLaplacian = 'Hodge-Laplacian'
-
-
-@dataclass
-class SimplicialLaplacian:
-    """
-    Define the components of the Laplacian for Simplicial Complexes
-    @param simplicial_laplacian_type Type of Laplacian (UP, DOWN or Hodge)
-    @param rank Rank of the Laplacian
-    @param signed Boolean flag to specify if the values of Laplacian are signed (Directed/Undirected)
-    """
-    simplicial_laplacian_type:  SimplicialLaplacianType
-    rank: int
-    signed: bool
-
-    def __str__(self) -> AnyStr:
-        return f'{self.simplicial_laplacian_type.value}, rank={self.rank}, signed={self.signed}'
-
-    def __call__(self, simplicial_indices: List[List[int]]) -> np.array:
-        """
-        Compute the various combination of Laplacian (UP, DOWN, Hodge) for different rank.
-
-        @param simplicial_indices: List of edge and face indices
-        @type simplicial_indices: List of list
-        @return: 2D Numpy array representing the Laplacian matrix
-        @rtype: Numpy array
-        """
-        if len(simplicial_indices) < 1:
-            raise TopologyException('Cannot compute simplicial Laplacian with undefined indices')
-        try:
-            sc = tnx.SimplicialComplex(simplicial_indices)
-            match self.simplicial_laplacian_type:
-                case SimplicialLaplacianType.UpLaplacian:
-                    laplacian_matrix = sc.up_laplacian_matrix(self.rank, self.signed)
-                case SimplicialLaplacianType.DownLaplacian:
-                    laplacian_matrix = sc.down_laplacian_matrix(self.rank, self.signed)
-                case SimplicialLaplacianType.HodgeLaplacian:
-                    laplacian_matrix = sc.hodge_laplacian_matrix(self.rank, self.signed)
-            return laplacian_matrix.toarray()
-        except ValueError as e:
-            raise TopologyException(e)
+from topology.simplicial_laplacian import SimplicialLaplacian
 
 
 class SimplicialFeatureSet(object):
@@ -168,68 +121,7 @@ class SimplicialFeatureSet(object):
     def laplacian(self, simplicial_laplacian: SimplicialLaplacian) -> np.array:
         return simplicial_laplacian(self.simplicial_indices)
 
-    def show(self) -> None:
-        """
-        Display this simplicial domain with node, feature vectors, edges and faces.
-        """
-        import networkx as nx
-        # Prepare the plots
-        fig = plt.figure(figsize=(8, 6), facecolor='lightblue')
-        fig.subplots()
-
-        # Build the NetworkX
-        G = nx.Graph()
-        nodes = range(1, len(self.feature_set) + 1)
-        G.add_nodes_from(nodes)
-        G.add_edges_from(self.edge_set)
-
-        for idx, feature in enumerate(self.feature_set):
-            G.nodes[idx+1]['value'] = feature
-        labels_map = self.__display_features()
-
-        # Generate the x, y positions
-        node_pos = nx.circular_layout(G, dim=2)
-        face_label_pos = self.__face_label_pos(node_pos)
-
-        # Draw the graph (nodes + edges)
-        nx.draw(G, node_pos, with_labels=True, node_color='cyan', node_size=380, font_size=17)
-        label_pos = {idx: [v[0]-0.12, v[1]] for idx, v in node_pos.items()}
-        bbox = dict(boxstyle="round,pad=0.2", edgecolor='black', facecolor='yellow')
-        nx.draw_networkx_labels(G, label_pos, labels=labels_map, font_color='black', font_size=10, bbox=bbox)
-
-        # Draw the faces
-        self.__draw_faces(node_pos=node_pos, face_label_pos=face_label_pos)
-        plt.show()
-
     """ -------------------------  Private Supporting methods ------------------ """
-
-    def __draw_faces(self, node_pos: np.array, face_label_pos: np.array) -> None:
-        color_idx = 0
-        label_offset = 0.15
-
-        # Draw the simplices (faces)
-        for idx, face in enumerate(self.face_set):
-            face.append(face[0])
-            face_pos = [node_pos[n] for n in face]
-            x, y = zip(*face_pos)
-            if len(face) == 5:
-                plt.fill(x, y, color=SimplicialFeatureSet.tetrahedron_color, alpha=0.7)
-                """
-                    plt.text(x=face_label_pos[0][0],
-                             y=face_label_pos[0][1] + label_offset,
-                             s=f'Tetrahedron {idx + 1}',
-                             fontdict={'fontsize': 16, 'color': 'darkgrey'},
-                             bbox=dict(boxstyle="round,pad=0.2", edgecolor='black', facecolor='white'))
-                """
-            else:
-                face_color = SimplicialFeatureSet.triangle_colors[idx % len(SimplicialFeatureSet.triangle_colors)]
-                plt.fill(x, y, face_color, alpha=0.4)
-                plt.text(x=face_label_pos[color_idx][0] - label_offset,
-                         y=face_label_pos[color_idx][1],
-                         s=f'Triangle {idx + 1}',
-                         fontdict={'fontsize': 13, 'color': face_color},
-                         bbox=dict(boxstyle="round,pad=0.2", edgecolor='black', facecolor='white'))
-                color_idx += 1
 
     @staticmethod
     def __validate(edge_set: np.array, face_set: np.array) -> None:
@@ -239,17 +131,3 @@ class SimplicialFeatureSet(object):
         assert len(face_set) > 0, 'Simplicial requires at least face'
         assert all(len(sublist) in (3, 4) for sublist in face_set), \
             f'All elements of edge list should have 3 or 4 indices'
-
-    def __display_features(self) -> Dict[int, AnyStr]:
-        def display_feature_values(x: np.array) -> AnyStr:
-            return '\n'.join([f'{n:.2f}' for n in x])
-        return {idx+1: display_feature_values(x) for idx, x in enumerate(self.feature_set)}
-
-    def __face_label_pos(self, node_pos: Dict[int, np.array]) -> List[np.array]:
-        def gravity_center(face_idx: List[int]) -> np.array:
-            return (node_pos[face_idx[0]] + node_pos[face_idx[1]] + node_pos[face_idx[2]]) * 0.333 \
-                if len(face_idx) == 3 \
-                else (node_pos[face_idx[0]] + node_pos[face_idx[1]] + node_pos[face_idx[2]] + node_pos[face_idx[3]]) * 0.25
-
-        face_labels_pos = [gravity_center(face_indices) for face_indices in self.face_set]
-        return face_labels_pos
