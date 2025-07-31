@@ -13,9 +13,8 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Self, AnyStr, List, Dict
+from typing import Self, AnyStr, List
 import toponetx as tnx
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from topology.simplicial_laplacian import SimplicialLaplacian

@@ -1,7 +1,7 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
-from sympy.combinatorics import tetrahedron
+from dataclasses import dataclass
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,70 +38,153 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 from matplotlib.animation import FuncAnimation
-
-# Example vertices
-#                      0       1       2          3      4        5          6         7           8
-vertices = np.array([[0, 0], [1, 0], [0.5, 1], [1, 1], [0, 1], [0, 0.5], [1, 1.5], [1.5, 1.5], [1.5, 0]])
-edges = [(0, 1), (1, 2), (0, 2), (1, 3), (3, 4), (3, 7), (6, 7), (4, 6), (3, 5), (7, 8), (4, 5), (1, 8), (1, 7), [2, ]]
-triangles = [[0, 1, 2], [4, 5, 3], [1, 8, 7]]
-tetrahedrons = [[1, 8, 7, 3]]
-colors = ['cyan', 'red', 'green', 'purple']
-
-fig, ax = plt.subplots()
-lines = []
-patches = []
-
-def init():
-    ax.set_xlim(-0.1, 1.6)
-    ax.set_ylim(-0.1, 1.7)
-    plt.axis('off')
-    return []
-
-def update(frame):
-    ax.clear()
-    ax.set_xlim(-0.1, 1.6)
-    ax.set_ylim(-0.1, 1.7)
-    plt.axis('off')
-    offset = 12
-    start_edges = len(vertices) + offset
-    start_triangles = start_edges + len(edges) + offset
-    start_tetrahedrons = start_triangles + len(triangles) + offset
-    title = ''
-    if frame >= 0:
-        title = 'Topological Set - Point Cloud'
-        ax.scatter(vertices[:frame+1, 0], vertices[:frame+1, 1], s=300, c='blue')
-
-    if frame >= start_edges:
-        title = 'Undirected Graph'
-        num_items = frame - start_edges
-        if num_items >= len(edges):
-            num_items = len(edges)
-        for idx in range(num_items):
-            i = edges[idx][0]
-            j = edges[idx][1]
-            ax.plot(*zip(vertices[i], vertices[j]), c='grey', linewidth=2)
-
-    if frame >= start_triangles:
-        title = 'Simplicial Complex'
-        num_items = frame - start_triangles
-        if num_items >= len(triangles):
-            num_items = len(triangles)
-        for idx in range(num_items):
-            poly = Polygon(vertices[triangles[idx]], closed=True, alpha=0.2, color=colors[idx])
-            ax.add_patch(poly)
-
-    if frame >= start_tetrahedrons:
-        title = 'Simplicial Complex'
-        num_items = frame - start_tetrahedrons
-        if num_items >= len(tetrahedrons):
-            num_items = len(tetrahedrons)
-        for idx in range(num_items):
-            poly = Polygon(vertices[tetrahedrons[idx]], closed=True, alpha=0.5, color='darkgrey')
-            ax.add_patch(poly)
-
-    ax.set_title(title, fontdict={'fontsize': 22, 'fontname': 'Helvetica'})
-    return []
+from typing import List, Tuple, Dict,AnyStr, Any
 
 
-ani = FuncAnimation(fig, update, frames=110, init_func=init, blit=False, interval=100, repeat=False)
-plt.show()
+class SimplicialAnimation(object):
+    """
+        Configuration dictionary
+        fig_size: Tuple[int, int]
+        x_lim: Tuple[float, float]   -0.1, 1.6
+        y_lim: Tuple[float, float]     -0.1, 1.7
+        group_interval: int   20
+        logo_pos: Tuple[float, float]   -0.3, 1.85
+        title_pos: Tuple[float, float]  0.6, 0.94
+        status_pos: Tuple[float, float]  0.05  -0.15
+        fps: int   ex 10
+        interval: int  ex: 200
+    """
+
+    face_colors = ['cyan', 'red', 'green', 'purple', 'yellow', 'orange', 'blue']
+    tetrahedron_hatches = ['///', '--', '|']
+
+    def __init__(self,
+                 nodes: np.array,
+                 edge_set: List[Tuple[int, int]],
+                 face_set: List[List[int]],
+                 config: Dict[AnyStr, Any]) -> None:
+
+        assert len(nodes) > 1, 'Cannot animate a simplicial with no node'
+        self.nodes = nodes
+        self.edge_set = edge_set
+
+        # Extract triangles and tetrahedrons
+        self.triangle_set, self.tetrahedron_set = [], []
+        [( self.triangle_set if len(face) == 3 else self.tetrahedron_set ).append(face) for face in face_set]
+
+        fig_size = config.get('fig_size', (10, 9))
+        self.config = config
+        self.fig, self.ax = plt.subplots(figsize=fig_size)
+
+    def show(self) -> None:
+        def set_axis() -> None:
+            self.ax.set_xlim(self.config['xlim'])
+            self.ax.set_ylim(self.config['ylim'])
+            plt.axis('off')
+
+        def init() -> List:
+            set_axis()
+            return []
+
+        def update(frame: int) -> List:
+            self.ax.clear()
+            set_axis()
+            self.fig.set_facecolor('#f0f9ff')
+            self.ax.set_facecolor('#f0f9ff')
+            group_interval = self.config.get('group_interval', 18)
+            start_edges = len(self.nodes) + group_interval
+            start_triangles = start_edges + len(self.edge_set) + group_interval
+            start_tetrahedrons = start_triangles + len(self.triangle_set) + group_interval
+            title = ''
+            status = []
+            if frame >= 0:
+                title = 'Point Cloud | 0-simplices'
+                self.ax.scatter(self.nodes[:frame + 1, 0], self.nodes[:frame + 1, 1], s=300, c='blue')
+                num_nodes = frame if frame < len(self.nodes) else len(self.nodes)
+                status.append(f'{num_nodes} nodes')
+
+            if frame >= start_edges:
+                title = 'Undirected Graph | 1-simplices'
+                num_items = frame - start_edges
+                if num_items >= len(self.edge_set):
+                    num_items = len(self.edge_set)
+                for idx in range(num_items):
+                    i = self.edge_set[idx][0]
+                    j = self.edge_set[idx][1]
+                    self.ax.plot(*zip(self.nodes[i], self.nodes[j]), c='grey', linewidth=2)
+                status.append(f'{num_items} edges')
+
+            if frame >= start_triangles:
+                title = 'Simplicial Complex | 2-simplices'
+                num_items = frame - start_triangles
+                if num_items >= len(self.triangle_set):
+                    num_items = len(self.triangle_set)
+                for idx in range(num_items):
+                    poly = Polygon(self.nodes[self.triangle_set[idx]],
+                                   closed=True,
+                                   alpha=0.2,
+                                   color=SimplicialAnimation.__attribute(SimplicialAnimation.face_colors, idx))
+                    self.ax.add_patch(poly)
+                status.append(f'{num_items} triangles')
+
+            if frame >= start_tetrahedrons:
+                title = 'Simplicial Complex | 3-simplices'
+                num_items = frame - start_tetrahedrons
+                if num_items >= len(self.tetrahedron_set):
+                    num_items = len(self.tetrahedron_set)
+                for idx in range(num_items):
+                    poly = Polygon(self.nodes[self.tetrahedron_set[idx]],
+                                   closed=True,
+                                   alpha=0.5,
+                                   color='darkgrey',
+                                   edgecolor='black',
+                                   hatch=SimplicialAnimation.__attribute(SimplicialAnimation.tetrahedron_hatches, idx))
+                    self.ax.add_patch(poly)
+                status.append(f'{num_items} tetrahedrons')
+
+            self.__descriptors(status, title)
+            return []
+
+        ani = FuncAnimation(self.fig, update, frames=110, init_func=init, blit=False, interval=90, repeat=False)
+        plt.show()
+
+    @staticmethod
+    def __attribute(items: List[AnyStr], idx: int) -> AnyStr:
+        return items[idx % len(items)]
+
+    def __descriptors(self, status: List[AnyStr], title: AnyStr) -> None:
+        self.ax.text(x=self.config['status_pos'][0],
+                     y=self.config['status_pos'][1],
+                     s=', '.join(status),
+                     fontdict={'fontsize': 20, 'fontname': 'Helvetica', 'color': 'grey'})
+        self.ax.set_title(x=self.config['title_pos'][0],
+                          y=self.config['title_pos'][1],
+                          label=title,
+                          fontdict={'fontsize': 22, 'fontname': 'Helvetica', 'color': 'black'})
+        self.ax.text(x=self.config['logo_pos'][0],
+                     y=self.config['logo_pos'][1],
+                     s='Hands-on Geometric Deep Learning',
+                     fontdict={'fontsize': 24, 'fontname': 'Apple Chancery', 'color': 'blue'})
+
+
+if __name__ == '__main__':
+    configuration = {
+        'fig_size': (8, 6),
+        'xlim': (-0.1, 1.6),
+        'ylim': (-0.1, 1.7),
+        'group_interval': 20,
+        'logo_pos': (-0.3, 1.85),
+        'title_pos': (0.6, 0.94),
+        'status_pos': (0.05, -0.15),
+        'fps': 10,
+        'interval': 90
+    }
+    vertices = np.array([
+        [0, 0], [1, 0], [0.5, 1], [1, 1], [0, 1], [0, 0.5], [1, 1.5], [1.5, 1.5], [1.5, 0], [0, 1.5], [1, 0.5]
+    ])
+    edges = [(0, 1), (1, 2), (0, 2), (1, 3), (3, 4), (3, 7), (6, 7), (4, 6), (2, 5), (7, 8), (4, 5), (1, 8), (1, 7),
+             [2, 4], [3, 6], (2, 6), [4, 9], [9, 6], [2, 10]]
+    faces = [[0, 1, 2], [4, 5, 2], [1, 8, 7], [3, 6, 7], [4, 6, 2], [4, 9, 6], [2, 10, 3], [1, 8, 7, 3], [5, 4, 6, 2]]
+
+    simplicial_animation = SimplicialAnimation(nodes=vertices, edge_set=edges, face_set=faces, config=configuration)
+    simplicial_animation.show()

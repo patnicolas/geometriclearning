@@ -36,7 +36,7 @@ class SimplicialVisualization(object):
         """
         import networkx as nx
         # Prepare the plots
-        fig = plt.figure(figsize=(8, 6), facecolor='lightblue')
+        fig = plt.figure(figsize=(12, 10), facecolor='lightblue')
         fig.subplots()
 
         # Build the NetworkX
@@ -78,27 +78,38 @@ class SimplicialVisualization(object):
         face_font_size = self.attributes.get('face_font_size', 15)
 
         # Draw the simplices (faces)
+        tetrahedrons = []
         for idx, face in enumerate(self.simplicial_feature_set.face_set):
             face.append(face[0])
             face_pos = [node_pos[n] for n in face]
             x, y = zip(*face_pos)
             if len(face) == 5:
-                plt.fill(x, y, color=SimplicialFeatureSet.tetrahedron_color, alpha=0.7)
+                tetrahedrons.append((x, y))
+                """
                 plt.text(x=face_label_pos[0][0],
                          y=face_label_pos[0][1] + label_offset,
                          s=f'Tetrahedron {idx + 1}',
                          fontdict={'fontsize': face_font_size, 'color': 'darkgrey'},
                          bbox=dict(boxstyle="round,pad=0.2", edgecolor='black', facecolor='white'))
+                """
 
             else:
                 face_color = SimplicialFeatureSet.triangle_colors[idx % len(SimplicialFeatureSet.triangle_colors)]
-                plt.fill(x, y, face_color, alpha=0.4)
+                plt.fill(x, y, face_color, alpha=0.2)
                 plt.text(x=face_label_pos[color_idx][0] - label_offset,
                          y=face_label_pos[color_idx][1],
                          s=f'Triangle {idx + 1}',
                          fontdict={'fontsize': face_font_size-3, 'color': face_color},
                          bbox=dict(boxstyle="round,pad=0.2", edgecolor='black', facecolor='white'))
                 color_idx += 1
+
+        for (x, y) in tetrahedrons:
+            plt.fill(x,
+                     y,
+                     color=SimplicialFeatureSet.tetrahedron_color,
+                     alpha=0.6,
+                     edgecolor='grey',
+                     hatch='////')
 
     def __display_features(self) -> Dict[int, AnyStr]:
         def display_feature_values(x: np.array) -> AnyStr:
