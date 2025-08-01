@@ -13,30 +13,32 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, AnyStr
-from abc import abstractmethod
+from typing import AnyStr, Any, Dict
+from abc import abstractmethod, ABC
 import matplotlib.image as mpimg
 __all__ = ['BaseAnimation']
 
 
-class BaseAnimation(object):
-    def __init__(self, logo_pos: List[float], interval: int, fps: int) -> None:
+class BaseAnimation(ABC):
+    """
+    Generic Abstract class for animation
+    logo_pos: Tuple[int, int]   Position of the logo if one is defined
+    logo_size: Tuple[int, int]  Size of the logo if one is defined
+    interval: int  Interval for FuncAnimation in msec
+    fps: int  Frame per second
+    """
+    def __init__(self, **kwargs: Dict[AnyStr, Any]) -> None:
         """
         Constructor for the base animation
-        @param logo_pos: Position of the chart used in call to plt.set_position or ax.set_position
-        @type logo_pos: 4-dimension array
-        @param interval: Interval in milliseconds between frames
-        @type interval: int
-        @param fps: Number of frame per seconds for animation
-        @type fps: int
+        @param **kwargs: Dictionary of configuration parameters for any given animation
+        @type **kwargs: Dictionary
         """
-        assert len(logo_pos) == 4, f'Length of chart position {len(logo_pos)} should be 4'
-        assert 1 < interval <= 4096, f'Interval for animation {interval} should be [2, 4096]'
-        assert 0 < fps <= 2048, f'Frame per second for animation {fps} should be [1, 2048]'
-
-        self.chart_pos = logo_pos
-        self.interval = interval
-        self.fps = fps
+        assert 1 < kwargs.get('interval', 128) <= 4096, \
+            f'Interval for animation { kwargs.get("interval", 128)} should be [2, 4096]'
+        assert 0 < kwargs.get('fps', 128) <= 2048, \
+            f'Frame per second for animation {kwargs.get("fps", 128)} should be [1, 2048]'
+        _dict = kwargs
+        self.config = _dict['kwargs']
 
     @abstractmethod
     def _group_name(self) -> AnyStr:
@@ -45,12 +47,12 @@ class BaseAnimation(object):
     @abstractmethod
     def draw(self, mp4_filename: AnyStr = None) -> None:
         """
-            Draw and animate lie group/manifold in ambient Euclidean space. The animation is driven by Matplotlib
-            FuncAnimation class that require an update nested function.
-            This method needs to be overwritten in sub-classes
+        Draw and animate lie group/manifold in ambient Euclidean space. The animation is driven by Matplotlib
+        FuncAnimation class that require an update nested function.
+        This method needs to be overwritten in sub-classes
 
-            @param mp4_filename: Name of the mp4 file is to be generated (False plot are displayed but not saved)
-            @type mp4_filename: str
+        @param mp4_filename: Name of the mp4 file is to be generated (False plot are displayed but not saved)
+        @type mp4_filename: str
         """
         pass
 
@@ -61,7 +63,11 @@ class BaseAnimation(object):
         @type fig: Figure
         """
         img = mpimg.imread('../../input/Animation_logo.png')
-        inset_ax = fig.add_axes(self.chart_pos)
+        chart_pos = (self.config['logo_pos'][0],
+                     self.config['logo_pos'][1],
+                     self.config['logo_size'][0],
+                     self.config['logo_size'][1])
+        inset_ax = fig.add_axes(chart_pos)
         inset_ax.imshow(img, alpha=1.0)
         inset_ax.axis('off')
 

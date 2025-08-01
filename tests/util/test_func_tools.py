@@ -2,9 +2,6 @@ from functools import total_ordering
 from unittest import TestCase
 import unittest
 import logging
-import os
-import python
-from python import SKIP_REASON
 
 @total_ordering
 class Student:
@@ -29,6 +26,22 @@ class Student:
 
 
 class TestFuncTools(TestCase):
+
+    def test_1(self):
+        class Composition(object):
+            def __init__(self, *functions):
+                self.functions = functions
+
+            def __call__(self, x):
+                from functools import reduce
+                return reduce(lambda acc, f: f(acc), reversed(self.functions), x)
+
+        import math
+        c = Composition(lambda x: math.sqrt(x), lambda x: x*x)
+        self.assertTrue(c(2.0) == 2.0)
+        print(f'c(2.0)={c(2.0)}')
+
+
     @unittest.skip("Not needed")
     def test_total_ordering(self):
         student1 = Student("Greg", 4.6)

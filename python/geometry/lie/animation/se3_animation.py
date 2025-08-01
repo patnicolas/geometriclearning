@@ -15,7 +15,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from geometry.lie.animation.so3_animation import SO3Animation
 import numpy as np
-from typing import List, Self, Callable, AnyStr
+from typing import List, Callable, AnyStr, Dict, Any
 __all__ = ['SE3Animation']
 
 
@@ -48,56 +48,32 @@ class SE3Animation(SO3Animation):
     as a nested function.
 
     Reference:
+
+    Dictionary of animation configuration parameters
+    ------------------------------------------------
+    logo_pos: Tuple[int, int]   Position of the logo if one is defined
+    logo_size: Tuple[int, int]  Size of the logo if one is defined
+    interval: int  Interval for FuncAnimation in msec
+    fps: int  Frame per second
+    sphere_radius: float  Radius of sphere in 3D space
+    x_lim: Tuple[float, float]  Range of x values
+    y_lim: Tuple[float, float]  Range of y values
+    z_lim: Tuple[float, float]  Range of z values
+    formula_pos: Tuple[float, float]  Position of formula if any
+    title_pos: Tuple[float, float]  Position of title
     """
     def __init__(self,
-                 logo_pos: List[float],
-                 interval: int,
-                 fps: int,
-                 coordinates: (float, float, float),
-                 transform: Callable[[np.array], np.array] = default_se3_transform) -> None:
+                 transform: Callable[[np.array], np.array] = default_se3_transform,
+                 **kwargs: Dict[AnyStr, Any]) -> None:
         """
-            Default constructor for the animation of SE3 lie Group.
-
-            @param logo_pos: Define the position of the chart [x, y, width, height]
-            @type logo_pos: List[float]
-            @param interval: Interval in milliseconds between frames
-            @type interval: int
-            @param fps: Number of frame per seconds for animation
-            @type fps: int
-            @param coordinates: Initial coordinate of the sphere used for SE3 transformation
-            @type coordinates: Tuple[float, float,float]
-            @param transform: Rotation (SO3) + Translation transform
-            @type transform: Callable
-        """
-        super(SE3Animation, self).__init__(logo_pos, interval, fps, coordinates, transform, 1.0)
-
-    @classmethod
-    def build(cls,
-              logo_pos: List[float],
-              interval: int,
-              fps: int,
-              transform: Callable[[np.array], np.array] = default_se3_transform,
-              sphere_radius: float = 1.0) -> Self:
-        """
-        Alternative constructor that takes a SE3 transformation as argument
-        @param logo_pos: Define the position of the chart [x, y, width, height]
-        @type logo_pos: List[float]
-        @param interval: Interval in milliseconds between frames
-        @type interval: int
-        @param fps: Number of frame per seconds for animation
-        @type fps: int
+        Default constructor for the animation of SE3 lie Group.
         @param transform: Rotation (SO3) + Translation transform
         @type transform: Callable
-        @param sphere_radius: Radius of the 3D sphere
-        @type sphere_radius: float
-        @return: Instance of SE3Animation
-        @rtype: SO3Animation
+        @param **kwargs: Dictionary of configuration parameters for any given animation
+        @type **kwargs: Dictionary
         """
-        x, y, z = SO3Animation._set_coordinates(1.0)
-        return cls(logo_pos=logo_pos,
-                   interval=interval,
-                   fps=fps, coordinates=(x, y, z),
-                   transform=transform)
+
+        super(SE3Animation, self).__init__(transform, **kwargs)
 
     """ ----------------  Polymorphic protected methods ------------------  """
 
@@ -124,9 +100,19 @@ class SE3Animation(SO3Animation):
 
 
 if __name__ == '__main__':
-    lie_group_simulation = SE3Animation.build(logo_pos=[0.01, 0.74, 0.34, 0.24],
-                                              interval=1000,
-                                              fps=8,
-                                              sphere_radius=1.6)
+    config = {
+        'fig_size': (10, 8),
+        'logo_pos': (0.1, 0.97),
+        'formula_pos': (0.01, 0.35),
+        'formula_size': (0.24, 0.24),
+        'title_pos': (0.6, 1.0),
+        'x_lim': (-1.8, 1.8),
+        'y_lim': (-1.8, 1.8),
+        'z_lim': (-1.8, 1.8),
+        'sphere_radius': 1.2,
+        'interval': 1000,
+        'fps': 8
+    }
+    lie_group_simulation = SE3Animation(transform=default_se3_transform, kwargs=config)
     lie_group_simulation.draw(mp4_file=True)
 

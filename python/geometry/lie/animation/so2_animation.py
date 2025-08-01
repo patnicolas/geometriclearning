@@ -1,5 +1,20 @@
+__author__ = "Patrick R. Nicolas"
+__copyright__ = "Copyright 2023, 2025  All rights reserved."
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from util.base_animation import BaseAnimation
-from typing import List, Callable, AnyStr
+from typing import List, Callable, AnyStr, Dict, Any
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import numpy as np
@@ -7,12 +22,22 @@ __all__ = ['SO2Animation']
 
 
 class SO2Animation(BaseAnimation):
-    def __init__(self,
-                 logo_pos: List[float],
-                 interval: int,
-                 fps: int,
-                 rotation_steps: List[Callable[[int], float]]) -> None:
-        super(SO2Animation, self).__init__(logo_pos, interval, fps)
+    """
+        Dictionary of animation configuration parameters
+    ------------------------------------------------
+    logo_pos: Tuple[int, int]   Position of the logo if one is defined
+    logo_size: Tuple[int, int]  Size of the logo if one is defined
+    interval: int  Interval for FuncAnimation in msec
+    fps: int  Frame per second
+    sphere_radius: float  Radius of sphere in 3D space
+    x_lim: Tuple[float, float]  Range of x values
+    y_lim: Tuple[float, float]  Range of y values
+    formula_pos: Tuple[float, float]  Position of formula if any
+    title_pos: Tuple[float, float]  Position of title
+    num_frames: int  Number of frames in the animation
+    """
+    def __init__(self, rotation_steps: List[Callable[[int], float]], **kwargs: Dict[AnyStr, Any]) -> None:
+        super(SO2Animation, self).__init__(**kwargs)
         fig, ax = plt.subplots()
         self.fig = fig
         self.ax = ax
@@ -44,14 +69,19 @@ class SO2Animation(BaseAnimation):
 
         self.fig.patch.set_facecolor('#f0f9ff')
         self.ax.set_facecolor('#f0f9ff')
-        self.ax.set_xlim(-1.1, 1.1)
-        self.ax.set_ylim(-1.1, 1.1)
+        x_lim = self.config['x_lim']
+        y_lim = self.config['y_lim']
+        self.ax.set_xlim(x_lim[0], x_lim[1])
+        self.ax.set_ylim(y_lim[0], y_lim[1])
         self.ax.set_aspect('equal')
         self.ax.grid(True)
         circle = Circle((0.0, 0.0), 1.0, edgecolor='blue', facecolor='lightblue', linewidth=2)
         self.ax.add_patch(circle)
-        self.ax.set_title(y=1.01, x=0.7, label="SO(2) Rotation", fontdict={'fontsize': 16, 'fontname': 'Helvetica'})
-        self._draw_logo(fig=self.fig)
+        self.ax.set_title(y=self.config['title_pos'][0],
+                          x=self.config['title_pos'][1],
+                          label="SO(2) Rotation",
+                          fontdict={'fontsize': 16, 'fontname': 'Helvetica'})
+        self._draw_logo(fig=self.config['fig_size'])
 
         # Update function for animation
         def update(frame: int) -> None:
@@ -65,12 +95,13 @@ class SO2Animation(BaseAnimation):
         # Create animation
         ani = FuncAnimation(self.fig,
                             update,
-                            frames=20,
+                            frames=self.config['num_frames'],
                             repeat=False,
-                            interval=self.interval,
+                            interval=self.config['interval'],
                             blit=False)
         if mp4_file:
-            ani.save(filename=f'{self._group_name()}_animation.mp4', writer='ffmpeg', fps=self.fps, dpi=240)
+            fps = self.config['fps']
+            ani.save(filename=f'{self._group_name()}_animation.mp4', writer='ffmpeg', fps=fps, dpi=240)
         else:
             plt.show()
 
@@ -83,8 +114,16 @@ if __name__ == '__main__':
         lambda a: 0.012 * a * a - a,
         lambda a: 0.005 * a * a - a
     ]
-    so2_animation = SO2Animation(logo_pos=[0.02, 0.785, 0.32, 0.24],
-                                 interval=10000,
-                                 fps=5,
-                                 rotation_steps=rot_steps)
+    config = {
+        'fig_size': (10, 8),
+        'logo_pos': (0.1, 0.97),
+        'title_pos': (0.6, 1.0),
+        'x_lim': (-1.8, 1.8),
+        'y_lim': (-1.8, 1.8),
+        'sphere_radius': 1.2,
+        'interval': 1000,
+        'fps': 8,
+        'num_frames': 40
+    }
+    so2_animation = SO2Animation(rotation_steps=rot_steps, kwargs=config)
     so2_animation.draw(mp4_file=True)

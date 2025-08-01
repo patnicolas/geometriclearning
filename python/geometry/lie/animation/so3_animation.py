@@ -14,7 +14,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 import numpy as np
-from typing import AnyStr, List, Self, Callable, Tuple
+from typing import AnyStr, List, Self, Callable, Tuple, Any, Dict
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from util.base_animation import BaseAnimation
@@ -46,67 +46,51 @@ class SO3Animation(BaseAnimation):
     as a nested function.
 
     Reference: https://patricknicolas.substack.com/p/mastering-special-orthogonal-groups
+
+    Dictionary of animation configuration parameters
+    ------------------------------------------------
+    logo_pos: Tuple[int, int]   Position of the logo if one is defined
+    logo_size: Tuple[int, int]  Size of the logo if one is defined
+    interval: int  Interval for FuncAnimation in msec
+    fps: int  Frame per second
+    sphere_radius: float  Radius of sphere in 3D space
+    x_lim: Tuple[float, float]  Range of x values
+    y_lim: Tuple[float, float]  Range of y values
+    z_lim: Tuple[float, float]  Range of z values
+    formula_pos: Tuple[float, float]  Position of formula if any
+    title_pos: Tuple[float, float]  Position of title
     """
     def __init__(self,
-                 logo_pos: List[float],
-                 interval: int,
-                 fps: int,
-                 coordinates: (float, float, float),
                  transform: Callable[[np.array], np.array] = default_so3_transform,
-                 sphere_radius: float = 1.0) -> None:
+                 **kwargs: Dict[AnyStr, Any]) -> None:
         """
         Default constructor for the animation of SO3 lie Group.
 
-        @param logo_pos: Define the position of the chart [x, y, width, height]
-        @type logo_pos: List[float]
-        @param interval: Interval in milliseconds between frames
-        @type interval: int
-        @param fps: Number of frame per seconds for animation
-        @type fps: int
-        @param coordinates: Initial coordinate of the sphere used for SE3 transformation
-        @type coordinates: Tuple[float, float,float]
+        @param **kwargs: Dictionary of configuration parameters for any given animation
+        @type **kwargs: Dictionary
         @param transform: Rotation (SO3) + Translation transform
         @type transform: Callable
-        @param sphere_radius: Radius of the 3D sphere
-        @type sphere_radius: float
         """
-        super(SO3Animation, self).__init__(logo_pos, interval, fps)
+        super(SO3Animation, self).__init__(**kwargs)
 
-        self.coordinates = coordinates
         self.transform = transform
         self.next_step = [np.array(0.0), np.array([[0.0], [0.0], [0.0]])]
-        self.fig = plt.figure(figsize=(10, 7))
-        self.sphere_radius = sphere_radius
+        fig_size: Tuple[int, int] = kwargs.get('fig_size', (10, 7))
+        self.fig = plt.figure(figsize=fig_size)
         self.ax = self.fig.add_subplot(111, projection='3d')
+        c = kwargs['kwargs']['sphere_radius']
+        self.coordinates = SO3Animation._set_coordinates(c)
 
     @classmethod
-    def build(cls,
-              logo_pos: List[float],
-              interval: int,
-              fps: int,
-              transform: Callable[[np.array], np.array] = default_so3_transform,
-              sphere_radius: float = 1.0) -> Self:
+    def build(cls, transform: Callable[[np.array], np.array] = default_so3_transform) -> Self:
         """
         Alternative constructor that takes a SE3 transformation as argument
-        @param logo_pos: Define the position of the chart [x, y, width, height]
-        @type logo_pos: List[float]
-        @param interval: Interval in milliseconds between frames
-        @type interval: int
-        @param fps: Number of frame per seconds for animation
-        @type fps: int
         @param transform: Rotation (SO3) + Translation transform
         @type transform: Callable
-        @param sphere_radius: Radius of the 3D sphere
-        @type sphere_radius: float
         @return: Instance of SE3Animation
         @rtype: SO3Animation
         """
-        x, y, z = SO3Animation._set_coordinates(sphere_radius)
-        return cls(logo_pos=logo_pos,
-                   interval=interval,
-                   fps=fps, coordinates=(x, y, z),
-                   transform=transform,
-                   sphere_radius=sphere_radius)
+        return cls(transform=transform)
 
     def draw(self, mp4_file: bool = False) -> None:
         """
@@ -134,7 +118,7 @@ class SO3Animation(BaseAnimation):
 
         geo_lines = self.__sphere_geo_lines()
 
-        def update(frame: int) -> None:
+        def update(frame: int) -> List:
             """
             Update method to be executed for each frame
             @param frame: Number of the frame (index) used in the simulation
@@ -146,15 +130,21 @@ class SO3Animation(BaseAnimation):
             self._draw_trajectory(next_pts, frame)
             T = self.transform(self.next_step)
             self.__draw_next_sphere(colors[frame], geo_lines, points, T)
+            return []
 
         self.__reset_axis()
         self._draw_trajectory(next_pts)
         self.__draw_sphere(color='#facf0d', geo_lines=geo_lines)
 
-        ani = FuncAnimation(self.fig, update, frames=len(colors), interval=self.interval, repeat=False, blit=False)
+        ani = FuncAnimation(self.fig,
+                            update,
+                            frames=len(colors),
+                            interval=self.config['interval'],
+                            repeat=False,
+                            blit=False)
         if mp4_file:
             file_name = f'{self._group_name()}_animation.mp4'
-            ani.save(file_name, writer='ffmpeg', fps=self.fps, dpi=240)
+            ani.save(file_name, writer='ffmpeg', fps=self.config['fps'], dpi=240)
         else:
             plt.show()
 
@@ -182,7 +172,9 @@ class SO3Animation(BaseAnimation):
     def __draw_formula(self) -> None:
         import matplotlib.image as mpimg
         img = mpimg.imread(f'../../input/{self._group_name()}_formula.png')
-        inset_ax = self.fig.add_axes((0.01, 0.35, 0.24, 0.24))
+        formula_pos = self.config['formula_pos']
+        formula_size = self.config['formula_size']
+        inset_ax = self.fig.add_axes((formula_pos[0], formula_pos[1], formula_size[0], formula_size[1]))
         inset_ax.imshow(img, alpha=1.0)
         inset_ax.axis('off')
 
@@ -208,7 +200,7 @@ class SO3Animation(BaseAnimation):
             self.ax.plot(line[0], line[1], line[2], color='black', linewidth=1.5, alpha=1.0)
 
     def __draw_next_sphere(self, color: AnyStr, geo_lines: List[np.array], points: np.array, T) -> None:
-        # Step 3: Apply SE(3) transformation
+        # Step 3: Apply SO(3) transformation
         transformed_points = T @ points
         self.coordinates = [transformed_points[idx].reshape(self.coordinates[idx].shape) for idx in range(3)]
 
@@ -247,26 +239,30 @@ class SO3Animation(BaseAnimation):
         geo_lines = []
         for lat in latitudes:
             phi = np.linspace(0, 2 * np.pi, 100)
-            x_lat = self.sphere_radius * np.cos(phi) * np.cos(lat)
-            y_lat = self.sphere_radius * np.sin(phi) * np.cos(lat)
-            z_lat = self.sphere_radius * np.ones_like(phi) * np.sin(lat)
+            x_lat = self.config['sphere_radius'] * np.cos(phi) * np.cos(lat)
+            y_lat = self.config['sphere_radius'] * np.sin(phi) * np.cos(lat)
+            z_lat = self.config['sphere_radius'] * np.ones_like(phi) * np.sin(lat)
             geo_lines.append(np.stack([x_lat, y_lat, z_lat, np.ones_like(phi)]))
 
         for lon in longitudes:
-            theta = self.sphere_radius * np.linspace(-np.pi / 2, np.pi / 2, 100)
-            x_lon = self.sphere_radius * np.cos(theta) * np.cos(lon)
-            y_lon = self.sphere_radius * np.cos(theta) * np.sin(lon)
-            z_lon = self.sphere_radius * np.sin(theta)
+            theta = self.config['sphere_radius'] * np.linspace(-np.pi / 2, np.pi / 2, 100)
+            x_lon = self.config['sphere_radius'] * np.cos(theta) * np.cos(lon)
+            y_lon = self.config['sphere_radius'] * np.cos(theta) * np.sin(lon)
+            z_lon = self.config['sphere_radius'] * np.sin(theta)
             geo_lines.append(np.stack([x_lon, y_lon, z_lon, np.ones_like(theta)]))
         return geo_lines
 
     def __reset_axis(self):
         self.ax.set_box_aspect([1.3, 1.3, 1.2])
-        self.ax.set_xlim(-1.8, 1.8)
-        self.ax.set_ylim(-1.8, 1.8)
-        self.ax.set_zlim(-1.8, 1.8)
-        self.ax.set_title(x=0.6,
-                          y=1.0,
+        x_lim = self.config['x_lim']
+        y_lim = self.config['y_lim']
+        z_lim = self.config['z_lim']
+        self.ax.set_xlim(x_lim[0], x_lim[1])
+        self.ax.set_ylim(y_lim[0], y_lim[1])
+        self.ax.set_zlim(z_lim[0], z_lim[1])
+
+        self.ax.set_title(x=self.config['title_pos'][0],        # 0.6,
+                          y=self.config['title_pos'][1],  # 1.0,
                           label='Mastering Special Orthogonal Groups-Python',
                           fontdict={'fontsize': 18, 'fontweight': 'bold', 'fontname': 'Helvetica', 'color': 'black'})
         self.ax.set_xlabel('X', fontdict={'fontsize': 14, 'fontweight': 'bold'})
@@ -275,11 +271,21 @@ class SO3Animation(BaseAnimation):
 
 
 if __name__ == '__main__':
-    lie_group_simulation = SO3Animation.build(logo_pos=[0.015, 0.725, 0.3, 0.28],
-                                              interval=2000,
-                                              fps=10,
-                                              sphere_radius=2)
-    lie_group_simulation.draw(mp4_file=True)
+    config = {
+        'fig_size': (10, 8),
+        'logo_pos': (0.1, 0.97),
+        'formula_pos': (0.01, 0.35),
+        'formula_size': (0.24, 0.24),
+        'title_pos': (0.6, 1.0),
+        'x_lim': (-1.8, 1.8),
+        'y_lim': (-1.8, 1.8),
+        'z_lim': (-1.8, 1.8),
+        'sphere_radius': 1.2,
+        'interval': 1000,
+        'fps': 8
+    }
+    lie_group_simulation = SO3Animation(transform=default_so3_transform, kwargs=config)
+    lie_group_simulation.draw(mp4_file=False)
 
 
 

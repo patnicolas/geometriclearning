@@ -17,38 +17,29 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-from typing import List, Tuple, AnyStr
+from typing import List, Tuple, AnyStr, Any, Dict
 from util.base_animation import BaseAnimation
 __all__ = ['SO4Animation']
 
 class SO4Animation(BaseAnimation):
     from mpl_toolkits.mplot3d import Axes3D
 
-    def __init__(self,
-                 logo_pos: List[float],
-                 interval: int,
-                 fps: int,
-                 n_geodesics: Tuple[int, int]) -> None:
+    def __init__(self, n_geodesics: Tuple[int, int], **kwargs: Dict[AnyStr, Any]) -> None:
         """
-            Default constructor for the SO(4) lie group designed at two 2D rotations
+        Default constructor for the SO(4) lie group designed at two 2D rotations
 
-            @param logo_pos: Define the position of the chart [x, y, width, height]
-            @type logo_pos: List[float]
-            @param interval: Interval in milliseconds between frames
-            @type interval: int
-            @param fps: Number of frame per seconds for animation
-            @type fps: int
-            @param n_geodesics: Number of geodesics for each of the two 2D rotations
-            @type n_geodesics: Tuple
+        @param n_geodesics: Number of geodesics for each of the two 2D rotations
+        @type n_geodesics: Tuple
+        @param **kwargs: Dictionary of configuration parameters for any given animation
+        @type **kwargs: Dictionary
         """
         assert len(n_geodesics) == 2, f'Number of elements of geodesics {len(n_geodesics)} should be 2'
 
-        super(SO4Animation, self).__init__(logo_pos, interval, fps)
-
-        self.fig = plt.figure(figsize=(10, 7))
+        super(SO4Animation, self).__init__(**kwargs)
+        fig_size = self.config['fig_size']
+        self.fig = plt.figure(figsize=fig_size)
         self.n_theta, self.n_phi = n_geodesics
         self.ax = self.fig.add_subplot(111, projection='3d')
-        self.fps = fps
 
     def _group_name(self) -> AnyStr:
         return 'SO4'
@@ -69,12 +60,15 @@ class SO4Animation(BaseAnimation):
         self._draw_logo(fig=self.fig)
         self.__draw_formula()
 
-        self.ax.set_xlim([-1.1, 1.1])
-        self.ax.set_ylim([-1.1, 1.1])
-        self.ax.set_zlim([-1.1, 1.1])
+        x_lim = self.config['x_lim']
+        y_lim = self.config['y_lim']
+        z_lim = self.config['z_lim']
+        self.ax.set_xlim(x_lim[0], x_lim[1])
+        self.ax.set_ylim(y_lim[0], y_lim[1])
+        self.ax.set_zlim(z_lim[0], z_lim[1])
         self.ax.set_box_aspect([1, 1, 1])
-        self.ax.set_title(x=0.7,
-                          y=1.0,
+        self.ax.set_title(x=self.config['title_pos'][0],
+                          y=self.config['title_pos'][0],
                           label=f"SO4 Transformation - 3D Sphere",
                           fontdict={'fontsize': 18, 'fontweight': 'bold', 'fontname': 'Helvetica', 'color': 'black'})
 
@@ -113,10 +107,10 @@ class SO4Animation(BaseAnimation):
                             update,
                             frames=np.linspace(0, 360, 300),
                             repeat=False,
-                            interval=50)
+                            interval=self.config['interval'])
         # If the animation has to be saved into a MP4 file
         if mp4_file:
-            ani.save(f'{self._group_name()}_animation.mp4', writer='ffmpeg', fps=self.fps, dpi=240)
+            ani.save(f'{self._group_name()}_animation.mp4', writer='ffmpeg', fps=self.config['fps'], dpi=240)
         # Otherwise
         else:
             plt.show()
@@ -166,12 +160,30 @@ class SO4Animation(BaseAnimation):
         import matplotlib.image as mpimg
 
         img = mpimg.imread(f'../../input/{self._group_name()}_formula.png')
-        inset_ax = self.fig.add_axes((0.1, 0.56, 0.4, 0.26))
+        inset_ax = self.fig.add_axes((
+            self.config['formula_pos'][0],
+            self.config['formula_pos'][1],
+            self.config['formula_size'][0],
+            self.config['formula_size'][1]
+        ))
         inset_ax.imshow(img, alpha=1.0)
         inset_ax.axis('off')
 
 
 if __name__ == '__main__':
-    logo_position = [0.1, 0.71, 0.3, 0.3]
-    so4_animation = SO4Animation(logo_pos=logo_position, interval=50, fps=20, n_geodesics=(60, 160))
+    config = {
+        'fig_size': (10, 8),
+        'logo_pos': (0.1, 0.71),
+        'logo_size': (0.3, 0.3),
+        'formula_pos': (0.01, 0.35),
+        'formula_size': (0.24, 0.24),
+        'title_pos': (0.6, 1.0),
+        'x_lim': (-1.8, 1.8),
+        'y_lim': (-1.8, 1.8),
+        'z_lim': (-1.8, 1.8),
+        'sphere_radius': 1.2,
+        'interval': 1000,
+        'fps': 8
+    }
+    so4_animation = SO4Animation(n_geodesics=(60, 160), kwargs=config)
     so4_animation.draw(mp4_file=True)
