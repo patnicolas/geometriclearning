@@ -1,13 +1,12 @@
 import unittest
 from torch_geometric.nn import GCNConv
-from deeplearning.block.graph.g_message_passing_block import GMessagePassingBlock
+from deeplearning.block.graph.message_passing_block import MessagePassingBlock
 import torch.nn as nn
 import logging
 import python
 
 
-
-class GMessagePassingBlockTest(unittest.TestCase):
+class MessagePassingBlockTest(unittest.TestCase):
 
     def test_init(self):
         from torch_geometric.datasets.karate import KarateClub
@@ -15,7 +14,7 @@ class GMessagePassingBlockTest(unittest.TestCase):
         karate_club_dataset = KarateClub()
         hidden_channels = 16
         conv = GCNConv(karate_club_dataset.num_node_features, out_channels = hidden_channels)
-        gcn_conv = GMessagePassingBlock('K1', conv, activation_module=nn.ReLU(), batch_norm_module=None, drop_out_module=0.0)
+        gcn_conv = MessagePassingBlock('K1', conv, activation_module=nn.ReLU(), batch_norm_module=None, dropout_module=0.0)
         logging.info(repr(gcn_conv))
         self.assertTrue(True)
 
@@ -26,11 +25,11 @@ class GMessagePassingBlockTest(unittest.TestCase):
         karate_club_dataset = KarateClub()
         hidden_channels = 16
         conv = GCNConv(karate_club_dataset.num_node_features, out_channels=hidden_channels)
-        gcn_conv = GMessagePassingBlock('K2',
-                                        conv,
-                                        activation_module=nn.ReLU(),
-                                        batch_norm_module=BatchNorm(hidden_channels),
-                                        drop_out_module=nn.Dropout(0.2))
+        gcn_conv = MessagePassingBlock('K2',
+                                       conv,
+                                       activation_module=nn.ReLU(),
+                                       batch_norm_module=BatchNorm(hidden_channels),
+                                       dropout_module=nn.Dropout(0.2))
         logging.info(repr(gcn_conv))
         self.assertTrue(True)
 

@@ -1,6 +1,6 @@
 import unittest
 import logging
-from deeplearning.model.mlp_model import MLPModel
+from deeplearning.model.mlp.mlp_model import MLPModel
 from deeplearning.block.mlp.mlp_block import MLPBlock
 from deeplearning.training.hyper_params import HyperParams
 from plots.plotter import PlotterParameters

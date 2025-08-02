@@ -22,9 +22,9 @@ import torch_geometric
 from dataset.graph.graph_data_loader import GraphDataLoader
 from dataset.graph.pyg_datasets import PyGDatasets
 from torch_geometric.nn import GraphConv
-from deeplearning.block.graph.gconv_block import GConvBlock
+from deeplearning.block.graph.graph_conv_block import GraphConvBlock
 from deeplearning.block.mlp.mlp_block import MLPBlock
-from deeplearning.model.gconv_model import GConvModel
+from deeplearning.model.graph.graph_conv_model import GraphConvModel
 import torch
 from torch_geometric.data import Data
 from plots.plotter import PlotterParameters
@@ -46,7 +46,7 @@ def distribution(data: Data) -> torch.Tensor:
     return raw_distribution / total_sum
 
 
-def flickr_model(dataset_name, hidden_channels, pooling_ratio, dropout_p) -> (GConvModel, torch.Tensor):
+def flickr_model(dataset_name, hidden_channels, pooling_ratio, dropout_p) -> (GraphConvModel, torch.Tensor):
     from torch_geometric.datasets.flickr import Flickr
 
     pyg_dataset = PyGDatasets(dataset_name)
@@ -61,31 +61,31 @@ def flickr_model(dataset_name, hidden_channels, pooling_ratio, dropout_p) -> (GC
     conv_1 = GraphConv(in_channels=_data.num_node_features, out_channels=hidden_channels)
 
     pooling_module = TopKPooling(hidden_channels, ratio=pooling_ratio) if pooling_ratio > 0 else None
-    gconv_block_1 = GConvBlock(block_id='Conv 24-256',
-                               gconv_layer=conv_1,
-                               batch_norm_module=None,  # BatchNorm(hidden_channels),
-                               activation_module=nn.ReLU(),
-                               pooling_module=pooling_module,
-                               dropout_module=nn.Dropout(dropout_p))
+    gconv_block_1 = GraphConvBlock(block_id='Conv 24-256',
+                                   graph_conv_layer=conv_1,
+                                   batch_norm_module=None,  # BatchNorm(hidden_channels),
+                                   activation_module=nn.ReLU(),
+                                   pooling_module=pooling_module,
+                                   dropout_module=nn.Dropout(dropout_p))
 
     conv_2 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-    gconv_block_2 = GConvBlock(block_id='Conv 256-256',
-                               gconv_layer=conv_2,
-                               batch_norm_module=None,  # BatchNorm(hidden_channels),
-                               activation_module=nn.ReLU(),
-                               pooling_module=pooling_module,
-                               dropout_module=nn.Dropout(dropout_p))
+    gconv_block_2 = GraphConvBlock(block_id='Conv 256-256',
+                                   graph_conv_layer=conv_2,
+                                   batch_norm_module=None,  # BatchNorm(hidden_channels),
+                                   activation_module=nn.ReLU(),
+                                   pooling_module=pooling_module,
+                                   dropout_module=nn.Dropout(dropout_p))
 
     mlp_block = MLPBlock(block_id='Fully connected',
                          layer_module=nn.Linear(hidden_channels, flickr_dataset.num_classes),
                          activation_module=nn.LogSoftmax(dim=-1))
 
-    return GConvModel(model_id='Flicker test dataset',
-                      gconv_blocks=[gconv_block_1, gconv_block_2],
-                      mlp_blocks=[mlp_block]), distribution(_data)
+    return GraphConvModel(model_id='Flicker test dataset',
+                          graph_conv_blocks=[gconv_block_1, gconv_block_2],
+                          mlp_blocks=[mlp_block]), distribution(_data)
 
 
-def training_env(model: GConvModel, class_weights: torch.Tensor) -> GNNTraining:
+def training_env(model: GraphConvModel, class_weights: torch.Tensor) -> GNNTraining:
     metric_labels = {
         MetricType.Accuracy: BuiltInMetric(MetricType.Accuracy, encoding_len=-1, is_weighted=True),
         MetricType.Precision: BuiltInMetric(MetricType.Precision, encoding_len=-1, is_weighted=True),

@@ -6,7 +6,7 @@ from dataset import DatasetException
 from deeplearning.block.mlp.mlp_block import MLPBlock
 from deeplearning.training.hyper_params import HyperParams
 from deeplearning.training.gnn_training import GNNTraining
-from deeplearning.model.gnn_base_model import GNNBaseModel
+from deeplearning.model.graph.gnn_base_model import GNNBaseModel
 from dataset.graph.graph_data_loader import GraphDataLoader
 from metric.metric_type import MetricType
 from metric.built_in_metric import BuiltInMetric
@@ -423,25 +423,25 @@ class GNNTrainingTest(unittest.TestCase):
     @staticmethod
     def create_model(num_node_features: int, num_classes: int) -> GNNBaseModel:
         from torch_geometric.nn import GraphConv
-        from deeplearning.block.graph.g_message_passing_block import GMessagePassingBlock
-        from deeplearning.model.gnn_base_model import GNNBaseModel
+        from deeplearning.block.graph.message_passing_block import MessagePassingBlock
+        from deeplearning.model.graph.gnn_base_model import GNNBaseModel
 
         hidden_channels = 256
         conv_1 = GraphConv(in_channels=num_node_features, out_channels=hidden_channels)
-        gnn_block_1 = GMessagePassingBlock(block_id='K1',
-                                           message_passing_module=conv_1,
-                                           activation_module=nn.ReLU(),
-                                           drop_out_module=nn.Dropout(0.2))
+        gnn_block_1 = MessagePassingBlock(block_id='K1',
+                                          message_passing_module=conv_1,
+                                          activation_module=nn.ReLU(),
+                                          dropout_module=nn.Dropout(0.2))
         conv_2 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-        gnn_block_2 = GMessagePassingBlock(block_id='K2',
-                                           message_passing_module=conv_2,
-                                           activation_module=nn.ReLU(),
-                                           drop_out_module=nn.Dropout(0.2))
+        gnn_block_2 = MessagePassingBlock(block_id='K2',
+                                          message_passing_module=conv_2,
+                                          activation_module=nn.ReLU(),
+                                          dropout_module=nn.Dropout(0.2))
         conv_3 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-        gnn_block_3 = GMessagePassingBlock(block_id='K3',
-                                           message_passing_module=conv_3,
-                                           activation_module=nn.ReLU(),
-                                           drop_out_module=nn.Dropout(0.2))
+        gnn_block_3 = MessagePassingBlock(block_id='K3',
+                                          message_passing_module=conv_3,
+                                          activation_module=nn.ReLU(),
+                                          dropout_module=nn.Dropout(0.2))
 
         ffnn_block = MLPBlock(block_id='Output',
                               layer_module=nn.Linear(3*hidden_channels, num_classes),

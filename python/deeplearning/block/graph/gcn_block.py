@@ -14,14 +14,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 
-from deeplearning.block.graph.g_message_passing_block import GMessagePassingBlock
+from deeplearning.block.graph.message_passing_block import MessagePassingBlock
 from typing import AnyStr, Self, Optional, Dict, Any
 import torch.nn as nn
 from torch_geometric.nn import BatchNorm, GCNConv
 __all__ = ['GCNBlock']
 
 
-class GCNBlock(GMessagePassingBlock):
+class GCNBlock(MessagePassingBlock):
     """
     Neural block for generic Graph Neural Network
 
@@ -38,12 +38,12 @@ class GCNBlock(GMessagePassingBlock):
 
     Reference: https://patricknicolas.substack.com/p/reusable-neural-blocks-in-pytorch
     """
-    def __int__(self,
-                block_id: AnyStr,
-                gcn_layer: GCNConv,
-                batch_norm_module: Optional[BatchNorm] = None,
-                activation_module: Optional[nn.Module] = None,
-                drop_out_module: Optional[nn.Module] = None) -> None:
+    def __init__(self,
+                 block_id: AnyStr,
+                 gcn_layer: GCNConv,
+                 batch_norm_module: Optional[BatchNorm] = None,
+                 activation_module: Optional[nn.Module] = None,
+                 dropout_module: Optional[nn.Module] = None) -> None:
         """
         Constructor for the base Graph Neural block
         @param block_id: Identifier for the Graph neural block
@@ -54,15 +54,15 @@ class GCNBlock(GMessagePassingBlock):
         @type batch_norm_module: BatchNorm subclass
         @param activation_module: Activation function if defined
         @type activation_module: nn.Module subclass
-        @param drop_out_module: Drop out for training
-        @type drop_out_module: nn.Module subclass
+        @param dropout_module: Drop out for training
+        @type dropout_module: nn.Module subclass
         """
         super(GCNBlock, self).__init__(block_id=block_id,
                                        message_passing_module=gcn_layer,
                                        batch_norm_module=batch_norm_module,
                                        activation_module=activation_module,
                                        graph_pooling_module=None,
-                                       drop_out_module=drop_out_module)
+                                       dropout_module=dropout_module)
 
     @classmethod
     def build(cls, block_attributes: Dict[AnyStr, Any]) -> Self:
@@ -86,7 +86,7 @@ class GCNBlock(GMessagePassingBlock):
                    batch_norm_module=batch_norm_module,
                    activation_module=activation_module,
                    graph_pooling_module=pooling_module,
-                   drop_out_module=dropout_module)
+                   dropout_module=dropout_module)
 
     @classmethod
     def build_from_params(cls,

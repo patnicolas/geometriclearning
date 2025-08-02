@@ -2,10 +2,10 @@ import unittest
 import torch.nn as nn
 
 from deeplearning.block.mlp.mlp_block import MLPBlock
-from deeplearning.model.mlp_model import MLPModel
-from deeplearning.model.conv_model import ConvModel
+from deeplearning.model.mlp.mlp_model import MLPModel
+from deeplearning.model.conv.conv_model import ConvModel
 from deeplearning.block.conv.conv_2d_block import Conv2dBlock
-from deeplearning.model.vae_model import VAEModel
+from deeplearning.model.generative.vae_model import VAEModel
 from deeplearning import VAEException, ConvException
 from deeplearning.training.vae_training import VAETraining
 import logging

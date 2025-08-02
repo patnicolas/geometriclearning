@@ -18,8 +18,8 @@ from abc import ABC
 from deeplearning.block.mlp.mlp_block import MLPBlock
 from deeplearning.block.conv.conv_block import ConvBlock
 from deeplearning.model.neural_model import NeuralModel
-from deeplearning.model.mlp_model import MLPModel
-from deeplearning.model.deconv_2d_model import DeConv2dModel
+from deeplearning.model.mlp.mlp_model import MLPModel
+from deeplearning.model.conv.deconv_2d_model import DeConv2dModel
 from deeplearning.block.conv import ConvDataType
 from typing import List, AnyStr, Dict, Any, Optional
 import torch

@@ -15,7 +15,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from deeplearning.model.neural_model import NeuralModel
 from deeplearning.block.mlp.mlp_block import MLPBlock
-from deeplearning.block.graph.g_message_passing_block import GMessagePassingBlock
+from deeplearning.block.graph.message_passing_block import MessagePassingBlock
 from deeplearning.training.neural_training import NeuralTraining
 from deeplearning.training.hyper_params import HyperParams
 from metric.built_in_metric import BuiltInMetric
@@ -36,7 +36,7 @@ class GNNBaseModel(NeuralModel):
 
     def __init__(self,
                  model_id: AnyStr,
-                 gnn_blocks: List[GMessagePassingBlock],
+                 gnn_blocks: List[MessagePassingBlock],
                  mlp_blocks: Optional[List[MLPBlock]] = None) -> None:
         """
         Constructor for this simple Graph convolutional neural network
@@ -62,7 +62,7 @@ class GNNBaseModel(NeuralModel):
         super(GNNBaseModel, self).__init__(model_id, nn.Sequential(*modules))
 
     @classmethod
-    def build(cls, model_id: AnyStr, gnn_blocks: List[GMessagePassingBlock]) -> Self:
+    def build(cls, model_id: AnyStr, gnn_blocks: List[MessagePassingBlock]) -> Self:
         """
         Create a pure graph neural network
         @param model_id: Identifier for the model
@@ -109,21 +109,22 @@ class GNNBaseModel(NeuralModel):
 
     def do_train(self,
                  hyper_parameters: HyperParams,
-                 metrics_attributes: Dict[MetricType, BuiltInMetric],
+                 metrics_list: List[MetricType],
                  data_source: Data | Dataset) -> None:
         """
         Execute the training, evaluation and metrics for any model for MNIST data set
         @param hyper_parameters: Hyper-parameters for the execution of the
         @type hyper_parameters: HyperParams
-        @param metrics_attributes: Dictionary of performance metrices
-        @type metrics_attributes: Dictionary
+        @param metrics_list: List of performance metrics
+        @type metrics_list: List
         @param data_source: Data source
         @type data_source: Union[Data, Dataset]
         """
         try:
+            metrics_attributes = {metric_type: BuiltInMetric(metric_type) for metric_type in metrics_list}
             network = NeuralTraining(hyper_parameters, metrics_attributes)
             train_dataset, test_dataset = self.load_data_source(data_source)
-            network.start_training(self.model_id, self.modules_seq, train_dataset, test_dataset)
+            network.train(self.model_id, self.modules_seq, train_dataset, test_dataset)
         except AssertionError as e:
             logging.error(str(e))
             raise GraphException(e)

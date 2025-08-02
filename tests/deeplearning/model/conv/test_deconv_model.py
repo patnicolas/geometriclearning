@@ -2,10 +2,9 @@ import unittest
 import logging
 import torch.nn as nn
 from deeplearning.block.conv.deconv_2d_block import DeConv2dBlock
-from deeplearning.model.deconv_2d_model import DeConv2dModel
+from deeplearning.model.conv.deconv_2d_model import DeConv2dModel
 from deeplearning import ConvException
 from typing import Tuple
-import python
 
 
 class DeConvModelTest(unittest.TestCase):

@@ -14,7 +14,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 from typing import AnyStr, List, Optional
-from deeplearning.model.conv_model import ConvModel
+from deeplearning.model.conv.conv_model import ConvModel
 from deeplearning.block.conv import Conv3DataType
 from deeplearning.block.conv.conv_3d_block import Conv3dBlock
 from deeplearning.block.mlp.mlp_block import MLPBlock

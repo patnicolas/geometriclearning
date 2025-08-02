@@ -2,7 +2,7 @@ import unittest
 import torch.nn as nn
 from deeplearning.block.conv.conv_2d_block import Conv2dBlock
 from deeplearning.block.mlp.mlp_block import MLPBlock
-from deeplearning.model.conv_model import ConvModel
+from deeplearning.model.conv.conv_model import ConvModel
 from deeplearning import ConvException
 from deeplearning.training.neural_training import NeuralTraining
 import logging
@@ -53,7 +53,7 @@ class ConvModelTest(unittest.TestCase):
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_mnist_small_2(self):
-        from deeplearning.model.conv_2d_model import Conv2dBuilder
+        from deeplearning.model.conv.conv_2d_model import Conv2dBuilder
         try:
             conv_builder = Conv2dBuilder({})
             conv_builder.set(key='model_id', value='My model')
@@ -80,7 +80,7 @@ class ConvModelTest(unittest.TestCase):
             self.assertTrue(False)
 
     def test_mnist_small_3(self):
-        from deeplearning.model.conv_2d_model import Conv2dBuilder
+        from deeplearning.model.conv.conv_2d_model import Conv2dBuilder
         try:
             model_attributes = {
                 'model_id': 'My model',
@@ -107,7 +107,7 @@ class ConvModelTest(unittest.TestCase):
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_validation_conv(self):
-        from deeplearning.model.conv_2d_model import Conv2dBuilder
+        from deeplearning.model.conv.conv_2d_model import Conv2dBuilder
 
         conv_2d_block_1 = Conv2dBlock.build_from_params(block_id='conv_1',
                                                         in_channels=1,
@@ -202,7 +202,7 @@ class ConvModelTest(unittest.TestCase):
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_builder(self):
-        from deeplearning.model.conv_2d_model import Conv2dBuilder
+        from deeplearning.model.conv.conv_2d_model import Conv2dBuilder
         conv_attributes = {
             'input_size': (28, 28),
             'in_channels_list': [3, 8, 16],
@@ -373,7 +373,7 @@ class ConvModelTest(unittest.TestCase):
                                    mlp_blocks=[mlp_block_1, mlp_block_2])
             logging.info(repr(conv_model))
             caltech101_loader = Caltech101Loader(batch_size=8, split_ratio=0.9, resize_image=128)
-            train_loader, eval_loader = caltech101_loader.loaders_from_path(root_path='../../../data/caltech-101',
+            train_loader, eval_loader = caltech101_loader.loaders_from_path(root_path='../../../../data/caltech-101',
                                                                             exec_config=ExecConfig.default())
             net_training = ConvModelTest.create_executor()
             logging.info(f'Network training:\n{net_training}')

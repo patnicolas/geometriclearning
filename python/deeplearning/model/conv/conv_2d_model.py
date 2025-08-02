@@ -15,13 +15,13 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from typing import AnyStr, List, Optional, Tuple, Dict, Any
 
-from deeplearning.model.conv_model import ConvModel
-from deeplearning.model.mlp_model import MLPBuilder
+from deeplearning.model.conv.conv_model import ConvModel
+from deeplearning.model.mlp.mlp_model import MLPBuilder
 from deeplearning.model.neural_model import NeuralBuilder
 from deeplearning.block.conv import Conv2DataType
 from deeplearning.block.conv.conv_2d_block import Conv2dBlock
 from deeplearning.block.mlp.mlp_block import MLPBlock
-__all__ = ['Conv2dModel']
+__all__ = ['Conv2dModel', 'Conv2dBuilder']
 
 
 class Conv2dModel(ConvModel):
@@ -128,7 +128,7 @@ class Conv2dBuilder(NeuralBuilder):
         @type mlp_blocks: List[MLPBlock]
         @param input_size: Input size as int (1D) or Tuple (2D)
         """
-        from deeplearning.model.mlp_model import MLPBuilder
+        from deeplearning.model.mlp.mlp_model import MLPBuilder
         assert conv_blocks, 'This convolutional model has not defined neural blocks'
         Conv2dBuilder.validate_conv(conv_blocks, input_size)
         MLPBuilder.validate(mlp_blocks)

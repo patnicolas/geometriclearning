@@ -111,7 +111,7 @@ class VAETraining(NeuralTraining, ABC):
         @param eval_loader:  Data loader for the valuation set
         @type eval_loader: DataLoader
         """
-        from deeplearning.model.vae_model import VAEModel
+        from deeplearning.model.generative.vae_model import VAEModel
 
         if not isinstance(neural_model, VAEModel):
             raise VAEException(f'Neural model {type(neural_model)} cannot not be trained as VAE')

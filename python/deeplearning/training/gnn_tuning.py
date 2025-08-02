@@ -18,7 +18,7 @@ from optuna.trial import TrialState
 import torch.nn as nn
 from dataset.graph.graph_data_loader import GraphDataLoader
 from torch_geometric.nn import GraphConv
-from deeplearning.model.gconv_model import GConvModel
+from deeplearning.model.graph.graph_conv_model import GraphConvModel
 from torch_geometric.data import Data
 from metric.metric_type import MetricType
 from typing import Dict, List, AnyStr, Any, Callable
@@ -187,7 +187,7 @@ class GNNTuning(object):
             GNNTuning.training_parameters['loss_function'] = nn.NLLLoss()
 
     @staticmethod
-    def __get_model(data: Data, num_classes: int, hidden_channels: int) -> GConvModel:
+    def __get_model(data: Data, num_classes: int, hidden_channels: int) -> GraphConvModel:
         num_node_features = data.num_node_features
         model_parameters = {
             'model_id': 'MyModel',
@@ -221,7 +221,7 @@ class GNNTuning(object):
                 }
             ]
         }
-        return GConvModel.build(model_parameters)
+        return GraphConvModel.build(model_parameters)
 
     @staticmethod
     def __get_output_id(sampling_parameters: Dict[AnyStr, Any]) -> AnyStr:

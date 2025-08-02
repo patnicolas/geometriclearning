@@ -16,7 +16,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from abc import ABC
 
 from deeplearning.model.neural_model import NeuralModel
-from deeplearning.model.mlp_model import MLPModel
+from deeplearning.model.mlp.mlp_model import MLPModel
 from deeplearning.block.conv.deconv_2d_block import DeConv2dBlock
 from deeplearning.block.mlp.mlp_block import MLPBlock
 from typing import AnyStr, List, Self, Dict, Any

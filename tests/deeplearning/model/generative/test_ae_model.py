@@ -1,8 +1,8 @@
 import unittest
 import torch
 from deeplearning.block.mlp.mlp_block import MLPBlock
-from deeplearning.model.mlp_model import MLPModel
-from deeplearning.model.ae_model import AEModel
+from deeplearning.model.mlp.mlp_model import MLPModel
+from deeplearning.model.generative.ae_model import AEModel
 import logging
 
 

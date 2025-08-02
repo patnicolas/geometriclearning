@@ -1,7 +1,7 @@
 import unittest
 import torch.nn as nn
 from deeplearning.block.mlp.mlp_block import MLPBlock
-from deeplearning.model.mlp_model import MLPModel, MLPBuilder
+from deeplearning.model.mlp.mlp_model import MLPModel, MLPBuilder
 from deeplearning.training.neural_training import NeuralTraining
 from deeplearning import MLPException
 import logging

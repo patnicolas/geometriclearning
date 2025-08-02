@@ -19,26 +19,26 @@ import torch
 import torch.nn as nn
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.typing import Adj
-
-"""
-Implementation of a very simple Graph Convolutional Neural block which consists of 
-- Message passing operator
-- Optional activation function
-- Optional batch norm 1-dimension
-- Optional drop-out
-"""
+__all__ = ['MessagePassingBlock']
 
 
-class GMessagePassingBlock(NeuralBlock):
+class MessagePassingBlock(NeuralBlock):
+    """
+    Implementation of a very simple Graph Convolutional Neural block which consists of
+    - Message passing operator
+    - Optional activation function
+    - Optional batch norm 1-dimension
+    - Optional drop-out
+    """
     def __init__(self,
                  block_id: AnyStr,
                  message_passing_module: MessagePassing,
                  batch_norm_module: Optional[nn.Module] = None,
                  activation_module: Optional[nn.Module] = None,
-                 graph_pooling_module: Optional[nn.Module] = None,
-                 drop_out_module: Optional[nn.Module] = None) -> None:
+                 dropout_module: Optional[nn.Module] = None) -> None:
         """
         Constructor for the base Graph Neural block
+        
         @param block_id: Identifier for the Graph neural block
         @type block_id: str
         @param message_passing_module: Message passing operator (Conv,....)
@@ -47,11 +47,11 @@ class GMessagePassingBlock(NeuralBlock):
         @type batch_norm_module: BatchNorm subclass
         @param activation_module: Activation function if defined
         @type activation_module: nn.Module subclass
-        @param graph_pooling_module: Graph Pooling module
-        @type graph_pooling_module: nn.Module subclass
-        @param drop_out_module: Drop out for training
-        @type drop_out_module: nn.Module subclass
+        @param dropout_module: Drop out for training
+        @type dropout_module: nn.Module subclass
         """
+        super(MessagePassingBlock, self).__init__(block_id)
+
         # Need at a minimum a message passing module
         modules: List[nn.Module] = [message_passing_module]
         # Optional batch normalization
@@ -60,18 +60,28 @@ class GMessagePassingBlock(NeuralBlock):
         # Optional activation
         if activation_module is not None:
             modules.append(activation_module)
-        # Optional Graph pooling module
-        if graph_pooling_module is not None:
-            modules.append(graph_pooling_module)
-        if drop_out_module is not None:
-            modules.append(drop_out_module)
-        super(GMessagePassingBlock, self).__init__(block_id, modules)
+        if dropout_module is not None:
+            modules.append(dropout_module)
+        self.modules_list = modules
 
     def forward(self,
                 x: torch.Tensor,
-                edge_index: Adj) -> torch.Tensor:
+                edge_index: Adj,
+                batch: torch.Tensor) -> torch.Tensor:
+        """
+        Forward propagation along the network with an input x  an adjacency, edge_index and a batch
+
+        @param x: Input tensor
+        @type x: torch.Tensor
+        @param edge_index: Adjacency matrix as an index pairs
+        @type edge_index:
+        @param batch: Batch
+        @type batch: torch.Tensor
+        @return: Output of the graph convolutional neural block
+        @rtype: torch.Tensor
+        """
         # The adjacency data is used in the first module
-        conv_module = self.modules[0]
+        conv_module = self.modules_list[0]
         x = conv_module(x, edge_index)
 
         # Process all the torch modules if defined
@@ -80,5 +90,5 @@ class GMessagePassingBlock(NeuralBlock):
         return x
 
     def __repr__(self) -> AnyStr:
-        modules_str = '\n'.join([str(module) for module in self.modules])
-        return f'\nGCN Modules:\n{modules_str}'
+        modules_str = '\n'.join([str(module) for module in self.modules_list])
+        return f'\nGraph Neural Network Modules:\n{modules_str}'

@@ -82,7 +82,7 @@ class GraphDataLoader(object):
         from dataset.graph.pyg_datasets import PyGDatasets
 
         assert num_subgraph_nodes is None or -1 <= num_subgraph_nodes <= 8192, \
-            f'Number of subgraph nodes {num_subgraph_nodes} shoudl be [-1, 8192]'
+            f'Number of subgraph nodes {num_subgraph_nodes} should be [-1, 8192]'
 
         # Validate the attributes against the type of loader-sampler
         GraphDataLoader.__validate(sampling_attributes)

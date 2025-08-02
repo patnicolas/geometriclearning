@@ -18,7 +18,7 @@ import torch_geometric
 from dataset.graph.graph_data_loader import GraphDataLoader
 from dataset.graph.pyg_datasets import PyGDatasets
 from torch_geometric.nn import GraphConv
-from deeplearning.model.gconv_model import GConvModel
+from deeplearning.model.graph.graph_conv_model import GraphConvModel
 import torch
 from torch_geometric.data import Data
 from typing import AnyStr, Dict, Any
@@ -26,7 +26,7 @@ from deeplearning.training.gnn_training import GNNTraining
 from torch.utils.data import DataLoader
 from deeplearning.block.graph import GraphException
 import logging
-import python
+
 __all__ = ['EvalGConv']
 
 
@@ -74,7 +74,7 @@ class EvalGConv(object):
         raw_weights = 1.0/raw_distribution
         return raw_weights/raw_weights.sum()
 
-    def __get_training_env(self, model: GConvModel, class_weights: torch.Tensor = None) -> GNNTraining:
+    def __get_training_env(self, model: GraphConvModel, class_weights: torch.Tensor = None) -> GNNTraining:
         self.training_attributes['loss_function'] = nn.NLLLoss(weight=class_weights.to('mps')) \
             if class_weights is not None \
             else nn.NLLLoss()
@@ -82,7 +82,7 @@ class EvalGConv(object):
         self.training_attributes['class_weights'] = class_weights
         return GNNTraining.build(self.training_attributes)
 
-    def __get_eval_model(self) -> (GConvModel, torch.Tensor):
+    def __get_eval_model(self) -> (GraphConvModel, torch.Tensor):
         from torch_geometric.datasets.flickr import Flickr
 
         pyg_dataset = PyGDatasets(self.training_attributes['dataset_name'])
@@ -99,7 +99,7 @@ class EvalGConv(object):
                                     hidden_channels=384)
         return my_model, EvalGConv.__distribution(_data)
 
-    def __get_model(self, num_node_features: int, _num_classes: int, hidden_channels: int) -> GConvModel:
+    def __get_model(self, num_node_features: int, _num_classes: int, hidden_channels: int) -> GraphConvModel:
         model_attributes = {
             'model_id': 'MyModel',
             'gconv_blocks': [
@@ -132,7 +132,7 @@ class EvalGConv(object):
                 }
             ]
         }
-        return GConvModel.build(model_attributes)
+        return GraphConvModel.build(model_attributes)
 
 
 if __name__ == '__main__':

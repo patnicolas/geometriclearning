@@ -102,14 +102,33 @@ class NeuralModel(torch.nn.Module, ABC):
 
 
 class NeuralBuilder(ABC):
+    """
+    A builder for any Neural Network
+    """
     def __init__(self, model_attributes: Dict[AnyStr, Any]) -> None:
+        """
+        Constructor for this Builder
+        @param model_attributes:  Dictionary of model configuration parameters
+        @type model_attributes: Dictionary
+        """
         self.model_attributes = model_attributes
 
-    # Add/update dynamically the torch module as value of attributes dict.
     def set(self, key: AnyStr, value: Any) -> Self:
+        """
+        Add/update dynamically the torch module as value of attributes dict.
+        @param key: Key or name of the configuration parameter
+        @type key:  str
+        @param value: Value for the configuration parameter
+        @type value: Any
+        @return: Instance of this builder
+        @rtype: NeuralBuilder
+        """
         self.model_attributes[key] = value
         return self
 
     @abstractmethod
     def build(self) -> NeuralModel:
-        raise MLPException('Neural Builder is an abstract class')
+        """
+        A Neural Builder is an abstract class
+        """
+        pass

@@ -1,13 +1,13 @@
 import unittest
 
 import os
-from deeplearning.block.graph.g_message_passing_block import GMessagePassingBlock
-from deeplearning.model.gnn_base_model import GNNBaseModel
+from deeplearning.block.graph.message_passing_block import MessagePassingBlock
+from deeplearning.model.graph.gnn_base_model import GNNBaseModel
 from deeplearning.training.hyper_params import HyperParams
 from torch_geometric.nn import GraphConv
 import torch.nn as nn
 import logging
-import python
+
 
 class GNNBaseModelTest(unittest.TestCase):
 
@@ -62,7 +62,7 @@ class GNNBaseModelTest(unittest.TestCase):
                                            num_classes=_dataset[0].num_classes)
 
         gcn_model.do_train(hyper_parameters=hyper_parameters,
-                           metric_labels=['Precision', 'Recall'])
+                           metrics=['Precision', 'Recall'])
 
     @staticmethod
     def build(num_node_features: int, num_classes: int) -> GNNBaseModel:
@@ -70,15 +70,15 @@ class GNNBaseModelTest(unittest.TestCase):
 
         hidden_channels = 256
         conv_1 = GraphConv(in_channels=num_node_features, out_channels=hidden_channels)
-        gcn_conv_1 = GMessagePassingBlock(block_id='K1',
-                                          message_passing_module=conv_1,
-                                          activation_module=nn.ReLU(),
-                                          batch_norm_module=BatchNorm(hidden_channels),
-                                          drop_out_module=nn.Dropout(0.2))
+        gcn_conv_1 = MessagePassingBlock(block_id='K1',
+                                         message_passing_module=conv_1,
+                                         activation_module=nn.ReLU(),
+                                         batch_norm_module=BatchNorm(hidden_channels),
+                                         dropout_module=nn.Dropout(0.2))
         conv_2 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-        gcn_conv_2 = GMessagePassingBlock(block_id='K2', message_passing_module=conv_2, activation_module=nn.ReLU())
+        gcn_conv_2 = MessagePassingBlock(block_id='K2', message_passing_module=conv_2, activation_module=nn.ReLU())
         conv_3 = GraphConv(in_channels=hidden_channels, out_channels=num_classes)
-        gcn_conv_3 = GMessagePassingBlock(block_id='K3', message_passing_module=conv_3)
+        gcn_conv_3 = MessagePassingBlock(block_id='K3', message_passing_module=conv_3)
 
         return GNNBaseModel.build(model_id='Karate club test',
                                   gnn_blocks=[gcn_conv_1, gcn_conv_2, gcn_conv_3])

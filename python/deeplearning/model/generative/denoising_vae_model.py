@@ -15,7 +15,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from typing import AnyStr, Callable
 from deeplearning.model.neural_model import NeuralModel
-from deeplearning.model.vae_model import VAEModel
+from deeplearning.model.generative.vae_model import VAEModel
 import torch
 __all__ = ['DenoisingVAEModel']
 
