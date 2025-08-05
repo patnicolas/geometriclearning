@@ -13,11 +13,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+# Standard Library imports
+from typing import List, AnyStr, Optional, Self
+from dataclasses import dataclass
+# 3rd Party imports
 import numpy as np
 import torch
-from typing import List, AnyStr, Optional, Self
 from geomstats.geometry.base import LevelSet
-from dataclasses import dataclass
 __all__ = ['ManifoldPoint']
 
 

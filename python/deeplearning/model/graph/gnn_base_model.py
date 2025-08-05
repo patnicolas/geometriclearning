@@ -13,6 +13,16 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
+from typing import List, AnyStr, Optional, Self
+import logging
+# 3rd Party imports
+import torch
+from torch_geometric.loader import GraphSAINTRandomWalkSampler
+from torch_geometric.data import Data
+from torch.utils.data import DataLoader, Dataset
+import torch.nn as nn
+# Library imports
 from deeplearning.model.neural_model import NeuralModel
 from deeplearning.block.mlp.mlp_block import MLPBlock
 from deeplearning.block.graph.message_passing_block import MessagePassingBlock
@@ -20,15 +30,7 @@ from deeplearning.training.neural_training import NeuralTraining
 from deeplearning.training.hyper_params import HyperParams
 from metric.built_in_metric import BuiltInMetric
 from metric.metric_type import MetricType
-from typing import List, AnyStr, Optional, Self, Dict
-import torch
-from torch_geometric.loader import GraphSAINTRandomWalkSampler
-from torch_geometric.data import Data
-from torch.utils.data import DataLoader, Dataset
-import torch.nn as nn
 from deeplearning.block.graph import GraphException
-import logging
-
 __all__ = ['GNNBaseModel']
 
 

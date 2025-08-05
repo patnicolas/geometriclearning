@@ -13,10 +13,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+# Standard Library imports
 from typing import List, AnyStr
+# 3rd Party imports
 import numpy as np
 import geomstats.backend as gs
 from geomstats.geometry.functions import HilbertSphere
+# Library imports
 from geometry.manifold.manifold_point import ManifoldPoint
 from geometry import GeometricException
 __all__ = ['FunctionSpace']

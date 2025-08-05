@@ -14,15 +14,19 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 
+# Standard Library imports
+from typing import Dict, AnyStr, Any, Optional, List, Self
+import logging
+# 3rd Party imports
 from torch.utils.data import DataLoader
 from torch_geometric.data import Data
 from torch_geometric.loader import (NeighborLoader, RandomNodeLoader, GraphSAINTRandomWalkSampler,
                                     GraphSAINTNodeSampler, GraphSAINTEdgeSampler, ShaDowKHopSampler,
                                     ClusterData, ClusterLoader)
 import torch
-from typing import Dict, AnyStr, Any, Optional, List, Self, Callable
+# Library imports
 from dataset import DatasetException
-import logging
+
 __all__ = ['GraphDataLoader']
 
 

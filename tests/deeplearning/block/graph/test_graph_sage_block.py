@@ -23,7 +23,10 @@ class GraphSAGEBlockTest(unittest.TestCase):
             self.assertEqual(len(modules), 4)
             self.assertTrue(isinstance(modules[-1], nn.Dropout))
             logging.info(f'\n{graph_SAGE_block}')
-        except (KeyError | ValueError) as e:
+        except KeyError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except ValueError as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -45,7 +48,10 @@ class GraphSAGEBlockTest(unittest.TestCase):
             self.assertEqual(len(modules), 4)
             self.assertTrue(isinstance(modules[-1], nn.Dropout))
             logging.info(f'\n{graph_SAGE_block}')
-        except (KeyError | ValueError) as e:
+        except KeyError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except ValueError as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -92,3 +98,37 @@ class GraphSAGEBlockTest(unittest.TestCase):
         except ValueError as e:
             logging.error(e)
             self.assertTrue(True)
+
+    def test_forward(self):
+        try:
+            from dataset.graph.pyg_datasets import PyGDatasets
+
+            dataset_name = 'Flickr'
+            pyg_datasets = PyGDatasets(dataset_name)
+            dataset = pyg_datasets()
+            data = dataset[0]
+            logging.info(f'\nInput data:\n{str(data)}')
+
+            num_node_features = data.num_features
+            num_channels = 256
+            block_attributes = {
+                'block_id': 'MyBlock',
+                'SAGE_layer': SAGEConv(in_channels=num_node_features, out_channels=num_channels),
+                'activation': nn.ReLU(),
+                'batch_norm': BatchNorm(num_channels),
+                'dropout': 0.25
+            }
+            graph_SAGE_block = GraphSAGEBlock.build(block_attributes)
+
+            output = graph_SAGE_block.forward(data.x, data.edge_index, data.batch)
+            logging.info(output)
+            self.assertEqual(output.shape[1], 256)
+        except KeyError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except ValueError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except RuntimeError as e:
+            logging.error(e)
+            self.assertTrue(False)

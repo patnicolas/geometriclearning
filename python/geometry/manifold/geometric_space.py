@@ -13,12 +13,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from geometry.manifold.manifold_point import ManifoldPoint
-from typing import AnyStr, List, NoReturn
-import numpy as np
+# Standard Library imports
+from typing import AnyStr, List
 import abc
 from abc import ABC
+# 3rd Party imports
+import numpy as np
+# Library imports
+from geometry.manifold.manifold_point import ManifoldPoint
 __all__ = ['GeometricSpace']
 
 
@@ -110,7 +112,7 @@ class GeometricSpace(ABC):
         pass
 
     @abc.abstractmethod
-    def show_manifold(self, manifold_points: List[ManifoldPoint]) -> NoReturn:
+    def show_manifold(self, manifold_points: List[ManifoldPoint]) -> None:
         """
         Signature of the method to display the various components on a manifold such as data points,
         tangent vector, end point (exp. map), Geodesics

@@ -13,14 +13,16 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
+from dataclasses import dataclass
+from typing import AnyStr, Dict
+# 3rd Party imports
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_validate
-from dataclasses import dataclass
-from typing import AnyStr, NoReturn
 import numpy as np
+# Library imports
 from geomstats.geometry.spd_matrices import SPDMatrices
 from geomstats.geometry.riemannian_metric import RiemannianMetric
-import geomstats.backend as gs  # Numpy
 __all__ = ['SPDTestData', 'BinaryLRManifold']
 
 
@@ -50,7 +52,7 @@ class SPDTestData:
         """
         return len(self.X)
 
-    def flatten(self) -> NoReturn:
+    def flatten(self) -> None:
         """
         Flatten the 2 dimension feature into a single dimension feature
         """
@@ -128,9 +130,9 @@ class BinaryLRManifold(object):
         @return A dictionary of scoring values
         @rtype Dict
         """
-        model = LogisticRegression()
+        _model = LogisticRegression()
         spd_test_data.flatten()
-        return cross_validate(model, spd_test_data.X, spd_test_data.y)
+        return cross_validate(_model, spd_test_data.X, spd_test_data.y)
 
     @staticmethod
     def evaluate_spd(spd_test_data: SPDTestData, spd_matrices: SPDMatrices) -> Dict[AnyStr, np.array]:

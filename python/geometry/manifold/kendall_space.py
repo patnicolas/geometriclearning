@@ -13,11 +13,15 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+# Standard Library imports
+from typing import AnyStr
+# 3rd Party imports
+import numpy as np
 from geomstats.geometry.pre_shape import PreShapeSpace
+# Library imports
 from geometry.visualization.space_visualization import VisualizationParams, SpaceVisualization
 from geometry.manifold.geometric_space import GeometricSpace
-import numpy as np
-from typing import AnyStr
 __all__ = ['KendallSpace']
 
 

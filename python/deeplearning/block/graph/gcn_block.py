@@ -13,11 +13,13 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from deeplearning.block.graph.message_passing_block import MessagePassingBlock
+# Standard Library imports
 from typing import AnyStr, Self, Optional, Dict, Any
+# 3rd Party imports
 import torch.nn as nn
 from torch_geometric.nn import BatchNorm, GCNConv
+# Library imports
+from deeplearning.block.graph.message_passing_block import MessagePassingBlock
 __all__ = ['GCNBlock']
 
 

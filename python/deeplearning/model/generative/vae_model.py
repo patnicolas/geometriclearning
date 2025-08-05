@@ -13,15 +13,19 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
 from typing import AnyStr, Self, Optional
+import logging
+# 3rd Party imports
+import torch
+import torch.nn as nn
+# Library imports
 from deeplearning.model.neural_model import NeuralModel
 from deeplearning.block.mlp.variational_block import VariationalBlock
 from deeplearning import ConvException, MLPException, VAEException
-import torch
-import torch.nn as nn
-import logging
-
 __all__ = ['VAEModel']
+
+
 
 class VAEModel(NeuralModel):
     """

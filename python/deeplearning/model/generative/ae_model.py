@@ -13,11 +13,15 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
 from typing import AnyStr, Self, Any
-from deeplearning.model.neural_model import NeuralModel
+# 3rd Party imports
 import torch.nn as nn
 import torch
+# Library imports
+from deeplearning.model.neural_model import NeuralModel
 __all__ = ['AEModel']
+
 
 class AEModel(NeuralModel):
     """

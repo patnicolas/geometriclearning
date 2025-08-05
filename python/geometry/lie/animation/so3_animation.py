@@ -13,10 +13,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy as np
+
+# Standard Library imports
 from typing import AnyStr, List, Self, Callable, Tuple, Any, Dict
+# 3rd Party imports
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.animation import FuncAnimation
+# Library imports
 from util.base_animation import BaseAnimation
 __all__ = ['SO3Animation', 'default_so3_transform']
 

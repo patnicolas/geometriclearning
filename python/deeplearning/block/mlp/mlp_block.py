@@ -13,9 +13,12 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
+from typing import Self, AnyStr, Optional, Any, Dict
+# 3rd Party imports
 from torch import nn
 import torch
-from typing import Self, AnyStr, Optional, Any, Dict
+# Library imports
 from deeplearning.block.neural_block import NeuralBlock
 __all__ = ['MLPBlock']
 

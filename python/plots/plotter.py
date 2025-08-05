@@ -13,11 +13,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+# Standard Library imports
+from typing import List, AnyStr, Tuple, Optional, Dict, Any, Self
+from dataclasses import dataclass
+# 3rd Party imports
 import numpy as np
 from matplotlib import pyplot as plt
 from datetime import datetime
-from typing import List, AnyStr, Tuple, Optional, Dict, Any, Self
-from dataclasses import dataclass
 import torch
 __all__ = ['PlotterParameters', 'Plotter']
 

@@ -13,8 +13,10 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import AnyStr, List, Optional, Tuple, Dict, Any
 
+# Standard Library imports
+from typing import AnyStr, List, Optional, Tuple, Dict, Any
+# Library imports
 from deeplearning.model.conv.conv_model import ConvModel
 from deeplearning.model.mlp.mlp_model import MLPBuilder
 from deeplearning.model.neural_model import NeuralBuilder

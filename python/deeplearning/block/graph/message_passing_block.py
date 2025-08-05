@@ -13,12 +13,16 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from deeplearning.block.neural_block import NeuralBlock
+
+# Standard Library imports
 from typing import AnyStr, List, Optional
+# 3rd Party imports
 import torch
 import torch.nn as nn
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.typing import Adj
+# Library imports
+from deeplearning.block.neural_block import NeuralBlock
 __all__ = ['MessagePassingBlock']
 
 

@@ -13,14 +13,18 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import matplotlib.pyplot as plt
 
+# Standard Library imports
 from typing import Tuple, NoReturn, AnyStr, List
+from dataclasses import dataclass
+# 3rd Party imports
+import matplotlib.pyplot as plt
 import numpy as np
 import geomstats.visualization as visualization
-from dataclasses import dataclass
+# Library imports
 from geometry.manifold.manifold_point import ManifoldPoint
 from geometry import GeometricException
+__all__ = ['VisualizationParams', 'SpaceVisualization']
 
 
 @dataclass

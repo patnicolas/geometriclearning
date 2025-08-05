@@ -16,7 +16,6 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from typing import AnyStr, TypeVar, List
 from dataclasses import dataclass
-
 Item = TypeVar("Item")
 
 @dataclass

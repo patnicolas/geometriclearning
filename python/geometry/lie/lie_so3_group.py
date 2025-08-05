@@ -13,12 +13,15 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import geomstats.backend as gs
-from geomstats.geometry.special_orthogonal import SpecialOrthogonal
-from mpl_toolkits.mplot3d import Axes3D
 
-import numpy as np
+# Standard Library imports
 from typing import List, Self, AnyStr
+# 3rd Party imports
+import geomstats.backend as gs
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+# Library imports
+from geomstats.geometry.special_orthogonal import SpecialOrthogonal
 from geometry.lie import LieElement
 __all__ = ['LieSO3Group']
 

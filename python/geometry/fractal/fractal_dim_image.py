@@ -13,9 +13,12 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+# Standard Library imports
 from typing import AnyStr, Union, List
-import numpy as np
 import logging
+# 3rd Party imports
+import numpy as np
 import python
 from dataclasses import dataclass
 __all__ = ['BoxParameter', 'FractalDimImage']

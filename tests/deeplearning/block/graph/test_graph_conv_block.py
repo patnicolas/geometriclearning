@@ -8,7 +8,6 @@ import python
 
 class GraphConvBlockTest(unittest.TestCase):
 
-    # @unittest.skip('Ignore')
     def test_init_default(self):
         try:
             num_node_features = 24
@@ -31,7 +30,6 @@ class GraphConvBlockTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(True)
 
-    # @unittest.skip('Ignore')
     def test_init_default_2(self):
         try:
             num_node_features = 24
@@ -50,7 +48,6 @@ class GraphConvBlockTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
     def test_init_build(self):
         try:
             num_node_features = 24
@@ -75,11 +72,8 @@ class GraphConvBlockTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-
-    # @unittest.skip('Ignore')
     def test_init_build_failed(self):
         from torch_geometric.nn import SAGEConv
-
         try:
             num_node_features = 24
             num_channels = 256

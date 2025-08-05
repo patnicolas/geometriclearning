@@ -13,10 +13,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+# Standard Library imports
+from typing import AnyStr, Optional, List
+# 3rd Party imports
 from geomstats.geometry.riemannian_metric import RiemannianMetric
 from geomstats.geometry.base import LevelSet
 import numpy as np
-from typing import AnyStr, Optional, List
+# Library imports
 from geometry.manifold.manifold_point import ManifoldPoint
 from geometry import GeometricException
 __all__ = ['RiemannianConnection']

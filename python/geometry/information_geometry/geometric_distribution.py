@@ -13,11 +13,13 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geometry.manifold.hypersphere_space import HypersphereSpace
-from typing import List
-from geometry.manifold.manifold_point import ManifoldPoint
-import logging
 
+# Standard Library imports
+from typing import List
+import logging
+# Library imports
+from geometry.manifold.manifold_point import ManifoldPoint
+from geometry.manifold.hypersphere_space import HypersphereSpace
 __all__ = ['GeometricDistribution']
 
 

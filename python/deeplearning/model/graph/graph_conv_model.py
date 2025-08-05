@@ -13,14 +13,19 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from deeplearning.block.mlp.mlp_block import MLPBlock
-from deeplearning.block.graph.graph_conv_block import GraphConvBlock
-from deeplearning.model.neural_model import NeuralModel, NeuralBuilder
-from typing import List, AnyStr, Optional, Any, Dict, Self
+# Standard Library imports
+from typing import List, AnyStr, Optional, Any, Dict
+import logging
+# 3rd Party imports
 import torch
 from torch_geometric.data import Data
 import torch.nn as nn
-__all__ = ['GraphConvModel']
+# Library imports
+from deeplearning.block.mlp.mlp_block import MLPBlock
+from deeplearning.block.graph.graph_conv_block import GraphConvBlock
+from deeplearning.model.neural_model import NeuralModel, NeuralBuilder
+import python
+__all__ = ['GraphConvModel', 'GraphConvBuilder']
 
 
 class GraphConvModel(NeuralModel):
@@ -63,16 +68,26 @@ class GraphConvModel(NeuralModel):
         super(GraphConvModel, self).__init__(model_id, nn.Sequential(*graph_conv_modules))
 
     def forward(self, data: Data) -> torch.Tensor:
+        """
+        Forward propagation of data across various Graph Convolutional layers and optionally multi-perceptron layers
+        @param data: Graph data
+        @type data: Data
+        @return: values of output features
+        @rtype: torch Tensor
+        """
         # Step 1: Initiate the graph embedding vector
         x = data.x
+        edge_index = data.edge_index
 
         # Step 2: Process forward the convolutional layers
         # Create and collect the output of each GNN layer
         for graph_conv_block in self.graph_conv_blocks:
             # Implicit invoke forward method for the block
-            # logging.info(f'Before forward shape {x.shape}')
-            x = graph_conv_block(x, data.edge_index, data.batch)
-            # logging.info(f'After forward shape {x.shape}')
+            logging.debug(f'Before Conv shape {x.shape} & index {edge_index}')
+            x = graph_conv_block(x, edge_index, data.batch)
+            if graph_conv_block.has_pooling:
+                edge_index = graph_conv_block.pooling_edge_index
+            logging.debug(f'After Conv shape {x.shape} & index {edge_index}')
 
         # Step 4: Process the fully connected, MLP layers
         for mlp_block in self.mlp_blocks:
@@ -113,7 +128,7 @@ class GraphConvBuilder(NeuralBuilder):
         @return: 2-dimensional convolutional model instance
         @rtype: Conv2dModel
         """
-        graph_conv_blocks_attribute = self.model_attributes['gconv_blocks']
+        graph_conv_blocks_attribute = self.model_attributes['graph_conv_blocks']
         mlp_blocks_attribute = self.model_attributes['mlp_blocks']
         graph_conv_blocks = [GraphConvBlock.build(graph_conv_block_attribute)
                              for graph_conv_block_attribute in graph_conv_blocks_attribute]

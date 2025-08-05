@@ -13,11 +13,15 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy as np
+
+# Standard Library imports
 from typing import AnyStr, List, Self
-from mpl_toolkits.mplot3d import Axes3D
 from dataclasses import dataclass
+# 3rd Party imports
+import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
 import geomstats.backend as gs
+# Library imports
 from geomstats.geometry.special_euclidean import SpecialEuclidean
 __all__ = ['SE3Element', 'LieSE3Group', 'SE3ElementDescriptor']
 

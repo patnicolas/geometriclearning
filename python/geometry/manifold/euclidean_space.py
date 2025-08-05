@@ -13,10 +13,11 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geomstats.geometry.euclidean import Euclidean
-from geometry.manifold.geometric_space import GeometricSpace
-from typing import NoReturn
+# 3rd Party imports
 import numpy as np
+from geomstats.geometry.euclidean import Euclidean
+# Library imports
+from geometry.manifold.geometric_space import GeometricSpace
 from geometry.visualization.space_visualization import VisualizationParams, SpaceVisualization
 __all__ = ['EuclideanSpace']
 
@@ -50,7 +51,7 @@ class EuclideanSpace(GeometricSpace):
         return self.space.random_point(num_samples)
 
     @staticmethod
-    def show(vParams: VisualizationParams, data_points: np.array) -> NoReturn:
+    def show(vParams: VisualizationParams, data_points: np.array) -> None:
         """
         Visualize the data points in 3D
         :param vParams Parameters for the visualization

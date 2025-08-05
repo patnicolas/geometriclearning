@@ -13,12 +13,16 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+# Standard Library imports
 from typing import AnyStr, Optional, Dict, Any, Self
+# 3rd Party imports
 import torch
 import torch.nn as nn
 from torch_geometric.nn import BatchNorm, GraphConv
 from torch_geometric.nn.pool import TopKPooling, SAGPooling
 from torch_geometric.typing import Adj
+# Library imports
 from deeplearning.block.graph.message_passing_block import MessagePassingBlock
 __all__ = ['GraphConvBlock']
 
@@ -59,6 +63,8 @@ class GraphConvBlock(MessagePassingBlock):
                 self.modules_list.append(dropout_module)
             else:
                 self.modules_list.append(pooling_module)
+        self.pooling_edge_index = None
+        self.has_pooling = pooling_module is not None
 
     @classmethod
     def build(cls, block_attributes: Dict[AnyStr, Any]) -> Self:
@@ -105,7 +111,7 @@ class GraphConvBlock(MessagePassingBlock):
             if isinstance(module, GraphConv):
                 x = module(x, edge_index)
             elif isinstance(module, TopKPooling):
-                x, edge_index, _, _, _, _ = module(x, edge_index, None, batch)
+                x, self.pooling_edge_index, _, _, _, _ = module(x, edge_index, None, batch)
             else:
                 x = module(x)
         return x
@@ -119,8 +125,8 @@ class GraphConvBlock(MessagePassingBlock):
             raise ValueError(f'SAGE layer type {block_attributes["conv_layer"]} should be GraphConv')
         if block_attributes['batch_norm'] is not None and not isinstance(block_attributes['batch_norm'], BatchNorm):
             raise ValueError(f'batch norm type {block_attributes["batch_norm"]} should be BatchNorm')
-        if block_attributes['pooling'] is not None and (not isinstance(block_attributes['pooling'], SAGPooling)
-                                                        or not isinstance(block_attributes['pooling'], TopKPooling)):
+        if block_attributes['pooling'] is not None and not (isinstance(block_attributes['pooling'], SAGPooling)
+                                                            or isinstance(block_attributes['pooling'], TopKPooling)):
             raise ValueError(f'pooling {block_attributes["pooling"]} should be SAGPooling | TopKPooling')
         if (block_attributes['dropout'] is not None and
                 (block_attributes['dropout'] < 0.0 or block_attributes['dropout'] > 0.5)):

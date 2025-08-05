@@ -13,12 +13,16 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+# Standard Library imports
+from typing import List
+# 3rd Party imports
 import geomstats.visualization as visualization
 from geomstats.geometry.hypersphere import Hypersphere, HypersphereMetric
-from typing import List
 import numpy as np
-from geometry.manifold.geometric_space import GeometricSpace, ManifoldPoint
 import geomstats.backend as gs
+# Library imports
+from geometry.manifold.geometric_space import GeometricSpace, ManifoldPoint
 from geometry import GeometricException
 __all__ = ['HypersphereSpace']
 

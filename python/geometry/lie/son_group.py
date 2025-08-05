@@ -13,10 +13,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geomstats.geometry.special_orthogonal import SpecialOrthogonal
+
+# Standard Library imports
+from typing import AnyStr, Dict, List
+# 3rd Party imports
 import torch
 import numpy as np
-from typing import AnyStr, Dict, List
+# Library imports
+from geomstats.geometry.special_orthogonal import SpecialOrthogonal
 from geometry.lie import LieException
 __all__ = ['SOnGroup']
 

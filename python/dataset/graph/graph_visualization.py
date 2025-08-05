@@ -13,8 +13,10 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
 from dataclasses import dataclass
 from typing import AnyStr
+# 3rd Party imports
 from torch_geometric.data import Data
 __all__ = ['SubgraphExtractor', 'GraphVisualization']
 

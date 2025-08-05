@@ -15,35 +15,37 @@ from dataclasses import dataclass
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Two steps:
-1. Represent simplices of different dimensions (vertices, edges, triangles, tetrahedra).
-   0-simplices (vertices): Scatter points.
-   1-simplices (edges): Lines between points.
-   2-simplices (triangles): Use Polygon from matplotlib.patches.
-   3-simplices (tetrahedra): Not native in 3D Matplotlib; use Poly3DCollection from mpl_toolkits.mplot3d.art3d.
 
-2. Show how the complex evolves—either over a filtration (like in persistent homology) or structural construction 
-    (growing the complex).
-
-Animate steps like:
-- Birth of a vertex (0-simplex)
-- Adding edges
-- Filling in triangles
-- Growing tetrahedra
-This mimics the process of building a Čech or Vietoris–Rips complex over increasing radius.
-
-"""
+# Standard Library imports
+from typing import List, Tuple, Dict,AnyStr, Any
+# 3rd Party imports
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 from matplotlib.animation import FuncAnimation
-from typing import List, Tuple, Dict,AnyStr, Any
+__all__ = ['SimplicialAnimation']
 
 
 class SimplicialAnimation(object):
     """
-        Configuration dictionary
+    Two steps:
+    1. Represent simplices of different dimensions (vertices, edges, triangles, tetrahedra).
+        0-simplices (vertices): Scatter points.
+        1-simplices (edges): Lines between points.
+        2-simplices (triangles): Use Polygon from matplotlib.patches.
+        3-simplices (tetrahedra): Not native in 3D Matplotlib; use Poly3DCollection from mpl_toolkits.mplot3d.art3d.
+
+    2. Show how the complex evolves—either over a filtration (like in persistent homology) or structural construction
+    (growing the complex).
+
+    Animate steps like:
+    - Birth of a vertex (0-simplex)
+    - Adding edges
+    - Filling in triangles
+    - Growing tetrahedra
+    This mimics the process of building a Čech or Vietoris–Rips complex over increasing radius.
+
+    Configuration dictionary
         fig_size: Tuple[int, int]
         x_lim: Tuple[float, float]   -0.1, 1.6
         y_lim: Tuple[float, float]     -0.1, 1.7

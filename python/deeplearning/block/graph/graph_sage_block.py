@@ -13,9 +13,15 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+# Standard Library imports
 from typing import AnyStr, Optional, Dict, Any, Self
+# 3rd Party imports
 import torch.nn as nn
+from torch_geometric.typing import Adj
+import torch
 from torch_geometric.nn import BatchNorm, SAGEConv
+# Library imports
 from deeplearning.block.graph.message_passing_block import MessagePassingBlock
 __all__ = ['GraphSAGEBlock']
 
@@ -74,6 +80,26 @@ class GraphSAGEBlock(MessagePassingBlock):
                    block_attributes['batch_norm'],
                    block_attributes['activation'],
                    nn.Dropout(block_attributes['dropout']))
+
+    def forward(self,
+                x: torch.Tensor,
+                edge_index: Adj,
+                batch: torch.Tensor) -> torch.Tensor:
+        """
+        Forward propagation along the network with an input x  an adjacency, edge_index and a batch
+        @param x: Input tensor
+        @type x: torch.Tensor
+        @param edge_index: Adjacency matrix as an index pairs
+        @type edge_index:
+        @param batch: Batch
+        @type batch: torch.Tensor
+        @return: Output of the graph convolutional neural block
+        @rtype: torch.Tensor
+        """
+        # Process all the torch modules if defined
+        for module in self.modules_list:
+            x = module(x, edge_index) if isinstance(module, SAGEConv) else module(x)
+        return x
 
     @staticmethod
     def __validate(block_attributes: Dict[AnyStr, Any]) -> None:

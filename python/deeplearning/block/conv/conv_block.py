@@ -13,14 +13,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
+from typing import Any, AnyStr, Optional, List
+# 3rd Party imports
 from torch import nn
-from typing import Tuple, Any, AnyStr, Optional, Dict, List
-
+# Library imports
 from deeplearning import ConvException
 from deeplearning.block.neural_block import NeuralBlock
 from deeplearning.block.conv.conv_output_size import ConvOutputSize
-import logging
-logger = logging.getLogger('deeplearning.block.ConvBlock')
 __all__ = ['ConvBlock']
 
 

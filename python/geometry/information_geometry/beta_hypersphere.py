@@ -13,9 +13,12 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geometry.information_geometry.geometric_distribution import GeometricDistribution
+
+# 3rd Party imports
 import geomstats.backend as gs
 import matplotlib.pyplot as plt
+# Library imports
+from geometry.information_geometry.geometric_distribution import GeometricDistribution
 __all__ = ['BetaHypersphere']
 
 

@@ -13,13 +13,17 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geomstats.information_geometry.base import InformationManifoldMixin
-from geomstats.information_geometry.fisher_rao_metric import FisherRaoMetric
+
+# Standard Library imports
 from typing import Tuple, AnyStr, List
+import os
+# 3rd Party imports
 import numpy as np
 import torch
+# Library imports
+from geomstats.information_geometry.base import InformationManifoldMixin
+from geomstats.information_geometry.fisher_rao_metric import FisherRaoMetric
 from geometry import GeometricException
-import os
 os.environ["GEOMSTATS_BACKEND"] = "pytorch"
 __all__ = ['CFStatisticalManifold']
 

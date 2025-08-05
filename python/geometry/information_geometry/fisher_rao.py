@@ -13,14 +13,17 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+# Standard Library imports
+from typing import Tuple
+import os
+# 3rd Party imports
+import torch
+ParamType = torch.Tensor | Tuple[torch.Tensor, torch.Tensor]
+# Library imports
 from geomstats.information_geometry.base import InformationManifoldMixin
 from geometry.information_geometry.cf_statistical_manifold import CFStatisticalManifold
-from typing import Tuple
-import torch
-
 from geometry import GeometricException
-ParamType = torch.Tensor | Tuple[torch.Tensor, torch.Tensor]
-import os
 os.environ["GEOMSTATS_BACKEND"] = "pytorch"
 __all__ = ['FisherRao']
 

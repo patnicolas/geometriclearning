@@ -13,12 +13,16 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+# Standard Library imports
 from typing import List, AnyStr, Self, Dict, Any
+# 3rd Party imports
+import torch.nn as nn
+# Library imports
 from deeplearning.block.conv import ConvDataType
 from deeplearning.model.neural_model import NeuralModel, NeuralBuilder
 from deeplearning.block.mlp.mlp_block import MLPBlock
-import torch.nn as nn
-__all__ = ['MLPModel']
+__all__ = ['MLPModel', 'MLPBuilder']
 
 
 class MLPModel(NeuralModel):
