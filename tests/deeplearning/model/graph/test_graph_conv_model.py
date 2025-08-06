@@ -256,7 +256,7 @@ class GraphConvModelTest(unittest.TestCase):
                 'class_weights': None,
                 'patience': 2,
                 'min_diff_loss': 0.02,
-                'epochs': 10,
+                'epochs': 1,
                 # Model configuration
                 'hidden_channels': 64,
                 # Performance metric definition

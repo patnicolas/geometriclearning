@@ -120,8 +120,8 @@ class BuiltInMetric(Metric):
         np_metric = self.from_numpy(np_predicted, np_labels)
         return torch.tensor(np_metric)
 
-    def __call__(self, predicted: List[float], labeled: List[float]) -> np.array:
-        value = self.from_float(predicted, labeled)
+    def __call__(self, predicted: np.array, labeled: np.array) -> np.array:
+        value = self.from_numpy(predicted, labeled)
         return np.array(value)
 
     def default(self, predicted: List[float], labeled: List[float]) -> Dict[MetricType, torch.Tensor]:
@@ -177,3 +177,20 @@ class BuiltInMetric(Metric):
         return f1_score(_labeled, _predicted, average='macro', zero_division=1.0) if self.is_weighted \
             else f1_score(_labeled, _predicted, average=None, zero_division=1.0)
 
+    def __auc(self, _labeled: np.array, _predicted: np.array) -> np.array:
+        from sklearn.metrics import auc
+
+        return auc(_labeled, _predicted, average='macro', zero_division=1.0) if self.is_weighted \
+            else auc(_labeled, _predicted, average=None, zero_division=1.0)
+
+    def __roc_auc_score(self, _labeled: np.array, _predicted: np.array) -> np.array:
+        from sklearn.metrics import roc_auc_score
+
+        return roc_auc_score(_labeled, _predicted, average='macro', zero_division=1.0) if self.is_weighted \
+            else roc_auc_score(_labeled, _predicted, average=None, zero_division=1.0)
+
+    def __jaccard(self, _labeled: np.array, _predicted: np.array) -> np.array:
+        from sklearn.metrics import jaccard_score
+
+        return jaccard_score(_labeled, _predicted, average='macro', zero_division=1.0) if self.is_weighted \
+            else jaccard_score(_labeled, _predicted, average=None, zero_division=1.0)

@@ -2,7 +2,7 @@ import unittest
 
 import os
 from deeplearning.block.graph.message_passing_block import MessagePassingBlock
-from deeplearning.model.graph.gnn_base_model import GNNBaseModel
+from deeplearning.model.graph.graph_base_model import GraphBaseModel
 from deeplearning.training.hyper_params import HyperParams
 from torch_geometric.nn import GraphConv
 import torch.nn as nn
@@ -65,7 +65,7 @@ class GNNBaseModelTest(unittest.TestCase):
                            metrics=['Precision', 'Recall'])
 
     @staticmethod
-    def build(num_node_features: int, num_classes: int) -> GNNBaseModel:
+    def build(num_node_features: int, num_classes: int) -> GraphBaseModel:
         from torch_geometric.nn import BatchNorm
 
         hidden_channels = 256
@@ -80,7 +80,7 @@ class GNNBaseModelTest(unittest.TestCase):
         conv_3 = GraphConv(in_channels=hidden_channels, out_channels=num_classes)
         gcn_conv_3 = MessagePassingBlock(block_id='K3', message_passing_module=conv_3)
 
-        return GNNBaseModel.build(model_id='Karate club test',
-                                  gnn_blocks=[gcn_conv_1, gcn_conv_2, gcn_conv_3])
+        return GraphBaseModel.build(model_id='Karate club test',
+                                    gnn_blocks=[gcn_conv_1, gcn_conv_2, gcn_conv_3])
 
 

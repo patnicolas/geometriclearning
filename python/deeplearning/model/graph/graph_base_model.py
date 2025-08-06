@@ -31,29 +31,29 @@ from deeplearning.training.hyper_params import HyperParams
 from metric.built_in_metric import BuiltInMetric
 from metric.metric_type import MetricType
 from deeplearning.block.graph import GraphException
-__all__ = ['GNNBaseModel']
+__all__ = ['GraphBaseModel']
 
 
-class GNNBaseModel(NeuralModel):
+class GraphBaseModel(NeuralModel):
 
     def __init__(self,
                  model_id: AnyStr,
-                 gnn_blocks: List[MessagePassingBlock],
+                 graph_blocks: List[MessagePassingBlock],
                  mlp_blocks: Optional[List[MLPBlock]] = None) -> None:
         """
-        Constructor for this simple Graph convolutional neural network
+        Constructor for this simple generic Graph neural network
         @param model_id: Identifier for this model
         @type model_id: Str
-        @param gnn_blocks: List of Graph convolutional neural blocks
-        @type gnn_blocks: List[ConvBlock]
+        @param graph_blocks: List of Graph convolutional neural blocks
+        @type graph_blocks: List[ConvBlock]
         @param mlp_blocks: List of Feed-Forward Neural Blocks
         @type mlp_blocks: List[MLPBlock]
         """
-        assert len(gnn_blocks) > 0, f'Number of message passing blocks {gnn_blocks} should not be empty'
+        assert len(graph_blocks) > 0, f'Number of message passing blocks {graph_blocks} should not be empty'
 
-        self.gnn_blocks = gnn_blocks
+        self.graph_blocks = graph_blocks
 
-        modules: List[nn.Module] = [module for block in gnn_blocks for module in block.modules]
+        modules: List[nn.Module] = [module for block in graph_blocks for module in block.modules]
         # If fully connected are provided as CNN
         if mlp_blocks is not None:
             self.ffnn_blocks = mlp_blocks
@@ -61,7 +61,7 @@ class GNNBaseModel(NeuralModel):
             modules.append(nn.Flatten())
             # Generate
             [modules.append(module) for block in mlp_blocks for module in block.modules]
-        super(GNNBaseModel, self).__init__(model_id, nn.Sequential(*modules))
+        super(GraphBaseModel, self).__init__(model_id, nn.Sequential(*modules))
 
     @classmethod
     def build(cls, model_id: AnyStr, gnn_blocks: List[MessagePassingBlock]) -> Self:
@@ -72,9 +72,9 @@ class GNNBaseModel(NeuralModel):
         @param gnn_blocks: List of convolutional blocks
         @type gnn_blocks: List[ConvBlock]
         @return: Instance of decoder of type GCNModel
-        @rtype: GNNBaseModel
+        @rtype: GraphBaseModel
         """
-        return cls(model_id, gnn_blocks=gnn_blocks, mlp_blocks=None)
+        return cls(model_id, graph_blocks=gnn_blocks, mlp_blocks=None)
 
     def __repr__(self) -> str:
         modules = [f'{idx}: {str(module)}' for idx, module in enumerate(self.get_modules())]
@@ -91,7 +91,8 @@ class GNNBaseModel(NeuralModel):
 
     def forward(self, data: Data) -> torch.Tensor:
         """
-        Execute the default forward method for all neural network models inherited from this class
+        Execute the default forward method for all neural network models inherited from this class.
+
         @param data: Graph representation
         @type data: Data
         @return: Prediction for the input
@@ -100,7 +101,7 @@ class GNNBaseModel(NeuralModel):
         x = data.x
         edge_index = data.edge_index
         output = []
-        for gnn_block in self.gnn_blocks:
+        for gnn_block in self.graph_blocks:
             x = gnn_block(x, edge_index)
             output.append(x)
         x = torch.cat(output, dim=-1)

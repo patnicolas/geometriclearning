@@ -36,7 +36,7 @@ class BuiltInMetricTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(True)
 
-    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_precision(self):
         try:
             metric_type = MetricType.Precision
@@ -61,7 +61,7 @@ class BuiltInMetricTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(True)
 
-    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_recall(self):
         try:
             metric_type = MetricType.Recall

@@ -25,10 +25,9 @@ from torch.utils.data import DataLoader
 from deeplearning.block.mlp.mlp_block import MLPBlock
 from deeplearning.block.graph.graph_conv_block import GraphConvBlock
 from deeplearning.model.neural_model import NeuralModel, NeuralBuilder
+from deeplearning.training.gnn_training import GNNTraining
 import python
 __all__ = ['GraphConvModel', 'GraphConvBuilder']
-
-from deeplearning.training.gnn_training import GNNTraining
 
 
 class GraphConvModel(NeuralModel):

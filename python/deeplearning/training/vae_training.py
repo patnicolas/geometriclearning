@@ -229,7 +229,7 @@ class VAETraining(NeuralTraining, ABC):
                 raise VAEException(str(e))
 
         eval_loss = total_loss / num_records
-        self.performance_metrics.update_metric(MetricType.EvalLoss, eval_loss)
+        self.performance_metrics.collect_metric(MetricType.EvalLoss, eval_loss)
         self.__visualize(eval_images)
 
     """ ------------------------------  Private helper method for visual debugging --------------- """

@@ -15,39 +15,33 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 
 # Standard Library imports
-from enum import Enum
-from typing import AnyStr, Self
+from enum import StrEnum
+from typing import AnyStr
+import logging
 # Library imports
 from metric import MetricException
-__all__ = ['MetricType']
+import python
+__all__ = ['MetricType', 'get_metric_type']
 
 
-class MetricType(Enum):
+class MetricType(StrEnum):
     Accuracy = 'Accuracy'
     Precision = 'Precision'
     Recall = 'Recall'
     F1 = 'F1'
-    AuROC = 'AuROC'
+    Auc = 'Auc'
+    RocAucScore = 'RocAucScore'
+    Jaccard = 'Jaccard'
     TrainLoss = 'TrainLoss'
     EvalLoss = 'EvalLoss'
     All = 'All'
 
-    @staticmethod
-    def get_metric_type(metric_type_str: AnyStr) -> Self:
-        match metric_type_str:
-            case 'Accuracy':
-                return MetricType.Accuracy
-            case 'Precision':
-                return MetricType.Precision
-            case 'Recall':
-                return MetricType.Recall
-            case 'F1':
-                return MetricType.F1
-            case 'EvalLoss':
-                return MetricType.EvalLoss
-            case 'TrainLoss':
-                return MetricType.TrainLoss
-            case 'All':
-                return MetricType.All
-            case _:
-                raise MetricException(f'{metric_type_str} metric is not supported')
+
+_lookup = {item.value: item for item in MetricType}
+
+def get_metric_type(metric_type_str: AnyStr) -> MetricType:
+    try:
+        return _lookup[metric_type_str]
+    except KeyError as e:
+        logging.error(e)
+        raise MetricException(e)

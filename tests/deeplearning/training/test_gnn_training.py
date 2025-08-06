@@ -6,7 +6,7 @@ from dataset import DatasetException
 from deeplearning.block.mlp.mlp_block import MLPBlock
 from deeplearning.training.hyper_params import HyperParams
 from deeplearning.training.gnn_training import GNNTraining
-from deeplearning.model.graph.gnn_base_model import GNNBaseModel
+from deeplearning.model.graph.graph_base_model import GraphBaseModel
 from dataset.graph.graph_data_loader import GraphDataLoader
 from metric.metric_type import MetricType
 from metric.built_in_metric import BuiltInMetric
@@ -430,10 +430,10 @@ class GNNTrainingTest(unittest.TestCase):
             encoding_len=num_classes)
 
     @staticmethod
-    def create_model(num_node_features: int, num_classes: int) -> GNNBaseModel:
+    def create_model(num_node_features: int, num_classes: int) -> GraphBaseModel:
         from torch_geometric.nn import GraphConv
         from deeplearning.block.graph.message_passing_block import MessagePassingBlock
-        from deeplearning.model.graph.gnn_base_model import GNNBaseModel
+        from deeplearning.model.graph.graph_base_model import GraphBaseModel
 
         hidden_channels = 256
         conv_1 = GraphConv(in_channels=num_node_features, out_channels=hidden_channels)
@@ -455,6 +455,6 @@ class GNNTrainingTest(unittest.TestCase):
         ffnn_block = MLPBlock(block_id='Output',
                               layer_module=nn.Linear(3*hidden_channels, num_classes),
                               activation_module=nn.LogSoftmax(dim=-1))
-        return GNNBaseModel(model_id='Flickr',
-                            gnn_blocks=[gnn_block_1, gnn_block_2, gnn_block_3],
-                            mlp_blocks=[ffnn_block])
+        return GraphBaseModel(model_id='Flickr',
+                              graph_blocks=[gnn_block_1, gnn_block_2, gnn_block_3],
+                              mlp_blocks=[ffnn_block])

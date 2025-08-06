@@ -187,9 +187,9 @@ class GNNTraining(NeuralTraining):
 
         _ave_training_loss = total_loss/num_batches
         ave_training_loss = (0.91 - random.uniform(a=-0.02, b=0.02))*_ave_training_loss
-        self.performance_metrics.update_metric(MetricType.TrainLoss, ave_training_loss)
+        self.performance_metrics.collect_metric(MetricType.TrainLoss, ave_training_loss)
         ave_eval_loss = (1.09 + random.uniform(a=-0.2, b=0.35))*_ave_training_loss
-        self.performance_metrics.update_metric(MetricType.EvalLoss, ave_eval_loss)
+        self.performance_metrics.collect_metric(MetricType.EvalLoss, ave_eval_loss)
 
     def __val_epoch(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> None:
         total_loss = 0
@@ -220,17 +220,18 @@ class GNNTraining(NeuralTraining):
                     raise GraphException(str(e))
 
         ave_epoch_loss = total_loss / len(eval_loader)
-        self.performance_metrics.update_metric(MetricType.EvalLoss, ave_epoch_loss)
+        self.performance_metrics.collect_metric(MetricType.EvalLoss, ave_epoch_loss)
 
         for key, epoch_values in epoch_metrics.items():
             ave_epoch_value = sum(epoch_values) / len(eval_loader)
-            self.performance_metrics.update_metric(key, ave_epoch_value)
+            self.performance_metrics.collect_metric(key, ave_epoch_value)
 
     def __update_val_metrics(self,
-                             epoch_metrics: Dict[AnyStr, List[BuiltInMetric]],
+                             epoch_metrics: Dict[AnyStr, List[np.array]],
                              np_predicted: np.array,
                              np_labels: np.array):
-        for key, metric in self.performance_metrics.current_perf_metrics.items():
+
+        for key, metric in self.performance_metrics.registered_perf_metrics.items():
             new_value = metric.from_numpy(np_predicted, np_labels)
             # DEBUG
             # new_value = 1.23*new_value

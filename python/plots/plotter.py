@@ -137,9 +137,9 @@ class Plotter(object):
         font_style = {'family': 'sans-serif', 'size': 16}
         fig.suptitle(plot_title, **font_style)
         plt.tight_layout()
-        # plt.show()
-        plot_file_name = f"{Plotter.test_images_folder}/plot_{plot_title}.png"
-        fig.savefig(plot_file_name)
+        plt.show()
+        # plot_file_name = f"{Plotter.test_images_folder}/plot_{plot_title}.png"
+        # fig.savefig(plot_file_name)
 
     @staticmethod
     def plot(values: List[List[float]], labels: List[AnyStr], plotter_parameters: PlotterParameters) -> None:
@@ -225,8 +225,10 @@ class Plotter(object):
             limits: (int, int)) -> None:
         y = np.asarray(values)
         limit_y, delta_x, delta_y = Plotter.arrange_y(limits)
+
         axes[index[0]][index[1]].set_facecolor('black')
-        axes[index[0]][index[1]].set_xlim(1, limits[0]-1)
+        max_x = 2 if limits[0] <= 1 else limits[0]-1
+        axes[index[0]][index[1]].set_xlim(1, max_x)
         axes[index[0]][index[1]].set_ylim(0, limit_y)
         axes[index[0]][index[1]].set_xticks(np.arange(0, limits[0], delta_x))
         axes[index[0]][index[1]].set_yticks(np.arange(0,  limit_y, delta_y))

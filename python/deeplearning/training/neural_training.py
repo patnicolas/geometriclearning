@@ -156,7 +156,7 @@ class NeuralTraining(object):
             except Exception as e:
                 raise TrainingException(str(e))
             average_loss = total_loss / len(train_loader)
-            self.performance_metrics.update_metric(MetricType.TrainLoss, np.array(average_loss))
+            self.performance_metrics.collect_metric(MetricType.TrainLoss, np.array(average_loss))
 
     def __val_epoch(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> None:
         total_loss = 0
@@ -199,5 +199,5 @@ class NeuralTraining(object):
                     raise ValidationException(str(e))
 
         eval_loss = total_loss / count
-        self.performance_metrics.update_metric(MetricType.EvalLoss, np.array(eval_loss))
+        self.performance_metrics.collect_metric(MetricType.EvalLoss, np.array(eval_loss))
 

@@ -19,10 +19,12 @@ from typing import List, AnyStr, Optional, Any, Dict
 from torch_geometric.data import Data
 import torch
 import torch.nn as nn
+from torch.utils.data import DataLoader
 # Library imports
 from deeplearning.model.neural_model import NeuralModel, NeuralBuilder
 from deeplearning.block.mlp.mlp_block import MLPBlock
 from deeplearning.block.graph.graph_sage_block import GraphSAGEBlock
+from deeplearning.training.gnn_training import GNNTraining
 __all__ = ['GraphSAGEModel', 'GraphSAGEBuilder']
 
 
@@ -61,7 +63,7 @@ class GraphSAGEModel(NeuralModel):
         x = data.x
         edge_index = data.edge_index
 
-        # Step 2: Process forward the convolutional layers
+        # Step 2: Process forward the SAGE layers
         # Create and collect the output of each GNN layer
         for graph_SAGE_block in self.graph_SAGE_blocks:
             # Implicit invoke forward method for the block
@@ -69,9 +71,25 @@ class GraphSAGEModel(NeuralModel):
 
         # Step 4: Process the fully connected, MLP layers
         for mlp_block in self.mlp_blocks:
-            # Invoke the forward method for the MLP block
-            x = mlp_block(x)
+            x = mlp_block(x)  # Invoke the forward method for the MLP block
         return x
+
+    def train_model(self, gnn_training: GNNTraining, train_loader: DataLoader, val_loader: DataLoader) -> None:
+        """
+        Training and evaluation of models using Graph Neural Training and train loader for training and evaluation data
+
+        @param gnn_training: Wrapper class for training Graph Neural Network
+        @type gnn_training:  GNNTraining
+        @param train_loader: Loader for the training data set
+        @type train_loader: torch.utils.data.DataLoader
+        @param val_loader:   Loader for the validation data set
+        @type val_loader:  torch.utils.data.DataLoader
+        """
+        gnn_training.train(model_id=self.model_id,
+                           neural_model=self,
+                           train_loader=train_loader,
+                           val_loader=val_loader,
+                           val_enabled=True)
 
 
 class GraphSAGEBuilder(NeuralBuilder):

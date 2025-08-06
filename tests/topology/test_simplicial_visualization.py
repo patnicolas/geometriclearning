@@ -7,14 +7,6 @@ from topology.simplicial_visualization import SimplicialVisualization
 
 class SimplicialVisualizationTest(unittest.TestCase):
 
-    def test1(self):
-        i = 5
-        while(i > 0):
-            i -= 1
-            if i ==2:
-                break
-            print(i)
-
     @unittest.skip('Ignore')
     def test_show_1(self):
         edge_set = [
