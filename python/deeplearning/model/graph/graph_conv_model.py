@@ -20,12 +20,15 @@ import logging
 import torch
 from torch_geometric.data import Data
 import torch.nn as nn
+from torch.utils.data import DataLoader
 # Library imports
 from deeplearning.block.mlp.mlp_block import MLPBlock
 from deeplearning.block.graph.graph_conv_block import GraphConvBlock
 from deeplearning.model.neural_model import NeuralModel, NeuralBuilder
 import python
 __all__ = ['GraphConvModel', 'GraphConvBuilder']
+
+from deeplearning.training.gnn_training import GNNTraining
 
 
 class GraphConvModel(NeuralModel):
@@ -94,6 +97,22 @@ class GraphConvModel(NeuralModel):
             # Invoke the forward method for the MLP block
             x = mlp_block(x)
         return x
+
+    def train_model(self, gnn_training: GNNTraining, train_loader: DataLoader, val_loader: DataLoader) -> None:
+        """
+        Training and evaluation of models using Graph Neural Training and train loader for training and evaluation data
+        @param gnn_training: Wrapper class for training Graph Neural Network
+        @type gnn_training:  GNNTraining
+        @param train_loader: Loader for the training data set
+        @type train_loader: torch.utils.data.DataLoader
+        @param val_loader:   Loader for the validation data set
+        @type val_loader:  torch.utils.data.DataLoader
+        """
+        gnn_training.train(model_id=self.model_id,
+                           neural_model=self,
+                           train_loader=train_loader,
+                           val_loader=val_loader,
+                           val_enabled=True)
 
 
 class GraphConvBuilder(NeuralBuilder):

@@ -38,24 +38,32 @@ class PerformanceMetrics(object):
 
     There are two constructors
     __init__: Default constructor taking a dictionary  {metric_name, build in metric} as input
-            example: {metric='Accuracy', BuildInMetric(MetricType.Accuracy, is_weighted}
+            The default constructor does not automatically include the training and validation losses
+            Example: {metric='Accuracy', BuildInMetric(MetricType.Accuracy, is_weighted}
+
     build: Alternative constructor taking a list of metric labels and flag to specify if the
-            class are imbalance
+            class are imbalance.
+            This alternative constructor will automatically add the training and validation losses if they
+            are not explicitly defined
             example: metrics_list=['Accuracy', 'f1'],  is_class_imbalance=True
 
-    Methods:
-    register_metric: Add/register another metric
+    Attributes:
+        registered_perf_metrics: Dictionary of the metric registered for this model
+        current_perf_metrics: Dictionary of the metric currently collected for this training session
     """
     import os
     output_path = '../../'
     output_filename = 'output'
     output_folder = os.path.join(output_path, output_filename)
-    valid_metrics = ['Accuracy', 'Precision', 'Recall', 'F1']
+    valid_metrics = ['Accuracy', 'Precision', 'Recall', 'F1', 'AuC']
 
     def __init__(self, registered_perf_metrics: Dict[MetricType, BuiltInMetric]) -> None:
         """
         Default constructor for the Performance metrics taking a dictionary input a
-        { metric_name, build in metric}   example {metric='Accuracy', BuildInMetric(MetricType.Accuracy, is_weighted}
+        { metric_name, build in metric}
+        This constructor does not automatically include the training and validation losses
+          Example {metric='Accuracy', BuildInMetric(MetricType.Accuracy, is_weighted}
+
         @param registered_perf_metrics: Dictionary { metric_name, built in metric}
         @type registered_perf_metrics: Dictionary
         """
@@ -72,7 +80,9 @@ class PerformanceMetrics(object):
     def build(cls, metrics_list: List[AnyStr], is_class_imbalance: bool) -> Self:
         """
         Alternative constructor for the Performance metrics taking a dictionary input as
-         { metric_name, is_weighted}  example {metric='Accuracy', is_weighted=True}
+         { metric_name, is_weighted}
+        This constructor will automatically add the training and validation losses if they are not explicitly defined
+         Example {metric='Accuracy', is_weighted=True}
 
         @param metrics_list: List of metrics name
         @type metrics_list: Dictionary
@@ -86,7 +96,10 @@ class PerformanceMetrics(object):
         metrics = {MetricType.get_metric_type(metric): BuiltInMetric(metric_type=MetricType.get_metric_type(metric),
                                                                      is_weighted=is_class_imbalance)
                    for metric in metrics_list}
-        # If the caller forgot to include Eval loss as a performance metric, add it.
+        # If the caller forgot to include Train loss or Eval loss as a performance metric, add them.
+        if MetricType.TrainLoss not in metrics:
+            metrics[MetricType.TrainLoss] = BuiltInMetric(metric_type=MetricType.TrainLoss,
+                                                          is_weighted=is_class_imbalance)
         if MetricType.EvalLoss not in metrics:
             metrics[MetricType.EvalLoss] = BuiltInMetric(metric_type=MetricType.EvalLoss,
                                                          is_weighted=is_class_imbalance)

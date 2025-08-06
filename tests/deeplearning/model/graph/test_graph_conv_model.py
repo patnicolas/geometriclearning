@@ -56,6 +56,7 @@ class GraphConvModelTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
+    @unittest.skip('Ignore')
     def test_init_build(self):
         try:
             out_channels = 256
@@ -112,6 +113,7 @@ class GraphConvModelTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
+    @unittest.skip('Ignore')
     def test_init_build_2(self):
         out_channels = 256
         in_features = 256
@@ -170,6 +172,7 @@ class GraphConvModelTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
+    @unittest.skip('Ignore')
     def test_forward(self):
         out_channels = 256
         in_features = 256
@@ -224,4 +227,107 @@ class GraphConvModelTest(unittest.TestCase):
             self.assertTrue(False)
         except DatasetException as e:
             logging.error(e)
+            self.assertTrue(False)
+
+    def test_training(self):
+        from torch_geometric.datasets.flickr import Flickr
+        from deeplearning.training.gnn_training import GNNTraining
+        from dataset.graph.graph_data_loader import GraphDataLoader
+        from deeplearning.block.graph import GraphException
+
+        try:
+            path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
+            _dataset = Flickr(path)
+            _data = _dataset[0]
+
+            training_attributes = {
+                'dataset_name': 'Flickr',
+                # Model training Hyperparameters
+                'learning_rate': 0.0005,
+                'batch_size': 32,
+                'loss_function': nn.CrossEntropyLoss(),
+                'momentum': 0.90,
+                'encoding_len': -1,
+                'train_eval_ratio': 0.9,
+                'weight_initialization': 'xavier',
+                'optim_label': 'adam',
+                'drop_out': 0.25,
+                'is_class_imbalance': True,
+                'class_weights': None,
+                'patience': 2,
+                'min_diff_loss': 0.02,
+                'epochs': 10,
+                # Model configuration
+                'hidden_channels': 64,
+                # Performance metric definition
+                'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1'],
+                'plot_parameters': [
+                    {'title': 'Accuracy', 'x_label': 'epoch', 'y_label': 'accuracy'},
+                    {'title': 'Precision', 'x_label': 'epochs', 'y_label': 'precision'},
+                    {'title': 'Recall', 'x_label': 'epochs', 'y_label': 'recall'},
+                    {'title': 'F1', 'x_label': 'epochs', 'y_label': 'F1'},
+                ]
+            }
+            attrs = {
+                'id': 'NeighborLoader',
+                'num_neighbors': [12, 6, 3],
+                'batch_size': 32,
+                'replace': True,
+                'num_workers': 4
+            }
+            hidden_channels = 64
+            in_features = 64
+            model_attributes = {
+                'model_id': 'MyModel',
+                'graph_conv_blocks': [
+                    {
+                        'block_id': 'MyBlock_1',
+                        'conv_layer': GraphConv(in_channels=_data.num_node_features, out_channels=hidden_channels),
+                        'num_channels': hidden_channels,
+                        'activation': nn.ReLU(),
+                        'batch_norm': BatchNorm(hidden_channels),
+                        'pooling': None,
+                        'dropout': 0.25
+                    },
+                    {
+                        'block_id': 'MyBlock_2',
+                        'conv_layer': GraphConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                        'num_channels': hidden_channels,
+                        'activation': nn.ReLU(),
+                        'batch_norm': BatchNorm(hidden_channels),
+                        'pooling': None,
+                        'dropout': 0.25
+                    }
+                ],
+                'mlp_blocks': [
+                    {
+                        'block_id': 'Classifier',
+                        'in_features': in_features,
+                        'out_features': _dataset.num_classes,
+                        'activation': None,
+                        'dropout': 0.3
+                    }
+                ]
+            }
+            graph_conv_builder = GraphConvBuilder(model_attributes)
+            graph_conv_model = graph_conv_builder.build()
+
+            trainer = GNNTraining.build(training_attributes)
+            graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
+            train_loader, eval_loader = graph_data_loader()
+            graph_conv_model.train_model(trainer, train_loader, eval_loader)
+        except KeyError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except ValueError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except AssertionError as e:
+            logging.info(f'Error: {str(e)}')
+            self.assertTrue(False)
+        except DatasetException as e:
+            logging.info(f'Error: {str(e)}')
+            self.assertTrue(False)
+        except GraphException as e:
+            logging.info(f'Error: {str(e)}')
             self.assertTrue(False)

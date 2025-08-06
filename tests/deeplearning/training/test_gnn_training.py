@@ -51,9 +51,19 @@ class GNNTrainingTest(unittest.TestCase):
                 {'title': 'F1', 'x_label': 'epochs', 'y_label': 'F1'},
             ]
         }
-
-        gnn_training = GNNTraining.build(training_attributes)
-        logging.info(gnn_training)
+        try:
+            gnn_training = GNNTraining.build(training_attributes)
+            logging.info(gnn_training)
+            self.assertTrue(True)
+        except KeyError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except ValueError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_train_random_walk_loader(self):
@@ -200,7 +210,6 @@ class GNNTrainingTest(unittest.TestCase):
         except (GraphException | DatasetException | AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
-
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_train_random_loader_2(self):

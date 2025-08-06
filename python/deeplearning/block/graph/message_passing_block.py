@@ -33,6 +33,13 @@ class MessagePassingBlock(NeuralBlock):
     - Optional activation function
     - Optional batch norm 1-dimension
     - Optional drop-out
+
+    This class is the base class for all Graph Neural Blocks
+                                MessagePassingBlock
+                                        |
+                      ----------------------------------
+                      |           |                   |
+                  GCNBlock    GraphConvBlock     GraphSAGEBlock
     """
     def __init__(self,
                  block_id: AnyStr,

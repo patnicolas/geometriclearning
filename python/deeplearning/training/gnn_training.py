@@ -24,6 +24,7 @@ import torch
 import torch_geometric
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+import numpy as np
 # Library imports
 from deeplearning.training.neural_training import NeuralTraining
 from deeplearning.training.hyper_params import HyperParams
@@ -69,16 +70,24 @@ class GNNTraining(NeuralTraining):
 
     @classmethod
     def build(cls, training_attributes: Dict[AnyStr, Any]) -> Self:
+        # Instantiate the Hyper parameters from the training attributes
         hyper_params = HyperParams.build(training_attributes)
-        metric_attributes = PerformanceMetrics.build(training_attributes)
+
+        # Instantiate the Performance metrics
+        metric_attributes = PerformanceMetrics.build(metrics_list=training_attributes['metrics_list'],
+                                                     is_class_imbalance=training_attributes['is_class_imbalance'])
+
+        # Instantiate the Early Stopping criteria
         early_stopping = EarlyStopping.build(training_attributes)
-        plot_parameter_attrs = training_attributes['plot_parameters']
+
+        # Instantiate the Plots
         plot_parameters = [PlotterParameters(0,
                                              plot_param['x_label'],
                                              plot_param['y_label'],
-                                             plot_param['title'])for plot_param in plot_parameter_attrs]
+                                             plot_param['title'])for plot_param in training_attributes['plot_parameters']]
+
         return cls(hyper_params=hyper_params,
-                   metrics_attributes=metric_attributes.metrics,
+                   metrics_attributes=metric_attributes.registered_perf_metrics,
                    early_stopping=early_stopping,
                    plot_parameters=plot_parameters)
 
@@ -169,8 +178,13 @@ class GNNTraining(NeuralTraining):
                 # Monitoring and caching for performance
                 self.exec_config.apply_batch_optimization(idx, optimizer)
                 idx += 1
-            except (RuntimeError | AttributeError | ValueError | Exception) as e:
+            except RuntimeError as e:
                 raise GraphException(str(e))
+            except AttributeError as e:
+                raise GraphException(str(e))
+            except ValueError as e:
+                raise GraphException(str(e))
+
         _ave_training_loss = total_loss/num_batches
         ave_training_loss = (0.91 - random.uniform(a=-0.02, b=0.02))*_ave_training_loss
         self.performance_metrics.update_metric(MetricType.TrainLoss, ave_training_loss)
@@ -196,28 +210,35 @@ class GNNTraining(NeuralTraining):
 
                     # Compute and accumulate the loss
                     total_loss += raw_loss.item()
-                    # Transfer prediction and labels to CPU for computing metrics
-                    np_predicted = predicted.cpu().numpy()
-                    np_labels = data.y.cpu().numpy()
 
-                    # Update the metrics
-                    for key, metric in self.performance_metrics.metrics.items():
-                        new_value = metric.from_numpy(np_predicted, np_labels)
-                        # DEBUG
-                        new_value = 1.23*new_value
-                        # End Debug
-                        if key in epoch_metrics:
-                            values = epoch_metrics[key]
-                            values.append(new_value)
-                        else:
-                            values = [new_value]
-                        epoch_metrics[key] = values
+                    # Update the metrics and
+                    # Transfer prediction and labels to CPU for computing metrics
+                    self.__update_val_metrics(epoch_metrics=epoch_metrics,
+                                              np_predicted=predicted.cpu().numpy(),
+                                              np_labels=data.y.cpu().numpy())
                 except (RuntimeError | AttributeError| ValueError| Exception) as e:
                     raise GraphException(str(e))
-        # ave_epoch_loss = total_loss / len(eval_loader)
-        # self.performance_metrics.update_metric(MetricType.EvalLoss, ave_epoch_loss)
+
+        ave_epoch_loss = total_loss / len(eval_loader)
+        self.performance_metrics.update_metric(MetricType.EvalLoss, ave_epoch_loss)
 
         for key, epoch_values in epoch_metrics.items():
             ave_epoch_value = sum(epoch_values) / len(eval_loader)
             self.performance_metrics.update_metric(key, ave_epoch_value)
+
+    def __update_val_metrics(self,
+                             epoch_metrics: Dict[AnyStr, List[BuiltInMetric]],
+                             np_predicted: np.array,
+                             np_labels: np.array):
+        for key, metric in self.performance_metrics.current_perf_metrics.items():
+            new_value = metric.from_numpy(np_predicted, np_labels)
+            # DEBUG
+            # new_value = 1.23*new_value
+            # End Debug
+            if key in epoch_metrics:
+                values = epoch_metrics[key]
+                values.append(new_value)
+            else:
+                values = [new_value]
+            epoch_metrics[key] = values
 
