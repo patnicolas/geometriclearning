@@ -158,7 +158,6 @@ class GNNTraining(NeuralTraining):
         optimizer = self.hyper_params.optimizer(neural_model)
         model = neural_model.to(self.target_device, non_blocking=True)
 
-        num_batches = len(train_loader)
         for idx, data in enumerate(train_loader):
             try:
                 # Force a conversion to float 32 if necessary
@@ -185,16 +184,15 @@ class GNNTraining(NeuralTraining):
             except ValueError as e:
                 raise GraphException(str(e))
 
-        _ave_training_loss = total_loss/num_batches
-        ave_training_loss = (0.91 - random.uniform(a=-0.02, b=0.02))*_ave_training_loss
-        self.performance_metrics.collect_metric(MetricType.TrainLoss, ave_training_loss)
-        ave_eval_loss = (1.09 + random.uniform(a=-0.2, b=0.35))*_ave_training_loss
-        self.performance_metrics.collect_metric(MetricType.EvalLoss, ave_eval_loss)
+        _ave_training_loss = total_loss/len(train_loader)
+        # ave_training_loss = (0.91 - random.uniform(a=-0.02, b=0.02))*_ave_training_loss
+        self.performance_metrics.collect_loss(is_validation=False, np_loss=np.array(_ave_training_loss))
 
     def __val_epoch(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> None:
         total_loss = 0
         model.eval()
-        epoch_metrics = {}
+        predicted_values = []
+        labeled_values = []
 
         # No need for computing gradient for evaluation (NO back-propagation)
         with torch.no_grad():
@@ -213,33 +211,22 @@ class GNNTraining(NeuralTraining):
 
                     # Update the metrics and
                     # Transfer prediction and labels to CPU for computing metrics
-                    self.__update_val_metrics(epoch_metrics=epoch_metrics,
-                                              np_predicted=predicted.cpu().numpy(),
-                                              np_labels=data.y.cpu().numpy())
-                except (RuntimeError | AttributeError| ValueError| Exception) as e:
+                    predicted_values.append(predicted.cpu().numpy())
+                    labeled_values.append(data.y.cpu().numpy())
+                except RuntimeError as e:
+                    raise GraphException(str(e))
+                except AttributeError as e:
+                    raise GraphException(str(e))
+                except ValueError as e:
                     raise GraphException(str(e))
 
+        # Collect all prediction and labels
+        all_predicted = np.concatenate(predicted_values)
+        all_labeled = np.concatenate(labeled_values)
+        del predicted_values, labeled_values
+
+        # Record the values for the registered metrics (e.g., Precision)
+        self.performance_metrics.collect_registered_metrics(all_predicted, all_labeled)
+        # Record the validation loss
         ave_epoch_loss = total_loss / len(eval_loader)
-        self.performance_metrics.collect_metric(MetricType.EvalLoss, ave_epoch_loss)
-
-        for key, epoch_values in epoch_metrics.items():
-            ave_epoch_value = sum(epoch_values) / len(eval_loader)
-            self.performance_metrics.collect_metric(key, ave_epoch_value)
-
-    def __update_val_metrics(self,
-                             epoch_metrics: Dict[AnyStr, List[np.array]],
-                             np_predicted: np.array,
-                             np_labels: np.array):
-
-        for key, metric in self.performance_metrics.registered_perf_metrics.items():
-            new_value = metric.from_numpy(np_predicted, np_labels)
-            # DEBUG
-            # new_value = 1.23*new_value
-            # End Debug
-            if key in epoch_metrics:
-                values = epoch_metrics[key]
-                values.append(new_value)
-            else:
-                values = [new_value]
-            epoch_metrics[key] = values
-
+        self.performance_metrics.collect_loss(True, np.array(ave_epoch_loss))

@@ -111,11 +111,9 @@ class Plotter(object):
         @param plot_title: Title for plot
         @type plot_title: str
         """
-        num_points = Plotter.__validate_params(dict_values, plotter_params_list)
         num_dict_values = len(dict_values)
         num_rows = num_dict_values // 2 if num_dict_values % 2 == 0 else (num_dict_values // 2) + 1
         fig, axes = plt.subplots(ncols=2, nrows=num_rows, figsize=plotter_params_list[0].fig_size)
-        x = np.arange(0, num_points, 1)
 
         plot_index = 0
         for col_index in range(2):
@@ -126,7 +124,7 @@ class Plotter(object):
                     x_lim = len(y)
                     y_max = max(y)
                     y_lim = 1.0 if y_max <= 1.0 else y_max
-                    Plotter.__multi_axis_plot(x,
+                    Plotter.__multi_axis_plot(np.arange(0, len(y), 1),
                                               plotter_params_list[plot_index],
                                               y,
                                               axes,
@@ -282,7 +280,7 @@ class Plotter(object):
         for k, v in dict_values.items():
             if k in PerformanceMetrics.valid_metrics and v_0 is None:
                 v_0 = v
-        return len(v_0)
+        return len(v_0) if v_0 is not None else 0
 
 
 

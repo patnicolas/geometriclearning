@@ -51,7 +51,6 @@ class PerformanceMetrics(object):
         registered_perf_metrics: Dictionary of the metric registered for this model
         collected_metrics: Dictionary of the metric currently collected for this training session
     """
-    import os
     output_filename = 'output'
     # output_folder = os.path.join(output_path, output_filename)
     valid_metrics = ['Accuracy', 'Precision', 'Recall', 'F1', 'AuC']
@@ -140,8 +139,9 @@ class PerformanceMetrics(object):
     def collect_loss(self, is_validation: bool, np_loss: np.array) -> int:
         metric_type = MetricType.EvalLoss if is_validation else MetricType.TrainLoss
         self.collect_metric(metric_type, np_loss)
+        return len(self.collected_metrics[metric_type])
 
-    def collect_registered_metrics(self, np_predicted: np.array, np_labeled: np.array):
+    def collect_registered_metrics(self, np_predicted: np.array, np_labeled: np.array) -> None:
         """
         Compute all the registered metrics
         @param np_predicted: Predicted values as Numpy arrays
@@ -149,11 +149,16 @@ class PerformanceMetrics(object):
         @param np_labeled: Labeled values
         @type np_labeled: Numpy array
         """
+        num_data_points = 0
         for key, metric in self.registered_perf_metrics.items():
             value = metric(np_predicted, np_labeled)
-            self.collect_metric(key, value)
+            num_data_points = self.collect_metric(key, value)
 
-    def collect_metric(self, new_metric_type: MetricType, np_new_metric_value: np.array) -> None:
+        metric_str = '\n'.join([f'   {str(k)}: {str(v)}' for k, v in self.collected_metrics.items()])
+        logging.info(f'>> Epoch: {num_data_points}\n{metric_str}')
+
+
+    def collect_metric(self, new_metric_type: MetricType, np_new_metric_value: np.array) -> int:
         """
         Update a metric of a given key with a value
         @param new_metric_type: Key or id of the metric
@@ -170,24 +175,7 @@ class PerformanceMetrics(object):
             # Otherwise create a new entry
             values = [np_new_metric_value]
             self.collected_metrics[new_metric_type] = values
-
-    """
-    def update_all_metrics(self, new_metrics: Dict[MetricType, torch.Tensor]) -> bool:
-        for key, value in new_metrics.items():
-            if key not in self.registered_perf_metrics:
-                raise MetricException(f'{key} metric is not supported')
-
-            # Update the existing key values pairs
-            if key in self.collected_metrics:
-                values = self.collected_metrics[key]
-                values.append(value.numpy())
-                self.collected_metrics[key] = values
-            # In case the new dictionary introduce new key
-            else:
-                values = [value.numpy()]
-                self.collected_metrics[key] = values
-        return len(self.collected_metrics.items()) > 0
-    """
+        return len(values)
 
     def summary(self, model_id: AnyStr) -> None:
         """
@@ -209,12 +197,10 @@ class PerformanceMetrics(object):
         try:
             parameters = [PlotterParameters(count=0,
                                             x_label='Epochs',
-                                            y_label=k.value,
-                                            title=f'{k} Plot',
-                                            fig_size=(10, 6)) for idx, k in enumerate(self.collected_metrics.keys())]
-            # Plot statistics
-            attribute_values = {k.value: v for k, v in self.collected_metrics.items()}
-            Plotter.multi_plot(attribute_values, parameters, output_filename)
+                                            y_label=key,
+                                            title=f'{key} Plot',
+                                            fig_size=(10, 6)) for key in self.collected_metrics.keys()]
+            Plotter.multi_plot(self.collected_metrics, parameters, output_filename)
         except FileNotFoundError as e:
             logging.error(e)
             raise MetricException(e)
