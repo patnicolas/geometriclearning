@@ -172,10 +172,9 @@ class BuiltInMetric(Metric):
         return np.array([score])
 
     def __f1(self, _labeled: np.array, _predicted: np.array) -> np.array:
-        from sklearn.metrics import f1_score
-
-        return f1_score(_labeled, _predicted, average='macro', zero_division=1.0) if self.is_weighted \
-            else f1_score(_labeled, _predicted, average=None, zero_division=1.0)
+        precision = self.__precision(_labeled, _predicted)
+        recall = self.__recall(_labeled, _predicted)
+        return 2.0*precision*recall/(precision + recall)
 
     def __auc(self, _labeled: np.array, _predicted: np.array) -> np.array:
         from sklearn.metrics import auc

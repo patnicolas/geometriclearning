@@ -33,7 +33,9 @@ class PerformanceMetricsTest(unittest.TestCase):
         try:
             import numpy as np
             from metric.built_in_metric import BuiltInMetric
+            from plots.plotter import Plotter
 
+            Plotter.set_images_folder('../output_images')
             metrics = {
                 MetricType.Accuracy: BuiltInMetric(metric_type=MetricType.Accuracy),
                 MetricType.Precision: BuiltInMetric(metric_type=MetricType.Precision),
@@ -86,12 +88,14 @@ class PerformanceMetricsTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_plot_summary_batches(self):
         try:
             import numpy as np
             from metric.built_in_metric import BuiltInMetric
+            from plots.plotter import Plotter
 
+            Plotter.set_images_folder('../output_plots')
             metrics = {
                 MetricType.Accuracy: BuiltInMetric(metric_type=MetricType.Accuracy),
                 MetricType.Precision: BuiltInMetric(metric_type=MetricType.Precision),
@@ -111,8 +115,9 @@ class PerformanceMetricsTest(unittest.TestCase):
                 performance_metrics.collect_loss(is_validation=True, np_loss=np_loss)
 
             logging.info(f'\n{performance_metrics=}')
+            logging.info(f'Length: {len(performance_metrics)}')
 
-            output_file_name = '../output_images/results'
+            output_file_name = 'results'
             performance_metrics.summary(output_file_name)
             self.assertTrue(True)
         except (Union[AssertionError, MetricException]) as e:

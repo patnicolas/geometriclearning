@@ -74,9 +74,13 @@ class PlotterParameters:
 
 class Plotter(object):
     plot_parameters_label = 'plot_parameters'
-    test_images_folder = '../../output_images'
+    images_folder = '../../output_plots'
     markers = ['-', '--', '-.', '--', '^', '-']
     colors = ['blue', 'green', 'red', 'orange', 'black', 'grey']
+
+    @staticmethod
+    def set_images_folder(img_folder: AnyStr) -> None:
+        Plotter.images_folder = img_folder
 
     @staticmethod
     def single_plot_np_array(np_array1: np.array, np_array2: np.array, plotter_parameters: PlotterParameters):
@@ -84,7 +88,7 @@ class Plotter(object):
         axes.plot(np_array1, np_array2)
         axes.set(xlabel=plotter_parameters.x_label, ylabel=plotter_parameters.y_label, title=plotter_parameters.title)
         axes.grid()
-        fig.savefig(f"{Plotter.test_images_folder}/plot-{plotter_parameters.time_str}.png")
+        fig.savefig(f"{Plotter.images_folder}/plot-{plotter_parameters.time_str}.png")
         plt.show()
 
     @staticmethod
@@ -95,7 +99,7 @@ class Plotter(object):
         axes.plot(x, y)
         axes.set(xlabel=plotter_parameters.x_label, ylabel=plotter_parameters.y_label, title=plotter_parameters.title)
         axes.grid()
-        fig.savefig(f"{Plotter.test_images_folder}/plot-{plotter_parameters.time_str}.png")
+        fig.savefig(f"{Plotter.images_folder}/plot-{plotter_parameters.time_str}.png")
         plt.show()
 
     @staticmethod
@@ -136,8 +140,8 @@ class Plotter(object):
         fig.suptitle(plot_title, **font_style)
         plt.tight_layout()
         plt.show()
-        # plot_file_name = f"{Plotter.test_images_folder}/plot_{plot_title}.png"
-        # fig.savefig(plot_file_name)
+        plot_file_name = f"{Plotter.images_folder}/plot_{plot_title}.png"
+        fig.savefig(plot_file_name)
 
     @staticmethod
     def plot(values: List[List[float]], labels: List[AnyStr], plotter_parameters: PlotterParameters) -> None:
@@ -193,7 +197,7 @@ class Plotter(object):
         x = np.arange(0, len(values1), 1)
         for i in range(2):
             Plotter.__axis_plot(x, plotter_parameters_list[i], [torch.Tensor(x) for x in values1], axes, i)
-        fig.savefig(f"{Plotter.test_images_folder}/plot-{Plotter.time_str()}.png")
+        fig.savefig(f"{Plotter.images_folder}/plot-{Plotter.time_str()}.png")
         plt.show()
 
     @staticmethod
@@ -210,7 +214,7 @@ class Plotter(object):
         x = np.arange(0, len(values1), 1)
         for i in range(3):
             Plotter.__axis_plot(x, plotter_parameters_list[i], [torch.Tensor(x) for x in values1], axes, i)
-        # fig.savefig(f"{Plotter.test_images_folder}/plot-{Plotter.time_str()}.png")
+        fig.savefig(f"{Plotter.images_folder}/plot-{Plotter.time_str()}.png")
         plt.show()
 
     @staticmethod

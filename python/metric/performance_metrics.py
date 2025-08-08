@@ -93,7 +93,11 @@ class PerformanceMetrics(object):
         return cls(metrics)
 
     def __len__(self) -> int:
-        return len(self.registered_perf_metrics)
+        if len(self.collected_metrics) > 0:
+            k, v = next(iter(self.collected_metrics.items()))
+            return len(v)
+        else:
+            return 0
 
     def register_metric(self, metric_type: MetricType, encoding_len: int = -1, is_weighted: bool = False) -> None:
         """
@@ -157,7 +161,6 @@ class PerformanceMetrics(object):
         metric_str = '\n'.join([f'   {str(k)}: {str(v)}' for k, v in self.collected_metrics.items()])
         logging.info(f'>> Epoch: {num_data_points}\n{metric_str}')
 
-
     def collect_metric(self, new_metric_type: MetricType, np_new_metric_value: np.array) -> int:
         """
         Update a metric of a given key with a value
@@ -202,20 +205,12 @@ class PerformanceMetrics(object):
                                             fig_size=(10, 6)) for key in self.collected_metrics.keys()]
             Plotter.multi_plot(self.collected_metrics, parameters, output_filename)
         except FileNotFoundError as e:
-            logging.error(e)
+            logging.error(f'Output file {output_filename} undefined {e}')
             raise MetricException(e)
 
     def __save_summary(self, output_filename) -> None:
-        summary_dict = {}
-        for k, lst in self.collected_metrics.items():
-            stacked_tensor = torch.stack(lst)
-            summary_dict[k] = stacked_tensor
-        logging.info(f'Save summary {str(summary_dict)}')
-        torch.save(summary_dict, f"{output_filename}.pth")
+        import json
 
-    """
-    def __recordX(self, epoch: int, metrics: Dict[MetricType, torch.Tensor]):
-        metric_str = '\n'.join([f'   {k.value}: {v}' for k, v in metrics.items()])
-        logging.info(f'>> Epoch: {epoch}\n{metric_str}')
-        self.update_all_metrics(metrics)
-    """
+        collected_values = { k: [float(v) for v in values] for k, values in self.collected_metrics.items()}
+        with open(f'{output_filename}.json', 'w') as f:
+            json.dump(collected_values, f)

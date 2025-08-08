@@ -25,11 +25,13 @@ import torch_geometric
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import numpy as np
+
 # Library imports
 from deeplearning.training.neural_training import NeuralTraining
 from deeplearning.training.hyper_params import HyperParams
 from deeplearning.block.graph import GraphException
 from metric.performance_metrics import PerformanceMetrics
+from deeplearning.training import TrainingException
 from plots.plotter import PlotterParameters
 from metric.metric_type import MetricType
 from metric.built_in_metric import BuiltInMetric
@@ -160,6 +162,7 @@ class GNNTraining(NeuralTraining):
 
         for idx, data in enumerate(train_loader):
             try:
+                optimizer.zero_grad()
                 # Force a conversion to float 32 if necessary
                 if data.x.dtype == torch.float64:
                     data.x = data.x.float()
@@ -175,24 +178,31 @@ class GNNTraining(NeuralTraining):
                 total_loss += loss
 
                 # Monitoring and caching for performance
-                self.exec_config.apply_batch_optimization(idx, optimizer)
-                idx += 1
+                optimizer.step()
+                # self.exec_config.apply_batch_optimization(idx, optimizer)
+                # idx += 1
             except RuntimeError as e:
                 raise GraphException(str(e))
             except AttributeError as e:
                 raise GraphException(str(e))
             except ValueError as e:
                 raise GraphException(str(e))
-
-        _ave_training_loss = total_loss/len(train_loader)
-        # ave_training_loss = (0.91 - random.uniform(a=-0.02, b=0.02))*_ave_training_loss
-        self.performance_metrics.collect_loss(is_validation=False, np_loss=np.array(_ave_training_loss))
+        # Collect the training loss
+        loss = total_loss/len(train_loader)
+        if loss > 1e+6:
+            raise TrainingException(f'Loss {loss} for {len(train_loader)} points is out of bounds')
+        self.performance_metrics.collect_loss(is_validation=False,
+                                              np_loss=np.array(loss))
 
     def __val_epoch(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> None:
         total_loss = 0
         model.eval()
         predicted_values = []
         labeled_values = []
+        # DEBUG
+        build_in_metric = BuiltInMetric(MetricType.Accuracy)
+        total_acc = 0
+        # DEBUG
 
         # No need for computing gradient for evaluation (NO back-propagation)
         with torch.no_grad():
@@ -211,6 +221,16 @@ class GNNTraining(NeuralTraining):
 
                     # Update the metrics and
                     # Transfer prediction and labels to CPU for computing metrics
+
+                    # DEBUG
+                    """
+                    p = predicted.cpu().numpy()
+                    l = data.y.cpu().numpy()
+                    acc = build_in_metric.from_numpy(p, l)
+                    logging.info(f'acc: {acc}')
+                    # total_acc += acc
+                    """
+                    # DEBUG
                     predicted_values.append(predicted.cpu().numpy())
                     labeled_values.append(data.y.cpu().numpy())
                 except RuntimeError as e:
@@ -223,10 +243,12 @@ class GNNTraining(NeuralTraining):
         # Collect all prediction and labels
         all_predicted = np.concatenate(predicted_values)
         all_labeled = np.concatenate(labeled_values)
+        # all_acc = build_in_metric.from_numpy(all_predicted, all_labeled)
+        # logging.info(f'all_acc: {all_acc} Total acc: {total_acc/len(eval_loader)}')
         del predicted_values, labeled_values
 
         # Record the values for the registered metrics (e.g., Precision)
         self.performance_metrics.collect_registered_metrics(all_predicted, all_labeled)
         # Record the validation loss
-        ave_epoch_loss = total_loss / len(eval_loader)
-        self.performance_metrics.collect_loss(True, np.array(ave_epoch_loss))
+        self.performance_metrics.collect_loss(is_validation=True,
+                                              np_loss=np.array(total_loss / len(eval_loader)))

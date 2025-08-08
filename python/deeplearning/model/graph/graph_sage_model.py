@@ -109,6 +109,7 @@ class GraphSAGEBuilder(NeuralBuilder):
         Constructor for Graph SAGE Model using default
         set of keys (name of configuration parameters) and default value for activation
         module, stride, padding, enabling batch normalization and no dropout
+
         @param model_attributes: Dictionary of model attributes
         @type model_attributes: Dict[AnyStr, Any]
         """
@@ -118,11 +119,11 @@ class GraphSAGEBuilder(NeuralBuilder):
         """
         Build Graph SAGE Model from a dictionary of configuration
         parameters in three steps:
-        1- Generate the convolutional neural block from the configuration parameters
+        1- Generate the graph SAGE neural block from the configuration parameters
         2- Generate the MLP neural blocks from the configuration if defined
         3- Validate the model
         @return: Graph SAGE model instance
-        @rtype: Conv2dModel
+        @rtype: GraphSAGEModel
         """
         graph_SAGE_blocks_attribute = self.model_attributes['graph_SAGE_blocks']
         mlp_blocks_attribute = self.model_attributes['mlp_blocks']

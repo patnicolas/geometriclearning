@@ -24,7 +24,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 # Library imports
 from deeplearning.training.exec_config import ExecConfig
-from deeplearning import TrainingException, ValidationException
+from deeplearning.training import TrainingException, ValidationException
 from deeplearning.training.hyper_params import HyperParams
 from metric.built_in_metric import BuiltInMetric
 from metric.metric import Metric

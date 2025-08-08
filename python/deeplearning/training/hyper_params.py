@@ -24,7 +24,7 @@ from torch import nn
 # Library imports
 from dataset import DatasetException
 import python
-from deeplearning import TrainingException
+from deeplearning.training import TrainingException
 __all__ = ['HyperParams']
 
 
