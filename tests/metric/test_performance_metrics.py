@@ -95,7 +95,6 @@ class PerformanceMetricsTest(unittest.TestCase):
             from metric.built_in_metric import BuiltInMetric
             from plots.plotter import Plotter
 
-            Plotter.set_images_folder('../output_plots')
             metrics = {
                 MetricType.Accuracy: BuiltInMetric(metric_type=MetricType.Accuracy),
                 MetricType.Precision: BuiltInMetric(metric_type=MetricType.Precision),
@@ -117,8 +116,7 @@ class PerformanceMetricsTest(unittest.TestCase):
             logging.info(f'\n{performance_metrics=}')
             logging.info(f'Length: {len(performance_metrics)}')
 
-            output_file_name = 'results'
-            performance_metrics.summary(output_file_name)
+            performance_metrics.summary(model_id='Test model', plot_folder='../output_plots')
             self.assertTrue(True)
         except (Union[AssertionError, MetricException]) as e:
             logging.error(e)

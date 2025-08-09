@@ -116,6 +116,9 @@ class Plotter(object):
         @type plot_title: str
         """
         num_dict_values = len(dict_values)
+        assert num_dict_values > 0, 'Dictionary of values to be plotted is undefined'
+        assert len(plotter_params_list) > 0, 'Plotting parameters are undefined'
+
         num_rows = num_dict_values // 2 if num_dict_values % 2 == 0 else (num_dict_values // 2) + 1
         fig, axes = plt.subplots(ncols=2, nrows=num_rows, figsize=plotter_params_list[0].fig_size)
 
@@ -224,16 +227,17 @@ class Plotter(object):
             values: List[float],
             axes,
             index: (int, int),
-            limits: (int, int)) -> None:
+            x_limits: (int, int)) -> None:
+
+        y_low, y_high, num_ticks = Plotter.plots_bounds(values)
         y = np.asarray(values)
-        limit_y, delta_x, delta_y = Plotter.arrange_y(limits)
 
         axes[index[0]][index[1]].set_facecolor('black')
-        max_x = 2 if limits[0] <= 1 else limits[0]-1
+        max_x = 2 if x_limits[0] <= 1 else x_limits[0] - 1
         axes[index[0]][index[1]].set_xlim(1, max_x)
-        axes[index[0]][index[1]].set_ylim(0, limit_y)
-        axes[index[0]][index[1]].set_xticks(np.arange(0, limits[0], delta_x))
-        axes[index[0]][index[1]].set_yticks(np.arange(0,  limit_y, delta_y))
+        axes[index[0]][index[1]].set_ylim(y_low, y_high)
+        axes[index[0]][index[1]].set_xticks(np.arange(x_limits[0], x_limits[1], 1))
+        axes[index[0]][index[1]].set_yticks(np.arange(y_low,  y_high, 0.1))
         axes[index[0]][index[1]].plot(x, y, color='yellow')
         axes[index[0]][index[1]].set(xlabel=plotter_param.x_label, ylabel=plotter_param.y_label, title='')
         axes[index[0]][index[1]].xaxis.label.set_fontsize(10)
@@ -245,11 +249,14 @@ class Plotter(object):
         axes[index[0]][index[1]].grid(which='major', color='lightgray', linestyle='-', linewidth=0.7)
 
     @staticmethod
-    def arrange_y(limits: (int, int)) -> (float, float, float):
-        y_int_max = int(limits[1]-0.01)+1
-        delta_y = 0.2*y_int_max
-        delta_x = int(limits[0]*0.1+1)
-        return y_int_max,  delta_x, delta_y
+    def plots_bounds(limit_values: (float, float)) -> (float, float):
+        import math
+
+        floor_value = math.floor(limit_values[0] * 10.0)
+        ceil_value = math.ceil(limit_values[1] * 10.0)
+        return round(floor_value*0.1, 1), round(ceil_value*0.1, 1)
+
+
 
     @staticmethod
     def __axis_plot(

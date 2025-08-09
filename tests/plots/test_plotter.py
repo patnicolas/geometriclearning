@@ -1,5 +1,6 @@
 import unittest
 
+import numpy as np
 from plots.plotter import PlotterParameters, Plotter
 import matplotlib.pyplot as plt
 import logging
@@ -10,6 +11,22 @@ from python import SKIP_REASON
 
 class PlotterTest(unittest.TestCase):
 
+    def test_bounds_1(self):
+        limits = (0.2891, 0.451)
+        l, h, t = Plotter.plots_bounds(limits)
+        lin = np.arange(l, h+0.1, 0.1)
+        logging.info(lin)
+        self.assertEqual(l, 0.2)
+        self.assertEqual(h, 0.5)
+
+        limits = (0.2891, 0.296)
+        l, h, t = Plotter.plots_bounds(limits)
+        lin = np.arange(l, h+0.1, 0.1)
+        logging.info(lin)
+        self.assertEqual(l,0.2)
+        self.assertEqual(h, 0.3)
+
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_scatter_point(self):
         homophilies = [0.815, 0.815, 0.815, 0.302, 0.302, 0.302]
         precisions = [0.78, 0.81, 0.84, 0.49, 0.65, 0.88]

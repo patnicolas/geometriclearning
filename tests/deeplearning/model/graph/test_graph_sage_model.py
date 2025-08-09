@@ -180,10 +180,9 @@ class GraphSAGEModelTest(unittest.TestCase):
             Plotter.set_images_folder('../../../output_plots')
             class_weights = GraphDataLoader.class_weights(_data)
 
-
             # Parameterization
-            lr = 0.0005
-            neighbors = [10, 4]
+            lr = 0.001
+            neighbors = [8, 12]
             training_attributes = {
                 'dataset_name': 'Flickr',
                 # Model training Hyperparameters
@@ -259,17 +258,7 @@ class GraphSAGEModelTest(unittest.TestCase):
             # Step 3: Create the data loader
             graph_data_loader = GraphDataLoader(dataset_name='Flickr',
                                                 sampling_attributes=attrs,
-                                                num_subgraph_nodes=20000)
-            y = graph_data_loader.data.y
-            counts = np.bincount(graph_data_loader.data.y)
-            s = sum(counts)
-            weights = [s/cnt for cnt in counts]
-            total_weights = sum(weights)
-            normalized_weights = [w/total_weights for w in weights]
-            ss = sum(normalized_weights)
-
-            s = sum(1.0/counts)
-            weights = [sum(counts) for cnt in counts]
+                                                num_subgraph_nodes=40000)
             logging.info(graph_data_loader)
             train_loader, eval_loader = graph_data_loader()
 
