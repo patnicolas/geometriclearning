@@ -81,7 +81,7 @@ class PerformanceMetricsTest(unittest.TestCase):
 
             logging.info(f'\n{performance_metrics=}')
 
-            output_file_name = '../output_images/results'
+            output_file_name = '../output_plots/results'
             performance_metrics.summary(output_file_name)
             self.assertTrue(True)
         except (Union[AssertionError, MetricException]) as e:
@@ -98,7 +98,9 @@ class PerformanceMetricsTest(unittest.TestCase):
             metrics = {
                 MetricType.Accuracy: BuiltInMetric(metric_type=MetricType.Accuracy),
                 MetricType.Precision: BuiltInMetric(metric_type=MetricType.Precision),
-                MetricType.Recall: BuiltInMetric(metric_type=MetricType.Recall)
+                MetricType.Recall: BuiltInMetric(metric_type=MetricType.Recall),
+                MetricType.F1: BuiltInMetric(metric_type=MetricType.F1),
+                MetricType.AucROC: BuiltInMetric(metric_type=MetricType.AucROC)
             }
             performance_metrics = PerformanceMetrics(metrics)
             logging.info(str(performance_metrics))
@@ -116,7 +118,7 @@ class PerformanceMetricsTest(unittest.TestCase):
             logging.info(f'\n{performance_metrics=}')
             logging.info(f'Length: {len(performance_metrics)}')
 
-            performance_metrics.summary(model_id='Test model', plot_folder='../output_plots')
+            performance_metrics.summary(plot_filename='../../output_plots_test')
             self.assertTrue(True)
         except (Union[AssertionError, MetricException]) as e:
             logging.error(e)

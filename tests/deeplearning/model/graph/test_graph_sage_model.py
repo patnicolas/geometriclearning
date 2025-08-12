@@ -167,7 +167,7 @@ class GraphSAGEModelTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_training_flickr(self):
         import os
         logging.info(os.getcwd())
@@ -183,9 +183,10 @@ class GraphSAGEModelTest(unittest.TestCase):
             # Parameterization
             neighbors = [10, 8]
             training_attributes, model_attributes = GraphSAGEModelTest.create_configuration(dataset_name='Flickr',
-                                                                                            lr=0.002,
+                                                                                            lr=0.0005,
                                                                                             neighbors=neighbors,
                                                                                             hidden_channels=64,
+                                                                                            epochs=4,
                                                                                             _dataset=_dataset)
             sampling_attrs = {
                 'id': 'NeighborLoader',
@@ -202,7 +203,7 @@ class GraphSAGEModelTest(unittest.TestCase):
             # Step 3: Create the data loader
             graph_data_loader = GraphDataLoader(dataset_name='Flickr',
                                                 sampling_attributes=sampling_attrs,
-                                                num_subgraph_nodes=20000)
+                                                num_subgraph_nodes=None)
             logging.info(graph_data_loader)
             train_loader, eval_loader = graph_data_loader()
 
@@ -227,7 +228,7 @@ class GraphSAGEModelTest(unittest.TestCase):
             logging.info(f'Graph model: {str(e)}')
             self.assertTrue(False)
 
-    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_training_cora(self):
         from torch_geometric.datasets import Planetoid
         from deeplearning.block.graph import GraphException
@@ -240,7 +241,8 @@ class GraphSAGEModelTest(unittest.TestCase):
                                                                                             lr=0.0008,
                                                                                             neighbors=neighbors,
                                                                                             hidden_channels=32,
-                                                                                            _dataset=_dataset)
+                                                                                            _dataset=_dataset,
+                                                                                            epochs=70)
             sampling_attrs = {
                 'id': 'NeighborLoader',
                 'num_neighbors': neighbors,
@@ -277,10 +279,12 @@ class GraphSAGEModelTest(unittest.TestCase):
                              lr: float,
                              neighbors: List[int],
                              _dataset,
-                             hidden_channels: int) -> (Dict[AnyStr, Any], Dict[AnyStr, Any]):
+                             hidden_channels: int,
+                             epochs: int) -> (Dict[AnyStr, Any], Dict[AnyStr, Any]):
         from dataset.graph.graph_data_loader import GraphDataLoader
         _data = _dataset[0]
         class_weights = GraphDataLoader.class_weights(_data)
+        title = f'SAGE_{dataset_name}_{lr}_{neighbors}'
 
         # Parameterization
         training_attributes = {
@@ -300,16 +304,17 @@ class GraphSAGEModelTest(unittest.TestCase):
             'class_weights': class_weights,
             'patience': 2,
             'min_diff_loss': 0.02,
-            'epochs': 72,
+            'epochs': epochs,
             # Model configuration
             'hidden_channels': 32,
             # Performance metric definition
-            'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1'],
+            'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1', 'AucROC', 'AucPR'],
             'plot_parameters': {
                 'x_label': 'epochs',
-                'x_label_size': 10,
-                'fig_size': (10, 9),
-                'plot_filename': f'../../../output_plots/SAGE_{dataset_name}_{lr}_{neighbors}'
+                'title': title,
+                'x_label_size': 11,
+                'fig_size': (13, 8),
+                'plot_filename': f'../../../output_plots/{title}'
             }
         }
         model_attributes = {

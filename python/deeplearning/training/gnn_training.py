@@ -17,7 +17,6 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # Standard Library imports
 from typing import Dict, AnyStr, Optional, List, Any, Self
 import logging
-import random
 # 3rd Party imports
 import torch.nn as nn
 import torch
@@ -60,7 +59,7 @@ class GNNTraining(NeuralTraining):
         @param exec_config: Configuration for optimization of execution of training
         @type exec_config: ExecConfig
         @param plot_parameters: Optional plotting parameters
-        @type plot_parameters: List[PlotterParameters]
+        @type plot_parameters: PlotterParameters
         """
         assert len(metrics_attributes) > 0, 'Metric attributes are undefined'
 
@@ -130,7 +129,6 @@ class GNNTraining(NeuralTraining):
         neural_model = neural_model.float()
         # Reset the parameters for the Graph Neural Layers
         neural_model.reset_parameters()
-        # neural_model.init_weights()
 
         # Train and evaluation process
         for epoch in tqdm(range(self.hyper_params.epochs)):
@@ -144,7 +142,7 @@ class GNNTraining(NeuralTraining):
             # self.exec_config.apply_monitor_memory()
 
         # Generate summary
-        self.performance_metrics.summary(self.plot_parameters.plot_filename)
+        self.performance_metrics.summary(self.plot_parameters)
         logging.info(f"\nMPS usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
 
     """ -----------------------------  Private helper methods ------------------------------  """
@@ -212,7 +210,6 @@ class GNNTraining(NeuralTraining):
 
                     # Compute and accumulate the loss
                     total_loss += raw_loss.item()
-                    logging.info(total_loss)
 
                     # Update the metrics and
                     # Transfer prediction and labels to CPU for computing metrics

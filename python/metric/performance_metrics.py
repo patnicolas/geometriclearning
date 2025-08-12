@@ -53,7 +53,7 @@ class PerformanceMetrics(object):
     """
     output_filename = 'output'
     # output_folder = os.path.join(output_path, output_filename)
-    valid_metrics = ['Accuracy', 'Precision', 'Recall', 'F1', 'AuC']
+    valid_metrics = ['Accuracy', 'Precision', 'Recall', 'F1', 'AucROC', 'AucPR']
 
     def __init__(self, registered_perf_metrics: Dict[MetricType, BuiltInMetric], is_display_plot: bool = True) -> None:
         """
@@ -181,34 +181,27 @@ class PerformanceMetrics(object):
             self.collected_metrics[new_metric_type] = values
         return len(values)
 
-    def summary(self, plot_filename: AnyStr) -> None:
+    def summary(self, metric_plotter_parameters: MetricPlotterParameters) -> None:
         """
         Plots for the various metrics and stored metrics into torch local file
 
         @param plot_filename: Name of the file containing the summary of metrics and losses and plots
         @type plot_filename: str
         """
-        self.__plot_summary(plot_filename)
-        self.__save_summary(plot_filename)
+        self.__plot_summary(metric_plotter_parameters)
+        self.__save_summary(metric_plotter_parameters.plot_filename)
 
     """ -------------------------------  Private Helper Methods --------------------------  """
 
-    def __plot_summary(self, plot_filename: AnyStr) -> None:
+    def __plot_summary(self, metric_plotter_parameters: MetricPlotterParameters) -> None:
         """
         Plots for the various metrics and stored metrics into torch local file
 
-        @param plot_filename: Name of the file to store the plot used to define the file containing the summary of metrics and losses
-        @type plot_filename: str
+        @param metric_plotter_parameters: Parameter for the plot used to define the file containing the summary of metrics and losses
+        @type metric_plotter_parameters: str
         """
         try:
-            import os
-            title = os.path.basename(plot_filename)
-            parameters = MetricPlotterParameters(count=0,
-                                                 x_label='Epochs',
-                                                 title=title,
-                                                 plot_filename=plot_filename,
-                                                 fig_size=(10, 6))
-            metric_plotter = MetricPlotter(parameters)
+            metric_plotter = MetricPlotter(metric_plotter_parameters)
             # If we need to display the plot in real time
             if self.is_display_plot:
                 metric_plotter.plot(self.collected_metrics)

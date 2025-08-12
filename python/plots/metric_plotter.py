@@ -47,8 +47,8 @@ class MetricPlotterParameters:
     count: int
     x_label: AnyStr
     title: AnyStr
+    x_label_size: int
     plot_filename: AnyStr = None
-    x_label_size: int = 11
     fig_size: Optional[Tuple[int, int]] = None
     time_str = datetime.now().strftime("%b-%d-%Y:%H.%M")
 
@@ -63,8 +63,8 @@ class MetricPlotterParameters:
         """
         return cls(count=attributes.get('count', 0),
                    x_label=attributes.get('x_label', 'X'),
-                   title=attributes.get('title', ''),
-                   x_label_size=attributes.get('x_label_size', 11),
+                   title=attributes['title'],
+                   x_label_size=attributes['x_label_size'],
                    plot_filename=attributes['plot_filename'],
                    fig_size=attributes.get('fig_size', (10, 8)))
 
@@ -157,7 +157,7 @@ class MetricPlotter(object):
                                      title='')
         axes[index[0]][index[1]].xaxis.label.set_fontsize(self.plotter_params.x_label_size)
         axes[index[0]][index[1]].tick_params(axis='x', labelsize=self.plotter_params.x_label_size, labelrotation=0)
-        axes[index[0]][index[1]].yaxis.label.set_fontsize(13)
+        axes[index[0]][index[1]].yaxis.label.set_fontsize(12)
         axes[index[0]][index[1]].yaxis.label.set_fontweight('bold')
         axes[index[0]][index[1]].yaxis.label.set_color(color)
         axes[index[0]][index[1]].tick_params(axis='y', labelsize=self.plotter_params.x_label_size)
