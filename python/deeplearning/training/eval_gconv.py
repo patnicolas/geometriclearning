@@ -58,7 +58,7 @@ class EvalGConv(object):
         train_loader, val_loader = self.__get_loaders()
 
         # Step 4: Train the model
-        gnn_training.train(model_id=title,
+        gnn_training.train(plot_filename=title,
                            neural_model=flickr_model,
                            train_loader=train_loader,
                            val_loader=val_loader)

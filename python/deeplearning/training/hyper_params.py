@@ -42,6 +42,7 @@ class HyperParams(object):
     def __init__(self,
                  lr: float,
                  momentum: float,
+                 weight_decay: float,
                  epochs: int,
                  optim_label: AnyStr,
                  batch_size: int,
@@ -73,6 +74,7 @@ class HyperParams(object):
         self.batch_size = batch_size
         self.loss_function = loss_function
         self.momentum = momentum
+        self.weight_decay = weight_decay
         self.encoding_len = encoding_len
         self.train_eval_ratio = train_eval_ratio
         self.weight_initialization = weight_initialization
@@ -93,29 +95,18 @@ class HyperParams(object):
         assert len(attributes), 'Attributes for hyper parameters are undefined'
 
         try:
-            learning_rate = attributes['learning_rate']
-            epochs = attributes['epochs']
-            batch_size = attributes['batch_size']
-            loss_function = attributes.get('loss_function', nn.CrossEntropyLoss())
-            momentum = attributes['momentum']
-            encoding_len = attributes['encoding_len']
-            train_eval_ratio = attributes['train_eval_ratio']
-            weight_initialization = attributes['weight_initialization']
-            optim_label = attributes['optim_label']
-            drop_out = attributes['drop_out']
-            class_weights = attributes['class_weights'] if 'class_weights' in attributes else None
-
-            return cls(learning_rate,
-                       momentum,
-                       epochs,
-                       optim_label,
-                       batch_size,
-                       loss_function,
-                       drop_out,
-                       train_eval_ratio,
-                       encoding_len,
-                       weight_initialization,
-                       class_weights)
+            return cls(lr=attributes['learning_rate'],
+                       momentum=attributes['momentum'],
+                       weight_decay=attributes['weight_decay'],
+                       epochs=attributes['epochs'],
+                       optim_label=attributes['optim_label'],
+                       batch_size=attributes['batch_size'],
+                       loss_function=attributes.get('loss_function', nn.CrossEntropyLoss()),
+                       drop_out=attributes['drop_out'],
+                       train_eval_ratio=attributes['train_eval_ratio'],
+                       encoding_len=attributes['encoding_len'],
+                       weight_initialization=attributes['weight_initialization'],
+                       class_weights=attributes.get('class_weights', None))
         except KeyError as e:
             logging.error(e)
             raise TrainingException(e)
@@ -143,6 +134,9 @@ class HyperParams(object):
                               )
 
         match self.weight_initialization:
+            case 'kaiming':
+                [nn.init.kaiming_uniform_(tensor=module.weight, mode='fan_in', nonlinearity='relu')
+                 for module in modules if is_layer_module(module)]
             case 'normal':
                 [nn.init.normal_(module.weight) for module in modules if is_layer_module(module)]
             case 'xavier':
@@ -169,20 +163,21 @@ class HyperParams(object):
             case HyperParams.optim_adam_label:
                 optimizer = optim.Adam(params=model.parameters(),
                                        lr=self.learning_rate,
+                                       weight_decay=self.weight_decay,
                                        betas=(self.momentum, 0.998))
             case HyperParams.optim_nesterov_label:
                 optimizer = optim.SGD(model.parameters(),
                                       lr=self.learning_rate,
+                                      weight_decay=5e-4,
                                       momentum=self.momentum,
                                       nesterov=True)
             case _:
-                logging.warn(f'Type of optimization {self.optim_label} not supported: reverted to SGD')
+                logging.warning(f'Type of optimization {self.optim_label} not supported: reverted to SGD')
                 optimizer = optim.SGD(model.parameters(),
                                       lr=self.learning_rate,
+                                      weight_decay=5e-4,
                                       momentum=self.momentum,
                                       nesterov=False)
-        # Set the gradient values of the selected optimizer to 0.0
-        optimizer.zero_grad()
         return optimizer
 
     def __repr__(self) -> str:

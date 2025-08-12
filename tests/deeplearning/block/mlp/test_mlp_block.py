@@ -9,13 +9,14 @@ from python import SKIP_REASON
 
 class MLPBlockTest(unittest.TestCase):
 
-    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_1(self):
         try:
             mlp_block = MLPBlock(block_id='id1',
                                  layer_module=nn.Linear(12, 6),
                                  activation_module=nn.ReLU(),
                                  dropout_module=nn.Dropout(0.4))
+            mlp_block.init_weights()
             params = mlp_block.parameters()
             params_list = list(params)
             self.assertTrue(len(params_list) == 2)

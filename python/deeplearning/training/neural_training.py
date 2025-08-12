@@ -29,7 +29,7 @@ from deeplearning.training.hyper_params import HyperParams
 from metric.built_in_metric import BuiltInMetric
 from metric.metric import Metric
 from metric.metric_type import MetricType
-from plots.plotter import PlotterParameters
+from plots.metric_plotter import MetricPlotterParameters
 from metric.performance_metrics import PerformanceMetrics
 from deeplearning.training.early_stopping import EarlyStopping
 import python
@@ -52,7 +52,7 @@ class NeuralTraining(object):
                  metrics_attributes: Dict[MetricType, BuiltInMetric],
                  early_stopping: Optional[EarlyStopping] = None,
                  exec_config: Optional[ExecConfig] = None,
-                 plot_parameters: Optional[List[PlotterParameters]] = None) -> None:
+                 plot_parameters: Optional[MetricPlotterParameters] = None) -> None:
         """
         Constructor for the training and execution of any neural network.
         @param hyper_params: Hyper-parameters associated with the training of th emodel
@@ -76,7 +76,6 @@ class NeuralTraining(object):
         self.performance_metrics = PerformanceMetrics(metrics_attributes)
 
     def train(self,
-              model_id: AnyStr,
               neural_model: nn.Module,
               train_loader: DataLoader,
               eval_loader: DataLoader) -> None:
@@ -85,8 +84,6 @@ class NeuralTraining(object):
         data loader for the evaluation/test1 set and a encoder_model. The weights of the various linear modules
         (neural_blocks) will be initialized if self.hyper_params using a Normal distribution
 
-        @param model_id: Identifier for the model
-        @type model_id: str
         @param neural_model: Neural model as torch module
         @type neural_model: nn_Module
         @param train_loader: Data loader for the training set
@@ -95,7 +92,6 @@ class NeuralTraining(object):
         @type eval_loader: DataLoader
         """
         torch.manual_seed(42)
-        output_file_name = f'{model_id}_metrics_{self.plot_parameters[0].title}'
         self.hyper_params.initialize_weight(neural_model.get_modules())
 
         # Train and evaluation process
@@ -108,7 +104,7 @@ class NeuralTraining(object):
             self.exec_config.apply_monitor_memory()
 
         # Generate summary
-        self.performance_metrics.summary(output_file_name)
+        self.performance_metrics.summary(self.plot_parameters.plot_filename)
         logging.info(f"\nMPS usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
 
     def __repr__(self) -> str:

@@ -68,8 +68,7 @@ class GraphDataLoader(object):
     def __init__(self,
                  dataset_name: AnyStr,
                  sampling_attributes: Dict[AnyStr, Any],
-                 num_subgraph_nodes: Optional[int] = -1,
-                 start_index: Optional[int] = -1) -> None:
+                 num_subgraph_nodes: Optional[int] = -1) -> None:
         """
         Constructor for the Generic Graph Data Loader
 
@@ -80,8 +79,6 @@ class GraphDataLoader(object):
         @param num_subgraph_nodes: Num of indices of nodes in the range [random_index, random_index+num_random_indices]
                                    The entire graph is loaded if value is -1
         @type num_subgraph_nodes: int
-        @param start_index: Index of the first node to be sample from the original graph
-        @type start_index int
         """
         from dataset.graph.pyg_datasets import PyGDatasets
 

@@ -22,7 +22,7 @@ import numpy as np
 # Library imports
 from metric import MetricException
 from metric.built_in_metric import BuiltInMetric
-from metric.metric_type import MetricType, get_metric_type
+from metric.metric_type import MetricType
 from plots.metric_plotter import MetricPlotter, MetricPlotterParameters
 import python
 __all__ = ['PerformanceMetrics']
@@ -55,7 +55,7 @@ class PerformanceMetrics(object):
     # output_folder = os.path.join(output_path, output_filename)
     valid_metrics = ['Accuracy', 'Precision', 'Recall', 'F1', 'AuC']
 
-    def __init__(self, registered_perf_metrics: Dict[MetricType, BuiltInMetric]) -> None:
+    def __init__(self, registered_perf_metrics: Dict[MetricType, BuiltInMetric], is_display_plot: bool = True) -> None:
         """
         Default constructor for the Performance metrics taking a dictionary input a
         { metric_name, build in metric}
@@ -64,15 +64,18 @@ class PerformanceMetrics(object):
 
         @param registered_perf_metrics: Dictionary { metric_name, built in metric}
         @type registered_perf_metrics: Dictionary
+        @param is_display_plot: Flag to display the metric plots at runtime - Default = False
+        @type is_display_plot: bool
         """
         self.registered_perf_metrics: Dict[MetricType, BuiltInMetric] = registered_perf_metrics
         self.collected_metrics: Dict[MetricType, List[np.array]] = {}
+        self.is_display_plot = is_display_plot
 
     def __str__(self) -> AnyStr:
-        return '\n'.join([f' {k.value}: {str(v)}' for k, v in self.registered_perf_metrics.items()])
+        return '\n'.join([f' {k}: {", ".join([str(round(x.item(), 7)) for x in v])}' for k, v in self.collected_metrics.items()])
 
     @classmethod
-    def build(cls, metrics_list: List[MetricType], is_class_imbalance: bool) -> Self:
+    def build(cls, metrics_list: List[MetricType], is_class_imbalance: bool, is_display_plot: bool = False) -> Self:
         """
         Alternative constructor for the Performance metrics taking a dictionary input as
          { metric_name, is_weighted}
@@ -83,6 +86,8 @@ class PerformanceMetrics(object):
         @type metrics_list: Dictionary
         @param is_class_imbalance: Is class imbalance
         @type is_class_imbalance: boolean
+        @param is_display_plot: Flag to display the metric plots at runtime - Default = False
+        @type is_display_plot: bool
         @return: Instance of PerformanceMetrics
         @rtype: PerformanceMetrics
         """
@@ -90,7 +95,7 @@ class PerformanceMetrics(object):
 
         metrics = {metric_type: BuiltInMetric(metric_type=metric_type,
                                               is_weighted=is_class_imbalance) for metric_type in metrics_list}
-        return cls(metrics)
+        return cls(metrics, is_display_plot)
 
     def __len__(self) -> int:
         if len(self.collected_metrics) > 0:
@@ -153,13 +158,9 @@ class PerformanceMetrics(object):
         @param np_labeled: Labeled values
         @type np_labeled: Numpy array
         """
-        num_data_points = 0
         for key, metric in self.registered_perf_metrics.items():
             value = metric(np_predicted, np_labeled)
-            num_data_points = self.collect_metric(key, value)
-
-        metric_str = '\n'.join([f'   {str(k)}: {str(v)}' for k, v in self.collected_metrics.items()])
-        logging.info(f'>> Epoch: {num_data_points}\n{metric_str}')
+            self.collect_metric(key, value)
 
     def collect_metric(self, new_metric_type: MetricType, np_new_metric_value: np.array) -> int:
         """
@@ -180,38 +181,37 @@ class PerformanceMetrics(object):
             self.collected_metrics[new_metric_type] = values
         return len(values)
 
-    def summary(self, model_id: AnyStr, plot_folder: Optional[AnyStr] = None) -> None:
+    def summary(self, plot_filename: AnyStr) -> None:
         """
         Plots for the various metrics and stored metrics into torch local file
 
-        @param model_id: Identifier for the model used to define the file containing the summary of metrics and losses
-        @type model_id: str
-        @param plot_folder: Optional path of tile to store plot
-        @type plot_folder: str
+        @param plot_filename: Name of the file containing the summary of metrics and losses and plots
+        @type plot_filename: str
         """
-        plot_file_name = self.__plot_summary(model_id, plot_folder)
-        self.__save_summary(plot_file_name)
+        self.__plot_summary(plot_filename)
+        self.__save_summary(plot_filename)
 
     """ -------------------------------  Private Helper Methods --------------------------  """
 
-    def __plot_summary(self, model_id: AnyStr, plot_folder: Optional[AnyStr] = None) -> AnyStr:
+    def __plot_summary(self, plot_filename: AnyStr) -> None:
         """
         Plots for the various metrics and stored metrics into torch local file
 
-        @param model_id: Identifier for the model used to define the file containing the summary of metrics and losses
-        @type model_id: str
-        @param plot_folder: Optional path of tile to store plot
-        @type plot_folder: str
+        @param plot_filename: Name of the file to store the plot used to define the file containing the summary of metrics and losses
+        @type plot_filename: str
         """
         try:
+            import os
+            title = os.path.basename(plot_filename)
             parameters = MetricPlotterParameters(count=0,
                                                  x_label='Epochs',
-                                                 title=model_id,
-                                                 plot_folder=plot_folder,
+                                                 title=title,
+                                                 plot_filename=plot_filename,
                                                  fig_size=(10, 6))
             metric_plotter = MetricPlotter(parameters)
-            metric_plotter.plot(self.collected_metrics)
-            return parameters.plot_file_name()
+            # If we need to display the plot in real time
+            if self.is_display_plot:
+                metric_plotter.plot(self.collected_metrics)
         except FileNotFoundError as e:
             logging.error(f'Output file undefined {e}')
             raise MetricException(e)
@@ -222,3 +222,5 @@ class PerformanceMetrics(object):
         collected_values = { k: [float(v) for v in values] for k, values in self.collected_metrics.items()}
         with open(f'{output_filename}.json', 'w') as f:
             json.dump(collected_values, f)
+
+

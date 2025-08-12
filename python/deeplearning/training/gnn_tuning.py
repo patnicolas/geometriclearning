@@ -135,7 +135,7 @@ class GNNTuning(object):
                                                num_classes=graph_loader.num_classes,
                                                hidden_channels=384)
         # Step 6: Train and validate the model
-        gnn_training.train(model_id=GNNTuning.__get_output_id(sampling_attributes),
+        gnn_training.train(plot_filename=GNNTuning.__get_output_id(sampling_attributes),
                            neural_model=gnn_conv_model,
                            train_loader=train_loader,
                            val_loader=val_loader)

@@ -24,13 +24,14 @@ from torch.utils.data import DataLoader
 # Library imports
 from deeplearning.block.mlp.mlp_block import MLPBlock
 from deeplearning.block.graph.graph_conv_block import GraphConvBlock
-from deeplearning.model.neural_model import NeuralModel, NeuralBuilder
+from deeplearning.model.neural_model import NeuralBuilder
+from deeplearning.model.graph.graph_base_model import GraphBaseModel
 from deeplearning.training.gnn_training import GNNTraining
 import python
 __all__ = ['GraphConvModel', 'GraphConvBuilder']
 
 
-class GraphConvModel(NeuralModel):
+class GraphConvModel(GraphBaseModel):
     """
     A Graph Convolution Network may require one output multi-layer perceptron for classification purpose using
     SoftMax activation. We do not restrict a model from have multiple linear layers for output
@@ -50,24 +51,8 @@ class GraphConvModel(NeuralModel):
         @param mlp_blocks: List of Feed-Forward Neural Blocks
         @type mlp_blocks: List[MLPBlock]
         """
-        assert len(graph_conv_blocks) > 0, f'Number of graph convolutional block {graph_conv_blocks} should not be empty'
+        super(GraphConvModel, self).__init__(model_id, graph_conv_blocks, mlp_blocks)
 
-        self.graph_conv_blocks = graph_conv_blocks
-        # Extract the torch modules for the convolutional blocks
-        # in the appropriate order
-
-        graph_conv_modules: List[nn.Module] = [module for block in graph_conv_blocks
-                                               for module in block.modules_list]
-        # If fully connected are provided as CNN
-        if mlp_blocks is not None:
-            self.mlp_blocks = mlp_blocks
-            # Flatten the output from the last convolutional layer
-            graph_conv_modules.append(nn.Flatten())
-            # Extract the relevant modules from the fully connected blocks
-            mlp_modules: List[nn.Module] = [module for block in mlp_blocks
-                                            for module in block.modules_list]
-            graph_conv_modules = graph_conv_modules + mlp_modules
-        super(GraphConvModel, self).__init__(model_id, nn.Sequential(*graph_conv_modules))
 
     def forward(self, data: Data) -> torch.Tensor:
         """
@@ -83,7 +68,7 @@ class GraphConvModel(NeuralModel):
 
         # Step 2: Process forward the convolutional layers
         # Create and collect the output of each GNN layer
-        for graph_conv_block in self.graph_conv_blocks:
+        for graph_conv_block in self.graph_blocks:
             # Implicit invoke forward method for the block
             logging.debug(f'Before Conv shape {x.shape} & index {edge_index}')
             x = graph_conv_block(x, edge_index, data.batch)
@@ -107,7 +92,7 @@ class GraphConvModel(NeuralModel):
         @param val_loader:   Loader for the validation data set
         @type val_loader:  torch.utils.data.DataLoader
         """
-        gnn_training.train(model_id=self.model_id,
+        gnn_training.train(plot_filename=self.model_id,
                            neural_model=self,
                            train_loader=train_loader,
                            val_loader=val_loader,

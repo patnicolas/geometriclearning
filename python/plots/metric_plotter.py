@@ -17,11 +17,12 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # Standard Library imports
 from typing import List, AnyStr, Tuple, Optional, Dict, Any, Self
 from dataclasses import dataclass
+import logging
 # 3rd Party imports
 import numpy as np
 from matplotlib import pyplot as plt
 from datetime import datetime
-import torch
+import python
 __all__ = ['MetricPlotterParameters', 'MetricPlotter']
 
 
@@ -42,16 +43,14 @@ class MetricPlotterParameters:
     @type fig_size: (int, int)
     @param time_str: Time stamp the plot was created, used for name of the file the plot image is stored
     @type time_str: str
-    @param plot_folder: Path of tile to store plot
-    @type plot_folder: str
     """
     count: int
     x_label: AnyStr
     title: AnyStr
+    plot_filename: AnyStr = None
     x_label_size: int = 11
     fig_size: Optional[Tuple[int, int]] = None
     time_str = datetime.now().strftime("%b-%d-%Y:%H.%M")
-    plot_folder: Optional[AnyStr] = None
 
     @classmethod
     def build(cls, attributes: Dict[AnyStr, Any]) -> Self:
@@ -66,7 +65,7 @@ class MetricPlotterParameters:
                    x_label=attributes.get('x_label', 'X'),
                    title=attributes.get('title', ''),
                    x_label_size=attributes.get('x_label_size', 11),
-                   plot_folder=attributes.get('plot_folder', None),
+                   plot_filename=attributes['plot_filename'],
                    fig_size=attributes.get('fig_size', (10, 8)))
 
     def save_plot(self, fig) -> bool:
@@ -76,17 +75,13 @@ class MetricPlotterParameters:
         @param fig: Current figure
         @return: True if plot to be saved in file, False if plot to be displayed
         """
-        if self.plot_folder:
-            plot_file_name = self.plot_file_name()
-            fig.savefig(f'{plot_file_name}.png')
-        return self.plot_folder is not None
-
-    def plot_file_name(self) -> AnyStr:
-        return f"{self.plot_folder}/plot_{self.title}"
+        if self.plot_filename is not None:
+            fig.savefig(f'{self.plot_filename}.png')
+        return self.plot_filename is not None
 
     def __repr__(self) -> AnyStr:
         return (f'\nTitle: {self.title}\nX label: {self.x_label}\nX label Size: {self.x_label_size}'
-                f'\nPlot Folder: {self.plot_folder}\nFig size: {self.fig_size}')
+                f'\nPlot Filename: {self.self.plot_filename}\nFig size: {self.fig_size}')
 
 
 class MetricPlotter(object):
@@ -146,12 +141,15 @@ class MetricPlotter(object):
 
         y_low, y_high, delta_y = MetricPlotter.plots_bounds(values)
         y = np.asarray(values)
+        delta_x = int((x_limits[1] - x_limits[0]) * 0.1) + 1
 
-        axes[index[0]][index[1]].set_facecolor('black')
+        color = '#030580' if key in ('TrainLoss', 'EvalLoss') else 'black'
+
+        axes[index[0]][index[1]].set_facecolor(color)
         max_x = 2 if x_limits[0] <= 1 else x_limits[0] - 1
         axes[index[0]][index[1]].set_xlim(1, max_x)
         axes[index[0]][index[1]].set_ylim(y_low, y_high)
-        axes[index[0]][index[1]].set_xticks(np.arange(x_limits[0], x_limits[1], 1))
+        axes[index[0]][index[1]].set_xticks(np.arange(x_limits[0], x_limits[1], delta_x))
         axes[index[0]][index[1]].set_yticks(np.arange(y_low, y_high, delta_y))
         axes[index[0]][index[1]].plot(x, y, color='yellow')
         axes[index[0]][index[1]].set(xlabel=self.plotter_params.x_label,
@@ -159,19 +157,22 @@ class MetricPlotter(object):
                                      title='')
         axes[index[0]][index[1]].xaxis.label.set_fontsize(self.plotter_params.x_label_size)
         axes[index[0]][index[1]].tick_params(axis='x', labelsize=self.plotter_params.x_label_size, labelrotation=0)
-        axes[index[0]][index[1]].yaxis.label.set_fontsize(12)
+        axes[index[0]][index[1]].yaxis.label.set_fontsize(13)
         axes[index[0]][index[1]].yaxis.label.set_fontweight('bold')
-        axes[index[0]][index[1]].yaxis.label.set_color('black')
+        axes[index[0]][index[1]].yaxis.label.set_color(color)
         axes[index[0]][index[1]].tick_params(axis='y', labelsize=self.plotter_params.x_label_size)
         axes[index[0]][index[1]].grid(which='major', color='lightgray', linestyle='-', linewidth=0.7)
 
     @staticmethod
-    def plots_bounds(values: List[float]) -> (float, float):
+    def plots_bounds(values: List[float]) -> (float, float, float):
         import math
+        if len(values) > 0:
+            floor_value = math.floor(min(values) * 10.0) * 0.1
+            ceil_value = math.ceil(max(values) * 10.0) * 0.1
+            delta = math.ceil(ceil_value - floor_value)
+            delta_y = delta*0.1 if ceil_value > 1.0 else 0.1
 
-        floor_value = math.floor(min(values) * 10.0) * 0.1
-        ceil_value = math.ceil(max(values) * 10.0) * 0.1
-        delta = math.ceil(ceil_value - floor_value)
-        delta_y = delta*0.1 if ceil_value > 1.0 else 0.1
-
-        return round(floor_value, 1), round(ceil_value, 1), round(delta_y, 1)
+            return round(floor_value, 1), round(ceil_value, 1), round(delta_y, 1)
+        else:
+            logging.warning('Values for computing bounds of plots are undefined')
+            return 0.0, 1.0, 0.1

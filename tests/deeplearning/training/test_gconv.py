@@ -110,7 +110,7 @@ class GConvTest(unittest.TestCase):
                                   metrics_attributes=metric_labels,
                                   exec_config=ExecConfig.default(),
                                   plot_parameters=parameters)
-            network.train(model_id='Graph Conv Flickr',
+            network.train(plot_filename='Graph Conv Flickr',
                           neural_model=flickr_model,
                           train_loader=train_loader,
                           val_loader=val_loader)

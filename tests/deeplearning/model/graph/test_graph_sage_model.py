@@ -1,5 +1,6 @@
 import unittest
 import logging
+from typing import List, AnyStr, Any, Dict, Optional
 from deeplearning.block.graph.graph_sage_block import GraphSAGEBlock
 from deeplearning.block.mlp.mlp_block import MLPBlock
 from deeplearning.model.graph.graph_sage_model import GraphSAGEModel, GraphSAGEBuilder
@@ -8,9 +9,11 @@ from dataset.graph.pyg_datasets import PyGDatasets
 from deeplearning.training import TrainingException
 import torch_geometric
 import torch.nn as nn
+import torch
 from dataset import DatasetException
 import os
 from python import SKIP_REASON
+
 
 class GraphSAGEModelTest(unittest.TestCase):
 
@@ -164,91 +167,32 @@ class GraphSAGEModelTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
-    def test_training(self):
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    def test_training_flickr(self):
+        import os
+        logging.info(os.getcwd())
         from torch_geometric.datasets.flickr import Flickr
         from deeplearning.training.gnn_training import GNNTraining
         from dataset.graph.graph_data_loader import GraphDataLoader
         from deeplearning.block.graph import GraphException
-        from plots.plotter import Plotter
-        import numpy as np
 
         try:
             path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
             _dataset = Flickr(path)
-            _data = _dataset[0]
-            Plotter.set_images_folder('../../../output_plots')
-            class_weights = GraphDataLoader.class_weights(_data)
 
             # Parameterization
-            lr = 0.001
-            neighbors = [8, 12]
-            training_attributes = {
-                'dataset_name': 'Flickr',
-                # Model training Hyperparameters
-                'learning_rate': lr,
-                'batch_size': 32,
-                'loss_function': nn.CrossEntropyLoss(),
-                'momentum': 0.90,
-                'encoding_len': -1,
-                'train_eval_ratio': 0.9,
-                'weight_initialization': 'xavier',
-                'optim_label': 'adam',
-                'drop_out': 0.25,
-                'is_class_imbalance': True,
-                'class_weights': class_weights,
-                'patience': 2,
-                'min_diff_loss': 0.02,
-                'epochs': 40,
-                # Model configuration
-                'hidden_channels': 64,
-                # Performance metric definition
-                'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1'],
-                'plot_parameters': [
-                    {'title': 'Accuracy', 'x_label': 'epoch', 'y_label': 'accuracy'},
-                    {'title': 'Precision', 'x_label': 'epochs', 'y_label': 'precision'},
-                    {'title': 'Recall', 'x_label': 'epochs', 'y_label': 'recall'},
-                    {'title': 'F1', 'x_label': 'epochs', 'y_label': 'F1'},
-                ]
-            }
-            attrs = {
+            neighbors = [10, 8]
+            training_attributes, model_attributes = GraphSAGEModelTest.create_configuration(dataset_name='Flickr',
+                                                                                            lr=0.002,
+                                                                                            neighbors=neighbors,
+                                                                                            hidden_channels=64,
+                                                                                            _dataset=_dataset)
+            sampling_attrs = {
                 'id': 'NeighborLoader',
                 'num_neighbors': neighbors,
                 'batch_size': 32,
                 'replace': True,
                 'num_workers': 4
-            }
-            hidden_channels = 64
-            in_features = 64
-            model_attributes = {
-                'model_id': f'GraphSAGE_Flickr_{lr}_{neighbors}',
-                'graph_SAGE_blocks': [
-                    {
-                        'block_id': 'SAGE Layer 1',
-                        'SAGE_layer': SAGEConv(in_channels=_data.num_node_features, out_channels=hidden_channels),
-                        'num_channels': hidden_channels,
-                        'activation': nn.ReLU(),
-                        'batch_norm': BatchNorm(hidden_channels),
-                        'dropout': 0.25
-                    },
-                    {
-                        'block_id': 'SAGE Layer 2',
-                        'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
-                        'num_channels': hidden_channels,
-                        'activation': nn.ReLU(),
-                        'batch_norm': BatchNorm(hidden_channels),
-                        'dropout': 0.25
-                    }
-                ],
-                'mlp_blocks': [
-                    {
-                        'block_id': 'Node classification block',
-                        'in_features': in_features,
-                        'out_features': _dataset.num_classes,
-                        'activation': None,
-                        'dropout': 0.3
-                    }
-                ]
             }
             # Step 1: Create the SAGE model
             graph_conv_builder = GraphSAGEBuilder(model_attributes)
@@ -257,8 +201,8 @@ class GraphSAGEModelTest(unittest.TestCase):
             trainer = GNNTraining.build(training_attributes)
             # Step 3: Create the data loader
             graph_data_loader = GraphDataLoader(dataset_name='Flickr',
-                                                sampling_attributes=attrs,
-                                                num_subgraph_nodes=40000)
+                                                sampling_attributes=sampling_attrs,
+                                                num_subgraph_nodes=20000)
             logging.info(graph_data_loader)
             train_loader, eval_loader = graph_data_loader()
 
@@ -283,3 +227,142 @@ class GraphSAGEModelTest(unittest.TestCase):
             logging.info(f'Graph model: {str(e)}')
             self.assertTrue(False)
 
+    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    def test_training_cora(self):
+        from torch_geometric.datasets import Planetoid
+        from deeplearning.block.graph import GraphException
+
+        try:
+            _dataset = Planetoid(root='/tmp/Cora', name='Cora')
+            # Parameterization
+            neighbors = [4, 4]
+            training_attributes, model_attributes = GraphSAGEModelTest.create_configuration(dataset_name='Cora',
+                                                                                            lr=0.0008,
+                                                                                            neighbors=neighbors,
+                                                                                            hidden_channels=32,
+                                                                                            _dataset=_dataset)
+            sampling_attrs = {
+                'id': 'NeighborLoader',
+                'num_neighbors': neighbors,
+                'batch_size': 32,
+                'replace': True,
+                'num_workers': 4
+            }
+            GraphSAGEModelTest.execute_training(dataset_name='Cora',
+                                                training_attributes=training_attributes,
+                                                model_attributes=model_attributes,
+                                                sampling_attrs=sampling_attrs,
+                                                num_subgraph_nodes=None)
+        except KeyError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except ValueError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except AssertionError as e:
+            logging.info(f'Assertion: {str(e)}')
+            self.assertTrue(False)
+        except TrainingException as e:
+            logging.info(f'Training: {str(e)}')
+            self.assertTrue(False)
+        except DatasetException as e:
+            logging.info(f'Dataset: {str(e)}')
+            self.assertTrue(False)
+        except GraphException as e:
+            logging.info(f'Graph model: {str(e)}')
+            self.assertTrue(False)
+
+    @staticmethod
+    def create_configuration(dataset_name: AnyStr,
+                             lr: float,
+                             neighbors: List[int],
+                             _dataset,
+                             hidden_channels: int) -> (Dict[AnyStr, Any], Dict[AnyStr, Any]):
+        from dataset.graph.graph_data_loader import GraphDataLoader
+        _data = _dataset[0]
+        class_weights = GraphDataLoader.class_weights(_data)
+
+        # Parameterization
+        training_attributes = {
+            'dataset_name': 'Cora',
+            # Model training Hyperparameters
+            'learning_rate': lr,
+            'batch_size': 32,
+            'loss_function': nn.CrossEntropyLoss(),
+            'momentum': 0.95,
+            'weight_decay': 1e-3,
+            'encoding_len': -1,
+            'train_eval_ratio': 0.9,
+            'weight_initialization': 'xavier',
+            'optim_label': 'adam',
+            'drop_out': 0.25,
+            'is_class_imbalance': True,
+            'class_weights': class_weights,
+            'patience': 2,
+            'min_diff_loss': 0.02,
+            'epochs': 72,
+            # Model configuration
+            'hidden_channels': 32,
+            # Performance metric definition
+            'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1'],
+            'plot_parameters': {
+                'x_label': 'epochs',
+                'x_label_size': 10,
+                'fig_size': (10, 9),
+                'plot_filename': f'../../../output_plots/SAGE_{dataset_name}_{lr}_{neighbors}'
+            }
+        }
+        model_attributes = {
+            'model_id': f'GraphSAGE_Cora_{lr}_{neighbors}',
+            'graph_SAGE_blocks': [
+                {
+                    'block_id': 'SAGE Layer 1',
+                    'SAGE_layer': SAGEConv(in_channels=_dataset[0].num_node_features, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    # 'batch_norm': BatchNorm(hidden_channels),
+                    'batch_norm': None,
+                    'dropout': 0.25
+                },
+                {
+                    'block_id': 'SAGE Layer 2',
+                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    # 'batch_norm': BatchNorm(hidden_channels),
+                    'batch_norm': None,
+                    'dropout': 0.25
+                }
+            ],
+            'mlp_blocks': [
+                {
+                    'block_id': 'Node classification block',
+                    'in_features': hidden_channels,
+                    'out_features': _dataset.num_classes,
+                    'activation': None
+                }
+            ]
+        }
+        return training_attributes, model_attributes
+
+    @staticmethod
+    def execute_training(dataset_name: AnyStr,
+                         training_attributes: Dict[AnyStr, Any],
+                         model_attributes: Dict[AnyStr, Any],
+                         sampling_attrs: Dict[AnyStr, Any],
+                         num_subgraph_nodes: Optional[int] = None) -> None:
+        from deeplearning.training.gnn_training import GNNTraining
+        from dataset.graph.graph_data_loader import GraphDataLoader
+
+        graph_SAGE_builder = GraphSAGEBuilder(model_attributes)
+        graph_SAVE_model = graph_SAGE_builder.build()
+        # Step 2:  Create the trainer
+        trainer = GNNTraining.build(training_attributes)
+        # Step 3: Create the data loader
+        graph_data_loader = GraphDataLoader(dataset_name=dataset_name,
+                                            sampling_attributes=sampling_attrs,
+                                            num_subgraph_nodes=num_subgraph_nodes)
+        logging.info(graph_data_loader)
+        train_loader, eval_loader = graph_data_loader()
+        # Step 4: Train and Validate the model
+        graph_SAVE_model.train_model(trainer, train_loader, eval_loader)

@@ -18,38 +18,23 @@ from typing import List, AnyStr, Optional, Any, Dict
 # 3rd Party imports
 from torch_geometric.data import Data
 import torch
-import torch.nn as nn
 from torch.utils.data import DataLoader
 # Library imports
-from deeplearning.model.neural_model import NeuralModel, NeuralBuilder
+from deeplearning.model.neural_model import NeuralBuilder
 from deeplearning.block.mlp.mlp_block import MLPBlock
 from deeplearning.block.graph.graph_sage_block import GraphSAGEBlock
+from deeplearning.model.graph.graph_base_model import GraphBaseModel
 from deeplearning.training.gnn_training import GNNTraining
 __all__ = ['GraphSAGEModel', 'GraphSAGEBuilder']
 
 
-class GraphSAGEModel(NeuralModel):
+class GraphSAGEModel(GraphBaseModel):
 
     def __init__(self,
                  model_id: AnyStr,
                  graph_SAGE_blocks: List[GraphSAGEBlock],
                  mlp_blocks: Optional[List[MLPBlock]] = None) -> None:
-        assert len(graph_SAGE_blocks) > 0, f'Number of graph SAGE block {graph_SAGE_blocks} should not be empty'
-
-        self.graph_SAGE_blocks = graph_SAGE_blocks
-        # Extract the torch modules for the SAGE blocks in the appropriate order
-        graph_sage_modules: List[nn.Module] = [module for block in graph_SAGE_blocks
-                                               for module in block.modules_list]
-        # If fully connected are provided as CNN
-        if mlp_blocks is not None:
-            self.mlp_blocks = mlp_blocks
-            # Flatten the output from the last convolutional layer
-            graph_sage_modules.append(nn.Flatten())
-            # Extract the relevant modules from the fully connected blocks
-            mlp_modules: List[nn.Module] = [module for block in mlp_blocks
-                                            for module in block.modules_list]
-            graph_sage_modules = graph_sage_modules + mlp_modules
-        super(GraphSAGEModel, self).__init__(model_id, nn.Sequential(*graph_sage_modules))
+        super(GraphSAGEModel, self).__init__(model_id, graph_SAGE_blocks, mlp_blocks)
 
     def forward(self, data: Data) -> torch.Tensor:
         """
@@ -65,10 +50,9 @@ class GraphSAGEModel(NeuralModel):
 
         # Step 2: Process forward the SAGE layers
         # Create and collect the output of each GNN layer
-        for graph_SAGE_block in self.graph_SAGE_blocks:
+        for graph_SAGE_block in self.graph_blocks:
             # Implicit invoke forward method for the block
             x = graph_SAGE_block(x, edge_index, data.batch)
-
         # Step 4: Process the fully connected, MLP layers
         for mlp_block in self.mlp_blocks:
             x = mlp_block(x)  # Invoke the forward method for the MLP block
@@ -85,8 +69,7 @@ class GraphSAGEModel(NeuralModel):
         @param val_loader:   Loader for the validation data set
         @type val_loader:  torch.utils.data.DataLoader
         """
-        gnn_training.train(model_id=self.model_id,
-                           neural_model=self,
+        gnn_training.train(neural_model=self,
                            train_loader=train_loader,
                            val_loader=val_loader,
                            val_enabled=True)

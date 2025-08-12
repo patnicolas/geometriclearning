@@ -16,6 +16,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # Standard Library imports
 from typing import List, AnyStr, Optional, Self
 import logging
+from abc import ABC, abstractmethod
 # 3rd Party imports
 import torch
 from torch_geometric.loader import GraphSAINTRandomWalkSampler
@@ -26,15 +27,11 @@ import torch.nn as nn
 from deeplearning.model.neural_model import NeuralModel
 from deeplearning.block.mlp.mlp_block import MLPBlock
 from deeplearning.block.graph.message_passing_block import MessagePassingBlock
-from deeplearning.training.neural_training import NeuralTraining
-from deeplearning.training.hyper_params import HyperParams
-from metric.built_in_metric import BuiltInMetric
-from metric.metric_type import MetricType
-from deeplearning.block.graph import GraphException
+from deeplearning.training.gnn_training import GNNTraining
 __all__ = ['GraphBaseModel']
 
 
-class GraphBaseModel(NeuralModel):
+class GraphBaseModel(NeuralModel, ABC):
 
     def __init__(self,
                  model_id: AnyStr,
@@ -53,15 +50,15 @@ class GraphBaseModel(NeuralModel):
 
         self.graph_blocks = graph_blocks
 
-        modules: List[nn.Module] = [module for block in graph_blocks for module in block.modules]
+        modules_list: List[nn.Module] = [module for block in graph_blocks for module in block.modules_list]
         # If fully connected are provided as CNN
         if mlp_blocks is not None:
-            self.ffnn_blocks = mlp_blocks
+            self.mlp_blocks = mlp_blocks
             # Flatten
-            modules.append(nn.Flatten())
+            modules_list.append(nn.Flatten())
             # Generate
-            [modules.append(module) for block in mlp_blocks for module in block.modules]
-        super(GraphBaseModel, self).__init__(model_id, nn.Sequential(*modules))
+            [modules_list.append(module) for block in mlp_blocks for module in block.modules_list]
+        super(GraphBaseModel, self).__init__(model_id, nn.Sequential(*modules_list))
 
     @classmethod
     def build(cls, model_id: AnyStr, gnn_blocks: List[MessagePassingBlock]) -> Self:
@@ -87,7 +84,7 @@ class GraphBaseModel(NeuralModel):
         @return: True if at least one fully connected layer exists, False otherwise
         @rtype: bool
         """
-        return len(self.ffnn_blocks) > 0
+        return len(self.mlp_blocks) > 0
 
     def forward(self, data: Data) -> torch.Tensor:
         """
@@ -105,24 +102,42 @@ class GraphBaseModel(NeuralModel):
             x = gnn_block(x, edge_index)
             output.append(x)
         x = torch.cat(output, dim=-1)
-        ffnn = self.ffnn_blocks[0]
+        ffnn = self.mlp_blocks[0]
         linear = ffnn.modules[0]
         x = linear(x)
         return x
 
+    def reset_parameters(self) -> None:
+        for graph_sage_block in self.graph_blocks:
+            graph_sage_block.reset_parameters()
+        if self.mlp_blocks is not None:
+            for mlp_block in self.mlp_blocks:
+                mlp_block.reset_parameters()
+
+    def init_weights(self) -> None:
+        if self.mlp_blocks is not None:
+            for mlp_block in self.mlp_blocks:
+                mlp_block.init_weights()
+
+    @abstractmethod
+    def train_model(self, gnn_training: GNNTraining, train_loader: DataLoader, val_loader: DataLoader) -> None:
+        """
+        Training and evaluation of models using Graph Neural Training and train loader for training and evaluation data
+
+        @param gnn_training: Wrapper class for training Graph Neural Network
+        @type gnn_training:  GNNTraining
+        @param train_loader: Loader for the training data set
+        @type train_loader: torch.utils.data.DataLoader
+        @param val_loader:   Loader for the validation data set
+        @type val_loader:  torch.utils.data.DataLoader
+        """
+        pass
+
+    """
     def do_train(self,
                  hyper_parameters: HyperParams,
                  metrics_list: List[MetricType],
                  data_source: Data | Dataset) -> None:
-        """
-        Execute the training, evaluation and metrics for any model for MNIST data set
-        @param hyper_parameters: Hyper-parameters for the execution of the
-        @type hyper_parameters: HyperParams
-        @param metrics_list: List of performance metrics
-        @type metrics_list: List
-        @param data_source: Data source
-        @type data_source: Union[Data, Dataset]
-        """
         try:
             metrics_attributes = {metric_type: BuiltInMetric(metric_type) for metric_type in metrics_list}
             network = NeuralTraining(hyper_parameters, metrics_attributes)
@@ -131,6 +146,7 @@ class GraphBaseModel(NeuralModel):
         except AssertionError as e:
             logging.error(str(e))
             raise GraphException(e)
+    """
 
     def load_data_source(self, data_source: Data | Dataset) -> (DataLoader, DataLoader):
         """

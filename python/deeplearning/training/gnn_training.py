@@ -32,7 +32,7 @@ from deeplearning.training.hyper_params import HyperParams
 from deeplearning.block.graph import GraphException
 from metric.performance_metrics import PerformanceMetrics
 from deeplearning.training import TrainingException
-from plots.plotter import PlotterParameters
+from plots.metric_plotter import MetricPlotterParameters
 from metric.metric_type import MetricType
 from metric.built_in_metric import BuiltInMetric
 from deeplearning.training.exec_config import ExecConfig
@@ -48,7 +48,7 @@ class GNNTraining(NeuralTraining):
                  metrics_attributes: Dict[MetricType, BuiltInMetric],
                  early_stopping: Optional[EarlyStopping] = None,
                  exec_config: ExecConfig = ExecConfig.default(),
-                 plot_parameters: Optional[List[PlotterParameters]] = None) -> None:
+                 plot_parameters: Optional[MetricPlotterParameters] = None) -> None:
         """
         Default constructor for this variational auto-encoder
         @param hyper_params:  Hyper-parameters for training and optimizatoin
@@ -83,11 +83,7 @@ class GNNTraining(NeuralTraining):
         early_stopping = EarlyStopping.build(training_attributes)
 
         # Instantiate the Plots
-        plot_parameters = [PlotterParameters(0,
-                                             plot_param['x_label'],
-                                             plot_param['y_label'],
-                                             plot_param['title'])for plot_param in training_attributes['plot_parameters']]
-
+        plot_parameters = MetricPlotterParameters.build(training_attributes['plot_parameters'])
         return cls(hyper_params=hyper_params,
                    metrics_attributes=metric_attributes.registered_perf_metrics,
                    early_stopping=early_stopping,
@@ -110,7 +106,6 @@ class GNNTraining(NeuralTraining):
         return self.performance_metrics.performance_values[metric_type]
 
     def train(self,
-              model_id: AnyStr,
               neural_model: nn.Module,
               train_loader: DataLoader,
               val_loader: DataLoader,
@@ -120,8 +115,6 @@ class GNNTraining(NeuralTraining):
         data loader for the evaluation/test1 set and an encoder_model. The weights of the various linear modules
         (neural_blocks) will be initialized if self.hyper_params using a Normal distribution
 
-        @param model_id: Identifier for the model
-        @type model_id: str
         @param neural_model: Neural model as torch module
         @type neural_model: nn_Module
         @param train_loader:  Data loader for the training set
@@ -135,6 +128,9 @@ class GNNTraining(NeuralTraining):
 
         # Force a conversion to 32-bits
         neural_model = neural_model.float()
+        # Reset the parameters for the Graph Neural Layers
+        neural_model.reset_parameters()
+        # neural_model.init_weights()
 
         # Train and evaluation process
         for epoch in tqdm(range(self.hyper_params.epochs)):
@@ -144,12 +140,11 @@ class GNNTraining(NeuralTraining):
             # Set mode and execute evaluation
             if val_enabled:
                 self.__val_epoch(neural_model, epoch, val_loader)
-
-            logging.info(f'Performance: {epoch=}\n{self.performance_metrics=}')
-            self.exec_config.apply_monitor_memory()
+            logging.info(f'Performance: {epoch=}\n{str(self.performance_metrics)}')
+            # self.exec_config.apply_monitor_memory()
 
         # Generate summary
-        self.performance_metrics.summary(model_id)
+        self.performance_metrics.summary(self.plot_parameters.plot_filename)
         logging.info(f"\nMPS usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
 
     """ -----------------------------  Private helper methods ------------------------------  """
@@ -170,17 +165,17 @@ class GNNTraining(NeuralTraining):
                 # Move data to the GPU and non_blocking
                 data = data.to(device=self.target_device, non_blocking=True)
                 predicted = model(data)  # Call forward - prediction
-                raw_loss = self.hyper_params.loss_function(predicted[data.train_mask], data.y[data.train_mask])
+                prediction = predicted[data.train_mask]
+                expected = data.y[data.train_mask]
+                raw_loss = self.hyper_params.loss_function(prediction, expected)
 
                 # Set back propagation
                 raw_loss.backward(retain_graph=True)
-                loss = raw_loss.item()
-                total_loss += loss
+                total_loss += raw_loss.item()
 
                 # Monitoring and caching for performance
                 optimizer.step()
                 # self.exec_config.apply_batch_optimization(idx, optimizer)
-                # idx += 1
             except RuntimeError as e:
                 raise GraphException(str(e))
             except AttributeError as e:
@@ -199,10 +194,6 @@ class GNNTraining(NeuralTraining):
         model.eval()
         predicted_values = []
         labeled_values = []
-        # DEBUG
-        build_in_metric = BuiltInMetric(MetricType.Accuracy)
-        total_acc = 0
-        # DEBUG
 
         # No need for computing gradient for evaluation (NO back-propagation)
         with torch.no_grad():
@@ -214,23 +205,17 @@ class GNNTraining(NeuralTraining):
 
                     data = data.to(self.target_device)
                     predicted = model(data)  # Call forward - prediction
-                    raw_loss = self.hyper_params.loss_function(predicted[data.val_mask], data.y[data.val_mask])
+
+                    prediction = predicted[data.val_mask]
+                    expected = data.y[data.val_mask]
+                    raw_loss = self.hyper_params.loss_function(prediction, expected)
 
                     # Compute and accumulate the loss
                     total_loss += raw_loss.item()
+                    logging.info(total_loss)
 
                     # Update the metrics and
                     # Transfer prediction and labels to CPU for computing metrics
-
-                    # DEBUG
-                    """
-                    p = predicted.cpu().numpy()
-                    l = data.y.cpu().numpy()
-                    acc = build_in_metric.from_numpy(p, l)
-                    logging.info(f'acc: {acc}')
-                    # total_acc += acc
-                    """
-                    # DEBUG
                     predicted_values.append(predicted.cpu().numpy())
                     labeled_values.append(data.y.cpu().numpy())
                 except RuntimeError as e:
@@ -243,8 +228,6 @@ class GNNTraining(NeuralTraining):
         # Collect all prediction and labels
         all_predicted = np.concatenate(predicted_values)
         all_labeled = np.concatenate(labeled_values)
-        # all_acc = build_in_metric.from_numpy(all_predicted, all_labeled)
-        # logging.info(f'all_acc: {all_acc} Total acc: {total_acc/len(eval_loader)}')
         del predicted_values, labeled_values
 
         # Record the values for the registered metrics (e.g., Precision)
