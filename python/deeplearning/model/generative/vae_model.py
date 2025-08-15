@@ -88,8 +88,8 @@ class VAEModel(NeuralModel):
     def __repr__(self) -> AnyStr:
         index2 = len(self.encoder.get_modules())
         index3 = index2+3
-        return (self.encoder.list_modules(0) + self.variational_block.list_modules(index2) +
-                f'\n{self.decoder.list_modules(index3)}')
+        return (self.encoder.show_modules(0) + self.variational_block.list_modules(index2) +
+                f'\n{self.decoder.show_modules(index3)}')
 
     def __str__(self) -> AnyStr:
         return f'Model id: {self.model_id}\n*Encoder:{repr(self.encoder.modules)}' \

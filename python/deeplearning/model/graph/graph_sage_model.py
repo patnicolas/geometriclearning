@@ -34,6 +34,16 @@ class GraphSAGEModel(GraphBaseModel):
                  model_id: AnyStr,
                  graph_SAGE_blocks: List[GraphSAGEBlock],
                  mlp_blocks: Optional[List[MLPBlock]] = None) -> None:
+        """
+        Constructor for the SAGE Graph Model
+
+        @param model_id: Identifier for this model
+        @type model_id: Str
+        @param graph_SAGE_blocks: List of SAGE Convolutional blocks
+        @type graph_SAGE_blocks: List[graph_SAGE_blocks]
+        @param mlp_blocks: Optional list of Feed-Forward Neural Blocks
+        @type mlp_blocks: List[MLPBlock]
+        """
         super(GraphSAGEModel, self).__init__(model_id, graph_SAGE_blocks, mlp_blocks)
 
     def forward(self, data: Data) -> torch.Tensor:
@@ -53,7 +63,8 @@ class GraphSAGEModel(GraphBaseModel):
         for graph_SAGE_block in self.graph_blocks:
             # Implicit invoke forward method for the block
             x = graph_SAGE_block(x, edge_index, data.batch)
-        # Step 4: Process the fully connected, MLP layers
+
+        # Step 3: Process the fully connected, MLP layers if defined
         for mlp_block in self.mlp_blocks:
             x = mlp_block(x)  # Invoke the forward method for the MLP block
         return x

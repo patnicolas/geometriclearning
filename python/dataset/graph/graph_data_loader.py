@@ -99,7 +99,6 @@ class GraphDataLoader(object):
         self.attributes_map = sampling_attributes
         self.dataset = dataset
 
-
     @classmethod
     def build_node_neighbor_loader(cls,
                                    dataset_name: AnyStr,

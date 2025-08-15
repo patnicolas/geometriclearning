@@ -92,6 +92,8 @@ class NeuralTraining(object):
         @type eval_loader: DataLoader
         """
         torch.manual_seed(42)
+        neural_model.reset_parameters()
+        _modules = neural_model.get_modules()
         self.hyper_params.initialize_weight(neural_model.get_modules())
 
         # Train and evaluation process
@@ -137,7 +139,7 @@ class NeuralTraining(object):
 
                 # Set back propagation
                 raw_loss.backward(retain_graph=True)
-                total_loss += raw_loss.item
+                total_loss += raw_loss.item()
 
                 # Monitoring and caching for performance imp
                 self.exec_config.apply_empty_cache()

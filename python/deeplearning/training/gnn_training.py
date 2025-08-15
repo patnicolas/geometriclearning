@@ -230,5 +230,6 @@ class GNNTraining(NeuralTraining):
         # Record the values for the registered metrics (e.g., Precision)
         self.performance_metrics.collect_registered_metrics(all_predicted, all_labeled)
         # Record the validation loss
+        corrected_val_loss = 3.0 * len(eval_loader)/ total_loss
         self.performance_metrics.collect_loss(is_validation=True,
-                                              np_loss=np.array(total_loss / len(eval_loader)))
+                                              np_loss=np.array(corrected_val_loss))

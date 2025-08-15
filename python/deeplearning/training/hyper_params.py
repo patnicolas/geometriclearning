@@ -129,6 +129,7 @@ class HyperParams(object):
                                   nn.Conv2d,
                                   nn.Conv1d,
                                   torch_geometric.nn.GraphConv,
+                                  torch_geometric.nn.SAGEConv,
                                   torch_geometric.nn.GCNConv,
                                   torch_geometric.nn.Linear)
                               )
@@ -146,7 +147,7 @@ class HyperParams(object):
             case _:
                 raise TrainingException(f'initialization {self.weight_initialization} '
                                         'for layer module weights is not supported')
-        [nn.init.constant_(module.bias, val=0.1) for module in modules if is_layer_module(module)]
+        # [nn.init.constant_(module.bias, val=0.1) for module in modules if is_layer_module(module)]
 
     def optimizer(self, model: nn.Module) -> torch.optim.Optimizer:
         """
@@ -205,6 +206,7 @@ class HyperParams(object):
         return (HyperParams(
             lr,
             self.momentum,
+            self.weight_decay,
             self.epochs,
             self.optim_label,
             batch_size,

@@ -15,7 +15,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 
 # Standard Library imports
-from typing import AnyStr, Optional, Dict, Any, Self
+from typing import AnyStr, Optional, Dict, Any, Self, List
 # 3rd Party imports
 import torch
 import torch.nn as nn
@@ -54,9 +54,10 @@ class GraphConvBlock(MessagePassingBlock):
                                              batch_norm_module,
                                              activation_module,
                                              dropout_module)
+        self.has_pooling = pooling_module is not None
         # Although it is not strictly required to have the dropout module be the last module,
         # it is recommended and therefore we re-order the modules in case both dropout and pooling are provided
-        if pooling_module is not None:
+        if self.has_pooling:
             if dropout_module is not None:
                 self.modules_list.remove(dropout_module)
                 self.modules_list.append(pooling_module)
@@ -64,7 +65,6 @@ class GraphConvBlock(MessagePassingBlock):
             else:
                 self.modules_list.append(pooling_module)
         self.pooling_edge_index = None
-        self.has_pooling = pooling_module is not None
 
     @classmethod
     def build(cls, block_attributes: Dict[AnyStr, Any]) -> Self:

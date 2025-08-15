@@ -71,10 +71,10 @@ class DeConv2dModel(NeuralModel, ABC):
         return len(self.ffnn_blocks) > 1
 
     def __str__(self) -> str:
-        return f'\nModel: {self.model_id}\nState:{self._state_params()}\nModules:\n{self.list_modules(0)}'
+        return f'\nModel: {self.model_id}\nState:{self._state_params()}\nModules:\n{self.show_modules(0)}'
 
     def __repr__(self) -> str:
-        return f'\n{self.list_modules(0)}'
+        return f'\n{self.show_modules(0)}'
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -97,7 +97,7 @@ class DeConv2dModel(NeuralModel, ABC):
             logger.info(x, 'Output connected Conv')
         return x
 
-    def list_modules(self, index: int = 0) -> AnyStr:
+    def show_modules(self, index: int = 0) -> AnyStr:
         modules = [f'{idx + index}: {str(module)}' for idx, module in enumerate(self.get_modules())]
         return '\n'.join(modules)
 

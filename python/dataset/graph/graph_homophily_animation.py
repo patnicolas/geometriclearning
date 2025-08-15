@@ -26,7 +26,6 @@ from networkx.classes.reportviews import NodeView
 from util.base_animation import BaseAnimation
 __all__ = ['GraphHomophilyAnimation']
 
-
 class GraphHomophilyAnimation(BaseAnimation):
     def __init__(self,
                  logo_pos: List[float],

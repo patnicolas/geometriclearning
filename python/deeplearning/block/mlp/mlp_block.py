@@ -142,7 +142,7 @@ class MLPBlock(NeuralBlock):
                                                bias=False),
                         activation_module=activation_module)
 
-    def reset_parameters(self):
+    def reset_parameters(self) -> None:
         self.modules_list[0].reset_parameters()
 
     def init_weights(self) -> None:

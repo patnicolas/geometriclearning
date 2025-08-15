@@ -105,7 +105,7 @@ class Caltech101Loader(BaseLoader):
             ])
 
             # Instantiate the data set
-            caltech_101_dataset = Caltech101(root=root_path, transform=transform, download=False)
+            caltech_101_dataset = Caltech101(root='./data', transform=transform, download=True)
 
             # Split training / validation data sets.
             train_size = int(self.split_ratio * len(caltech_101_dataset))

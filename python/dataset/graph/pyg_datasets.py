@@ -83,18 +83,19 @@ class PyGDatasets(object):
             raise DatasetException(f'Dataset {self.name} not supported {err}')
 
     """ ------------------   Private helper methods --------------------- """
+    from torch_geometric.data.dataset import Dataset
 
-    def __load_molecule_net(self):
+    def __load_molecule_net(self) -> Dataset:
         from torch_geometric.datasets import MoleculeNet
         molecule_net = MoleculeNet(root=PyGDatasets.base_dir, name=self.name)
         return molecule_net
 
-    def __load_amazon(self):
+    def __load_amazon(self) -> Dataset:
         from torch_geometric.datasets import Amazon
         amazon_dataset = Amazon(root=PyGDatasets.base_dir, name=self.name)
         return amazon_dataset
 
-    def __load_yelp(self):
+    def __load_yelp(self) -> Dataset:
         from torch_geometric.datasets import Yelp
         yelp_dataset = Yelp(PyGDatasets.base_dir)
         return yelp_dataset

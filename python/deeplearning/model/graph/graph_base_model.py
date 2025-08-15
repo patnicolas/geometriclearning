@@ -15,7 +15,6 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 # Standard Library imports
 from typing import List, AnyStr, Optional, Self
-import logging
 from abc import ABC, abstractmethod
 # 3rd Party imports
 import torch
@@ -39,6 +38,7 @@ class GraphBaseModel(NeuralModel, ABC):
                  mlp_blocks: Optional[List[MLPBlock]] = None) -> None:
         """
         Constructor for this simple generic Graph neural network
+
         @param model_id: Identifier for this model
         @type model_id: Str
         @param graph_blocks: List of Graph convolutional neural blocks
@@ -49,16 +49,9 @@ class GraphBaseModel(NeuralModel, ABC):
         assert len(graph_blocks) > 0, f'Number of message passing blocks {graph_blocks} should not be empty'
 
         self.graph_blocks = graph_blocks
-
-        modules_list: List[nn.Module] = [module for block in graph_blocks for module in block.modules_list]
-        # If fully connected are provided as CNN
         if mlp_blocks is not None:
             self.mlp_blocks = mlp_blocks
-            # Flatten
-            modules_list.append(nn.Flatten())
-            # Generate
-            [modules_list.append(module) for block in mlp_blocks for module in block.modules_list]
-        super(GraphBaseModel, self).__init__(model_id, nn.Sequential(*modules_list))
+        super(GraphBaseModel, self).__init__(model_id)
 
     @classmethod
     def build(cls, model_id: AnyStr, gnn_blocks: List[MessagePassingBlock]) -> Self:
@@ -72,6 +65,16 @@ class GraphBaseModel(NeuralModel, ABC):
         @rtype: GraphBaseModel
         """
         return cls(model_id, graph_blocks=gnn_blocks, mlp_blocks=None)
+
+    def get_modules(self) -> List[nn.Module]:
+        """
+        Extract the ordered list of all the PyTorch modules in this model. The sequence of modules is computed
+        the first time it is invoked.
+        @return: Ordered list of torch module for this model
+        @rtype: List[Module]
+        """
+        self._register_modules(self.graph_blocks, self.mlp_blocks)
+        return list(self.modules_seq.children())
 
     def __repr__(self) -> str:
         modules = [f'{idx}: {str(module)}' for idx, module in enumerate(self.get_modules())]
@@ -102,14 +105,25 @@ class GraphBaseModel(NeuralModel, ABC):
             x = gnn_block(x, edge_index)
             output.append(x)
         x = torch.cat(output, dim=-1)
-        ffnn = self.mlp_blocks[0]
-        linear = ffnn.modules[0]
+        mlp_block = self.mlp_blocks[0]
+        # It is assumed that the first module is a neural layer
+        linear = mlp_block.modules[0]
         x = linear(x)
         return x
 
     def reset_parameters(self) -> None:
+        """
+        Reset the parameters for all the blocks for this model. This method invokes the reset_parameters method for
+        each block that in turn reset the parameters for the layer of the block.
+        The sequence of modules for this model is computed the first time it is accessed.
+        @see NeuralModel._register_modules
+        """
+        # Register the sequence of torch modules if not defined yet.
+        self._register_modules(self.graph_blocks, self.mlp_blocks)
+
         for graph_sage_block in self.graph_blocks:
             graph_sage_block.reset_parameters()
+        # If fully connected perceptron blocks are defined...
         if self.mlp_blocks is not None:
             for mlp_block in self.mlp_blocks:
                 mlp_block.reset_parameters()
@@ -132,21 +146,6 @@ class GraphBaseModel(NeuralModel, ABC):
         @type val_loader:  torch.utils.data.DataLoader
         """
         pass
-
-    """
-    def do_train(self,
-                 hyper_parameters: HyperParams,
-                 metrics_list: List[MetricType],
-                 data_source: Data | Dataset) -> None:
-        try:
-            metrics_attributes = {metric_type: BuiltInMetric(metric_type) for metric_type in metrics_list}
-            network = NeuralTraining(hyper_parameters, metrics_attributes)
-            train_dataset, test_dataset = self.load_data_source(data_source)
-            network.train(self.model_id, self.modules_seq, train_dataset, test_dataset)
-        except AssertionError as e:
-            logging.error(str(e))
-            raise GraphException(e)
-    """
 
     def load_data_source(self, data_source: Data | Dataset) -> (DataLoader, DataLoader):
         """

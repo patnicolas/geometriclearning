@@ -61,6 +61,7 @@ class ConvModel(NeuralModel, ABC):
         self.conv_blocks = conv_blocks
         self.mlp_blocks = mlp_blocks
 
+        """
         # Define the sequence of modules from the layout
         modules = [module for block in self.conv_blocks
                    for module in block.modules_list]
@@ -78,10 +79,47 @@ class ConvModel(NeuralModel, ABC):
             # Generate the sequence of modules
             [modules.append(module) for block in self.mlp_blocks
              for module in block.modules_list]
-        else:
-            self.mlp_blocks = None
-
         super(ConvModel, self).__init__(model_id, nn.Sequential(*modules))
+    """
+        if self.mlp_blocks is not None:
+            # Compute the size of the 1 dimensional input to the first fully
+            # connected (Linear) layer
+            flatten_input_size = self.__linear_layer_input_size(conv_blocks[-1])
+            # Retrieve the first linear layer of the MLP sequence
+            first_linear_layer = self.mlp_blocks[0].modules_list[0]
+            first_linear_layer.in_features = flatten_input_size
+        super(ConvModel, self).__init__(model_id)
+
+    def reset_parameters(self) -> None:
+        """
+            Reset the parameters for all the blocks for this model. This method invokes the reset_parameters method for
+            each block that in turn reset the parameters for the layer of the block.
+            The sequence of modules for this model is computed the first time it is accessed.
+            @see NeuralModel._register_modules
+        """
+        # Register the sequence of torch modules if not defined yet.
+        self._register_modules(self.conv_blocks, self.mlp_blocks)
+
+        for conv_block in self.conv_blocks:
+            conv_block.reset_parameters()
+        if self.mlp_blocks is not None:
+            for mlp_block in self.mlp_blocks:
+                mlp_block.reset_parameters()
+
+    """
+    def _register_modules(self) -> nn.Sequential:
+        if self.modules_seq is None:
+            modules_list = [module for block in self.conv_blocks for module in block.modules_list]
+            # If fully connected are provided as CNN
+            if self.mlp_blocks is not None:
+                # Flatten
+                modules_list.append(nn.Flatten())
+                # Generate
+                [modules_list.append(module) for block in self.mlp_blocks for module in block.modules_list]
+            return nn.Sequential(*modules_list)
+        else:
+            return self.modules_seq
+    """
 
     def transpose(self, extra: nn.Module = None) -> DeConv2dModel:
         """
@@ -138,10 +176,10 @@ class ConvModel(NeuralModel, ABC):
         return x.view(resize, -1)
 
     def __str__(self) -> str:
-        return f'\nModel: {self.model_id}\nState:{self._state_params()}\nModules:\n{self.list_modules(0)}'
+        return f'\nModel: {self.model_id}\nState:{self._state_params()}\nModules:\n{self.show_modules(0)}'
 
     def __repr__(self) -> str:
-        return f'\n{self.list_modules(0)}'
+        return f'\n{self.show_modules(0)}'
 
     def _state_params(self) -> Dict[AnyStr, Any]:
         dff_model_input_size = self.mlp_blocks[0].in_features \
@@ -174,7 +212,9 @@ class ConvModel(NeuralModel, ABC):
             logging.error(e)
             return False
 
+
     """ ----------------------------   Private helper methods --------------------------- """
+
     def __linear_layer_input_size(self, last_conv_block: ConvBlock) -> int:
         from deeplearning.block.conv.conv_output_size import SeqConvOutputSize
 

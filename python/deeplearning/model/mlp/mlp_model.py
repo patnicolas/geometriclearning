@@ -82,7 +82,7 @@ class MLPModel(NeuralModel):
         return f'\nModel: {self.model_id}\nModules:{self.__repr__()}'
 
     def __repr__(self) -> AnyStr:
-        return f'\n{self.list_modules(0)}'
+        return f'\n{self.show_modules(0)}'
 
     def save(self, extra_params: dict = None):
         raise NotImplementedError('NeuralModel.save is an abstract method')

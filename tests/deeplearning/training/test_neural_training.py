@@ -3,7 +3,7 @@ import logging
 from deeplearning.model.mlp.mlp_model import MLPModel
 from deeplearning.block.mlp.mlp_block import MLPBlock
 from deeplearning.training.hyper_params import HyperParams
-from plots.plotter import PlotterParameters
+from plots.metric_plotter import MetricPlotterParameters
 from deeplearning.training.neural_training import NeuralTraining
 from dataset.tensor.labeled_loader import LabeledLoader
 from metric.metric_type import MetricType
@@ -30,10 +30,10 @@ class NeuralTrainingTest(unittest.TestCase):
                                 activation_module=None)
         binary_classifier = MLPModel(model_id='test1', mlp_blocks=[input_block, hidden_block, output_block])
         logging.info(repr(binary_classifier))
-        params = binary_classifier.parameters()
         hyper_params = HyperParams(
             lr=0.001,
             momentum=0.95,
+            weight_decay=1e-4,
             epochs=12,
             optim_label='adam',
             batch_size=8,
@@ -48,7 +48,7 @@ class NeuralTrainingTest(unittest.TestCase):
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_train_wages(self):
-        from metric.built_in_metric import BuiltInMetric, MetricType
+        from metric.built_in_metric import BuiltInMetric
 
         hidden_block = MLPBlock.build_from_params(block_id='hidden',
                                                   in_features=5,
@@ -74,8 +74,7 @@ class NeuralTrainingTest(unittest.TestCase):
             MetricType.Accuracy: BuiltInMetric(MetricType.Accuracy, encoding_len=-1, is_weighted=True),
             MetricType.Precision: BuiltInMetric(MetricType.Precision, encoding_len=-1, is_weighted=True)
         }
-        parameters = [PlotterParameters(0, x_label='x', y_label='y', title=k.value, fig_size=(11, 7))
-                      for k, _ in metric_attributes.items()]
+        parameters = MetricPlotterParameters(count=0, x_label='x', title='Test', fig_size=(11, 7), x_label_size=10)
 
         network = NeuralTraining(
             hyper_params=hyper_parameters,
@@ -131,8 +130,7 @@ class NeuralTrainingTest(unittest.TestCase):
             Metric.precision_label: BuiltInMetric(MetricType.Precision, encoding_len=-1, is_weighted=True),
             Metric.recall_label: BuiltInMetric(MetricType.Recall, encoding_len=-1, is_weighted=True)
         }
-        parameters = [PlotterParameters(0, x_label='x', y_label='y', title=label, fig_size=(11, 7))
-                      for label, _ in metric_labels.items()]
+        parameters = MetricPlotterParameters(count=0, x_label='x', title='Test', fig_size=(11, 7), x_label_size=10)
         network = NeuralTraining(
             hyper_parameters,
             training_summary,
