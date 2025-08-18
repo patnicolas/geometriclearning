@@ -166,7 +166,7 @@ class GraphSAGEModelTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_training_flickr(self):
         from deeplearning.block.graph import GraphException
         import time
@@ -222,14 +222,14 @@ class GraphSAGEModelTest(unittest.TestCase):
 
         try:
             pyg_dataset = PyGDatasets('Cora')
-            _dataset = pyg_dataset()
+            dataset = pyg_dataset()
             # Parameterization
             neighbors = [6, 3]
             train_attrs, model_attrs = GraphSAGEModelTest.build_config(dataset_name=pyg_dataset.name,
                                                                        lr=0.0008,
                                                                        neighbors=neighbors,
                                                                        hidden_channels=32,
-                                                                       _dataset=_dataset,
+                                                                       _dataset=dataset,
                                                                        epochs=90)
             sampling_attrs = {
                 'id': 'NeighborLoader',
@@ -307,6 +307,181 @@ class GraphSAGEModelTest(unittest.TestCase):
             logging.info(f'Graph model: {str(e)}')
             self.assertTrue(False)
 
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    def test_analyze_data_cora(self):
+        from plots.plotter import PlotterParameters, Plotter
+
+        auroc_6_3 = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_Cora_2layer_0.0008_random_[6, 3].json',
+            'AuROC')
+        auroc_12_8 = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_Cora_2layer_0.0008_random_[12, 8].json',
+            'AuROC')
+        auroc_12_12_6 = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_Cora_2layer_0.0008_random_[12, 12, 6].json',
+            'AuROC')
+
+        plotter_params = PlotterParameters(count=0,
+                                           x_label='X',
+                                           y_label='Y',
+                                           title='Impact of Neighbors Sampling',
+                                           fig_size=(12, 8))
+        labels = ['AuROC-6.3', 'AuROC-12.8', 'AuROC-12.12.6']
+        Plotter.plot([auroc_6_3, auroc_12_8, auroc_12_12_6], labels, plotter_params)
+
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    def test_analyze_data_pubmed_auROC(self):
+        from plots.plotter import PlotterParameters, Plotter
+
+        auroc_6_3 = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_PubMed_2layer_0.0012_random_[6, 3].json',
+            'AucROC')
+        auroc_12_8 = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_PubMed_2layer_0.0012_random_[12, 8].json',
+            'AucROC')
+        auroc_12_12_6 = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_PubMed_2layer_0.0012_random_[12, 12, 6].json',
+            'AucROC')
+
+        plotter_params = PlotterParameters(count=0,
+                                           x_label='Epochs',
+                                           y_label='AuROC',
+                                           title='Impact of Neighbors Sampling - PubMed',
+                                           fig_size=(12, 8))
+        labels = ['Neighbors Sampling 6 x 3', 'Neighbors Sampling 12 x 8', 'Neighbors Sampling 12 x 12 x 6']
+        Plotter.plot([auroc_6_3, auroc_12_8, auroc_12_12_6], labels, plotter_params)
+
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    def test_analyze_data_pubmed_f1(self):
+        from plots.plotter import PlotterParameters, Plotter
+
+        aucroc_6_3 = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_PubMed_2layer_0.0012_random_[6, 3].json',
+            'F1')
+        aucroc_12_8 = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_PubMed_2layer_0.0012_random_[12, 8].json',
+            'F1')
+        aucroc_12_12_6 = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_PubMed_2layer_0.0012_random_[12, 12, 6].json',
+            'F1')
+
+        plotter_params = PlotterParameters(count=0,
+                                           x_label='Epochs',
+                                           y_label='F1',
+                                           title='Impact of Neighbors Sampling - PubMed',
+                                           fig_size=(12, 8))
+        labels = ['Neighbors Sampling 6 x 3', 'Neighbors Sampling 12 x 8', 'Neighbors Sampling 12 x 12 x 6']
+        Plotter.plot([aucroc_6_3, aucroc_12_8, aucroc_12_12_6], labels, plotter_params)
+
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    def test_analyze_data_pubmed_f1_2_3_layers_F1(self):
+        from plots.plotter import PlotterParameters, Plotter
+
+        aucroc_6_3_2 = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_PubMed_2layer_0.0012_random_[6, 3].json',
+            'F1')
+        aucroc_6_3_3 = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_PubMed_3layer_0.0012_random_[6, 3].json',
+            'F1')
+
+        plotter_params = PlotterParameters(count=0,
+                                           x_label='Epochs',
+                                           y_label='F1',
+                                           title='Impact of Number SAGE Conv layers - PubMed',
+                                           fig_size=(12, 8))
+        labels = ['Neighbors Sampling 6 x 3 - 2 Conv', 'Neighbors Sampling 6 x 3 - 3 Conv']
+        Plotter.plot([aucroc_6_3_2, aucroc_6_3_3], labels, plotter_params)
+
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    def test_analyze_data_pubmed_2_3_layers_AuROC(self):
+        from plots.plotter import PlotterParameters, Plotter
+
+        auroc_6_3_2 = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_PubMed_2layer_0.0012_random_[6, 3].json',
+            'AucROC')
+        auroc_6_3_3 = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_PubMed_3layer_0.0012_random_[6, 3].json',
+            'AucROC')
+
+        plotter_params = PlotterParameters(count=0,
+                                           x_label='Epochs',
+                                           y_label='AuROC',
+                                           title='Impact of Number SAGE Conv layers - PubMed',
+                                           fig_size=(12, 8))
+        labels = ['Neighbors Sampling 6 x 3 - 2 Conv', 'Neighbors Sampling 6 x 3 - 3 Conv']
+        Plotter.plot([auroc_6_3_2, auroc_6_3_3], labels, plotter_params)
+
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    def test_analyze_data_flickr_F1(self):
+        from plots.plotter import PlotterParameters, Plotter
+
+        flickr_12K = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_Flickr_2layer_0.0018_random_[20, 12]_12Knodes.json',
+            'F1')
+        flickr_32K = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_Flickr_2layer_0.0018_random_[20, 12]_32Knodes.json',
+            'F1')
+        flickr_89K = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_Flickr_2layer_0.0018_random_[20, 12]_89Knodes.json',
+            'F1')
+
+        plotter_params = PlotterParameters(count=0,
+                                           x_label='Epochs',
+                                           y_label='F1',
+                                           title='Impact of Graph Nodes sub-sampling - F1 - Flickr',
+                                           fig_size=(12, 8))
+        labels = ['Neighbors Sampling 20x12 - 2 Conv-12K',
+                  'Neighbors Sampling 20x12 - 2 Conv-32K',
+                  'Neighbors Sampling 20x12 - 2 Conv-89K']
+        Plotter.plot([flickr_12K, flickr_32K, flickr_89K], labels, plotter_params)
+
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    def test_analyze_data_flickr_AuROC(self):
+        from plots.plotter import PlotterParameters, Plotter
+
+        flickr_12K = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_Flickr_2layer_0.0018_random_[20, 12]_12Knodes.json',
+            'AucROC')
+        flickr_32K = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_Flickr_2layer_0.0018_random_[20, 12]_32Knodes.json',
+            'AucROC')
+        flickr_89K = GraphSAGEModelTest.load_data(
+            '../../../output_plots/SAGE_Flickr_2layer_0.0018_random_[20, 12]_89Knodes.json',
+            'AucROC')
+
+        plotter_params = PlotterParameters(count=0,
+                                           x_label='Epochs',
+                                           y_label='AuROC',
+                                           title='Impact of Graph Nodes sub-sampling - AuROC - Flickr',
+                                           fig_size=(12, 8))
+        labels = ['Neighbors Sampling 20x12 - 2 Conv-12K',
+                  'Neighbors Sampling 20x12 - 2 Conv-32K',
+                  'Neighbors Sampling 20x12 - 2 Conv-89K']
+        Plotter.plot([flickr_12K, flickr_32K, flickr_89K], labels, plotter_params)
+
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    def test_analyze_data_flickr_latency(self):
+        from plots.plotter import PlotterParameters, Plotter
+
+        plotter_params = PlotterParameters(count=0,
+                                           x_label='Number Graph Nodes',
+                                           y_label='Seconds',
+                                           title='Impact of Graph  on Latency - Flickr',
+                                           fig_size=(12, 8))
+        labels = ['Latency']
+        latency = [1491, 8549, 31024]
+        Plotter.plot([latency], labels, plotter_params)
+
+
+    @staticmethod
+    def load_data(filename: AnyStr, column: AnyStr) -> List[float]:
+        import json
+
+        with open(filename, 'r', encoding='utf-8') as f:
+            s = json.load(f)
+        return s[column]
+
+
     @staticmethod
     def build_config(dataset_name: AnyStr,
                      lr: float,
@@ -341,7 +516,7 @@ class GraphSAGEModelTest(unittest.TestCase):
             # Model configuration
             'hidden_channels': hidden_channels,
             # Performance metric definition
-            'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1', 'AucROC', 'AucPR'],
+            'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1', 'AuROC', 'AuPR'],
             'plot_parameters': {
                 'x_label': 'epochs',
                 'title': title,
@@ -391,11 +566,12 @@ class GraphSAGEModelTest(unittest.TestCase):
         from deeplearning.training.gnn_training import GNNTraining
         from dataset.graph.graph_data_loader import GraphDataLoader
 
+        # Step 1:
         graph_SAGE_builder = GraphSAGEBuilder(model_attributes)
         graph_SAVE_model = graph_SAGE_builder.build()
-        # Step 2:  Create the trainer
+        # Step 2:  Create the trainer using the training attributes dictionary
         trainer = GNNTraining.build(training_attributes)
-        # Step 3: Create the data loader
+        # Step 3: Create the data loader and extract a sub graph
         graph_data_loader = GraphDataLoader(dataset_name=training_attributes['dataset_name'],
                                             sampling_attributes=sampling_attrs,
                                             num_subgraph_nodes=num_subgraph_nodes)

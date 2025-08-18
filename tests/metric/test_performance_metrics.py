@@ -100,7 +100,7 @@ class PerformanceMetricsTest(unittest.TestCase):
                 MetricType.Precision: BuiltInMetric(metric_type=MetricType.Precision),
                 MetricType.Recall: BuiltInMetric(metric_type=MetricType.Recall),
                 MetricType.F1: BuiltInMetric(metric_type=MetricType.F1),
-                MetricType.AucROC: BuiltInMetric(metric_type=MetricType.AucROC)
+                MetricType.AuROC: BuiltInMetric(metric_type=MetricType.AuROC)
             }
             performance_metrics = PerformanceMetrics(metrics)
             logging.info(str(performance_metrics))

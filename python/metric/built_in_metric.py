@@ -80,11 +80,11 @@ class BuiltInMetric(Metric):
             case MetricType.F1:
                 return self.__f1(labeled, predicted)
 
-            case MetricType.AucROC:
-                return self.__auc_roc_score(labeled, predicted)
+            case MetricType.AuROC:
+                return self.__auroc_score(labeled, predicted)
 
-            case MetricType.AucPR:
-                return self.__auc_pr_score(labeled, predicted)
+            case MetricType.AuPR:
+                return self.__aupr_score(labeled, predicted)
 
             case _:
                 raise MetricException(f'Metric type {self.metric_type} is not supported')
@@ -182,7 +182,7 @@ class BuiltInMetric(Metric):
         recall = self.__recall(_labeled, _predicted)
         return 2.0*precision*recall/(precision + recall)
 
-    def __auc_roc_score(self, _labeled: np.array, _predicted: np.array) -> np.array:
+    def __auroc_score(self, _labeled: np.array, _predicted: np.array) -> np.array:
         from sklearn.metrics import roc_auc_score
         # One vs rest AUC
         _labeled_bin = BuiltInMetric.__get_labeled_classes(_labeled)
@@ -191,7 +191,7 @@ class BuiltInMetric(Metric):
                              average='macro' if self.is_weighted else None,
                              multi_class='ovr' if self.is_multi_class else 'raise')
 
-    def __auc_pr_score(self, _labeled: np.array, _predicted: np.array) -> np.array:
+    def __aupr_score(self, _labeled: np.array, _predicted: np.array) -> np.array:
         from sklearn.metrics import average_precision_score
         # One vs rest AUC
         _labeled_bin = BuiltInMetric.__get_labeled_classes(_labeled)

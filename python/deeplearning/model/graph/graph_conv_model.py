@@ -19,7 +19,6 @@ import logging
 # 3rd Party imports
 import torch
 from torch_geometric.data import Data
-import torch.nn as nn
 from torch.utils.data import DataLoader
 # Library imports
 from deeplearning.block.mlp.mlp_block import MLPBlock
@@ -92,8 +91,7 @@ class GraphConvModel(GraphBaseModel):
         @param val_loader:   Loader for the validation data set
         @type val_loader:  torch.utils.data.DataLoader
         """
-        gnn_training.train(plot_filename=self.model_id,
-                           neural_model=self,
+        gnn_training.train(neural_model=self,
                            train_loader=train_loader,
                            val_loader=val_loader,
                            val_enabled=True)

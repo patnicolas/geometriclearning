@@ -163,7 +163,7 @@ class Plotter(object):
 
         plt.title(
             plotter_parameters.title,
-            fontdict={'family': 'sans-serif', 'size': 22, 'weight': 'bold'}
+            fontdict={'family': 'sans-serif', 'size': 18, 'weight': 'bold'}
         )
         plt.xlabel(
             plotter_parameters.x_label,
@@ -173,6 +173,8 @@ class Plotter(object):
             plotter_parameters.y_label,
             fontdict={'family': 'serif', 'size': 16, 'style': 'italic'}
         )
+        plt.tick_params(axis='y', labelsize=12)
+        plt.tick_params(axis='x', labelsize=12)
         plt.legend(prop={'family': 'serif', 'size': 14})
         plt.show()
 

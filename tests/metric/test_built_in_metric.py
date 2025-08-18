@@ -91,7 +91,7 @@ class BuiltInMetricTest(unittest.TestCase):
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_auc(self):
         try:
-            metric_type = MetricType.AucROC
+            metric_type = MetricType.AuROC
             build_in_metric = BuiltInMetric(metric_type)
             predicted: torch.Tensor = torch.tensor([[1.0, 0.0, 1.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0]])
             labels: torch.Tensor = torch.tensor([[1.0, 1.0, 0.0], [0.0, 1.0, 1.0], [0.0, 1.0, 1.0]])

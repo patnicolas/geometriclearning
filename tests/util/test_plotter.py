@@ -14,7 +14,7 @@ class PlotterTest(unittest.TestCase):
     def test_plot(self):
         import math
 
-        plotter_params = PlotterParameters(0, 'X', 'Y', 'Comparison', (12, 8))
+        plotter_params = PlotterParameters(count=0, x_label='X', y_label='Y', title='Comparison', fig_size=(12, 8))
         labels = ['sin', 'sqrt', 'exp']
         x = [math.sin(0.1 * x) for x in range(0, 100)]
         y = [0.1 * math.sqrt(x) for x in range(0, 100)]

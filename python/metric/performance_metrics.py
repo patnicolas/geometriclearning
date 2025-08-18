@@ -53,7 +53,7 @@ class PerformanceMetrics(object):
     """
     output_filename = 'output'
     # output_folder = os.path.join(output_path, output_filename)
-    valid_metrics = ['Accuracy', 'Precision', 'Recall', 'F1', 'AucROC', 'AucPR']
+    valid_metrics = ['Accuracy', 'Precision', 'Recall', 'F1', 'AuROC', 'AuPR']
 
     def __init__(self, registered_perf_metrics: Dict[MetricType, BuiltInMetric], is_display_plot: bool = True) -> None:
         """

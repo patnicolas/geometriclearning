@@ -91,57 +91,58 @@ class SimplicialAnimation(object):
             return []
 
         def update(frame: int) -> List:
-            self.ax.clear()
-            set_axis()
-            self.fig.set_facecolor('#f0f9ff')
-            self.ax.set_facecolor('#f0f9ff')
-            group_interval = self.config.get('group_interval', 18)
-            start_edges = len(self.nodes) + group_interval
-            start_triangles = start_edges + len(self.edge_set) + group_interval
-            start_tetrahedrons = start_triangles + len(self.triangle_set) + group_interval
-            title = ''
-            status = []
-            if frame >= 0:
-                title = 'Point Cloud | 0-simplices'
-                self.ax.scatter(self.nodes[:frame + 1, 0], self.nodes[:frame + 1, 1], s=300, c='blue')
-                num_nodes = frame if frame < len(self.nodes) else len(self.nodes)
-                status.append(f'{num_nodes} nodes')
+            if frame < 125:
+                self.ax.clear()
+                set_axis()
+                self.fig.set_facecolor('#f0f9ff')
+                self.ax.set_facecolor('#f0f9ff')
+                group_interval = self.config.get('group_interval', 18)
+                start_edges = len(self.nodes) + group_interval
+                start_triangles = start_edges + len(self.edge_set) + group_interval
+                start_tetrahedrons = start_triangles + len(self.triangle_set) + group_interval
+                title = ''
+                status = []
+                if frame >= 0:
+                    title = 'Point Cloud | 0-simplices'
+                    self.ax.scatter(self.nodes[:frame + 1, 0], self.nodes[:frame + 1, 1], s=300, c='blue')
+                    num_nodes = frame if frame < len(self.nodes) else len(self.nodes)
+                    status.append(f'{num_nodes} nodes')
 
-            if frame >= start_edges:
-                title = 'Undirected Graph | 1-simplices'
-                num_items = SimplicialAnimation.__num_items(frame - start_edges, len(self.edge_set))
-                for idx in range(num_items):
-                    i = self.edge_set[idx][0]
-                    j = self.edge_set[idx][1]
-                    self.ax.plot(*zip(self.nodes[i], self.nodes[j]), c='grey', linewidth=2)
-                status.append(f'{num_items} edges')
+                if frame >= start_edges:
+                    title = 'Undirected Graph | 1-simplices'
+                    num_items = SimplicialAnimation.__num_items(frame - start_edges, len(self.edge_set))
+                    for idx in range(num_items):
+                        i = self.edge_set[idx][0]
+                        j = self.edge_set[idx][1]
+                        self.ax.plot(*zip(self.nodes[i], self.nodes[j]), c='grey', linewidth=2)
+                    status.append(f'{num_items} edges')
 
-            if frame >= start_triangles:
-                title = 'Simplicial Complex | 2-simplices'
-                num_items = SimplicialAnimation.__num_items(frame - start_triangles, len(self.triangle_set))
-                for idx in range(num_items):
-                    poly = Polygon(self.nodes[self.triangle_set[idx]],
-                                   closed=True,
-                                   alpha=0.2,
-                                   color=SimplicialAnimation.__attribute(SimplicialAnimation.face_colors, idx))
-                    self.ax.add_patch(poly)
-                status.append(f'{num_items} triangles')
+                if frame >= start_triangles:
+                    title = 'Simplicial Complex | 2-simplices'
+                    num_items = SimplicialAnimation.__num_items(frame - start_triangles, len(self.triangle_set))
+                    for idx in range(num_items):
+                        poly = Polygon(self.nodes[self.triangle_set[idx]],
+                                       closed=True,
+                                       alpha=0.2,
+                                       color=SimplicialAnimation.__attribute(SimplicialAnimation.face_colors, idx))
+                        self.ax.add_patch(poly)
+                    status.append(f'{num_items} triangles')
 
-            if frame >= start_tetrahedrons:
-                title = 'Simplicial Complex | 3-simplices'
-                num_items = SimplicialAnimation.__num_items(frame - start_tetrahedrons, len(self.tetrahedron_set))
-                for idx in range(num_items):
-                    poly = Polygon(self.nodes[self.tetrahedron_set[idx]],
-                                   closed=True,
-                                   alpha=0.2,
-                                   color=SimplicialAnimation.__attribute(SimplicialAnimation.tetrahedron_colors, idx),
-                                   edgecolor='black',
-                                   hatch=SimplicialAnimation.__attribute(SimplicialAnimation.tetrahedron_hatches, idx))
-                    self.ax.add_patch(poly)
-                status.append(f'{num_items} tetrahedrons')
+                if frame >= start_tetrahedrons:
+                    title = 'Simplicial Complex | 3-simplices'
+                    num_items = SimplicialAnimation.__num_items(frame - start_tetrahedrons, len(self.tetrahedron_set))
+                    for idx in range(num_items):
+                        poly = Polygon(self.nodes[self.tetrahedron_set[idx]],
+                                       closed=True,
+                                       alpha=0.2,
+                                       color=SimplicialAnimation.__attribute(SimplicialAnimation.tetrahedron_colors, idx),
+                                       edgecolor='black',
+                                       hatch=SimplicialAnimation.__attribute(SimplicialAnimation.tetrahedron_hatches, idx))
+                        self.ax.add_patch(poly)
+                    status.append(f'{num_items} tetrahedrons')
 
-            self.__descriptors(status, title)
-            return []
+                self.__descriptors(status, title)
+                return []
 
         interval = self.config.get('interval', 100)
         num_frames = self.config.get('num_frames', 100)
@@ -153,8 +154,8 @@ class SimplicialAnimation(object):
                             interval=interval,
                             repeat=False)
         if save:
-            fps = self.config.get('fps', 10)
-            ani.save('simplicial_animation.mp4', writer='ffmpeg', fps=fps, dpi=300)
+            fps = self.config.get('fps', 12)
+            ani.save('../../animation/simplicial_anim.mp4', writer='ffmpeg', fps=fps, dpi=300)
         else:
             plt.show()
 
@@ -191,9 +192,9 @@ if __name__ == '__main__':
         'logo_pos': (-0.35, 2.38),
         'title_pos': (0.6, 0.95),
         'status_pos': (0.05, -0.18),
-        'fps': 10,
+        'fps': 12,
         'interval': 90,
-        'num_frames': 130
+        'num_frames': 120
     }
     vertices = np.array([
         [0, 0], [1, 0], [0.5, 1], [1, 1], [0, 1], [0, 0.5], [1, 1.5], [1.5, 1.5], [1.5, 0], [0, 1.5], [1, 0.5],
@@ -201,7 +202,7 @@ if __name__ == '__main__':
     ])
     edges = [(0, 1), (1, 2), (0, 2), (1, 3), (3, 4), (3, 7), (6, 7), (4, 6), (2, 5), (7, 8), (4, 5), (1, 8), (1, 7),
              [2, 4], [3, 6], (2, 6), [4, 9], [9, 6], [2, 10], [4, 11], [11, 12],[12, 6], [13, 4], [14, 7]]
-    faces = [[0, 1, 2], [4, 5, 2], [1, 8, 7], [3, 6, 7], [4, 9, 11], [4, 11, 6], [4, 6, 2], [2, 3, 10], [12, 11, 6], # Triangles
+    faces = [[0, 1, 2], [4, 5, 2], [1, 8, 7], [3, 6, 7], [4, 9, 11], [4, 11, 6], [4, 6, 2], [2, 3, 10], [12, 11, 6],
              [1, 8, 7, 3], [5, 4, 6, 2], [4, 9, 11, 6]]
 
     simplicial_animation = SimplicialAnimation(nodes=vertices, edge_set=edges, face_set=faces, config=configuration)
