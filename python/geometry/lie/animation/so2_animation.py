@@ -13,11 +13,15 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from util.base_animation import BaseAnimation
+
+# Standard Library imports
 from typing import List, Callable, AnyStr, Dict, Any
+# 3rd Party imports
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import numpy as np
+# Library imports
+from util.base_animation import BaseAnimation
 __all__ = ['SO2Animation']
 
 

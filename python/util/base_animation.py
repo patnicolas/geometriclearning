@@ -13,8 +13,11 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+# Standard Library imports
 from typing import AnyStr, Any, Dict
 from abc import abstractmethod, ABC
+# 3rd Party imports
 import matplotlib.image as mpimg
 __all__ = ['BaseAnimation']
 

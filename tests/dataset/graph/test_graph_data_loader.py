@@ -30,11 +30,14 @@ class GraphDataLoaderTest(unittest.TestCase):
             logging.info(graph_data)
             # Request validation of the graph parameters
             self.assertTrue(graph_data.validate(raise_on_error=True))
-        except (AssertionError | DatasetException) as e:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except DatasetException as e:
             logging.error(e)
             self.assertTrue(False)
 
-
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_random_node_flickr(self):
         try:
             dataset_name = 'Flickr'
@@ -46,17 +49,20 @@ class GraphDataLoaderTest(unittest.TestCase):
                     'batch_size': 32,
                     'num_workers': 2
                 },
-                dataset_name=dataset_name)
+                dataset_name=dataset_name,
+                num_subgraph_nodes=80)
             # 2. Extract the loader for training and validation sets
             train_data_loader, test_data_loader = graph_data_loader()
             result = [f'{idx}: {str(batch)}'
                       for idx, batch in enumerate(train_data_loader) if idx < 3]
             logging.info('\n'.join(result))
             self.assertTrue(True)
-        except (AssertionError | DatasetException) as e:
+        except AssertionError as e:
             logging.error(e)
             self.assertTrue(False)
-
+        except DatasetException as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_random_node_flickr_2(self):
@@ -136,7 +142,6 @@ class GraphDataLoaderTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_neighbor_node_facebook(self):
         try:
@@ -186,7 +191,6 @@ class GraphDataLoaderTest(unittest.TestCase):
         except (AssertionError | DatasetException) as e:
             logging.error(e)
             self.assertTrue(False)
-
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_cluster_proteins(self):

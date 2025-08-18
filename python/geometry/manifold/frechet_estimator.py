@@ -13,11 +13,15 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+# Standard Library imports
+from typing import List, Optional
+# 3rd Party imports
 from geomstats.geometry.manifold import Manifold
 from geomstats.learning.frechet_mean import FrechetMean, BaseGradientDescent
 from torch import Tensor
 import numpy as np
-from typing import List, Optional
+
 from geometry import GeometricException
 __all__ = ['FrechetEstimator']
 

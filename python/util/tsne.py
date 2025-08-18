@@ -17,20 +17,29 @@ import torch
 from sklearn.manifold import TSNE
 from matplotlib import pyplot as plt
 import numpy as np
-
-"""
-    Apply the Stochastic Neigbhors Embedding to a two or 3 num_tfidf_features wordembedding.
-    The main method, forward generates the appropriate image stored in 'images' directory
-    and return the embedding
-    @param n_components Number of principal components (num_tfidf_features) of the embedding
-    @param cmap Color map used for display 
-    @param fig_save_dir Directory the plot is stored
-    @param title Title of the plot
-"""
+__all__ = ['TSNE']
 
 
-class T_SNE(object):
+class TSNE(object):
+    """
+        Apply the Stochastic Neigbhors Embedding to a two or 3 num_tfidf_features wordembedding.
+        The main method, forward generates the appropriate image stored in 'images' directory
+        and return the embedding
+    """
+
     def __init__(self, n_components: int, cmap: str, fig_save_dir: str, title: str):
+        """
+        Constructor for T-SNE algorithm
+
+        @param n_components:  Number of principal components (num_tfidf_features) of the embedding
+        @type n_components: int
+        @param cmap: Color map used for display
+        @type cmap: str
+        @param fig_save_dir: Directory the plot is stored
+        @type fig_save_dir: str
+        @param title: Title of the plot
+        @type title: str
+        """
         assert 2 <= n_components <= 3, f'TSNE: num of components {n_components} should be [2, 3]'
 
         self.t_sne = TSNE(n_components = n_components)
@@ -41,7 +50,8 @@ class T_SNE(object):
     def forward(self, x: torch.Tensor) -> np.array:
         """
             Method to generate TSNE embedding with plot stored in a given directory
-            @param encoder Input torch input_tensor
+            @param x Input torch input_tensor
+            @type x Torch Tensor
         """
 
         # Apply the TSNE transform

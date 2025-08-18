@@ -13,11 +13,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import matplotlib.pyplot as plt
-from topology.simplicial_feature_set import SimplicialFeatureSet
-import numpy as np
+# Standard Library imports
 from typing import List, Dict, AnyStr, Any
-
+# 3rd Party imports
+import numpy as np
+import matplotlib.pyplot as plt
+# Library imports
+from topology.simplicial_feature_set import SimplicialFeatureSet
+__all__ = ['SimplicialVisualization']
 
 class SimplicialVisualization(object):
     """

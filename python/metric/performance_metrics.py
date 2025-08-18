@@ -13,15 +13,17 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, AnyStr, Self, List, Any
+# Standard Library imports
+import logging
+from typing import Dict, AnyStr, Self, List, Optional
+# 3rd Party imports
 import torch
-
+import numpy as np
+# Library imports
 from metric import MetricException
 from metric.built_in_metric import BuiltInMetric
 from metric.metric_type import MetricType
-from plots.plotter import Plotter, PlotterParameters
-import numpy as np
-import logging
+from plots.metric_plotter import MetricPlotter, MetricPlotterParameters
 import python
 __all__ = ['PerformanceMetrics']
 
@@ -36,62 +38,71 @@ class PerformanceMetrics(object):
 
     There are two constructors
     __init__: Default constructor taking a dictionary  {metric_name, build in metric} as input
-            example: {metric='Accuracy', BuildInMetric(MetricType.Accuracy, is_weighted}
+            The default constructor does not automatically include the training and validation losses
+            Example: {metric='Accuracy', BuildInMetric(MetricType.Accuracy, is_weighted}
+
     build: Alternative constructor taking a list of metric labels and flag to specify if the
-            class are imbalance
+            class are imbalance.
+            This alternative constructor will automatically add the training and validation losses if they
+            are not explicitly defined
             example: metrics_list=['Accuracy', 'f1'],  is_class_imbalance=True
 
-    Methods:
-    register_metric: Add/register another metric
+    Attributes:
+        registered_perf_metrics: Dictionary of the metric registered for this model
+        collected_metrics: Dictionary of the metric currently collected for this training session
     """
-    import os
-    output_path = '../../'
     output_filename = 'output'
-    output_folder = os.path.join(output_path, output_filename)
-    valid_metrics = ['Accuracy', 'Precision', 'Recall', 'F1']
+    # output_folder = os.path.join(output_path, output_filename)
+    valid_metrics = ['Accuracy', 'Precision', 'Recall', 'F1', 'AuROC', 'AuPR']
 
-    def __init__(self, registered_perf_metrics: Dict[MetricType, BuiltInMetric]) -> None:
+    def __init__(self, registered_perf_metrics: Dict[MetricType, BuiltInMetric], is_display_plot: bool = True) -> None:
         """
         Default constructor for the Performance metrics taking a dictionary input a
-        { metric_name, build in metric}   example {metric='Accuracy', BuildInMetric(MetricType.Accuracy, is_weighted}
+        { metric_name, build in metric}
+        This constructor does not automatically include the training and validation losses
+          Example {metric='Accuracy', BuildInMetric(MetricType.Accuracy, is_weighted}
+
         @param registered_perf_metrics: Dictionary { metric_name, built in metric}
         @type registered_perf_metrics: Dictionary
+        @param is_display_plot: Flag to display the metric plots at runtime - Default = False
+        @type is_display_plot: bool
         """
         self.registered_perf_metrics: Dict[MetricType, BuiltInMetric] = registered_perf_metrics
-        self.current_perf_metrics: Dict[MetricType, List[np.array]] = {}
-
-    def show_registered_metrics(self) -> AnyStr:
-        return '\n'.join([f' {k.value}: {str(v)}' for k, v in self.registered_perf_metrics.items()])
+        self.collected_metrics: Dict[MetricType, List[np.array]] = {}
+        self.is_display_plot = is_display_plot
 
     def __str__(self) -> AnyStr:
-        return '\n'.join([f' {k.value}: {str(lst)}' for k, lst in self.current_perf_metrics.items()])
+        return '\n'.join([f' {k}: {", ".join([str(round(x.item(), 7)) for x in v])}' for k, v in self.collected_metrics.items()])
 
     @classmethod
-    def build(cls, metrics_list: List[AnyStr], is_class_imbalance: bool) -> Self:
+    def build(cls, metrics_list: List[MetricType], is_class_imbalance: bool, is_display_plot: bool = False) -> Self:
         """
         Alternative constructor for the Performance metrics taking a dictionary input as
-         { metric_name, is_weighted}  example {metric='Accuracy', is_weighted=True}
+         { metric_name, is_weighted}
+        This constructor will automatically add the training and validation losses if they are not explicitly defined
+         Example {metric='Accuracy', is_weighted=True}
 
         @param metrics_list: List of metrics name
         @type metrics_list: Dictionary
         @param is_class_imbalance: Is class imbalance
         @type is_class_imbalance: boolean
+        @param is_display_plot: Flag to display the metric plots at runtime - Default = False
+        @type is_display_plot: bool
         @return: Instance of PerformanceMetrics
         @rtype: PerformanceMetrics
         """
         assert len(metrics_list) > 0, 'The list of performance metrics is undefined'
 
-        metrics = {MetricType.get_metric_type(metric): BuiltInMetric(metric_type=MetricType.get_metric_type(metric),
-                                                                     is_weighted=is_class_imbalance)
-                   for metric in metrics_list}
-        # If the caller forgot to include Eval loss as a performance metric, add it.
-        if MetricType.EvalLoss not in metrics:
-            metrics[MetricType.EvalLoss] = BuiltInMetric(metric_type=MetricType.EvalLoss,
-                                                         is_weighted=is_class_imbalance)
-        return cls(metrics)
+        metrics = {metric_type: BuiltInMetric(metric_type=metric_type,
+                                              is_weighted=is_class_imbalance) for metric_type in metrics_list}
+        return cls(metrics, is_display_plot)
 
     def __len__(self) -> int:
-        return len(self.registered_perf_metrics)
+        if len(self.collected_metrics) > 0:
+            k, v = next(iter(self.collected_metrics.items()))
+            return len(v)
+        else:
+            return 0
 
     def register_metric(self, metric_type: MetricType, encoding_len: int = -1, is_weighted: bool = False) -> None:
         """
@@ -107,9 +118,10 @@ class PerformanceMetrics(object):
                                                                   encoding_len=encoding_len,
                                                                   is_weighted=is_weighted)
 
-    def collect_metrics(self, epoch: int,  metrics_value: Dict[MetricType, torch.Tensor]) -> None:
+    def collect_all_metrics(self, epoch: int, metrics_value: Dict[MetricType, torch.Tensor]) -> int:
         """
-        Update the current performance metrics for a given epoch and add logging information,
+        Update the current performance metrics for a given epoch and add logging information.
+        No assumption is made on the keys of the new set of values.
 
         @param epoch: Current epoch in the training phase
         @type epoch: int
@@ -118,9 +130,27 @@ class PerformanceMetrics(object):
         """
         metric_str = '\n'.join([f'   {k.value}: {v.numpy()}' for k, v in metrics_value.items()])
         logging.info(f'>> Epoch: {epoch}\n{metric_str}')
-        self.update_all_metrics(metrics_value)
+        for key, value in metrics_value.items():
+            if key not in self.registered_perf_metrics:
+                raise MetricException(f'{key} metric is not supported')
 
-    def update_perf_metrics(self, np_predicted: np.array, np_labeled: np.array):
+            # Update the existing key values pairs
+            if key in self.collected_metrics:
+                values = self.collected_metrics[key]
+                values.append(value.numpy())
+                self.collected_metrics[key] = values
+            # In case the new dictionary introduce new key
+            else:
+                values = [value.numpy()]
+                self.collected_metrics[key] = values
+        return len(self.collected_metrics.items()) > 0
+
+    def collect_loss(self, is_validation: bool, np_loss: np.array) -> int:
+        metric_type = MetricType.EvalLoss if is_validation else MetricType.TrainLoss
+        self.collect_metric(metric_type, np_loss)
+        return len(self.collected_metrics[metric_type])
+
+    def collect_registered_metrics(self, np_predicted: np.array, np_labeled: np.array) -> None:
         """
         Compute all the registered metrics
         @param np_predicted: Predicted values as Numpy arrays
@@ -128,88 +158,62 @@ class PerformanceMetrics(object):
         @param np_labeled: Labeled values
         @type np_labeled: Numpy array
         """
-        assert len(np_predicted) == len(np_labeled), \
-            f'Number of predicted features {len(np_predicted)} should be equal to number of labels { len(np_labeled)}'
-
         for key, metric in self.registered_perf_metrics.items():
-            if key != MetricType.EvalLoss:
-                value = metric(np_predicted, np_labeled)
-                self.update_metric(key, value)
+            value = metric(np_predicted, np_labeled)
+            self.collect_metric(key, value)
 
-    def update_metric(self, metric_type: MetricType, np_metric_value: np.array) -> None:
+    def collect_metric(self, new_metric_type: MetricType, np_new_metric_value: np.array) -> int:
         """
         Update a metric of a given key with a value
-        @param metric_type: Key or id of the metric
-        @type metric_type: MetricType
-        @param np_metric_value: Value of the metric
-        @type np_metric_value: Numpy array
+        @param new_metric_type: Key or id of the metric
+        @type new_metric_type: MetricType
+        @param np_new_metric_value: Value of the metric
+        @type np_new_metric_value: Numpy array
         """
-        if metric_type not in self.registered_perf_metrics:
-            raise MetricException(f'{str(metric_type)} metric is not supported')
-
-        if metric_type in self.current_perf_metrics:
+        if new_metric_type in self.collected_metrics:
             # If this metric is already collected...
-            values = self.current_perf_metrics[metric_type]
-            values.append(np_metric_value)
-            self.current_perf_metrics[metric_type] = values
+            values = self.collected_metrics[new_metric_type]
+            values.append(np_new_metric_value)
+            self.collected_metrics[new_metric_type] = values
         else:
             # Otherwise create a new entry
-            values = [np_metric_value]
-            self.current_perf_metrics[metric_type] = values
+            values = [np_new_metric_value]
+            self.collected_metrics[new_metric_type] = values
+        return len(values)
 
-    def update_all_metrics(self, new_perf_metrics: Dict[MetricType, torch.Tensor]) -> bool:
-        """
-        Update the quality metrics with new pairs key-values. No assumption is made
-        for the keys of the new set of values.
-
-        @param new_perf_metrics: Set of metrics key-values
-        @type new_perf_metrics: Dictionary
-        """
-        for key, value in new_perf_metrics.items():
-            if key not in self.registered_perf_metrics:
-                raise MetricException(f'{key} metric is not supported')
-
-            # Update the existing key values pairs
-            if key in self.current_perf_metrics:
-                values = self.current_perf_metrics[key]
-                values.append(value.numpy())
-                self.current_perf_metrics[key] = values
-            # In case the new dictionary introduce new key
-            else:
-                values = [value.numpy()]
-                self.current_perf_metrics[key] = values
-        return len(self.current_perf_metrics.items()) > 0
-
-    def plot_summary(self, output_filename: AnyStr) -> None:
+    def summary(self, metric_plotter_parameters: MetricPlotterParameters) -> None:
         """
         Plots for the various metrics and stored metrics into torch local file
-        @param output_filename: Relative name of file containing the summary of metrics and losses
-        @type output_filename: str
+
+        @param plot_filename: Name of the file containing the summary of metrics and losses and plots
+        @type plot_filename: str
         """
-        try:
-            parameters = [PlotterParameters(count=0,
-                                            x_label='Epochs',
-                                            y_label=k.value,
-                                            title=f'{k} Plot',
-                                            fig_size=(10, 6)) for idx, k in enumerate(self.current_perf_metrics.keys())]
-            # Plot statistics
-            attribute_values = {k.value: v for k, v in self.current_perf_metrics.items()}
-            Plotter.multi_plot(attribute_values, parameters, output_filename)
-        except FileNotFoundError as e:
-            logging.error(e)
-            raise MetricException(e)
+        self.__plot_summary(metric_plotter_parameters)
+        self.__save_summary(metric_plotter_parameters.plot_filename)
 
     """ -------------------------------  Private Helper Methods --------------------------  """
 
-    def __save_summary(self, output_filename) -> None:
-        summary_dict = {}
-        for k, lst in self.current_perf_metrics.items():
-            stacked_tensor = torch.stack(lst)
-            summary_dict[k] = stacked_tensor
-        logging.info(f'Save summary {str(summary_dict)}')
-        torch.save(summary_dict, f"{PerformanceMetrics.output_folder}/{output_filename}.pth")
+    def __plot_summary(self, metric_plotter_parameters: MetricPlotterParameters) -> None:
+        """
+        Plots for the various metrics and stored metrics into torch local file
 
-    def __record(self, epoch: int, metrics: Dict[MetricType, torch.Tensor]):
-        metric_str = '\n'.join([f'   {k.value}: {v}' for k, v in metrics.items()])
-        logging.info(f'>> Epoch: {epoch}\n{metric_str}')
-        self.update_all_metrics(metrics)
+        @param metric_plotter_parameters: Parameter for the plot used to define the file containing the summary of metrics and losses
+        @type metric_plotter_parameters: str
+        """
+        try:
+            metric_plotter = MetricPlotter(metric_plotter_parameters)
+            # If we need to display the plot in real time
+            if self.is_display_plot:
+                metric_plotter.plot(self.collected_metrics)
+        except FileNotFoundError as e:
+            logging.error(f'Output file undefined {e}')
+            raise MetricException(e)
+
+    def __save_summary(self, output_filename: AnyStr) -> None:
+        import json
+
+        collected_values = { k: [float(v) for v in values] for k, values in self.collected_metrics.items()}
+        with open(f'{output_filename}.json', 'w') as f:
+            json.dump(collected_values, f)
+
+

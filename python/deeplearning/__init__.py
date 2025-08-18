@@ -33,13 +33,3 @@ class GraphException(Exception):
 class VAEException(Exception):
     def __init__(self, *args, **kwargs):
         super(VAEException, self).__init__(args, kwargs)
-
-
-class TrainingException(MLPException):
-    def __init__(self, *args, **kwargs):
-        super(TrainingException, self).__init__(args, kwargs)
-
-
-class ValidationException(MLPException):
-    def __init__(self, *args, **kwargs):
-        super(ValidationException, self).__init__(args, kwargs)

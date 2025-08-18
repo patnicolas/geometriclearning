@@ -13,13 +13,16 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geometry.lie.lie_se3_group import SE3ElementDescriptor, LieSE3Group
+# Standard Library imports
+from typing import AnyStr, List, Tuple
+# 3rd Party imports
 import matplotlib.pyplot as plt
 import geomstats.visualization as visualization
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
-from typing import AnyStr, List, Tuple
 import geomstats.backend as gs
+# Library imports
+from geometry.lie.lie_se3_group import SE3ElementDescriptor, LieSE3Group
 __all__ = ['SE3Visualization']
 
 

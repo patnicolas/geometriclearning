@@ -13,14 +13,18 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+# Standard Library imports
+from typing import AnyStr, Optional, List, Dict, Any, Self
+import logging
+# 3rd Party imports
 import torch
 from torch import optim
 from torch import nn
-from typing import AnyStr, Optional, List, Dict, Any, Self
+# Library imports
 from dataset import DatasetException
-import logging
 import python
-from deeplearning import TrainingException
+from deeplearning.training import TrainingException
 __all__ = ['HyperParams']
 
 
@@ -38,6 +42,7 @@ class HyperParams(object):
     def __init__(self,
                  lr: float,
                  momentum: float,
+                 weight_decay: float,
                  epochs: int,
                  optim_label: AnyStr,
                  batch_size: int,
@@ -69,6 +74,7 @@ class HyperParams(object):
         self.batch_size = batch_size
         self.loss_function = loss_function
         self.momentum = momentum
+        self.weight_decay = weight_decay
         self.encoding_len = encoding_len
         self.train_eval_ratio = train_eval_ratio
         self.weight_initialization = weight_initialization
@@ -89,29 +95,18 @@ class HyperParams(object):
         assert len(attributes), 'Attributes for hyper parameters are undefined'
 
         try:
-            learning_rate = attributes['learning_rate']
-            epochs = attributes['epochs']
-            batch_size = attributes['batch_size']
-            loss_function = attributes.get('loss_function', nn.CrossEntropyLoss())
-            momentum = attributes['momentum']
-            encoding_len = attributes['encoding_len']
-            train_eval_ratio = attributes['train_eval_ratio']
-            weight_initialization = attributes['weight_initialization']
-            optim_label = attributes['optim_label']
-            drop_out = attributes['drop_out']
-            class_weights = attributes['class_weights'] if 'class_weights' in attributes else None
-
-            return cls(learning_rate,
-                       momentum,
-                       epochs,
-                       optim_label,
-                       batch_size,
-                       loss_function,
-                       drop_out,
-                       train_eval_ratio,
-                       encoding_len,
-                       weight_initialization,
-                       class_weights)
+            return cls(lr=attributes['learning_rate'],
+                       momentum=attributes['momentum'],
+                       weight_decay=attributes['weight_decay'],
+                       epochs=attributes['epochs'],
+                       optim_label=attributes['optim_label'],
+                       batch_size=attributes['batch_size'],
+                       loss_function=attributes.get('loss_function', nn.CrossEntropyLoss()),
+                       drop_out=attributes['drop_out'],
+                       train_eval_ratio=attributes['train_eval_ratio'],
+                       encoding_len=attributes['encoding_len'],
+                       weight_initialization=attributes['weight_initialization'],
+                       class_weights=attributes.get('class_weights', None))
         except KeyError as e:
             logging.error(e)
             raise TrainingException(e)
@@ -134,11 +129,15 @@ class HyperParams(object):
                                   nn.Conv2d,
                                   nn.Conv1d,
                                   torch_geometric.nn.GraphConv,
+                                  torch_geometric.nn.SAGEConv,
                                   torch_geometric.nn.GCNConv,
                                   torch_geometric.nn.Linear)
                               )
 
         match self.weight_initialization:
+            case 'kaiming':
+                [nn.init.kaiming_uniform_(tensor=module.weight, mode='fan_in', nonlinearity='relu')
+                 for module in modules if is_layer_module(module)]
             case 'normal':
                 [nn.init.normal_(module.weight) for module in modules if is_layer_module(module)]
             case 'xavier':
@@ -148,7 +147,7 @@ class HyperParams(object):
             case _:
                 raise TrainingException(f'initialization {self.weight_initialization} '
                                         'for layer module weights is not supported')
-        [nn.init.constant_(module.bias, val=0.1) for module in modules if is_layer_module(module)]
+        # [nn.init.constant_(module.bias, val=0.1) for module in modules if is_layer_module(module)]
 
     def optimizer(self, model: nn.Module) -> torch.optim.Optimizer:
         """
@@ -165,20 +164,21 @@ class HyperParams(object):
             case HyperParams.optim_adam_label:
                 optimizer = optim.Adam(params=model.parameters(),
                                        lr=self.learning_rate,
+                                       weight_decay=self.weight_decay,
                                        betas=(self.momentum, 0.998))
             case HyperParams.optim_nesterov_label:
                 optimizer = optim.SGD(model.parameters(),
                                       lr=self.learning_rate,
+                                      weight_decay=5e-4,
                                       momentum=self.momentum,
                                       nesterov=True)
             case _:
-                logging.warn(f'Type of optimization {self.optim_label} not supported: reverted to SGD')
+                logging.warning(f'Type of optimization {self.optim_label} not supported: reverted to SGD')
                 optimizer = optim.SGD(model.parameters(),
                                       lr=self.learning_rate,
+                                      weight_decay=5e-4,
                                       momentum=self.momentum,
                                       nesterov=False)
-        # Set the gradient values of the selected optimizer to 0.0
-        optimizer.zero_grad()
         return optimizer
 
     def __repr__(self) -> str:
@@ -206,6 +206,7 @@ class HyperParams(object):
         return (HyperParams(
             lr,
             self.momentum,
+            self.weight_decay,
             self.epochs,
             self.optim_label,
             batch_size,
@@ -223,7 +224,7 @@ class HyperParams(object):
                             train_eval_ratio: float,
                             drop_out: float) -> None:
         assert 1e-6 <= lr <= 0.1, f'Learning rate {lr} should be [1e-6, 0.1]'
-        assert 2 <= epochs <= 2048, f'Number of epochs {epochs} should be [3, 2048]'
+        assert 1 <= epochs <= 2048, f'Number of epochs {epochs} should be [1, 2048]'
         assert 0.4 <= momentum <= 0.999, f'Context stride {momentum} should be [0.5, 0.999]'
         assert 1 <= batch_size <= 2048, f'Size of batch {batch_size} should be [2, 1024]'
         assert 0.5 < train_eval_ratio < 0.98, f'Train eval ratio {train_eval_ratio} is out of range ]0.5, 9.98['

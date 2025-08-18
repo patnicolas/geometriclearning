@@ -13,11 +13,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
+from typing import AnyStr, Tuple, Optional, Self, Dict, Any, List
+# 3rd Party imports
+import torch.nn as nn
+# Library imports
 from deeplearning.block.conv.conv_block import ConvBlock
 from deeplearning.block.conv.deconv_2d_block import DeConv2dBlock
 from deeplearning.block.conv.conv_output_size import ConvOutputSize
-from typing import AnyStr, Tuple, Optional, Self, Dict, Any
-import torch.nn as nn
 from deeplearning.block.conv import Conv2DataType
 from deeplearning import ConvException
 __all__ = ['Conv2dBlock']
@@ -185,6 +188,9 @@ class Conv2dBlock(ConvBlock):
                    max_pooling_module=max_pooling_module,
                    drop_out_module=drop_out_module)
 
+    def reset_parameters(self) -> None:
+        self.modules_list[0].reset_parameters()
+
     def transpose(self, output_activation: Optional[nn.Module] = None) -> DeConv2dBlock:
         """
         Build a de-convolutional neural block from an existing convolutional block
@@ -212,6 +218,14 @@ class Conv2dBlock(ConvBlock):
             conv_layer_module.stride,
             conv_layer_module.padding,
             max_pool_module.kernel_size)
+
+    def get_flatten_output_size(self, input_size: int | Tuple[int, int], conv_blocks: List[ConvBlock]):
+        from deeplearning.block.conv.conv_output_size import SeqConvOutputSize
+
+        conv_block_sizes = [conv_block.get_conv_output_size() for conv_block in conv_blocks]
+        conv_model_output_sizes = SeqConvOutputSize(conv_block_sizes)
+        conv_output_sizes = conv_model_output_sizes(input_size=input_size)
+        return self.get_out_channels() * conv_output_sizes[0] * conv_output_sizes[1]
 
     def validate(self, attributes: Dict[AnyStr, nn.Module] = None) -> Dict[AnyStr, nn.Module]:
         from deeplearning.block.neural_block import NeuralBlock

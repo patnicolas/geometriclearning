@@ -13,9 +13,12 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
+from typing import Self, AnyStr, Optional, Any, Dict
+# 3rd Party imports
 from torch import nn
 import torch
-from typing import Self, AnyStr, Optional, Any, Dict
+# Library imports
 from deeplearning.block.neural_block import NeuralBlock
 __all__ = ['MLPBlock']
 
@@ -79,8 +82,8 @@ class MLPBlock(NeuralBlock):
         block_id = block_attributes['block_id']
         in_features_attribute = block_attributes['in_features']
         out_features_attributes = block_attributes['out_features']
-        activation_attribute = block_attributes['activation']
-        dropout_attribute = block_attributes['dropout']
+        activation_attribute = block_attributes.get('activation', None)
+        dropout_attribute = block_attributes.get('dropout', 0.0)
         return cls(block_id,
                    nn.Linear(in_features_attribute, out_features_attributes),
                    activation_attribute,
@@ -139,8 +142,22 @@ class MLPBlock(NeuralBlock):
                                                bias=False),
                         activation_module=activation_module)
 
-    def reset_parameters(self):
-        self.linear.reset_parameters()
+    def reset_parameters(self) -> None:
+        self.modules_list[0].reset_parameters()
+
+    def init_weights(self) -> None:
+        layer_module_weight = self.modules_list[0].weight
+        match self.activation_module:
+            case nn.ReLU():
+                nn.init.kaiming_uniform_(tensor=layer_module_weight)
+            case nn.LeakyReLU():
+                nn.init.kaiming_uniform_(tensor=layer_module_weight)
+            case nn.Tanh():
+                nn.init.xavier_uniform_(tensor=layer_module_weight, gain=1)
+            case nn.Sigmoid():
+                nn.init.xavier_uniform_(tensor=layer_module_weight, gain=1)
+            case _:
+                nn.init.xavier_uniform_(tensor=layer_module_weight)
 
     def __repr__(self):
         return '\n'.join([f'{idx}: {str(module)}' for idx, module in enumerate(list(self.modules_list))])

@@ -14,15 +14,19 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 
+# Standard Library imports
+from typing import Dict, AnyStr, Any, Optional, List, Self
+import logging
+# 3rd Party imports
 from torch.utils.data import DataLoader
 from torch_geometric.data import Data
 from torch_geometric.loader import (NeighborLoader, RandomNodeLoader, GraphSAINTRandomWalkSampler,
                                     GraphSAINTNodeSampler, GraphSAINTEdgeSampler, ShaDowKHopSampler,
                                     ClusterData, ClusterLoader)
 import torch
-from typing import Dict, AnyStr, Any, Optional, List, Self, Callable
+# Library imports
 from dataset import DatasetException
-import logging
+
 __all__ = ['GraphDataLoader']
 
 
@@ -64,8 +68,7 @@ class GraphDataLoader(object):
     def __init__(self,
                  dataset_name: AnyStr,
                  sampling_attributes: Dict[AnyStr, Any],
-                 num_subgraph_nodes: Optional[int] = -1,
-                 start_index: Optional[int] = -1) -> None:
+                 num_subgraph_nodes: Optional[int] = -1) -> None:
         """
         Constructor for the Generic Graph Data Loader
 
@@ -76,25 +79,25 @@ class GraphDataLoader(object):
         @param num_subgraph_nodes: Num of indices of nodes in the range [random_index, random_index+num_random_indices]
                                    The entire graph is loaded if value is -1
         @type num_subgraph_nodes: int
-        @param start_index: Index of the first node to be sample from the original graph
-        @type start_index int
         """
         from dataset.graph.pyg_datasets import PyGDatasets
 
-        assert num_subgraph_nodes is None or -1 <= num_subgraph_nodes <= 8192, \
-            f'Number of subgraph nodes {num_subgraph_nodes} shoudl be [-1, 8192]'
+        assert num_subgraph_nodes is None or -1 <= num_subgraph_nodes <= 65536, \
+            f'Number of subgraph nodes {num_subgraph_nodes} should be [1, 65536]'
 
         # Validate the attributes against the type of loader-sampler
         GraphDataLoader.__validate(sampling_attributes)
         # Load directly from the dataset
         pyg_datasets = PyGDatasets(dataset_name)
         dataset = pyg_datasets()
-        # Load a subgraph is specified
-        self.data: Data = GraphDataLoader.__extract_subgraph(dataset[0], num_subgraph_nodes, start_index) \
+        # Load a subgraph is specified by the number of nodes
+        self.data: Data = GraphDataLoader.__random_subgraph(dataset[0], num_subgraph_nodes) \
             if num_subgraph_nodes is not None and num_subgraph_nodes > 0 else dataset[0]
 
+        self.subgraph_ratio = self.data.x.shape[0]/ dataset[0].x.shape[0]
         self.num_classes = dataset.num_classes
         self.attributes_map = sampling_attributes
+        self.dataset = dataset
 
     @classmethod
     def build_node_neighbor_loader(cls,
@@ -135,13 +138,18 @@ class GraphDataLoader(object):
         return loader_sampler(self)
 
     def __str__(self) -> AnyStr:
-        return f'\nAttributes: {str(self.attributes_map)}\nData: {self.data}'
+        data_desc = (f'\nNumber graphs: {len(self.dataset)}\nNumber nodes: {self.data.x.shape[0]}'
+                     f'\nNumber features: {self.dataset.num_features}\nNumber classes: {self.dataset.num_classes}'
+                     f'\nIs directed: {self.data.is_directed()}\nHas loop: {self.data.has_self_loops()}'
+                     f'\nTraining nodes: {sum(self.data.train_mask).item()}\nValidation nodes: '
+                     f'{sum(self.data.val_mask).item()}\nSubgraph coverage: {self.subgraph_ratio:.3f}')
+        return f'\nSampling: {str(self.attributes_map)}{data_desc}'
 
     def __len__(self) -> int:
         return len(self.data.x)
 
     @staticmethod
-    def distribution(data: Data) -> torch.Tensor:
+    def class_weights(data: Data) -> torch.Tensor:
         class_distribution = data.y[data.train_mask]
         raw_distribution = torch.bincount(class_distribution)
         raw_weights = 1.0 / raw_distribution
@@ -149,6 +157,25 @@ class GraphDataLoader(object):
         return raw_weights / total_sum
 
     """ ------------------------ Private Helper Methods ------------------------ """
+
+    @staticmethod
+    def __random_subgraph(data: Data, num_subgraph_nodes: int) -> Data:
+        from torch_geometric.utils import subgraph
+
+        # Select the first num_subgraph_nodes, randomly selected nodes
+        sample_node_indices = torch.randperm(data.num_nodes)[:num_subgraph_nodes]
+        sample_edge_index, _ = subgraph(sample_node_indices,
+                                        data.edge_index,
+                                        relabel_nodes=True)
+
+        # We need to adjust the masks for the train, validation and test for
+        # the subgraph of randomly selected nodes
+        return Data(x=data.x[sample_node_indices],
+                    edge_index=sample_edge_index,
+                    y=data.y[sample_node_indices],
+                    train_mask=data.train_mask[sample_node_indices],
+                    val_mask=data.val_mask[sample_node_indices],
+                    test_mask=data.test_mask[sample_node_indices])
 
     def __random_node_loader(self) -> (DataLoader, DataLoader):
         # Collect the attributes

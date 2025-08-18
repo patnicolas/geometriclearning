@@ -13,17 +13,20 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dataset.base_loader import BaseLoader
+# Standard Library imports
 from typing import AnyStr
+import logging
+# 3rd Party imports
 from torch.utils.data import Dataset, DataLoader
 from torchvision.transforms import InterpolationMode
 from torchvision.datasets import MNIST
 import torchvision.transforms as transforms
-from dl.model import GrayscaleToRGB
+# Library imports
+from deeplearning.model import GrayscaleToRGB
 from dataset import DatasetException
-import logging
+from dataset.base_loader import BaseLoader
 import python
-import abc
+__all__ = ['MNISTLoader']
 
 
 class MNISTLoader(BaseLoader):
@@ -39,7 +42,7 @@ class MNISTLoader(BaseLoader):
         @type resize_image: int
         """
         assert 0 < batch_size <= 8192, f'Batch size {batch_size} should be [1, 8192]'
-        assert 0 < resize_image <= 8192, f'Resize image factor {resize_image} should be [1, 8192]'
+        assert 0 < resize_image <= 8192 or resize_image == -1, f'Resize image factor {resize_image} should be [1, 8192]'
 
         super(MNISTLoader, self).__init__(batch_size=batch_size, num_samples=-1)
         self.resize_image = resize_image

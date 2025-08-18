@@ -6,7 +6,7 @@ from deeplearning.training.gnn_training import GNNTraining
 from deeplearning.training.exec_config import ExecConfig
 from plots.plotter import PlotterParameters
 from deeplearning import GraphException, MLPException, TrainingException
-from deeplearning.model.gconv_model import GConvModel
+from deeplearning.model.graph.graph_conv_model import GraphConvModel
 from deeplearning.training.hyper_params import HyperParams
 from metric.metric import Metric
 from metric.built_in_metric import BuiltInMetric
@@ -110,7 +110,7 @@ class GConvTest(unittest.TestCase):
                                   metrics_attributes=metric_labels,
                                   exec_config=ExecConfig.default(),
                                   plot_parameters=parameters)
-            network.train(model_id='Graph Conv Flickr',
+            network.train(plot_filename='Graph Conv Flickr',
                           neural_model=flickr_model,
                           train_loader=train_loader,
                           val_loader=val_loader)
@@ -119,11 +119,11 @@ class GConvTest(unittest.TestCase):
             self.assertTrue(False)
 
     @staticmethod
-    def flickr_model(hidden_channels: int, pooling_ratio: float, dropout_p: float) -> (GConvModel, torch.Tensor):
+    def flickr_model(hidden_channels: int, pooling_ratio: float, dropout_p: float) -> (GraphConvModel, torch.Tensor):
         import torch_geometric
         from dataset.graph.pyg_datasets import PyGDatasets
         from torch_geometric.nn import GraphConv
-        from deeplearning.block.graph.gconv_block import GConvBlock
+        from deeplearning.block.graph.graph_conv_block import GraphConvBlock
         from deeplearning.block.mlp.mlp_block import MLPBlock
         from torch_geometric.datasets.flickr import Flickr
 
@@ -138,28 +138,28 @@ class GConvTest(unittest.TestCase):
 
         conv_1 = GraphConv(in_channels=_data.num_node_features, out_channels=hidden_channels)
 
-        gconv_block_1 = GConvBlock(block_id='Conv 24-256',
-                                   gconv_layer=conv_1,
-                                   batch_norm_module=None,
-                                   activation_module=nn.ReLU(),
-                                   pooling_module=None,
-                                   dropout_module=nn.Dropout(dropout_p))
+        gconv_block_1 = GraphConvBlock(block_id='Conv 24-256',
+                                       graph_conv_layer=conv_1,
+                                       batch_norm_module=None,
+                                       activation_module=nn.ReLU(),
+                                       pooling_module=None,
+                                       dropout_module=nn.Dropout(dropout_p))
 
         conv_2 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-        gconv_block_2 = GConvBlock(block_id='Conv 256-256',
-                                   gconv_layer=conv_2,
-                                   batch_norm_module=None,
-                                   activation_module=nn.ReLU(),
-                                   pooling_module=None,
-                                   dropout_module=nn.Dropout(dropout_p))
+        gconv_block_2 = GraphConvBlock(block_id='Conv 256-256',
+                                       graph_conv_layer=conv_2,
+                                       batch_norm_module=None,
+                                       activation_module=nn.ReLU(),
+                                       pooling_module=None,
+                                       dropout_module=nn.Dropout(dropout_p))
 
         mlp_block = MLPBlock(block_id='Fully connected',
                              layer_module=nn.Linear(hidden_channels, flickr_dataset.num_classes),
                              activation_module=nn.LogSoftmax(dim=-1))
 
-        return GConvModel(model_id='Flicker test dataset',
-                          gconv_blocks=[gconv_block_1, gconv_block_2],
-                          mlp_blocks=[mlp_block]), GConvTest.distribution(_data)
+        return GraphConvModel(model_id='Flicker test dataset',
+                              graph_conv_blocks=[gconv_block_1, gconv_block_2],
+                              mlp_blocks=[mlp_block]), GConvTest.distribution(_data)
 
     @staticmethod
     def distribution(data: Data) -> torch.Tensor:

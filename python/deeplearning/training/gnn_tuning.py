@@ -13,17 +13,21 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+# Standard Library imports
+from typing import Dict, List, AnyStr, Any, Callable
+# 3rd Party imports
 import optuna
 from optuna.trial import TrialState
 import torch.nn as nn
-from dataset.graph.graph_data_loader import GraphDataLoader
-from torch_geometric.nn import GraphConv
-from deeplearning.model.gconv_model import GConvModel
-from torch_geometric.data import Data
-from metric.metric_type import MetricType
-from typing import Dict, List, AnyStr, Any, Callable
-from deeplearning.training.gnn_training import GNNTraining
 import torch
+from torch_geometric.data import Data
+from torch_geometric.nn import GraphConv
+# Library imports
+from deeplearning.model.graph.graph_conv_model import GraphConvModel
+from metric.metric_type import MetricType
+from deeplearning.training.gnn_training import GNNTraining
+from dataset.graph.graph_data_loader import GraphDataLoader
 __all__ = ['GNNTuning', 'class_weight_distribution', 'neighbor_list_generator']
 
 
@@ -131,7 +135,7 @@ class GNNTuning(object):
                                                num_classes=graph_loader.num_classes,
                                                hidden_channels=384)
         # Step 6: Train and validate the model
-        gnn_training.train(model_id=GNNTuning.__get_output_id(sampling_attributes),
+        gnn_training.train(plot_filename=GNNTuning.__get_output_id(sampling_attributes),
                            neural_model=gnn_conv_model,
                            train_loader=train_loader,
                            val_loader=val_loader)
@@ -187,7 +191,7 @@ class GNNTuning(object):
             GNNTuning.training_parameters['loss_function'] = nn.NLLLoss()
 
     @staticmethod
-    def __get_model(data: Data, num_classes: int, hidden_channels: int) -> GConvModel:
+    def __get_model(data: Data, num_classes: int, hidden_channels: int) -> GraphConvModel:
         num_node_features = data.num_node_features
         model_parameters = {
             'model_id': 'MyModel',
@@ -221,7 +225,7 @@ class GNNTuning(object):
                 }
             ]
         }
-        return GConvModel.build(model_parameters)
+        return GraphConvModel.build(model_parameters)
 
     @staticmethod
     def __get_output_id(sampling_parameters: Dict[AnyStr, Any]) -> AnyStr:

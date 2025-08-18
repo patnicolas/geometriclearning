@@ -13,9 +13,15 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
 from abc import ABC
-
+from typing import AnyStr, List, Optional, Dict, Self, Tuple
+# 3rd Party imports
 import torch.nn as nn
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+import torch
+# Library imports
 from deeplearning.training.neural_training import NeuralTraining
 from deeplearning.training.hyper_params import HyperParams
 from deeplearning.training.early_stopping import EarlyStopping
@@ -25,10 +31,6 @@ from metric.metric_type import MetricType
 from deeplearning.training.exec_config import ExecConfig
 from deeplearning import ConvException, VAEException
 from deeplearning.loss.vae_kl_loss import VAEKLLoss
-from typing import AnyStr, List, Optional, Dict, Self, Tuple
-from torch.utils.data import DataLoader
-from tqdm import tqdm
-import torch
 __all__ = ['VAETraining']
 
 EvaluatedImages = Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
@@ -111,7 +113,7 @@ class VAETraining(NeuralTraining, ABC):
         @param eval_loader:  Data loader for the valuation set
         @type eval_loader: DataLoader
         """
-        from deeplearning.model.vae_model import VAEModel
+        from deeplearning.model.generative.vae_model import VAEModel
 
         if not isinstance(neural_model, VAEModel):
             raise VAEException(f'Neural model {type(neural_model)} cannot not be trained as VAE')
@@ -227,7 +229,7 @@ class VAETraining(NeuralTraining, ABC):
                 raise VAEException(str(e))
 
         eval_loss = total_loss / num_records
-        self.performance_metrics.update_metric(MetricType.EvalLoss, eval_loss)
+        self.performance_metrics.collect_metric(MetricType.EvalLoss, eval_loss)
         self.__visualize(eval_images)
 
     """ ------------------------------  Private helper method for visual debugging --------------- """

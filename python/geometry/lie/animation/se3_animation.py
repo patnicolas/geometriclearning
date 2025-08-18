@@ -13,9 +13,13 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geometry.lie.animation.so3_animation import SO3Animation
-import numpy as np
+
+# Standard Library imports
 from typing import List, Callable, AnyStr, Dict, Any
+# 3rd Party imports
+import numpy as np
+# Library imports
+from geometry.lie.animation.so3_animation import SO3Animation
 __all__ = ['SE3Animation']
 
 

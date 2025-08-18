@@ -13,15 +13,20 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import torch
-import torch.nn as nn
+# Standard Library imports
 from abc import ABC, abstractmethod
 from typing import AnyStr, Self, List, Dict, Any
-from deeplearning.block.conv import ConvDataType
+import logging
+# 3rd Party imports
+import torch
+import torch.nn as nn
 from torch import Tensor
+# Library imports
 from deeplearning import MLPException
+from deeplearning.block.conv import ConvDataType
+from deeplearning.block.neural_block import NeuralBlock
+import python
 __all__ = ['NeuralModel', 'NeuralBuilder']
-
 
 
 class NeuralModel(torch.nn.Module, ABC):
@@ -29,17 +34,15 @@ class NeuralModel(torch.nn.Module, ABC):
     Abstract base class for Neural network models. The constructors of the sub-classes needs
     to define the sequence of neural blocks.
     """
-    def __init__(self, model_id: AnyStr, modules_seq: nn.Module) -> None:
+    def __init__(self, model_id: AnyStr) -> None:
         """
         Constructor
         @param model_id: Identifier for this model
         @type model_id: str
-        @param modules_seq: Model as a Torch neural module
-        @type modules_seq: nn.Module
         """
         super(NeuralModel, self).__init__()
         self.model_id = model_id
-        self.modules_seq = modules_seq
+        self.modules_seq = None
 
     def add_noise(self, x: Tensor) -> Tensor:
         """
@@ -52,9 +55,9 @@ class NeuralModel(torch.nn.Module, ABC):
         return self.noise_func(x) if self.noise_func is not None else x
 
     def get_modules(self) -> List[nn.Module]:
-        return list(self.modules_seq.children())
+        return list(self.modules_seq.children()) if self.modules_seq is not None else []
 
-    def list_modules(self, index: int = 0) -> AnyStr:
+    def show_modules(self, index: int = 0) -> AnyStr:
         modules = [f'{idx+index}: {str(module)}' for idx, module in enumerate(self.get_modules())]
         return '\n'.join(modules)
 
@@ -69,10 +72,21 @@ class NeuralModel(torch.nn.Module, ABC):
         @return: Prediction for the input
         @rtype: Torch tensor
         """
-        # logging.info(f'{self.model_id=}\n{x.shape=}')
+        logging.debug(f'{self.model_id=}\n{x.shape=}')
         x = self.modules_seq(x)
-        # logging.info(f'Output {self.model_id=}\n{x.shape=}')
+        logging.debug(f'Output {self.model_id=}\n{x.shape=}')
         return x
+
+    def _register_modules(self, conv_blocks: List[NeuralBlock], fully_connected: List[NeuralBlock]) -> None:
+        if self.modules_seq is None:
+            modules_list = [module for block in conv_blocks for module in block.modules_list]
+            # If fully connected are provided
+            if fully_connected is not None:
+                # Flatten the output of the last convolution block/layer
+                modules_list.append(nn.Flatten())
+                # Generate the list of modules for all the multi-layer perceptron blocks
+                [modules_list.append(module) for block in fully_connected for module in block.modules_list]
+            self.modules_seq = nn.Sequential(*modules_list)
 
     def get_in_features(self) -> int:
         raise NotImplementedError('NeuralModel.get_in_features undefined for abstract neural model')
@@ -101,15 +115,36 @@ class NeuralModel(torch.nn.Module, ABC):
         raise NotImplementedError('NeuralModel.save is an abstract method')
 
 
+
+
 class NeuralBuilder(ABC):
+    """
+    A builder for any Neural Network
+    """
     def __init__(self, model_attributes: Dict[AnyStr, Any]) -> None:
+        """
+        Constructor for this Builder
+        @param model_attributes:  Dictionary of model configuration parameters
+        @type model_attributes: Dictionary
+        """
         self.model_attributes = model_attributes
 
-    # Add/update dynamically the torch module as value of attributes dict.
     def set(self, key: AnyStr, value: Any) -> Self:
+        """
+        Add/update dynamically the torch module as value of attributes dict.
+        @param key: Key or name of the configuration parameter
+        @type key:  str
+        @param value: Value for the configuration parameter
+        @type value: Any
+        @return: Instance of this builder
+        @rtype: NeuralBuilder
+        """
         self.model_attributes[key] = value
         return self
 
     @abstractmethod
     def build(self) -> NeuralModel:
-        raise MLPException('Neural Builder is an abstract class')
+        """
+        A Neural Builder is an abstract class
+        """
+        pass

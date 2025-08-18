@@ -1,7 +1,7 @@
 import unittest
 from deeplearning.block.mlp.mlp_block import MLPBlock
-from deeplearning.model.mlp_model import MLPModel
-from deeplearning.model.vae_model import VAEModel
+from deeplearning.model.mlp.mlp_model import MLPModel
+from deeplearning.model.generative.vae_model import VAEModel
 from dataset.tensor.unlabeled_loader import UnlabeledLoader
 from deeplearning.training.exec_config import ExecConfig
 from deeplearning.training.vae_training import VAETraining

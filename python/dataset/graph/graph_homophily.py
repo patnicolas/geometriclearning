@@ -13,10 +13,13 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
 from typing import AnyStr, Self
-from dataset.graph.pyg_datasets import PyGDatasets
-from torch_geometric.data import Data
 from enum import StrEnum, verify, UNIQUE
+# 3rd Party imports
+from torch_geometric.data import Data
+# Library imports
+from dataset.graph.pyg_datasets import PyGDatasets
 __all__ = ['GraphHomophily', 'GraphHomophilyType']
 
 
