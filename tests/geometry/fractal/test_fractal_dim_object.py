@@ -12,7 +12,7 @@ class FractalDimObjectTest(unittest.TestCase):
 
         sample_size = 256
         threshold = 0.85
-        fractal_dim_object = FractalDimObject.build(sample_size, threshold, True)
+        fractal_dim_object = FractalDimObject.random(sample_size, threshold, True)
         xyz = fractal_dim_object.xyz
         logging.info(f'len(xyz[1]) = {len(xyz[1])}')
 
@@ -43,7 +43,7 @@ class FractalDimObjectTest(unittest.TestCase):
         import math
         sample_size = 256
         threshold = 0.92
-        fractal_dim_object = FractalDimObject.build(sample_size, threshold, True)
+        fractal_dim_object = FractalDimObject.random(sample_size, threshold, True)
         coefficient, counts, sizes = fractal_dim_object()
         estimated_num_counts = math.log2(sample_size)
         self.assertTrue(len(counts) == estimated_num_counts - 1)
@@ -57,7 +57,7 @@ class FractalDimObjectTest(unittest.TestCase):
 
         sample_size = 1024
         threshold = 0.88
-        fractal_dim_object = FractalDimObject.build(sample_size, threshold)
+        fractal_dim_object = FractalDimObject.random(sample_size, threshold)
         _, counts, sizes = fractal_dim_object()
         estimated_num_counts = math.log2(sample_size)
         self.assertTrue(len(counts) == estimated_num_counts-1)

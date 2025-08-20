@@ -1,8 +1,7 @@
 import unittest
 from topology import TopologyException
-from topology.simplicial_laplacian import SimplicialLaplacian, SimplicialLaplacianType
+from topology.simplicial.simplicial_laplacian import SimplicialLaplacian, SimplicialLaplacianType
 import logging
-import python
 
 
 class SimplicialLaplacianTest(unittest.TestCase):

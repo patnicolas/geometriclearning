@@ -15,17 +15,42 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 
 # Standard Library imports
-from typing import Self, AnyStr, List
+from typing import Self, AnyStr, List, Optional
+from dataclasses import dataclass
 # 3rd Party imports
 import toponetx as tnx
 import numpy as np
 import torch
 # Library imports
-from topology.simplicial_laplacian import SimplicialLaplacian
-__all__ = ['SimplicialFeatureSet']
+from topology.simplicial.simplicial_laplacian import SimplicialLaplacian
+__all__ = ['SimplicialElements', 'SimplicialElement']
 
 
-class SimplicialFeatureSet(object):
+@dataclass
+class SimplicialElement:
+    """
+    Definition of the basic element of a Simplicial Complex {Node, Edge, Face} composed of
+    - Feature vector
+    - Indices of nodes defining this element
+
+    @param node_indices: List of indices of nodes composing this simplicial element
+    @type node_indices: List[int]
+    @param feature_set: Feature vector or set associated with this simplicial element
+    @type feature_set: Numpy array
+    """
+    node_indices: Optional[List[int]] = None
+    feature_set: Optional[np.array] = None
+
+    def __str__(self) -> AnyStr:
+        output = []
+        if self.feature_set is not None:
+            output.append(str(self.feature_set))
+        if self.node_indices is not None:
+            output.append(', '.join([str(idx) for idx in self.node_indices]))
+        return '\n'.join(output) if len(output) > 0 else ''
+
+
+class SimplicialElements(object):
     """
     Implementation of the Simplicial Complex with operators and a feature set (embedded vector).
     The functionality is:
@@ -36,30 +61,36 @@ class SimplicialFeatureSet(object):
     triangle_colors = ['blue', 'red', 'green', 'purple', 'grey', 'orange']
     tetrahedron_color = 'lightgrey'
 
-    def __init__(self, feature_set: np.array, edge_set: List[List[int]], face_set: List[List[int]]) -> None:
+    def __init__(self,
+                 simplicial_nodes: List[SimplicialElement],
+                 simplicial_edges: List[SimplicialElement],
+                 simplicial_faces: List[SimplicialElement]) -> None:
         """
         Constructor for the Simplicial Complex Model. Shape of Numpy array for the edge and face sets
         are evaluated for consistency.
         
-        @param feature_set: Feature set or feature vector 
-        @type feature_set: Numpy array
-        @param edge_set:  Edge set an array of pair of node indices
-        @type edge_set: Numpy array
-        @param face_set:  Face set as an array of 3 node indices
-        @type face_set: Numpy array
+        @param simplicial_nodes: List of nodes elements
+        @type simplicial_nodes:  List[SimplicialElement]
+        @param simplicial_edges:  List of Edge elements
+        @type simplicial_edges:  List[SimplicialElement]
+        @param simplicial_faces:  List of Face elements
+        @type simplicial_faces:  List[SimplicialElement]
         """
         # Validate the shape of indices of the simplicial complex
-        SimplicialFeatureSet.__validate(edge_set, face_set)
+        SimplicialElements.__validate(simplicial_edges, simplicial_faces)
         
-        self.feature_set = feature_set
+        self.simplicial_nodes = simplicial_nodes
         # Tuple (Src -> Dest)
-        self.edge_set = edge_set
+        self.simplicial_edges = simplicial_edges
         # Either triangle {x, y, z] or Tetrahedron {x, y, z, t}
-        self.face_set = face_set
-        self.simplicial_indices = self.edge_set + self.face_set
+        self.simplicial_faces = simplicial_faces
+        # Extract the
+        edges_indices = [edge.node_indices for edge in simplicial_edges]
+        faces_indices = [edge.node_indices for edge in simplicial_faces]
+        self.simplicial_indices = edges_indices + faces_indices
 
     @classmethod
-    def build(cls, dimension: int, edge_set: List[List[int]], face_set: List[List[int]]) -> Self:
+    def random(cls, dimension: int, edge_set: List[List[int]], face_set: List[List[int]]) -> Self:
         """
         Alternative constructor for the Simplicial model that uses random value for features set. The size of the
         feature set matrix is computed from the list of edges node indices.
@@ -75,17 +106,23 @@ class SimplicialFeatureSet(object):
         @param face_set:  Face set as a tensor of tensor with 3 node indices
         @type face_set: Torch tensor
         @return: Instance of Simplicial model
-        @rtype: SimplicialFeatureSet
+        @rtype: SimplicialElements
         """
         import itertools
         assert dimension > 0, f'Dimension of random vector {dimension} should be > 0'
 
         num_nodes = max(list(itertools.chain.from_iterable(edge_set)))
-        random_feature_set = torch.rand(num_nodes, dimension)
-        return cls(random_feature_set, edge_set, face_set)
+        random_feature_set = torch.rand(num_nodes, dimension).numpy()
+        simplicial_nodes = [SimplicialElement(feature_set=feat) for feat in random_feature_set]
+        simplicial_edges = [SimplicialElement(edge_idx) for edge_idx in edge_set]
+        simplicial_faces = [SimplicialElement(face_idx) for face_idx in face_set]
+        return cls(simplicial_nodes, simplicial_edges, simplicial_faces)
 
     def __str__(self) -> AnyStr:
-        return f'\nFeatures:\n{self.feature_set}\nEdges:\n{self.edge_set}\nFaces:\n{self.face_set}'
+        simplicial_nodes_str = [str(node) for node in self.simplicial_nodes]
+        simplicial_edges_str = [str(edge) for edge in self.simplicial_edges]
+        simplicial_faces_str = [str(face) for face in self.simplicial_faces]
+        return f'\nNodes:\n{simplicial_nodes_str}\nEdges:\n{simplicial_edges_str}\nFaces:\n{simplicial_faces_str}'
 
     def adjacency_matrix(self, directed_graph: bool = False) -> np.array:
         """
@@ -96,11 +133,11 @@ class SimplicialFeatureSet(object):
         @rtype: Numpy array
         """
         # Initialize adjacency matrix
-        n = len(self.feature_set)
+        n = len(np.concatenate([node.feature_set for node in self.simplicial_nodes]))
         A = np.zeros((n, n), dtype=int)
 
         # Fill in edges
-        for u, v in self.edge_set:
+        for u, v in [edge.node_indices for edge in self.simplicial_edges]:
             A[u-1, v-1] = 1
             if directed_graph:
                 A[v-1, u-1] = 1
@@ -128,10 +165,12 @@ class SimplicialFeatureSet(object):
     """ -------------------------  Private Supporting methods ------------------ """
 
     @staticmethod
-    def __validate(edge_set: np.array, face_set: np.array) -> None:
+    def __validate(simplicial_edge: List[SimplicialElement], simplicial_face: SimplicialElement) -> None:
+        edge_set = [edge.node_indices for edge in simplicial_edge]
         assert len(edge_set) > 0, 'Simplicial requires at least one edge'
         assert all(len(sublist) == 2 for sublist in edge_set), f'All elements of edge list should have 2 indices'
 
+        face_set = [face.node_indices for face in simplicial_face]
         assert len(face_set) > 0, 'Simplicial requires at least face'
         assert all(len(sublist) in (3, 4) for sublist in face_set), \
             f'All elements of edge list should have 3 or 4 indices'

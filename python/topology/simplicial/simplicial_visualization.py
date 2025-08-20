@@ -19,7 +19,7 @@ from typing import List, Dict, AnyStr, Any
 import numpy as np
 import matplotlib.pyplot as plt
 # Library imports
-from topology.simplicial_feature_set import SimplicialFeatureSet
+from topology.simplicial.simplicial_elements import SimplicialElements
 __all__ = ['SimplicialVisualization']
 
 class SimplicialVisualization(object):
@@ -29,7 +29,7 @@ class SimplicialVisualization(object):
     triangle_colors = ['blue', 'red', 'green', 'purple', 'grey', 'orange', 'black']
     tetrahedron_color = 'lightgrey'
 
-    def __init__(self, simplicial_feature_set: SimplicialFeatureSet, attributes: Dict[AnyStr, Any]):
+    def __init__(self, simplicial_feature_set: SimplicialElements, attributes: Dict[AnyStr, Any]):
         self.simplicial_feature_set = simplicial_feature_set
         self.attributes = attributes
 
@@ -97,7 +97,7 @@ class SimplicialVisualization(object):
                 """
 
             else:
-                face_color = SimplicialFeatureSet.triangle_colors[idx % len(SimplicialFeatureSet.triangle_colors)]
+                face_color = SimplicialElements.triangle_colors[idx % len(SimplicialElements.triangle_colors)]
                 plt.fill(x, y, face_color, alpha=0.2)
                 plt.text(x=face_label_pos[color_idx][0] - label_offset,
                          y=face_label_pos[color_idx][1],
@@ -109,7 +109,7 @@ class SimplicialVisualization(object):
         for (x, y) in tetrahedrons:
             plt.fill(x,
                      y,
-                     color=SimplicialFeatureSet.tetrahedron_color,
+                     color=SimplicialElements.tetrahedron_color,
                      alpha=0.6,
                      edgecolor='grey',
                      hatch='////')
