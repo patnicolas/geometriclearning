@@ -15,12 +15,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 
 # Standard Library imports
-from typing import Self, AnyStr, List, Optional
+from typing import Self, AnyStr, List, Optional, Tuple, Dict
 from dataclasses import dataclass
 # 3rd Party imports
 import toponetx as tnx
 import numpy as np
 import torch
+
+from topology import TopologyException
 # Library imports
 from topology.simplicial.simplicial_laplacian import SimplicialLaplacian
 __all__ = ['SimplicialElements', 'SimplicialElement']
@@ -41,13 +43,33 @@ class SimplicialElement:
     node_indices: Optional[List[int]] = None
     feature_set: Optional[np.array] = None
 
+    def __call__(self, override_node_indices: Optional[List[int]] = None) -> Tuple[Tuple, np.array] | None:
+        """
+        Generate a tuple (node indices, feature vector) for this specific element. The node indices list is
+        overridden only if it has not been already defined.
+        A topology exception is raised if the node indices to be returned is None
+
+        @param override_node_indices: Optional node indices
+        @type override_node_indices: List[int]
+        @return: Tuple (node indices, feature vector)
+        @rtype: Tuple[Tuple, np.array]
+        """
+        if self.node_indices is None and override_node_indices is not None:
+            self.node_indices = override_node_indices
+        if self.node_indices is None:
+            raise TopologyException('No node indices has been defined for this simplicial element')
+
+        return tuple(self.node_indices), self.feature_set
+
     def __str__(self) -> AnyStr:
         output = []
         if self.feature_set is not None:
-            output.append(str(self.feature_set))
+            output.append(list(self.feature_set))
         if self.node_indices is not None:
-            output.append(', '.join([str(idx) for idx in self.node_indices]))
-        return '\n'.join(output) if len(output) > 0 else ''
+            output.append(self.node_indices)
+        return ", ".join(map(str, output)) if len(output) > 0 else ""
+        # a = str(output)
+        # return ', '.join(output) if len(output) > 0 else ''
 
 
 class SimplicialElements(object):
@@ -127,11 +149,48 @@ class SimplicialElements(object):
         simplicial_faces = [SimplicialElement(face_idx) for face_idx in face_node_indices]
         return cls(simplicial_nodes, simplicial_edges, simplicial_faces)
 
+    def node_features_map(self) -> Dict[Tuple, np.array]:
+        """
+        Generate a dictionary/map for all nodes in this simplicial complex using the format
+        { (1,): np.array([9.3, ...])}
+
+        @return: Dictionary of Tuple of node indices - Feature vectors
+        @rtype: Dict[Tuple, np.array]
+        """
+        node_indices = list(zip(list(range(len(self.simplicial_nodes)))))
+        nodes_feature_set = [simplicial_node.feature_set for simplicial_node in self.simplicial_nodes]
+        return dict(zip(node_indices, nodes_feature_set))
+
+    def edge_features_map(self) -> Dict[Tuple, np.array]:
+        """
+        Generate a dictionary/map for all edge in this simplicial complex using the format
+        { (1, 4): np.array([9.3, ...])}
+
+        @return: Dictionary of Tuple of the 2 node indices  - Feature vectors
+        @rtype: Dict[Tuple, np.array]
+        """
+        edges_node_indices = [tuple(simplicial_edge.node_indices) for simplicial_edge in self.simplicial_edges]
+        edges_feature_set = [simplicial_edge.feature_set for simplicial_edge in self.simplicial_edges]
+        return dict(zip(edges_node_indices, edges_feature_set))
+
+    def face_features_map(self) -> Dict[Tuple, np.array]:
+        """
+        Generate a dictionary/map for all faces in this simplicial complex using the format
+        { (1, 4, 11): np.array([9.3, ...])} or  { (1, 4, 11, 9): np.array([9.3, ...])}
+
+        @return: Dictionary of Tuple of the 3 or 4 node indices  - Feature vectors
+        @rtype: Dict[Tuple, np.array]
+        """
+        faces_node_indices = [tuple(simplicial_face.node_indices) for simplicial_face in self.simplicial_faces]
+        faces_feature_set = [simplicial_face.feature_set for simplicial_face in self.simplicial_faces]
+        return dict(zip(faces_node_indices, faces_feature_set))
+
     def __str__(self) -> AnyStr:
-        simplicial_nodes_str = [str(node) for node in self.simplicial_nodes]
-        simplicial_edges_str = [str(edge) for edge in self.simplicial_edges]
-        simplicial_faces_str = [str(face) for face in self.simplicial_faces]
-        return f'\nNodes:\n{simplicial_nodes_str}\nEdges:\n{simplicial_edges_str}\nFaces:\n{simplicial_faces_str}'
+        simplicial_nodes_str = "\n".join([str(node) for node in self.simplicial_nodes])
+        simplicial_edges_str = "\n".join([str(edge) for edge in self.simplicial_edges])
+        simplicial_faces_str = "\n".join([str(face) for face in self.simplicial_faces])
+
+        return f'\nNodes:{simplicial_nodes_str}\nEdges:{simplicial_edges_str}\nFaces:{simplicial_faces_str}'
 
     def adjacency_matrix(self, directed_graph: bool = False) -> np.array:
         """
