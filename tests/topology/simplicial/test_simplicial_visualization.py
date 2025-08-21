@@ -1,8 +1,7 @@
 import unittest
 import logging
-import python
-from topology.simplicial_feature_set import SimplicialFeatureSet
-from topology.simplicial_visualization import SimplicialVisualization
+from topology.simplicial.simplicial_elements import SimplicialElements
+from topology.simplicial.simplicial_visualization import SimplicialVisualization
 
 
 class SimplicialVisualizationTest(unittest.TestCase):
@@ -22,7 +21,7 @@ class SimplicialVisualizationTest(unittest.TestCase):
             logging.info(f'Number of faces: {len(face_set)}')
             font_attributes = {'title_font_size': 18, 'face_font_size': 15, 'feature_font_size': 10 }
             simplicial_visualization = SimplicialVisualization(
-                SimplicialFeatureSet.build(4, edge_set, face_set),
+                SimplicialElements.random(4, edge_set, face_set),
                 font_attributes
             )
             simplicial_visualization.show()
@@ -48,7 +47,7 @@ class SimplicialVisualizationTest(unittest.TestCase):
             logging.info(f'Number of faces: {len(face_set)}')
             font_attributes = {'title_font_size': 18, 'face_font_size': 15, 'feature_font_size': 10 }
             simplicial_visualization = SimplicialVisualization(
-                SimplicialFeatureSet.build(3, edge_set, face_set),
+                SimplicialElements.random(3, edge_set, face_set),
                 font_attributes
             )
             simplicial_visualization.show()
@@ -68,7 +67,7 @@ def test_show_2(self):
     try:
         font_attributes = {'title_font_size': 18, 'face_font_size': 15, 'feature_font_size': 10}
         simplicial_visualization = SimplicialVisualization(
-            SimplicialFeatureSet.build(6, edge_set, face_set),
+            SimplicialElements.random(6, edge_set, face_set),
             font_attributes
         )
         simplicial_visualization.show()
@@ -83,7 +82,7 @@ def test_show_3(self):
     try:
         font_attributes = {'title_font_size': 18, 'face_font_size': 15, 'feature_font_size': 10}
         simplicial_visualization = SimplicialVisualization(
-            SimplicialFeatureSet.build(dimension=6, edge_set=edge_set, face_set=face_set),
+            SimplicialElements.random(node_feature_dimension=6, edge_node_indices=edge_set, face_node_indices=face_set),
             font_attributes
         )
         simplicial_visualization.show()

@@ -2,8 +2,8 @@ import unittest
 import logging
 import os
 from dataset.graph.pyg_datasets import PyGDatasets
-from topology.graph_to_simplicial import GraphToSimplicial, SimpliceTypes
-import python
+from topology.simplicial.graph_to_simplicial import GraphToSimplicial, SimpliceTypes, SimplicialFeatures
+import toponetx as tnx
 from python import SKIP_REASON
 
 
@@ -24,7 +24,15 @@ class GraphToSimplicialTest(unittest.TestCase):
         self.assertEqual(counts['tetrahedrons'], 220)
         logging.info(counts)
 
-    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+
+    def test_faces_features(self):
+        sc = tnx.datasets.karate_club('simplicial')
+        simplicial_features = SimplicialFeatures.random(sc, ['node_feat', 'edge_feat', 'face_feat'])
+        logging.info(simplicial_features.edge_features())
+        logging.info(simplicial_features.show(3))
+
+
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_pubmed(self):
         pyg_dataset = PyGDatasets('PubMed')
         dataset = pyg_dataset()

@@ -14,7 +14,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import AnyStr, Dict, Optional
+from typing import AnyStr, Dict
 import logging
 from enum import IntEnum
 # 3rd Party imports
@@ -30,7 +30,6 @@ class SimpliceTypes(IntEnum):
     WithEdges = 1
     WithTriangles = 2
     WithTetrahedrons = 3
-
 
 
 class GraphToSimplicial(object):

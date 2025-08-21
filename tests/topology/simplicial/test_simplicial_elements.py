@@ -1,41 +1,41 @@
 import unittest
 import numpy as np
-from topology.simplicial_feature_set import SimplicialFeatureSet
-from topology.simplicial_laplacian import SimplicialLaplacian, SimplicialLaplacianType
+from topology.simplicial.simplicial_elements import SimplicialElements
+from topology.simplicial.simplicial_laplacian import SimplicialLaplacian, SimplicialLaplacianType
 import logging
 import python
 
 
-class AbstractSimplicialComplexTest(unittest.TestCase):
+class SimplicialElementsTest(unittest.TestCase):
 
-    @unittest.skip('Ignore')
+    # @unittest.skip('Ignore')
     def test_init_1(self):
         edge_set = [[1, 2], [1, 3], [2, 3], [2, 4], [3, 4], [2, 5], [4, 5]]
         face_set = [[2, 3, 4], [1, 2, 3]]
         try:
-            simplicial_feature_set = SimplicialFeatureSet.build(4, edge_set, face_set)
-            logging.info(simplicial_feature_set)
+            simplicial_feature_set = SimplicialElements.random(4, edge_set, face_set)
+            logging.info(str(simplicial_feature_set))
         except AssertionError as e:
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    # @unittest.skip('Ignore')
     def test_init_2(self):
         edge_set = [[1, 2], [1, 3], [2, 3], [2, 4], [3, 4], [2, 5], [4, 5]]
         face_set = [[2, 3, 4], [1, 2, 3]]
         try:
-            simplicial_feature_set = SimplicialFeatureSet.build(edge_set, face_set)
-            logging.info(simplicial_feature_set)
+            simplicial_feature_set = SimplicialElements.random(node_feature_dimension=3, edge_node_indices=edge_set, face_node_indices=face_set)
+            logging.info(str(simplicial_feature_set))
         except AssertionError as e:
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    # @unittest.skip('Ignore')
     def test_simplicial_up_laplacian_compute(self):
         edge_set = [[1, 2], [1, 5], [2, 3], [2, 4], [3, 4], [2, 5], [4, 5]]
         face_set = [[4, 2, 3], [2, 4, 5]]
         try:
-            simplicial_feature_set = SimplicialFeatureSet.build(5, edge_set, face_set)
+            simplicial_feature_set = SimplicialElements.random(5, edge_set, face_set)
             # simplicial_feature_set.show()
             simplicial_laplacian_0 = SimplicialLaplacian(simplicial_laplacian_type=SimplicialLaplacianType.UpLaplacian,
                                                          rank=0,
@@ -51,12 +51,12 @@ class AbstractSimplicialComplexTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    # @unittest.skip('Ignore')
     def test_simplicial_down_laplacian_compute(self):
         edge_set = [[1, 2], [1, 5], [2, 3], [2, 4], [3, 4], [2, 5], [4, 5]]
         face_set = [[4, 2, 3], [2, 4, 5]]
         try:
-            simplicial_feature_set = SimplicialFeatureSet.build(4, edge_set, face_set)
+            simplicial_feature_set = SimplicialElements.random(4, edge_set, face_set)
             simplicial_laplacian_1 = SimplicialLaplacian(simplicial_laplacian_type=SimplicialLaplacianType.DownLaplacian,
                                                          rank=1,
                                                          signed=True)
@@ -76,7 +76,7 @@ class AbstractSimplicialComplexTest(unittest.TestCase):
         edge_set = [[1, 2], [1, 5], [2, 3], [2, 4], [3, 4], [2, 5], [4, 5]]
         face_set = [[4, 2, 3], [2, 4, 5]]
         try:
-            simplicial_feature_set = SimplicialFeatureSet.build(5, edge_set, face_set)
+            simplicial_feature_set = SimplicialElements.random(5, edge_set, face_set)
             simplicial_laplacian_0 = SimplicialLaplacian(simplicial_laplacian_type=SimplicialLaplacianType.HodgeLaplacian,
                                                          rank=0,
                                                          signed=True)
@@ -104,18 +104,18 @@ class AbstractSimplicialComplexTest(unittest.TestCase):
         edge_set = [[1, 2], [1, 5], [2, 3], [2, 4], [3, 4], [2, 5], [4, 5]]
         face_set = [[4, 2, 3], [2, 4, 5]]
         try:
-            simplicial_feature_set = SimplicialFeatureSet.build(dimension=4, edge_set=edge_set, face_set=face_set)
+            simplicial_feature_set = SimplicialElements.random(node_feature_dimension=4, edge_node_indices=edge_set, face_node_indices=face_set)
             logging.info(f'\nAdjacency matrix:\n{simplicial_feature_set.adjacency_matrix()}')
         except AssertionError as e:
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    # @unittest.skip('Ignore')
     def test_incidence_directed_1(self):
         edge_set = [[1, 2], [1, 5], [2, 3], [2, 4], [3, 4], [2, 5], [4, 5]]
         face_set = [[4, 2, 3], [2, 4, 5]]
         try:
-            simplicial_feature_set = SimplicialFeatureSet.build(dimension=5, edge_set=edge_set, face_set=face_set)
+            simplicial_feature_set = SimplicialElements.random(node_feature_dimension=5, edge_node_indices=edge_set, face_node_indices=face_set)
             for rank in range(0, 3):
                 incidence_matrix = simplicial_feature_set.incidence_matrix(rank=rank)
                 logging.info(f'\nDirected incidence matrix rank {rank}:\n{incidence_matrix}')
@@ -128,7 +128,7 @@ class AbstractSimplicialComplexTest(unittest.TestCase):
         edge_set = [[1, 2], [1, 5], [2, 3], [2, 4], [3, 4], [2, 5], [4, 5]]
         face_set = [[4, 2, 3], [2, 4, 5]]
         try:
-            simplicial_feature_set = SimplicialFeatureSet.build(dimension=5, edge_set=edge_set, face_set=face_set)
+            simplicial_feature_set = SimplicialElements.random(node_feature_dimension=5, edge_node_indices=edge_set, face_node_indices=face_set)
             for rank in range(0, 3):
                 logging.info(f'\nDirected incidence matrix rank {rank}:\n{simplicial_feature_set.incidence_matrix(rank=rank)}')
         except AssertionError as e:
@@ -147,7 +147,7 @@ class AbstractSimplicialComplexTest(unittest.TestCase):
         edge_set = [[1, 2], [1, 3], [2, 3], [2, 4], [3, 4], [2, 5], [4, 5]]
         face_set = [[2, 3, 4], [1, 2, 3]]
         try:
-            simplicial_feature_set = SimplicialFeatureSet(features, edge_set, face_set)
+            simplicial_feature_set = SimplicialElements(features, edge_set, face_set)
             for rank in range(0, 3):
                 undirected_incidence = simplicial_feature_set.incidence_matrix(rank=rank, directed_graph=False)
                 logging.info(f'\nUndirected incidence matrix rank {rank}:\n{undirected_incidence}')
