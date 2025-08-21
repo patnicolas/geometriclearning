@@ -82,7 +82,7 @@ def test_show_3(self):
     try:
         font_attributes = {'title_font_size': 18, 'face_font_size': 15, 'feature_font_size': 10}
         simplicial_visualization = SimplicialVisualization(
-            SimplicialElements.random(dimension=6, edge_set=edge_set, face_set=face_set),
+            SimplicialElements.random(node_feature_dimension=6, edge_node_indices=edge_set, face_node_indices=face_set),
             font_attributes
         )
         simplicial_visualization.show()

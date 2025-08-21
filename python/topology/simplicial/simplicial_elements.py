@@ -90,32 +90,41 @@ class SimplicialElements(object):
         self.simplicial_indices = edges_indices + faces_indices
 
     @classmethod
-    def random(cls, dimension: int, edge_set: List[List[int]], face_set: List[List[int]]) -> Self:
+    def random(cls,
+               node_feature_dimension: int,
+               edge_node_indices: List[List[int]],
+               face_node_indices: List[List[int]]) -> Self:
         """
-        Alternative constructor for the Simplicial model that uses random value for features set. The size of the
+        Alternative constructor for the Simplicial model that uses random value for node features set. The size of the
         feature set matrix is computed from the list of edges node indices.
         The feature set is the matrix number of nodes x dimension as follows:
                 Feature#1   Feature#2  ...  Feature#dimension
         Node 1
         Node 2
 
-        @param dimension: Size of the feature vectors
-        @type dimension: int
-        @param edge_set: Edge set as a tensor of pair of node indices
-        @type edge_set: Torch tensor
-        @param face_set:  Face set as a tensor of tensor with 3 node indices
-        @type face_set: Torch tensor
+        @param node_feature_dimension: Size of the feature vectors
+        @type node_feature_dimension: int
+        @param edge_node_indices: Edge set as a tensor of pair of node indices
+        @type edge_node_indices: Torch tensor
+        @param face_node_indices:  Face set as a tensor of tensor with 3 node indices
+        @type face_node_indices: Torch tensor
         @return: Instance of Simplicial model
         @rtype: SimplicialElements
         """
         import itertools
-        assert dimension > 0, f'Dimension of random vector {dimension} should be > 0'
+        assert node_feature_dimension > 0, f'Dimension of random vector {node_feature_dimension} should be > 0'
 
-        num_nodes = max(list(itertools.chain.from_iterable(edge_set)))
-        random_feature_set = torch.rand(num_nodes, dimension).numpy()
+        # Retrieve the number of nodes from the largest index in the edge indices list
+        num_nodes = max(list(itertools.chain.from_iterable(edge_node_indices)))
+
+        # Generate random feature vector for node
+        random_feature_set = torch.rand(num_nodes, node_feature_dimension).numpy()
+        # Build the simplicial nodes (the node indices are implicit)
         simplicial_nodes = [SimplicialElement(feature_set=feat) for feat in random_feature_set]
-        simplicial_edges = [SimplicialElement(edge_idx) for edge_idx in edge_set]
-        simplicial_faces = [SimplicialElement(face_idx) for face_idx in face_set]
+        # Build the simplicial edges with no feature vector
+        simplicial_edges = [SimplicialElement(edge_idx) for edge_idx in edge_node_indices]
+        # Build the simplicial faces with no feature vector
+        simplicial_faces = [SimplicialElement(face_idx) for face_idx in face_node_indices]
         return cls(simplicial_nodes, simplicial_edges, simplicial_faces)
 
     def __str__(self) -> AnyStr:
@@ -165,12 +174,14 @@ class SimplicialElements(object):
     """ -------------------------  Private Supporting methods ------------------ """
 
     @staticmethod
-    def __validate(simplicial_edge: List[SimplicialElement], simplicial_face: SimplicialElement) -> None:
-        edge_set = [edge.node_indices for edge in simplicial_edge]
-        assert len(edge_set) > 0, 'Simplicial requires at least one edge'
-        assert all(len(sublist) == 2 for sublist in edge_set), f'All elements of edge list should have 2 indices'
+    def __validate(simplicial_edge: List[SimplicialElement], simplicial_face: List[SimplicialElement]) -> None:
+        if simplicial_edge is not None:
+            edge_set = [edge.node_indices for edge in simplicial_edge]
+            assert len(edge_set) > 0, 'Simplicial requires at least one edge'
+            assert all(len(sublist) == 2 for sublist in edge_set), f'All elements of edge list should have 2 indices'
 
-        face_set = [face.node_indices for face in simplicial_face]
-        assert len(face_set) > 0, 'Simplicial requires at least face'
-        assert all(len(sublist) in (3, 4) for sublist in face_set), \
-            f'All elements of edge list should have 3 or 4 indices'
+        if simplicial_face is not None:
+            face_set = [face.node_indices for face in simplicial_face]
+            assert len(face_set) > 0, 'Simplicial requires at least face'
+            assert all(len(sublist) in (3, 4) for sublist in face_set), \
+                f'All elements of edge list should have 3 or 4 indices'
