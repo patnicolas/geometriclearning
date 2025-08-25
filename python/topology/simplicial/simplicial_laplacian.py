@@ -15,7 +15,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 
 # Standard Library imports
-from typing import AnyStr, List
+from typing import AnyStr, List, Tuple
 from enum import Enum
 from dataclasses import dataclass
 # 3rd Party imports
@@ -47,7 +47,7 @@ class SimplicialLaplacian:
     def __str__(self) -> AnyStr:
         return f'{self.simplicial_laplacian_type.value}, rank={self.rank}, signed={self.signed}'
 
-    def __call__(self, simplicial_indices: List[List[int]]) -> np.array:
+    def __call__(self, simplicial_indices: List[Tuple[int, ...]]) -> np.array:
         """
         Compute the various combination of Laplacian (UP, DOWN, Hodge) for different rank.
 
