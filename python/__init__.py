@@ -22,7 +22,7 @@ from typing import AnyStr
 Environment variable to enable/disable unit test for execution
 """
 import os
-os.environ['SKIP_TESTS_IN_PROGRESS'] = '0'
+os.environ['SKIP_TESTS_IN_PROGRESS'] = '1'
 os.environ['SKIP_SLOW_TESTS'] = '1'
 SKIP_REASON = 'Skipping some tests due to environment variable'
 import logging

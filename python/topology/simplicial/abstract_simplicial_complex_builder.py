@@ -14,12 +14,12 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import List, AnyStr, Self
+from typing import List, AnyStr
 # 3rd Party imports
 from torch_geometric.data import Dataset
 import networkx as nx
 # Library imports
-from topology.simplicial.graph_to_simplicial import GraphToSimplicial, SimplexType
+from topology.simplicial.graph_to_simplicial_complex import GraphToSimplicialComplex
 from topology.simplicial.abstract_simplicial_complex import SimplicialElement, AbstractSimplicialComplex
 
 
@@ -73,15 +73,15 @@ class AbstractSimplicialComplexBuilder(object):
             @return: New Simplicial elements
             @rtype: AbstractSimplicialComplex
         """
-        graph_to_simplicial = GraphToSimplicial(self.nx_graph,
-                                                self.dataset,
-                                                max_num_nodes_cliques,
-                                                SimplexType.WithTriangles)
-        tnx_complex = graph_to_simplicial.add_faces(graph_to_simplicial.nx_graph)
+        graph_to_simplicial = GraphToSimplicialComplex(self.nx_graph,
+                                                       self.dataset,
+                                                       max_num_nodes_cliques,
+                                                       SimplexType.WithTriangles)
+        tnx_complex = graph_to_simplicial.add_faces()
 
         # Generate the node, edge and face feature vectors using Hodge Laplacian
         node_feature_from_hodge_laplacian, edge_feature_from_hodge_laplacian, face_feature_from_hodge_laplacian = (
-            GraphToSimplicial.features_from_hodge_laplacian(tnx_complex, num_eigenvectors)
+            GraphToSimplicialComplex.features_from_hodge_laplacian(tnx_complex, num_eigenvectors)
         )
         # Use the feature vector specified in the constructor for the graph nodes if provided (not None)
         # otherwise use the node element from the computation of the Hodge Laplacian

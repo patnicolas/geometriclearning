@@ -63,7 +63,7 @@ class SimplicialElement:
     def __str__(self) -> AnyStr:
         output = []
         if self.feature_set is not None:
-            output.append(list(self.feature_set))
+            output.append(list(np.round(self.feature_set, 5)))
         if self.node_indices is not None:
             output.append(self.node_indices)
         return ", ".join(map(str, output)) if len(output) > 0 else ""
