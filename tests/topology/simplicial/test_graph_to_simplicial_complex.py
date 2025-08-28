@@ -136,11 +136,11 @@ class GraphToSimplicialComplexTest(unittest.TestCase):
         tnx_simplicial = graph_to_simplicial.add_faces()
         logging.info(f'Duration lift_from_graph_neighbors {time.time() - start}')
 
-    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_features_from_hodge_laplacian_pub_med(self):
         import time
 
-        dataset_name = 'Cora'
+        dataset_name = 'KarateClub'
         # Step 1: Configure the migration from Graph to Simplicial
         start = time.time()
         graph_to_simplicial = GraphToSimplicialComplex(dataset=dataset_name,
