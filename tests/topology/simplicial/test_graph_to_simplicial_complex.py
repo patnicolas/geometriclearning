@@ -1,10 +1,11 @@
 import unittest
 import logging
 import os
-from typing import Dict, Any
+from typing import Dict, Any, AnyStr
 import networkx as nx
 import toponetx as tnx
 from dataset.graph.pyg_datasets import PyGDatasets
+from torch_geometric.data import Dataset
 from topology.simplicial.graph_to_simplicial_complex import GraphToSimplicialComplex
 from python import SKIP_REASON
 
@@ -33,20 +34,22 @@ def lift_from_graph_vietoris_rips(graph: nx.Graph, params: Dict[str, Any]) -> tn
 
 class GraphToSimplicialComplexTest(unittest.TestCase):
 
-    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_cora_lift_cliques(self):
-        graph_to_simplicial = GraphToSimplicialComplex(dataset='Cora',
-                                                       nx_graph=None,
-                                                       lifting_method=lift_from_graph_cliques)
+        dataset_name = 'Cora'
+        graph_to_simplicial = GraphToSimplicialComplex[AnyStr](dataset=dataset_name,
+                                                               nx_graph=None,
+                                                               lifting_method=lift_from_graph_cliques)
         logging.info(graph_to_simplicial.nx_graph)
         self.assertEqual(graph_to_simplicial.nx_graph.number_of_nodes(), 2708)
         self.assertEqual(graph_to_simplicial.nx_graph.number_of_edges(), 5278)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_cora_lift_neighbors(self):
-        graph_to_simplicial = GraphToSimplicialComplex(dataset='Cora',
-                                                       nx_graph=None,
-                                                       lifting_method=lift_from_graph_neighbors)
+        dataset_name = 'Cora'
+        graph_to_simplicial = GraphToSimplicialComplex[AnyStr](dataset=dataset_name,
+                                                               nx_graph=None,
+                                                               lifting_method=lift_from_graph_neighbors)
         logging.info(graph_to_simplicial.nx_graph)
         self.assertEqual(graph_to_simplicial.nx_graph.number_of_nodes(), 2708)
         self.assertEqual(graph_to_simplicial.nx_graph.number_of_edges(), 5278)
@@ -54,18 +57,19 @@ class GraphToSimplicialComplexTest(unittest.TestCase):
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_cora_lift_VR(self):
         pyg_dataset = PyGDatasets('Cora')
-        graph_to_simplicial = GraphToSimplicialComplex(dataset=pyg_dataset(),
-                                                       nx_graph=None,
-                                                       lifting_method=lift_from_graph_vietoris_rips)
+        graph_to_simplicial = GraphToSimplicialComplex[Dataset](dataset=pyg_dataset(),
+                                                                nx_graph=None,
+                                                                lifting_method=lift_from_graph_vietoris_rips)
         logging.info(graph_to_simplicial.nx_graph)
         self.assertEqual(graph_to_simplicial.nx_graph.number_of_nodes(), 2708)
         self.assertEqual(graph_to_simplicial.nx_graph.number_of_edges(), 5278)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_flickr_graph(self):
-        graph_to_simplicial = GraphToSimplicialComplex(dataset='Flickr',
-                                                       nx_graph=None,
-                                                       lifting_method=lift_from_graph_cliques)
+        dataset_name = "Flickr"
+        graph_to_simplicial = GraphToSimplicialComplex[AnyStr](dataset=dataset_name,
+                                                               nx_graph=None,
+                                                               lifting_method=lift_from_graph_cliques)
         logging.info(graph_to_simplicial.nx_graph)
         self.assertEqual(graph_to_simplicial.nx_graph.number_of_nodes(), 89250)
         self.assertEqual(graph_to_simplicial.nx_graph.number_of_edges(), 449878)
@@ -75,9 +79,9 @@ class GraphToSimplicialComplexTest(unittest.TestCase):
         import time
 
         dataset_name = 'Cora'
-        graph_to_simplicial = GraphToSimplicialComplex(dataset=dataset_name,
-                                                       nx_graph=None,
-                                                       lifting_method=lift_from_graph_cliques)
+        graph_to_simplicial = GraphToSimplicialComplex[AnyStr](dataset=dataset_name,
+                                                               nx_graph=None,
+                                                               lifting_method=lift_from_graph_cliques)
         start = time.time()
         tnx_simplicial = graph_to_simplicial.add_faces({'max_rank': 2})
         logging.info(f'Duration lift_from_graph_cliques for {dataset_name} {time.time() - start}')
@@ -90,9 +94,9 @@ class GraphToSimplicialComplexTest(unittest.TestCase):
     def test_add_faces_neighbors(self):
         import time
         dataset_name = 'KarateClub'
-        graph_to_simplicial = GraphToSimplicialComplex(dataset=dataset_name,
-                                                       nx_graph=None,
-                                                       lifting_method=lift_from_graph_neighbors)
+        graph_to_simplicial = GraphToSimplicialComplex[AnyStr](dataset=dataset_name,
+                                                               nx_graph=None,
+                                                               lifting_method=lift_from_graph_neighbors)
         start = time.time()
         tnx_simplicial = graph_to_simplicial.add_faces()
         logging.info(f'Duration lift_from_graph_neighbors for {dataset_name} {time.time() - start}')
@@ -104,9 +108,10 @@ class GraphToSimplicialComplexTest(unittest.TestCase):
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_add_faces_vietoris_rips(self):
-        graph_to_simplicial = GraphToSimplicialComplex(dataset='KarateClub',
-                                                       nx_graph=None,
-                                                       lifting_method=lift_from_graph_vietoris_rips)
+        dataset_name = 'KarateClub'
+        graph_to_simplicial = GraphToSimplicialComplex[AnyStr](dataset=dataset_name,
+                                                               nx_graph=None,
+                                                               lifting_method=lift_from_graph_vietoris_rips)
         tnx_simplicial = graph_to_simplicial.add_faces()
         logging.info(tnx_simplicial)
         shape = tnx_simplicial.shape
@@ -115,9 +120,9 @@ class GraphToSimplicialComplexTest(unittest.TestCase):
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_pubmed_count(self):
         import time
-        graph_to_simplicial = GraphToSimplicialComplex(dataset='PubMed',
-                                                       nx_graph=None,
-                                                       lifting_method=lift_from_graph_cliques)
+        graph_to_simplicial = GraphToSimplicialComplex[AnyStr](dataset='PubMed',
+                                                               nx_graph=None,
+                                                               lifting_method=lift_from_graph_cliques)
         start = time.time()
         tnx_simplicial = graph_to_simplicial.add_faces({'max_rank': 2})
         logging.info(f'Duration lift_from_graph_cliques {time.time() - start}')
@@ -129,9 +134,9 @@ class GraphToSimplicialComplexTest(unittest.TestCase):
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_pubmed_latency_neighbors(self):
         import time
-        graph_to_simplicial = GraphToSimplicialComplex(dataset='PubMed',
-                                                       nx_graph=None,
-                                                       lifting_method=lift_from_graph_neighbors)
+        graph_to_simplicial = GraphToSimplicialComplex[AnyStr](dataset='PubMed',
+                                                               nx_graph=None,
+                                                               lifting_method=lift_from_graph_neighbors)
         start = time.time()
         tnx_simplicial = graph_to_simplicial.add_faces()
         logging.info(f'Duration lift_from_graph_neighbors {time.time() - start}')
@@ -143,9 +148,9 @@ class GraphToSimplicialComplexTest(unittest.TestCase):
         dataset_name = 'KarateClub'
         # Step 1: Configure the migration from Graph to Simplicial
         start = time.time()
-        graph_to_simplicial = GraphToSimplicialComplex(dataset=dataset_name,
-                                                       nx_graph=None,
-                                                       lifting_method=lift_from_graph_cliques)
+        graph_to_simplicial = GraphToSimplicialComplex[AnyStr](dataset=dataset_name,
+                                                               nx_graph=None,
+                                                               lifting_method=lift_from_graph_cliques)
         # Step 2: Add faces to existing graph nodes and edges
         tnx_simplicial = graph_to_simplicial.add_faces({'max_rank': 2})
 
@@ -170,9 +175,9 @@ class GraphToSimplicialComplexTest(unittest.TestCase):
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_features_from_hodge_laplacian_karate_club(self):
-        graph_to_simplicial = GraphToSimplicialComplex(dataset='KarateClub',
-                                                       nx_graph=None,
-                                                       lifting_method=lift_from_graph_cliques)
+        graph_to_simplicial = GraphToSimplicialComplex[AnyStr](dataset='KarateClub',
+                                                               nx_graph=None,
+                                                               lifting_method=lift_from_graph_cliques)
         tnx_simplicial = graph_to_simplicial.add_faces({'max_rank': 2})
         num_eigenvectors = (4, 5, 4)
         _, _, face_simplicial_elements = (

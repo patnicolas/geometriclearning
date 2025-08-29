@@ -14,11 +14,11 @@ class GraphSAGEBlockTest(unittest.TestCase):
             num_node_features = 24
             hidden_channels = 256
             graph_SAGE_layer = SAGEConv(in_channels=num_node_features, out_channels=hidden_channels)
-            graph_SAGE_block = GraphSAGEBlock(block_id='SAGE-block',
-                                              graph_SAGE_layer=graph_SAGE_layer,
-                                              batch_norm_module=BatchNorm(hidden_channels),
-                                              activation_module=nn.ReLU(),
-                                              dropout_module=nn.Dropout(0.2))
+            graph_SAGE_block = GraphSAGEBlock[SAGEConv](block_id='SAGE-block',
+                                                        graph_SAGE_layer=graph_SAGE_layer,
+                                                        batch_norm_module=BatchNorm(hidden_channels),
+                                                        activation_module=nn.ReLU(),
+                                                        dropout_module=nn.Dropout(0.2))
             modules = list(graph_SAGE_block.modules_list)
             self.assertEqual(len(modules), 4)
             self.assertTrue(isinstance(modules[-1], nn.Dropout))
@@ -71,7 +71,7 @@ class GraphSAGEBlockTest(unittest.TestCase):
             }
             graph_SAGE_block = GraphSAGEBlock.build(block_attributes)
             self.assertTrue(False)
-        except KeyError as e:
+        except TypeError as e:
             logging.error(e)
             self.assertTrue(True)
         except ValueError as e:

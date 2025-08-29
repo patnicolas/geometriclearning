@@ -1,10 +1,14 @@
 
 ![Banner](images/ReadMeBanner.png)
 
-#### Classes and methods for Geometric Deep Learning and related topics.      
-#### _Patrick Nicolas - Last update 06.08.2025_   [Substack - Newsletter](https://patricknicolas.substack.com)
+#### Classes and methods for Geometric Deep Learning and related topics to support 💬 [Substack - Newsletter](https://patricknicolas.substack.com)  and 💬 [LinkedIn Articles](https://www.linkedin.com/newsletters/geometric-learning-in-python-7175924072638263296/)     
+#### _Patrick Nicolas - Last update 07.12.2025_
+.  
+![Disclaimer](images/ReadMe_disclaimer.png)
+.   
+.  
 
-# Why it Matters
+# 🎯 Why it Matters
 ### Purpose:      
 _Facing challenges with high-dimensional, densely packed but limited data, and complex distributions_?     
 Geometric Deep Learning (GDL) offers a solution by enabling data scientists to grasp the true shape and distribution of data. This newsletter explores the diverse techniques and frameworks shaping the field of Geometric Deep Learning.
@@ -15,14 +19,15 @@ Data Scientists or machine learning engineers involved in fields of research or 
 ### Value:      
 Learn about Geometric Learning, Graph Neural Networks, Manifolds, Equivariance and Lie Groups or Topological data analysis and unlocks the ability to model complex, structured, and relational data.
 
-# Theory    
+#  🎨 Theory    
 
 Geometric Deep Learning (GDL) is a field of machine learning that generalizes deep learning to non-Euclidean domains—such as graphs, manifolds, groups, and other structured geometric spaces—by leveraging their symmetries and topologies.   
+.   
 The key concepts are:   
-- __Invariance__: Output stays the same when input is transformed.     
-- __Equivariance__: Preserves transformations. The output transforms predictably when input is transformed.
-- __Manifolds__: Operates directly on Non-euclidean or curved spaces or tangent spaces.     
-- __Locality__: Uses local node structures and infinitesimal neighborhoods.    
+✅ __Invariance__: Output stays the same when input is transformed.     
+✅ __Equivariance__: Preserves transformations. The output transforms predictably when input is transformed.    
+✅__Manifolds__: Operates directly on Non-euclidean or curved spaces or tangent spaces.     
+✅__Locality__: Uses local node structures and infinitesimal neighborhoods.    
      
 Here are some references to get you feet wet!     
 
@@ -64,12 +69,11 @@ The directory __geometry__ contains the definition and implementation the variou
 
 ## Lie Groups and Algebras
 Lie groups play a crucial role in Geometric Deep Learning by modeling symmetries such as rotation, translation, and scaling. This enables non-linear models to generalize effectively for tasks like object detection and transformations in generative models.    
-Lie groups have numerous practical applications in various fields:     
-- __Physics__: They describe symmetries in classical mechanics, quantum mechanics, and relativity. 
-- __Robotics__: Lie groups model the motion of robots, particularly in the context of rotation and translation (using groups like SO(3) and SE(3)).
-- __Control Theory__: Lie groups are used in the analysis and design of control systems, especially in systems with rotational or symmetrical behavior.
-- __Computer Vision__: They help in image processing and 3D vision, especially in tasks involving rotations and transformations.
-- __Differential Equations__: Lie groups are instrumental in solving differential equations by leveraging symmetry properties.     
+Lie groups have numerous practical applications in various fields:        
+✅ __Robotics__: Lie groups model the motion of robots, particularly in the context of rotation and translation (using groups like SO(3) and SE(3)).    
+✅ __Control Theory__: Lie groups are used in the analysis and design of control systems, especially in systems with rotational or symmetrical behavior.     
+✅ __Computer Vision__: They help in image processing and 3D vision, especially in tasks involving rotations and transformations.    
+✅ __Differential Equations__: Lie groups are instrumental in solving differential equations by leveraging symmetry properties.         
 
 ![LieGroups](images/Lie_Manifold.png)
 
@@ -105,19 +109,19 @@ The key Attributes that define the complexity of a Graph Neural Network are
 - Data transformation prior aggregation       
 
 There are 5 different types of Graph Neural Networks:         
-- Graph Convolutional Networks    
-- Graph Attention Networks     
-- GraphSAGE    
-- Spectral Graph Neural Networks    
-- Graph Transformers
+✅ Graph Convolutional Networks    
+✅ Graph Attention Networks     
+✅ GraphSAGE    
+✅ Spectral Graph Neural Networks    
+✅ Graph Transformers
 
 ### Homophily    
 The homophily ratio in a Graph Neural Network (GNN) quantifies how often nodes in a graph are connected to other nodes with the same label or class. It’s a key measure for understanding how well GNNs are likely to perform, especially those that rely on message passing—which typically assumes that connected nodes share similar features or labels.     
 
 There are 3 homophily ratios:     
-- __Node homophily__: average fraction of same-label neighbors per node.
-- __Edge homophily__: fraction of edges connecting nodes with the same label     
-- __Class-insensitive edge homophily__: adjusts for class imbalance by computing same-label edge fractions per class, then averaging. across the C classes.    
+✅ __Node homophily__: average fraction of same-label neighbors per node.
+✅__Edge homophily__: fraction of edges connecting nodes with the same label     
+✅__Class-insensitive edge homophily__: adjusts for class imbalance by computing same-label edge fractions per class, then averaging. across the C classes.    
 
 ### PyTorch Geometric    
 Since its introduction in early 2019, PyTorch Geometric has expanded significantly, incorporating new models, graph samplers, and transformations, continuously evolving to align with the latest research publications.     
@@ -130,10 +134,10 @@ The key Features of PyTorch Geometric are:
 - __Diverse Graph Support__: PyTorch Geometric handles directed, undirected, weighted, and heterogeneous graphs.     
 
 The most important PyG Modules are:      
-- __torch_geometric.data__ to manages graph structures, including nodes, edges, and features.        
-- __torch_geometric.nn__ to provide data scientists prebuilt GNN layers like convolutional and gated layers.        
-- __torch_geometric.transforms__ to pre-process input data (e.g., feature normalization, graph sampling).     
-- __torch_geometric.loader__ to handle large-scale graph datasets with specialized loaders.
+✅ __torch_geometric.data__ to manages graph structures, including nodes, edges, and features.        
+✅ __torch_geometric.nn__ to provide data scientists prebuilt GNN layers like convolutional and gated layers.        
+✅ __torch_geometric.transforms__ to pre-process input data (e.g., feature normalization, graph sampling).     
+✅ __torch_geometric.loader__ to handle large-scale graph datasets with specialized loaders.
 
 
 ## Information Geometry
@@ -161,12 +165,12 @@ The Fisher information matrix is a type of __Riemannian metric__ that can be app
 
 
 ## Deep Learning Models
-The directory __dl__ implements a framework of __reusable neural blocks__ as key components of any deep learning models such as:
-- Feed forward neural network
-- Convolutional network
-- Variational auto-encoder
-- Generative adversarial network
-- Automatic generation (mirror) of encoder/de-convolutional blocks.   
+The directory __dl__ implements a framework of __reusable neural blocks__ as key components of any deep learning models such as:     
+✅ Feed forward neural network/Multilayer perceptron  
+✅ Convolutional network    
+✅ Variational auto-encoder      
+✅ Generative adversarial network       
+✅ Automatic generation (mirror) of encoder/de-convolutional blocks.   
 
 
 ## Fractal Dimension
@@ -194,7 +198,7 @@ The directory __control__ contains the implementation of __Kalman__ filters.
     
 ![KalmanFilter](images/Kalman_Filter.png)
 
-# Reusable Neural Components Design
+# ⚙️ Reusable Neural Components Design
 ## Neural Blocks
 A __block__ is defined as a logical grouping of neural components, implemented as Pytorch __Module__. All these components are assembled into a sequential set of torch modules.   
 ```
@@ -436,7 +440,7 @@ The current class hierarchy for Neural models is defined as:
 ![Neural Class Hierarchy](images/Neural_Model_Hierarchy.png)
 
 
-## Environment
+##  🛠️ Environment
 
 | Library         | Version |
 |:----------------|:--------|
@@ -470,7 +474,7 @@ The current class hierarchy for Neural models is defined as:
 ![Modules Navigation Map](images/Geometric_Learning_Modules_Diagram.png)   
 
 
-# References
+# 📘 References
 -[Introduction to Geometric Deep Learning](https://patricknicolas.substack.com/p/introduction-to-geometric-deep-learning)     
 -[Riemannian Manifolds: Foundational Concepts](https://patricknicolas.substack.com/p/riemannian-manifolds-1-foundation)       
 -[Riemannian Manifolds: Hands-on with Hypersphere](https://patricknicolas.substack.com/p/riemannian-manifolds-2-hands-on-with)        

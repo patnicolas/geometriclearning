@@ -13,12 +13,12 @@ class GraphConvBlockTest(unittest.TestCase):
             num_node_features = 24
             hidden_channels = 256
             graph_conv_layer = GraphConv(in_channels=num_node_features, out_channels=hidden_channels)
-            graph_conv_block = GraphConvBlock(block_id='GConv-block',
-                                              graph_conv_layer=graph_conv_layer,
-                                              batch_norm_module=BatchNorm(hidden_channels),
-                                              activation_module=nn.ReLU(),
-                                              pooling_module=TopKPooling(hidden_channels, ratio=0.4),
-                                              dropout_module=nn.Dropout(0.2))
+            graph_conv_block = GraphConvBlock[GraphConv, TopKPooling](block_id='GConv-block',
+                                                                      graph_conv_layer=graph_conv_layer,
+                                                                      batch_norm_module=BatchNorm(hidden_channels),
+                                                                      activation_module=nn.ReLU(),
+                                                                      pooling_module=TopKPooling(hidden_channels,ratio=0.4),
+                                                                      dropout_module=nn.Dropout(0.2))
             modules = list(graph_conv_block.modules_list)
             self.assertEqual(len(modules), 5)
             self.assertTrue(isinstance(modules[-1], nn.Dropout))
@@ -35,9 +35,9 @@ class GraphConvBlockTest(unittest.TestCase):
             num_node_features = 24
             hidden_channels = 256
             graph_conv_layer = GraphConv(in_channels=num_node_features, out_channels=hidden_channels)
-            graph_conv_block = GraphConvBlock(block_id='GConv-block',
-                                              graph_conv_layer=graph_conv_layer,
-                                              batch_norm_module=BatchNorm(hidden_channels))
+            graph_conv_block = GraphConvBlock[GraphConv, None](block_id='GConv-block',
+                                                               graph_conv_layer=graph_conv_layer,
+                                                               batch_norm_module=BatchNorm(hidden_channels))
             modules = list(graph_conv_block.modules_list)
             self.assertEqual(len(modules), 2)
             logging.info(f'\n{graph_conv_block}')

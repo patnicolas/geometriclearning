@@ -14,7 +14,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import List, AnyStr, Optional, Any, Dict
+from typing import List, AnyStr, Optional, Any, Dict, Generic, TypeVar
 # 3rd Party imports
 from torch_geometric.data import Data
 import torch
@@ -27,12 +27,13 @@ from deeplearning.model.graph.graph_base_model import GraphBaseModel
 from deeplearning.training.gnn_training import GNNTraining
 __all__ = ['GraphSAGEModel', 'GraphSAGEBuilder']
 
+CL = TypeVar("CL")
 
-class GraphSAGEModel(GraphBaseModel):
+class GraphSAGEModel(GraphBaseModel, Generic[CL]):
 
     def __init__(self,
                  model_id: AnyStr,
-                 graph_SAGE_blocks: List[GraphSAGEBlock],
+                 graph_SAGE_blocks: List[GraphSAGEBlock[CL]],
                  mlp_blocks: Optional[List[MLPBlock]] = None) -> None:
         """
         Constructor for the SAGE Graph Model
