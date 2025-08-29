@@ -28,28 +28,30 @@ class GraphSAGEModelTest(unittest.TestCase):
             _data: torch_geometric.data.Data = _dataset[0]
 
             sage_conv_1 = SAGEConv(in_channels=_data.num_node_features, out_channels=hidden_channels)
-            graph_SAGE_block_1 = GraphSAGEBlock(block_id='SAGE 24-256',
-                                                graph_SAGE_layer=sage_conv_1,
-                                                batch_norm_module=BatchNorm(hidden_channels),
-                                                activation_module=nn.ReLU(),
-                                                dropout_module=nn.Dropout(0.2))
+            graph_SAGE_block_1 = GraphSAGEBlock[SAGEConv](block_id='SAGE 24-256',
+                                                          graph_SAGE_layer=sage_conv_1,
+                                                          batch_norm_module=BatchNorm(hidden_channels),
+                                                          activation_module=nn.ReLU(),
+                                                          dropout_module=nn.Dropout(0.2))
 
             sage_conv_2 = SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels)
-            graph_SAGE_block_2 = GraphSAGEBlock(block_id='SAGE 256-256',
-                                                graph_SAGE_layer=sage_conv_2,
-                                                batch_norm_module=BatchNorm(hidden_channels),
-                                                activation_module=nn.ReLU(),
-                                                dropout_module=nn.Dropout(0.2))
+            graph_SAGE_block_2 = GraphSAGEBlock[SAGEConv](block_id='SAGE 256-256',
+                                                          graph_SAGE_layer=sage_conv_2,
+                                                          batch_norm_module=BatchNorm(hidden_channels),
+                                                          activation_module=nn.ReLU(),
+                                                          dropout_module=nn.Dropout(0.2))
 
             sage_conv_3 = SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels)
-            graph_SAGE_block_3 = GraphSAGEBlock(block_id='Conv 256-8', graph_SAGE_layer=sage_conv_3)
+            graph_SAGE_block_3 = GraphSAGEBlock[SAGEConv](block_id='Conv 256-8', graph_SAGE_layer=sage_conv_3)
             mlp_block = MLPBlock(block_id='Fully connected',
                                  layer_module=nn.Linear(hidden_channels, _dataset.num_classes),
                                  activation_module=None)
 
-            graph_SAGE_model = GraphSAGEModel(model_id='Flicker test dataset',
-                                              graph_SAGE_blocks=[graph_SAGE_block_1, graph_SAGE_block_2, graph_SAGE_block_3],
-                                              mlp_blocks=[mlp_block])
+            graph_SAGE_model = GraphSAGEModel[SAGEConv](
+                model_id='Flicker test dataset',
+                graph_SAGE_blocks=[graph_SAGE_block_1, graph_SAGE_block_2, graph_SAGE_block_3],
+                mlp_blocks=[mlp_block]
+            )
             logging.info(f'\n{graph_SAGE_model}')
             params = list(graph_SAGE_model.parameters())
             logging.info(f'\nParameters:\n{params}')
@@ -61,7 +63,7 @@ class GraphSAGEModelTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(True)
 
-    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_build(self):
         try:
             out_channels = 256
@@ -101,6 +103,7 @@ class GraphSAGEModelTest(unittest.TestCase):
             }
             graph_SAGE_builder = GraphSAGEBuilder(model_attributes)
             graph_SAGE_model = graph_SAGE_builder.build()
+            graph_SAGE_model.reset_parameters()
             logging.info(graph_SAGE_model)
             params = list(graph_SAGE_model.parameters())
             self.assertTrue(len(params) == 12)

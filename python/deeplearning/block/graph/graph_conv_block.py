@@ -15,25 +15,29 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 
 # Standard Library imports
-from typing import AnyStr, Optional, Dict, Any, Self, List
+from typing import AnyStr, Optional, Dict, Any, Self, Generic, TypeVar
 # 3rd Party imports
 import torch
 import torch.nn as nn
-from torch_geometric.nn import BatchNorm, GraphConv
+from torch_geometric.nn import BatchNorm, GraphConv, GCNConv, GCN2Conv
 from torch_geometric.nn.pool import TopKPooling, SAGPooling
 from torch_geometric.typing import Adj
 # Library imports
 from deeplearning.block.graph.message_passing_block import MessagePassingBlock
 __all__ = ['GraphConvBlock']
 
+# Class types
+CL = TypeVar('CL')
+P = TypeVar('P')
 
-class GraphConvBlock(MessagePassingBlock):
+
+class GraphConvBlock(MessagePassingBlock, Generic[CL, P]):
     def __init__(self,
                  block_id: AnyStr,
-                 graph_conv_layer: GraphConv,
+                 graph_conv_layer: CL,
                  batch_norm_module: Optional[BatchNorm] = None,
                  activation_module: Optional[nn.Module] = None,
-                 pooling_module: Optional[SAGPooling | TopKPooling] = None,
+                 pooling_module: Optional[P] = None,
                  dropout_module: Optional[nn.Dropout] = None) -> None:
         """
             Constructor for the Graph Convolutional Network
@@ -49,6 +53,11 @@ class GraphConvBlock(MessagePassingBlock):
             @param dropout_module: Drop out for training
             @type dropout_module: nn.Module subclass
             """
+        if not isinstance(graph_conv_layer, (GraphConv, GCNConv, GCN2Conv)):
+            raise TypeError(f'Type of graph convolutional layer {type(graph_conv_layer)} is not supported')
+        if pooling_module is not None and not isinstance(pooling_module, (SAGPooling, TopKPooling)):
+            raise TypeError(f'Type of pooling {type(pooling_module)} is not supported')
+
         super(GraphConvBlock, self).__init__(block_id,
                                              graph_conv_layer,
                                              batch_norm_module,

@@ -15,21 +15,23 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 
 # Standard Library imports
-from typing import AnyStr, Optional, Dict, Any, Self
+from typing import AnyStr, Optional, Dict, Any, Self, TypeVar, Generic
 # 3rd Party imports
 import torch.nn as nn
 from torch_geometric.typing import Adj
 import torch
-from torch_geometric.nn import BatchNorm, SAGEConv
+from torch_geometric.nn import BatchNorm, SAGEConv, CuGraphSAGEConv
 # Library imports
 from deeplearning.block.graph.message_passing_block import MessagePassingBlock
 __all__ = ['GraphSAGEBlock']
 
+CL = TypeVar('CL')
 
-class GraphSAGEBlock(MessagePassingBlock):
+
+class GraphSAGEBlock(MessagePassingBlock, Generic[CL]):
     def __init__(self,
                  block_id: AnyStr,
-                 graph_SAGE_layer: SAGEConv,
+                 graph_SAGE_layer: CL,
                  batch_norm_module: Optional[BatchNorm] = None,
                  activation_module: Optional[nn.Module] = None,
                  dropout_module: Optional[nn.Dropout] = None) -> None:
@@ -40,7 +42,7 @@ class GraphSAGEBlock(MessagePassingBlock):
         @param block_id: Identifier for the block
         @type block_id: str
         @param graph_SAGE_layer: PyTorch Geometric module for SAGE model
-        @type graph_SAGE_layer: SAGEConv
+        @type graph_SAGE_layer: Generic T
         @param batch_norm_module: Optional  PyTorch Geometric module for batch normalization
         @type batch_norm_module: Optional[BatchNorm]
         @param activation_module: Optional PyTorch Geometric module for activation
@@ -48,6 +50,9 @@ class GraphSAGEBlock(MessagePassingBlock):
         @param dropout_module: Optional PyTorch Geometric module for regularization 
         @type dropout_module: Optional[Dropout]
         """
+        if not isinstance(graph_SAGE_layer, (SAGEConv, CuGraphSAGEConv)):
+            raise TypeError(f'Type of graph_SAGE_layer {type(graph_SAGE_layer )} is incorrect')
+
         super(GraphSAGEBlock, self).__init__(block_id,
                                              graph_SAGE_layer,
                                              batch_norm_module,
@@ -98,7 +103,7 @@ class GraphSAGEBlock(MessagePassingBlock):
         """
         # Process all the torch modules if defined
         for module in self.modules_list:
-            x = module(x, edge_index) if isinstance(module, SAGEConv) else module(x)
+            x = module(x, edge_index) if isinstance(module, (SAGEConv, CuGraphSAGEConv)) else module(x)
         return x
 
     def reset_parameters(self) -> None:
