@@ -26,7 +26,11 @@ class LinearKalmanFilterTest(unittest.TestCase):
             kf = LinearKalmanFilter.build(x0, P0, A, H, cov_means)
             logging.info(str(kf))
             self.assertTrue(kf.A.shape[0] == 2)
-        except ControlException as _:
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except ControlException as e:
+            logging.error(e)
             self.assertTrue(False)
 
     @unittest.skip('Ignored')
@@ -40,6 +44,9 @@ class LinearKalmanFilterTest(unittest.TestCase):
             kf = LinearKalmanFilter.build(x0, P0, A, H, cov_means)
             logging.info(str(kf))
             self.assertTrue(kf.A.shape[0] == 3)
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
         except ControlException as _:
             self.assertTrue(False)
 
@@ -73,6 +80,9 @@ class LinearKalmanFilterTest(unittest.TestCase):
             plt.legend()
             plt.tight_layout()
             plt.show()
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
         except ControlException as _:
             self.assertTrue(False)
 
@@ -120,6 +130,7 @@ class LinearKalmanFilterTest(unittest.TestCase):
                                     lambda i: obs_generator_sqr(i),
                                     np.array([[0.4], [0.6], [0.1], [0.2]]))
             kalman_plot2 = KalmanPlot(estimation2, z_sqr, f'x=n, y=n*n')
+            LinearKalmanFilterTest.__plot_observed_estimate(num_points, kalman_plot1, kalman_plot2)
 
             estimation3 = kf.simulate(num_points,
                                      lambda i: obs_generator_exp(i),
@@ -130,29 +141,38 @@ class LinearKalmanFilterTest(unittest.TestCase):
                                      lambda i: obs_generator_sqrt(i),
                                      np.array([[0.4], [0.6], [0.1], [0.2]]))
             kalman_plot4 = KalmanPlot(estimation4, z_sqrt, f'x=n, y=sqrt(20000.n)')
-
-            LinearKalmanFilterTest.__plot_observed_estimate(num_points, kalman_plot1, kalman_plot2)
+            LinearKalmanFilterTest.__plot_observed_estimate(num_points, kalman_plot3, kalman_plot4)
             self.assertTrue(True)
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
         except ControlException as _:
             self.assertTrue(False)
 
     @unittest.skip('Ignored')
     def test_simulate_3d(self):
-        x0 = np.array([0.0, 0.1, 0.1])
-        P0 = np.eye(x0.shape[0])
-        A = np.array([[1.0, 0.5, 1.0], [0.0, 1.0, 0.5], [0.0, 0.0, 1.0]])
-        H = np.array([[1.0, 0.2, 0.0]])
-        cov_means = (0.6, 1.0)
+        try:
+            x0 = np.array([0.0, 0.1, 0.1])
+            P0 = np.eye(x0.shape[0])
+            A = np.array([[1.0, 0.5, 1.0], [0.0, 1.0, 0.5], [0.0, 0.0, 1.0]])
+            H = np.array([[1.0, 0.2, 0.0]])
+            cov_means = (0.6, 1.0)
 
-        kf = LinearKalmanFilter.build(x0, P0, A, H, cov_means)
+            kf = LinearKalmanFilter.build(x0, P0, A, H, cov_means)
 
-        num_points = 200
-        rNoise = 3.4
-        estimation = kf.simulate(num_points,
-                                 lambda i: np.array([i + np.random.normal(rNoise, rNoise)]),
-                                 np.array([0.4, 0.6, 0.1]))
-        LinearKalmanFilterTest.__plot_observed_estimate(num_points, estimation)
+            num_points = 200
+            rNoise = 3.4
+            estimation = kf.simulate(num_points,
+                                     lambda i: np.array([i + np.random.normal(rNoise, rNoise)]),
+                                     np.array([0.4, 0.6, 0.1]))
+            LinearKalmanFilterTest.__plot_observed_estimate(num_points, estimation)
+        except AssertionError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except ControlException as _:
+            self.assertTrue(False)
 
+    """ --------------  Private Supporting Methods ---------------------------- """
 
     @staticmethod
     def __plot_observed_estimate(

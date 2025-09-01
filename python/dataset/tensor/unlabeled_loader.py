@@ -13,13 +13,19 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
+from typing import Tuple, AnyStr, Callable
+import logging
+# 3rd Party imports
 import torch
 from torch.utils.data import DataLoader, Dataset
-from dataset.default_loader_generator import DefaultLoaderGenerator
 from torchvision import transforms
-from typing import Tuple, AnyStr, Callable
 from torchvision.transforms import Compose
+# Library imports
 from dataset.base_loader import BaseLoader
+from dataset.default_loader_generator import DefaultLoaderGenerator
+import python
+from dataset import DatasetException
 
 __all__ = ['UnlabeledLoader']
 
@@ -66,15 +72,19 @@ class UnlabeledLoader(BaseLoader):
             @return: Pair of Data loader for training data and validation data
             @rtype: Tuple of data loader
         """
-        transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((norm_factors[0],), (norm_factors[1],)),
-        ])
-        dataset: Dataset = self.create_dataset(data, transform)
-        return DefaultLoaderGenerator.generate_loader(dataset=dataset,
-                                                      num_samples=self.num_samples,
-                                                      batch_size=self.batch_size,
-                                                      split_ratio=self.split_ratio)
+        try:
+            transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize((norm_factors[0],), (norm_factors[1],)),
+            ])
+            dataset: Dataset = self.create_dataset(data, transform)
+            return DefaultLoaderGenerator.generate_loader(dataset=dataset,
+                                                          num_samples=self.num_samples,
+                                                          batch_size=self.batch_size,
+                                                          split_ratio=self.split_ratio)
+        except (RuntimeError | ValueError | TypeError) as e:
+            logging.error(str(e))
+            raise DatasetException(str(e))
 
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):
         raise NotImplementedError(f'Failed to load data from path {root_path}')

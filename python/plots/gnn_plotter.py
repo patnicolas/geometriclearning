@@ -13,10 +13,12 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
+from typing import Tuple, AnyStr, Callable, Dict, Any, Self
+# 3rd Party imports
 import networkx as nx
 from networkx import Graph
 from torch_geometric.data import Data
-from typing import Tuple, AnyStr, Callable, Dict, Any, Self
 import matplotlib.pyplot as plt
 __all__ = ['GNNPlotter']
 

@@ -15,6 +15,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from manim import *
 import torch
+import logging
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms

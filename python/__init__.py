@@ -16,7 +16,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import torch
 torch.set_default_dtype(torch.float32)
-from typing import AnyStr, List
+from typing import AnyStr
 
 """
 Environment variable to enable/disable unit test for execution
