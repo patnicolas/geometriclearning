@@ -484,7 +484,6 @@ class GraphSAGEModelTest(unittest.TestCase):
             s = json.load(f)
         return s[column]
 
-
     @staticmethod
     def build_config(dataset_name: AnyStr,
                      lr: float,

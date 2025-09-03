@@ -115,8 +115,6 @@ class NeuralModel(torch.nn.Module, ABC):
         raise NotImplementedError('NeuralModel.save is an abstract method')
 
 
-
-
 class NeuralBuilder(ABC):
     """
     A builder for any Neural Network

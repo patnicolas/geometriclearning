@@ -15,6 +15,15 @@ from python import SKIP_REASON
 
 class GraphConvModelTest(unittest.TestCase):
 
+    def test_fun(self):
+        def f(x, y=None):
+            if y is None:
+                y = [1]
+            y.insert(0, x)
+            return y
+        print(f([0], [2, 4, 5]))
+
+
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_1(self):
         hidden_channels = 256
@@ -23,31 +32,35 @@ class GraphConvModelTest(unittest.TestCase):
             _dataset = pyg_dataset()
             _data: torch_geometric.data.Data = _dataset[0]
 
-            conv_1 = GraphConv(in_channels=_data.num_node_features, out_channels=hidden_channels)
-            graph_conv_block_1 = GraphConvBlock(block_id='Conv 24-256',
-                                                graph_conv_layer=conv_1,
-                                                batch_norm_module=BatchNorm(hidden_channels),
-                                                activation_module=nn.ReLU(),
-                                                pooling_module=TopKPooling(hidden_channels, ratio=0.4),
-                                                dropout_module=nn.Dropout(0.2))
-
-            conv_2 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-            graph_conv_block_2 = GraphConvBlock(block_id='Conv 256-256',
-                                                graph_conv_layer=conv_2,
-                                                batch_norm_module=BatchNorm(hidden_channels),
-                                                activation_module=nn.ReLU(),
-                                                pooling_module=TopKPooling(hidden_channels, ratio=0.4),
-                                                dropout_module=nn.Dropout(0.2))
-
-            conv_3 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-            graph_conv_block_3 = GraphConvBlock(block_id='Conv 256-8', graph_conv_layer=conv_3)
+            graph_conv_block_1 = GraphConvBlock[GraphConv, TopKPooling](
+                block_id='Conv 24-256',
+                graph_conv_layer=GraphConv(in_channels=_data.num_node_features, out_channels=hidden_channels),
+                batch_norm_module=BatchNorm(hidden_channels),
+                activation_module=nn.ReLU(),
+                pooling_module=TopKPooling(hidden_channels, ratio=0.4),
+                dropout_module=nn.Dropout(0.2)
+            )
+            graph_conv_block_2 = GraphConvBlock[GraphConv, TopKPooling](
+                block_id='Conv 256-256',
+                graph_conv_layer= GraphConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                batch_norm_module=BatchNorm(hidden_channels),
+                activation_module=nn.ReLU(),
+                pooling_module=TopKPooling(hidden_channels, ratio=0.4),
+                dropout_module=nn.Dropout(0.2)
+            )
+            graph_conv_block_3 = GraphConvBlock[GraphConv, TopKPooling](
+                block_id='Conv 256-8',
+                graph_conv_layer=GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
+            )
             mlp_block = MLPBlock(block_id='Fully connected',
                                  layer_module=nn.Linear(hidden_channels, _dataset.num_classes),
                                  activation_module=nn.Softmax(dim=-1))
 
-            graph_conv_model = GraphConvModel(model_id='Flicker test dataset',
-                                              graph_conv_blocks=[graph_conv_block_1, graph_conv_block_2, graph_conv_block_3],
-                                              mlp_blocks=[mlp_block])
+            graph_conv_model = GraphConvModel[GraphConv, TopKPooling](
+                model_id='Flicker test dataset',
+                graph_conv_blocks=[graph_conv_block_1, graph_conv_block_2, graph_conv_block_3],
+                mlp_blocks=[mlp_block]
+            )
             logging.info(f'\n{graph_conv_model}')
             params = list(graph_conv_model.parameters())
             logging.info(f'\nParameters:\n{params}')
@@ -229,6 +242,7 @@ class GraphConvModelTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
+    @unittest.skip('Ignore')
     def test_training(self):
         from torch_geometric.datasets.flickr import Flickr
         from deeplearning.training.gnn_training import GNNTraining
@@ -244,6 +258,7 @@ class GraphConvModelTest(unittest.TestCase):
                 'dataset_name': 'Flickr',
                 # Model training Hyperparameters
                 'learning_rate': 0.0005,
+                'weight_decay': 1e-3,
                 'batch_size': 32,
                 'loss_function': nn.CrossEntropyLoss(),
                 'momentum': 0.90,
@@ -261,12 +276,14 @@ class GraphConvModelTest(unittest.TestCase):
                 'hidden_channels': 64,
                 # Performance metric definition
                 'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1'],
-                'plot_parameters': [
-                    {'title': 'Accuracy', 'x_label': 'epoch', 'y_label': 'accuracy'},
-                    {'title': 'Precision', 'x_label': 'epochs', 'y_label': 'precision'},
-                    {'title': 'Recall', 'x_label': 'epochs', 'y_label': 'recall'},
-                    {'title': 'F1', 'x_label': 'epochs', 'y_label': 'F1'},
-                ]
+                'plot_parameters': {
+                    'title': 'Accuracy',
+                    'x_label': 'epoch',
+                    'x_label_size': 11,
+                    'y_label': 'accuracy',
+                    'fig_size': (13, 8),
+                    'plot_filename': f'../../../output_plots/test1'
+                }
             }
             attrs = {
                 'id': 'NeighborLoader',

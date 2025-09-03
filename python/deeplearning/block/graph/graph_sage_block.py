@@ -106,9 +106,6 @@ class GraphSAGEBlock(MessagePassingBlock, Generic[CL]):
             x = module(x, edge_index) if isinstance(module, (SAGEConv, CuGraphSAGEConv)) else module(x)
         return x
 
-    def reset_parameters(self) -> None:
-        self.modules_list[0].reset_parameters()
-
     @staticmethod
     def __validate(block_attributes: Dict[AnyStr, Any]) -> None:
         if block_attributes['SAGE_layer'] is None or not isinstance(block_attributes['SAGE_layer'], SAGEConv):

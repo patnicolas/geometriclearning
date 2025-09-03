@@ -123,6 +123,7 @@ class GraphBaseModel(NeuralModel, ABC):
 
         for graph_sage_block in self.graph_blocks:
             graph_sage_block.reset_parameters()
+
         # If fully connected perceptron blocks are defined...
         if self.mlp_blocks is not None:
             for mlp_block in self.mlp_blocks:
