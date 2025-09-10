@@ -16,6 +16,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # Standard Library imports
 import logging
 from typing import Dict, AnyStr, Self, List, Optional
+import os
 # 3rd Party imports
 import torch
 import numpy as np
@@ -51,11 +52,15 @@ class PerformanceMetrics(object):
         registered_perf_metrics: Dictionary of the metric registered for this model
         collected_metrics: Dictionary of the metric currently collected for this training session
     """
-    output_filename = 'output'
-    # output_folder = os.path.join(output_path, output_filename)
+    perf_metrics_directory = '../../perf_metrics/'
+    if not os.path.exists(perf_metrics_directory):
+        os.makedirs(perf_metrics_directory)
+
     valid_metrics = ['Accuracy', 'Precision', 'Recall', 'F1', 'AuROC', 'AuPR']
 
-    def __init__(self, registered_perf_metrics: Dict[MetricType, BuiltInMetric], is_display_plot: bool = True) -> None:
+    def __init__(self,
+                 registered_perf_metrics: Dict[MetricType, BuiltInMetric] = None,
+                 is_display_plot: bool = True) -> None:
         """
         Default constructor for the Performance metrics taking a dictionary input a
         { metric_name, build in metric}
@@ -67,7 +72,7 @@ class PerformanceMetrics(object):
         @param is_display_plot: Flag to display the metric plots at runtime - Default = False
         @type is_display_plot: bool
         """
-        self.registered_perf_metrics: Dict[MetricType, BuiltInMetric] = registered_perf_metrics
+        self.registered_perf_metrics = registered_perf_metrics if registered_perf_metrics is not None else {}
         self.collected_metrics: Dict[MetricType, List[np.array]] = {}
         self.is_display_plot = is_display_plot
 
@@ -96,6 +101,9 @@ class PerformanceMetrics(object):
         metrics = {metric_type: BuiltInMetric(metric_type=metric_type,
                                               is_weighted=is_class_imbalance) for metric_type in metrics_list}
         return cls(metrics, is_display_plot)
+
+    def reset(self) -> None:
+        self.collected_metrics = {}
 
     def __len__(self) -> int:
         if len(self.collected_metrics) > 0:
@@ -181,15 +189,43 @@ class PerformanceMetrics(object):
             self.collected_metrics[new_metric_type] = values
         return len(values)
 
-    def summary(self, metric_plotter_parameters: MetricPlotterParameters) -> None:
+    def summary(self,
+                model_id: AnyStr,
+                metric_plotter_parameters: Optional[MetricPlotterParameters] = None) -> None:
         """
-        Plots for the various metrics and stored metrics into torch local file
+        Plots for the various metrics and stored metrics into torch local file which name is derived from
+        the model id as
+            f'{PerformanceMetrics.perf_metrics_directory}{model_id}.json'
 
-        @param plot_filename: Name of the file containing the summary of metrics and losses and plots
-        @type plot_filename: str
+        @param model_id: identifier of the model
+        @type model_id str
+        @param metric_plotter_parameters: Optional parameters for plotting and storing result of tes
+        @type metric_plotter_parameters: MetricPlotterParameters or AnyStr
         """
-        self.__plot_summary(metric_plotter_parameters)
-        self.__save_summary(metric_plotter_parameters.plot_filename)
+        if metric_plotter_parameters is not None:
+            self.__plot_summary(metric_plotter_parameters)
+        self.__save_summary(model_id)
+
+    @staticmethod
+    def get_perf_metrics_filename(model_id: AnyStr) -> AnyStr:
+        return f'{PerformanceMetrics.perf_metrics_directory}{model_id}.json'
+
+    @staticmethod
+    def load_summary(model_id: AnyStr) -> Dict[AnyStr, List[float]]:
+        """
+        Static method to load the summary of performance metrics as a JSON/Dictionary
+
+        @param model_id: Identifier for the Neural Model as instance of a subclass of NeuralModel
+        @type model_id: str
+        @return: Dictionary of performance metrics
+        @rtype: Dict
+        """
+        import json
+
+        with open(PerformanceMetrics.get_perf_metrics_filename(model_id), 'r') as f:
+            collected_values = json.load(f)
+            print(collected_values)
+        return collected_values
 
     """ -------------------------------  Private Helper Methods --------------------------  """
 
@@ -209,11 +245,12 @@ class PerformanceMetrics(object):
             logging.error(f'Output file undefined {e}')
             raise MetricException(e)
 
-    def __save_summary(self, output_filename: AnyStr) -> None:
+    def __save_summary(self, model_id: AnyStr) -> None:
         import json
 
         collected_values = { k: [float(v) for v in values] for k, values in self.collected_metrics.items()}
-        with open(f'{output_filename}.json', 'w') as f:
+        with open(PerformanceMetrics.get_perf_metrics_filename(model_id), 'w') as f:
             json.dump(collected_values, f)
+
 
 

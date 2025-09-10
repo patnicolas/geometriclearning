@@ -63,7 +63,7 @@ class GraphSAGEModelTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(True)
 
-    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_build(self):
         try:
             out_channels = 256
@@ -219,7 +219,7 @@ class GraphSAGEModelTest(unittest.TestCase):
             logging.info(f'Graph model: {str(e)}')
             self.assertTrue(False)
 
-    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_training_cora(self):
         from deeplearning.block.graph import GraphException
 
@@ -231,8 +231,8 @@ class GraphSAGEModelTest(unittest.TestCase):
             train_attrs, model_attrs = GraphSAGEModelTest.build_config(dataset_name=pyg_dataset.name,
                                                                        lr=0.0008,
                                                                        neighbors=neighbors,
-                                                                       hidden_channels=32,
                                                                        _dataset=dataset,
+                                                                       hidden_channels=32,
                                                                        epochs=90)
             sampling_attrs = {
                 'id': 'NeighborLoader',
@@ -277,8 +277,8 @@ class GraphSAGEModelTest(unittest.TestCase):
             train_attrs, model_attrs = GraphSAGEModelTest.build_config(dataset_name=pyg_dataset.name,
                                                                        lr=0.0008,
                                                                        neighbors=neighbors,
-                                                                       hidden_channels=40,
                                                                        _dataset=_dataset,
+                                                                       hidden_channels=40,
                                                                        epochs=90)
             sampling_attrs = {
                 'id': 'NeighborLoader',
@@ -474,7 +474,6 @@ class GraphSAGEModelTest(unittest.TestCase):
         labels = ['Latency']
         latency = [1491, 8549, 31024]
         Plotter.plot([latency], labels, plotter_params)
-
 
     @staticmethod
     def load_data(filename: AnyStr, column: AnyStr) -> List[float]:

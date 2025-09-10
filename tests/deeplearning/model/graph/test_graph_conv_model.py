@@ -15,15 +15,6 @@ from python import SKIP_REASON
 
 class GraphConvModelTest(unittest.TestCase):
 
-    def test_fun(self):
-        def f(x, y=None):
-            if y is None:
-                y = [1]
-            y.insert(0, x)
-            return y
-        print(f([0], [2, 4, 5]))
-
-
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_1(self):
         hidden_channels = 256

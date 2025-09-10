@@ -102,43 +102,6 @@ class Plotter(object):
         fig.savefig(f"{Plotter.images_folder}/plot-{plotter_parameters.time_str}.png")
         plt.show()
 
-    """
-    @staticmethod
-    def multi_plot(dict_values: Dict[AnyStr, List[float]],
-                   plotter_params_list: List[PlotterParameters],
-                   plot_title: AnyStr) -> None:
-        num_dict_values = len(dict_values)
-        assert num_dict_values > 0, 'Dictionary of values to be plotted is undefined'
-        assert len(plotter_params_list) > 0, 'Plotting parameters are undefined'
-
-        num_rows = num_dict_values // 2 if num_dict_values % 2 == 0 else (num_dict_values // 2) + 1
-        fig, axes = plt.subplots(ncols=2, nrows=num_rows, figsize=plotter_params_list[0].fig_size)
-
-        plot_index = 0
-        for col_index in range(2):
-            for row_index in range(num_rows):
-                if plot_index < num_dict_values:
-                    key = plotter_params_list[plot_index].y_label
-                    y = dict_values[key]
-                    x_lim = len(y)
-                    y_max = max(y)
-                    y_lim = 1.0 if y_max <= 1.0 else y_max
-                    Plotter.__multi_axis_plot(np.arange(0, len(y), 1),
-                                              plotter_params_list[plot_index],
-                                              y,
-                                              axes,
-                                              (row_index, col_index),
-                                              (x_lim, y_lim))
-                plot_index += 1
-
-        font_style = {'family': 'sans-serif', 'size': 16}
-        fig.suptitle(plot_title, **font_style)
-        plt.tight_layout()
-        plt.show()
-        plot_file_name = f"{Plotter.images_folder}/plot_{plot_title}.png"
-        fig.savefig(plot_file_name)
-    """
-
     @staticmethod
     def plot(values: List[List[float]], labels: List[AnyStr], plotter_parameters: PlotterParameters) -> None:
         """

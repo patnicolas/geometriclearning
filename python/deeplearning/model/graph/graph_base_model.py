@@ -135,16 +135,15 @@ class GraphBaseModel(NeuralModel, ABC):
                 mlp_block.init_weights()
 
     @abstractmethod
-    def train_model(self, gnn_training: GNNTraining, train_loader: DataLoader, val_loader: DataLoader) -> None:
+    def train_model(self, training: GNNTraining, train_loader: DataLoader, val_loader: DataLoader) -> None:
         """
         Training and evaluation of models using Graph Neural Training and train loader for training and evaluation data
 
-        @param gnn_training: Wrapper class for training Graph Neural Network
-        @type gnn_training:  GNNTraining
+        @param training: Wrapper class for training Graph Neural Network
+        @type training:  GNNTraining
         @param train_loader: Loader for the training data set
         @type train_loader: torch.utils.data.DataLoader
         @param val_loader:   Loader for the validation data set
-        @type val_loader:  torch.utils.data.DataLoader
         """
         pass
 

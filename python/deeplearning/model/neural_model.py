@@ -21,12 +21,15 @@ import logging
 import torch
 import torch.nn as nn
 from torch import Tensor
+from torch.utils.data import DataLoader
 # Library imports
 from deeplearning import MLPException
 from deeplearning.block.conv import ConvDataType
 from deeplearning.block.neural_block import NeuralBlock
 import python
 __all__ = ['NeuralModel', 'NeuralBuilder']
+
+from deeplearning.training.neural_training import NeuralTraining
 
 
 class NeuralModel(torch.nn.Module, ABC):
@@ -63,6 +66,22 @@ class NeuralModel(torch.nn.Module, ABC):
 
     def get_flatten_output_size(self) -> ConvDataType:
         raise MLPException('Abstract class cannot have a flatten output size')
+
+    def train_model(self,
+                    training: NeuralTraining,
+                    train_loader: DataLoader,
+                    val_loader: DataLoader) -> None:
+        """
+        Training and evaluation of models using Neural Training and train loader for training and evaluation data
+
+        @param training: Wrapper class for training Neural Network
+        @type training: NeuralTraining
+        @param train_loader: Loader for the training data set
+        @type train_loader: torch.utils.data.DataLoader
+        @param val_loader:   Loader for the validation data set
+        @type val_loader:  torch.utils.data.DataLoader
+        """
+        pass
 
     def forward(self, x: Tensor) -> Tensor:
         """

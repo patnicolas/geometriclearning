@@ -100,6 +100,20 @@ class PlotterTest(unittest.TestCase):
         plt.tight_layout()
         plt.show()
 
+    def test_plot(self):
+        from plots.plotter import PlotterParameters
+        plot_parameters_dict = {
+            'count': 0,
+            'x_label': 'Epochs',
+            'y_label': 'Accuracy',
+            'title': 'Accuracy plot',
+            'fig_size': (10, 10)
+        }
+        plot_parameters = PlotterParameters.build(plot_parameters_dict)
+        y1 = [0.5, 0.7, 0.9, 1.0]
+        y2 = [0.0, 0.6, 0.1, 0.4]
+        Plotter.plot([y1, y2], ['y1', 'y2'], plot_parameters)
+
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_scaling_ticks(self):
         y_lim, x_delta, y_delta = Plotter.arrange_y((23, 2.9))
