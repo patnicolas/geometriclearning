@@ -36,6 +36,7 @@ class PlotterParameters:
     title: AnyStr
     is_image: Optional[bool] = False
     fig_size: Optional[Tuple[int, int]] = None
+    multi_plot_pause: float = 0.0,
     time_str = datetime.now().strftime("%b-%d-%Y:%H.%M")
     """
     Constructor
@@ -51,6 +52,8 @@ class PlotterParameters:
     @type is_image: bool
     @param fig_size: Optional figure size
     @type fig_size: (int, int)
+    @param multi_plot_pause: Block and pause, optionally after each plot if > 0
+    @type multi_plot_pause: Optional boolean
     @param time_str: Time stamp the plot was created, used for name of the file the plot image is stored
     @type time_str: str
     """
@@ -69,14 +72,17 @@ class PlotterParameters:
         x_label = attributes.get('x_label', 'X')
         y_label = attributes.get('y_label', 'Y')
         title = attributes.get('title', '')
-        return cls(count, x_label, y_label, title)
+        is_image = attributes.get('title', False)
+        fig_size = attributes.get('fig_size', (8, 8))
+        multi_plot_pause = attributes.get('multi_plot_pause', 0.0)
+        return cls(count, x_label, y_label, title, is_image, fig_size, multi_plot_pause)
 
 
 class Plotter(object):
     plot_parameters_label = 'plot_parameters'
     images_folder = '../../output_plots'
     markers = ['-', '--', '-.', '--', '^', '-']
-    colors = ['blue', 'green', 'red', 'orange', 'black', 'grey']
+    colors = ['blue', 'green', 'red', 'black', 'orange', 'grey']
 
     @staticmethod
     def set_images_folder(img_folder: AnyStr) -> None:
@@ -113,20 +119,21 @@ class Plotter(object):
         @param plotter_parameters: Plotter parameters (title, legend,..)
         @type plotter_parameters: PlotterParameters
         """
-        assert len(values) == len(labels), f'Number of variables {len(values)} != number of labels {len(labels)}'
+        assert len(values) > 0 and len(values) == len(labels), \
+            f'Number of variables {len(values)} != number of labels {len(labels)}'
 
         len_x = len(values[0])
         x = np.arange(0, len_x, 1)
         y = [np.array(vals) for vals in values]
         fig_size = plotter_parameters.fig_size if plotter_parameters.fig_size is not None else (12, 12)
-        plt.figure(figsize=fig_size)
+        fig = plt.figure(figsize=fig_size)
 
         for i in range(len(y)):
             plt.plot(x, y[i], label=labels[i], color=Plotter.colors[i], linestyle=Plotter.markers[i])
 
         plt.title(
             plotter_parameters.title,
-            fontdict={'family': 'sans-serif', 'size': 18, 'weight': 'bold'}
+            fontdict={'family': 'sans-serif', 'size': 20, 'weight': 'bold'}
         )
         plt.xlabel(
             plotter_parameters.x_label,
@@ -136,14 +143,24 @@ class Plotter(object):
             plotter_parameters.y_label,
             fontdict={'family': 'serif', 'size': 16, 'style': 'italic'}
         )
-        plt.tick_params(axis='y', labelsize=12)
-        plt.tick_params(axis='x', labelsize=12)
-        plt.legend(prop={'family': 'serif', 'size': 14})
-        plt.show()
+        plt.tick_params(axis='y', labelsize=14)
+        plt.tick_params(axis='x', labelsize=14)
+        plt.legend(prop={'family': 'serif', 'size': 16})
+
+        # Test if the plots are blocking
+        block = plotter_parameters.multi_plot_pause <= 0
+        plt.show(block=block)
+        # If not blocked then pause between each display
+        if not block:
+            plt.pause(plotter_parameters.multi_plot_pause)
 
     @staticmethod
     def time_str() -> str:
         return datetime.now().strftime("%b-%d-%Y-%H.%M.%S")
+
+    @staticmethod
+    def ioff() -> None:
+        plt.ioff()
 
     """ ------------ Helper private methods --------------- """
 

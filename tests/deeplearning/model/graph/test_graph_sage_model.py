@@ -1,6 +1,6 @@
 import unittest
 import logging
-from typing import List, AnyStr, Any, Dict, Optional
+from typing import List, AnyStr, Any, Dict
 from deeplearning.block.graph.graph_sage_block import GraphSAGEBlock
 from deeplearning.block.mlp.mlp_block import MLPBlock
 from deeplearning.model.graph.graph_sage_model import GraphSAGEModel, GraphSAGEBuilder
@@ -96,7 +96,7 @@ class GraphSAGEModelTest(unittest.TestCase):
                         'block_id': 'MyMLP',
                         'in_features': in_features,
                         'out_features': out_features,
-                        'activation': nn.ReLU(),
+                        'activation': None,
                         'dropout': 0.3
                     }
                 ]
@@ -224,28 +224,10 @@ class GraphSAGEModelTest(unittest.TestCase):
         from deeplearning.block.graph import GraphException
 
         try:
-            pyg_dataset = PyGDatasets('Cora')
-            dataset = pyg_dataset()
-            # Parameterization
-            neighbors = [6, 3]
-            train_attrs, model_attrs = GraphSAGEModelTest.build_config(dataset_name=pyg_dataset.name,
-                                                                       lr=0.0008,
-                                                                       neighbors=neighbors,
-                                                                       _dataset=dataset,
-                                                                       hidden_channels=32,
-                                                                       epochs=90)
-            sampling_attrs = {
-                'id': 'NeighborLoader',
-                'num_neighbors': neighbors,
-                'batch_size': 32,
-                'replace': True,
-                'num_workers': 4
-            }
-
-            GraphSAGEModelTest.execute_training(training_attributes=train_attrs,
-                                                model_attributes=model_attrs,
-                                                sampling_attrs=sampling_attrs,
-                                                num_subgraph_nodes=None)
+            dataset_name = 'Cora'
+            neighbors = [20, 12]
+            num_layers = 4
+            GraphSAGEModelTest.process_training(dataset_name, num_layers, neighbors)
         except KeyError as e:
             logging.error(e)
             self.assertTrue(False)
@@ -264,6 +246,30 @@ class GraphSAGEModelTest(unittest.TestCase):
         except GraphException as e:
             logging.info(f'Graph model: {str(e)}')
             self.assertTrue(False)
+
+    @staticmethod
+    def process_training(dataset_name: AnyStr, num_layers: int, neighbors: List[int]):
+        pyg_dataset = PyGDatasets(dataset_name)
+        dataset = pyg_dataset()
+        # Parameterization
+        train_attrs, model_attrs = GraphSAGEModelTest.build_config(dataset_name=pyg_dataset.name,
+                                                                   lr=0.0008,
+                                                                   num_layers=num_layers,
+                                                                   neighbors=neighbors,
+                                                                   _dataset=dataset,
+                                                                   hidden_channels=256,
+                                                                   epochs=40)
+        logging.info(f'\nTraining attributes\n{train_attrs}\nModel attributes:\n{model_attrs}')
+        sampling_attrs = {
+            'id': 'NeighborLoader',
+            'num_neighbors': neighbors,
+            'batch_size': 32,
+            'replace': True,
+            'num_workers': 4
+        }
+        GraphSAGEModelTest.execute_training(training_attributes=train_attrs,
+                                            model_attributes=model_attrs,
+                                            sampling_attrs=sampling_attrs)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_training_pubmed(self):
@@ -486,6 +492,7 @@ class GraphSAGEModelTest(unittest.TestCase):
     @staticmethod
     def build_config(dataset_name: AnyStr,
                      lr: float,
+                     num_layers: int,
                      neighbors: List[int],
                      _dataset,
                      hidden_channels: int,
@@ -493,7 +500,7 @@ class GraphSAGEModelTest(unittest.TestCase):
         from dataset.graph.graph_data_loader import GraphDataLoader
         _data = _dataset[0]
         class_weights = GraphDataLoader.class_weights(_data)
-        title = f'SAGE_{dataset_name}_2layer_{lr}_random_{neighbors}_12Knodes'
+        title = f'SAGE_{dataset_name}_NeighborLoader{neighbors}_{num_layers}layers'
 
         # Parameterization
         training_attributes = {
@@ -517,16 +524,10 @@ class GraphSAGEModelTest(unittest.TestCase):
             # Model configuration
             'hidden_channels': hidden_channels,
             # Performance metric definition
-            'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1', 'AuROC', 'AuPR'],
-            'plot_parameters': {
-                'x_label': 'epochs',
-                'title': title,
-                'x_label_size': 11,
-                'fig_size': (13, 8),
-                'plot_filename': f'../../../output_plots/{title}'
-            }
+            'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1', 'AuROC', 'AuPR']
         }
-        model_attributes = {
+
+        model_attributes_2 = {
             'model_id': f'Graph{title}',
             'graph_SAGE_blocks': [
                 {
@@ -534,7 +535,6 @@ class GraphSAGEModelTest(unittest.TestCase):
                     'SAGE_layer': SAGEConv(in_channels=_dataset[0].num_node_features, out_channels=hidden_channels),
                     'num_channels': hidden_channels,
                     'activation': nn.ReLU(),
-                    # 'batch_norm': BatchNorm(hidden_channels),
                     'batch_norm': None,
                     'dropout': 0.25
                 },
@@ -543,7 +543,6 @@ class GraphSAGEModelTest(unittest.TestCase):
                     'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
                     'num_channels': hidden_channels,
                     'activation': nn.ReLU(),
-                    # 'batch_norm': BatchNorm(hidden_channels),
                     'batch_norm': None,
                     'dropout': 0.25
                 }
@@ -557,13 +556,126 @@ class GraphSAGEModelTest(unittest.TestCase):
                 }
             ]
         }
+
+        model_attributes_4 = {
+            'model_id': f'Graph{title}',
+            'graph_SAGE_blocks': [
+                {
+                    'block_id': 'SAGE Layer 1',
+                    'SAGE_layer': SAGEConv(in_channels=_dataset[0].num_node_features, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': None,
+                    'dropout': 0.25
+                },
+                {
+                    'block_id': 'SAGE Layer 2',
+                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': None,
+                    'dropout': 0.25
+                },
+                {
+                    'block_id': 'SAGE Layer 2',
+                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': None,
+                    'dropout': 0.25
+                },
+                {
+                    'block_id': 'SAGE Layer 2',
+                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': None,
+                    'dropout': 0.25
+                }
+            ],
+            'mlp_blocks': [
+                {
+                    'block_id': 'Node classification block',
+                    'in_features': hidden_channels,
+                    'out_features': _dataset.num_classes,
+                    'activation': None
+                }
+            ]
+        }
+
+        model_attributes_6 = {
+            'model_id': f'Graph{title}',
+            'graph_SAGE_blocks': [
+                {
+                    'block_id': 'SAGE Layer 1',
+                    'SAGE_layer': SAGEConv(in_channels=_dataset[0].num_node_features, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': None,
+                    'dropout': 0.25
+                },
+                {
+                    'block_id': 'SAGE Layer 2',
+                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': None,
+                    'dropout': 0.25
+                },
+                {
+                    'block_id': 'SAGE Layer 2',
+                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': None,
+                    'dropout': 0.25
+                },
+                {
+                    'block_id': 'SAGE Layer 2',
+                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': None,
+                    'dropout': 0.25
+                },
+                {
+                    'block_id': 'SAGE Layer 2',
+                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': None,
+                    'dropout': 0.25
+                },
+                {
+                    'block_id': 'SAGE Layer 2',
+                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': None,
+                    'dropout': 0.25
+                }
+            ],
+            'mlp_blocks': [
+                {
+                    'block_id': 'Node classification block',
+                    'in_features': hidden_channels,
+                    'out_features': _dataset.num_classes,
+                    'activation': None
+                }
+            ]
+        }
+        match num_layers:
+            case 2: model_attributes = model_attributes_2
+            case 4: model_attributes = model_attributes_4
+            case 6: model_attributes = model_attributes_6
+            case _: model_attributes = model_attributes_2
         return training_attributes, model_attributes
 
     @staticmethod
     def execute_training(training_attributes: Dict[AnyStr, Any],
                          model_attributes: Dict[AnyStr, Any],
                          sampling_attrs: Dict[AnyStr, Any],
-                         num_subgraph_nodes: Optional[int] = None) -> None:
+                         num_subgraph_nodes: int = 0) -> None:
         from deeplearning.training.gnn_training import GNNTraining
         from dataset.graph.graph_data_loader import GraphDataLoader
 

@@ -14,7 +14,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 # Standard library imports
-from typing import AnyStr, List, Dict
+from typing import Self, List
 import logging
 # 3rd Party imports
 from torch.utils.data import DataLoader
@@ -30,33 +30,37 @@ from plots.plotter import PlotterParameters
 
 class ModelComparison(object):
 
-    def __init__(self, model1: NeuralModel, model2: NeuralModel) -> None:
+    def __init__(self, models: List[NeuralModel]) -> None:
+        self.models = models
 
-        self.model1 = model1
-        self.model2 = model2
+    @classmethod
+    def build(cls, model1: NeuralModel, model2: NeuralModel) -> Self:
+        return cls([model1, model2])
 
     def compare(self,  neural_training: NeuralTraining,  train_loader: DataLoader, val_loader: DataLoader):
-        logging.info(f'\nStart training {self.model1.model_id}')
-        self.model1.train_model(training=neural_training, train_loader=train_loader, val_loader=val_loader)
-        logging.info(f'\nStart training {self.model2.model_id}')
+        for idx, model in enumerate(self.models):
+            logging.info(f'\nStart training {model.model_id}')
+            # Reset/empty the dictionary of collected metrics for subsequent models
+            if idx > 0:
+                neural_training.performance_metrics.reset()
+            model.train_model(training=neural_training, train_loader=train_loader, val_loader=val_loader)
 
-        # Reset/empty the dictionary of collected metrics
-        neural_training.performance_metrics.reset()
-        self.model2.train_model(training=neural_training, train_loader=train_loader, val_loader=val_loader)
-
-    def load(self, plotter_parameters: PlotterParameters) -> None:
+    def load_and_plot(self, plotter_parameters: PlotterParameters) -> None:
         from plots.plotter import Plotter
-        perf_metric_model1 = PerformanceMetrics.load_summary(self.model1.model_id)
-        perf_metric_model2 = PerformanceMetrics.load_summary(self.model2.model_id)
-        logging.info(f'\n{perf_metric_model1=}\n{perf_metric_model2=}')
+        # Load the data from local files
+        perf_metric_models = [PerformanceMetrics.load_summary(model.model_id) for model in self.models]
 
-        # Merge plots
-        merged_metrics = {k: [perf_metric_model1[k], perf_metric_model2[k]]
-                          for k in perf_metric_model1.keys() & perf_metric_model2.keys()}
+        # Merge performance metrics across multiple models
+        merged_metrics = {k: [perf_metric_model[k] for perf_metric_model in perf_metric_models]
+                          for k in perf_metric_models[0].keys()}
+
+        # Setup plotting parameters then display the plot
         for k, values in merged_metrics.items():
             setattr(plotter_parameters, 'y_label', k)
             setattr(plotter_parameters, 'title', f'{k} Comparison')
-            Plotter.plot(values, [self.model1.model_id, self.model2.model_id], plotter_parameters)
+            Plotter.plot(values, [model.model_id for model in self.models], plotter_parameters)
+
+        Plotter.ioff()
 
 
 
