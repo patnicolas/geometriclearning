@@ -106,21 +106,6 @@ class ConvModel(NeuralModel, ABC):
             for mlp_block in self.mlp_blocks:
                 mlp_block.reset_parameters()
 
-    """
-    def _register_modules(self) -> nn.Sequential:
-        if self.modules_seq is None:
-            modules_list = [module for block in self.conv_blocks for module in block.modules_list]
-            # If fully connected are provided as CNN
-            if self.mlp_blocks is not None:
-                # Flatten
-                modules_list.append(nn.Flatten())
-                # Generate
-                [modules_list.append(module) for block in self.mlp_blocks for module in block.modules_list]
-            return nn.Sequential(*modules_list)
-        else:
-            return self.modules_seq
-    """
-
     def transpose(self, extra: nn.Module = None) -> DeConv2dModel:
         """
          Build a de-convolutional neural model from an existing convolutional nodel
@@ -211,7 +196,6 @@ class ConvModel(NeuralModel, ABC):
         except AssertionError as e:
             logging.error(e)
             return False
-
 
     """ ----------------------------   Private helper methods --------------------------- """
 

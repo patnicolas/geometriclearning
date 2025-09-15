@@ -1,7 +1,6 @@
 import unittest
 import logging
 from torch_geometric.nn import SAGEConv, BatchNorm
-from torch_geometric.nn.pool import TopKPooling
 from deeplearning.block.graph.graph_sage_block import GraphSAGEBlock
 import torch.nn as nn
 import python

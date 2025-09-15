@@ -23,8 +23,8 @@ from torch import optim
 from torch import nn
 # Library imports
 from dataset import DatasetException
-import python
 from deeplearning.training import TrainingException
+import python
 __all__ = ['HyperParams']
 
 
@@ -119,8 +119,8 @@ class HyperParams(object):
     def initialize_weight(self, modules: List[nn.Module]) -> None:
         """
         In-place initialization weight of a list of linear module given an encoder model
-        @param modules: torch module to be initializes
-        @type modules: List
+        @param modules: All modules for which some need to be initialized
+        @type modules: List[nn.Module]
         """
         import torch_geometric
 
@@ -136,18 +136,21 @@ class HyperParams(object):
 
         match self.weight_initialization:
             case 'kaiming':
+                logging.info('Kaiming weights initialization')
                 [nn.init.kaiming_uniform_(tensor=module.weight, mode='fan_in', nonlinearity='relu')
                  for module in modules if is_layer_module(module)]
             case 'normal':
+                logging.info('Gaussian weights initialization')
                 [nn.init.normal_(module.weight) for module in modules if is_layer_module(module)]
             case 'xavier':
+                logging.info('Xavier weights initialization')
                 [nn.init.xavier_uniform_(module.weight) for module in modules if is_layer_module(module)]
             case 'constant':
+                logging.info('Constant weights initialization')
                 [nn.init.constant_(module.weight, val=0.5) for module in modules if is_layer_module(module)]
             case _:
                 raise TrainingException(f'initialization {self.weight_initialization} '
                                         'for layer module weights is not supported')
-        # [nn.init.constant_(module.bias, val=0.1) for module in modules if is_layer_module(module)]
 
     def optimizer(self, model: nn.Module) -> torch.optim.Optimizer:
         """

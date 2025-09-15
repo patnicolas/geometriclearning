@@ -1,5 +1,6 @@
 import unittest
 import logging
+from typing import List, AnyStr
 from deeplearning.block.graph.graph_conv_block import GraphConvBlock
 from deeplearning.block.mlp.mlp_block import MLPBlock
 from deeplearning.model.graph.graph_conv_model import GraphConvModel, GraphConvBuilder
@@ -23,31 +24,35 @@ class GraphConvModelTest(unittest.TestCase):
             _dataset = pyg_dataset()
             _data: torch_geometric.data.Data = _dataset[0]
 
-            conv_1 = GraphConv(in_channels=_data.num_node_features, out_channels=hidden_channels)
-            graph_conv_block_1 = GraphConvBlock(block_id='Conv 24-256',
-                                                graph_conv_layer=conv_1,
-                                                batch_norm_module=BatchNorm(hidden_channels),
-                                                activation_module=nn.ReLU(),
-                                                pooling_module=TopKPooling(hidden_channels, ratio=0.4),
-                                                dropout_module=nn.Dropout(0.2))
-
-            conv_2 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-            graph_conv_block_2 = GraphConvBlock(block_id='Conv 256-256',
-                                                graph_conv_layer=conv_2,
-                                                batch_norm_module=BatchNorm(hidden_channels),
-                                                activation_module=nn.ReLU(),
-                                                pooling_module=TopKPooling(hidden_channels, ratio=0.4),
-                                                dropout_module=nn.Dropout(0.2))
-
-            conv_3 = GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
-            graph_conv_block_3 = GraphConvBlock(block_id='Conv 256-8', graph_conv_layer=conv_3)
+            graph_conv_block_1 = GraphConvBlock[GraphConv, TopKPooling](
+                block_id='Conv 24-256',
+                graph_conv_layer=GraphConv(in_channels=_data.num_node_features, out_channels=hidden_channels),
+                batch_norm_module=BatchNorm(hidden_channels),
+                activation_module=nn.ReLU(),
+                pooling_module=TopKPooling(hidden_channels, ratio=0.4),
+                dropout_module=nn.Dropout(0.2)
+            )
+            graph_conv_block_2 = GraphConvBlock[GraphConv, TopKPooling](
+                block_id='Conv 256-256',
+                graph_conv_layer= GraphConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                batch_norm_module=BatchNorm(hidden_channels),
+                activation_module=nn.ReLU(),
+                pooling_module=TopKPooling(hidden_channels, ratio=0.4),
+                dropout_module=nn.Dropout(0.2)
+            )
+            graph_conv_block_3 = GraphConvBlock[GraphConv, TopKPooling](
+                block_id='Conv 256-8',
+                graph_conv_layer=GraphConv(in_channels=hidden_channels, out_channels=hidden_channels)
+            )
             mlp_block = MLPBlock(block_id='Fully connected',
                                  layer_module=nn.Linear(hidden_channels, _dataset.num_classes),
                                  activation_module=nn.Softmax(dim=-1))
 
-            graph_conv_model = GraphConvModel(model_id='Flicker test dataset',
-                                              graph_conv_blocks=[graph_conv_block_1, graph_conv_block_2, graph_conv_block_3],
-                                              mlp_blocks=[mlp_block])
+            graph_conv_model = GraphConvModel[GraphConv, TopKPooling](
+                model_id='Flicker test dataset',
+                graph_conv_blocks=[graph_conv_block_1, graph_conv_block_2, graph_conv_block_3],
+                mlp_blocks=[mlp_block]
+            )
             logging.info(f'\n{graph_conv_model}')
             params = list(graph_conv_model.parameters())
             logging.info(f'\nParameters:\n{params}')
@@ -229,93 +234,22 @@ class GraphConvModelTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
+    # @unittest.skip('Ignore')
     def test_training(self):
-        from torch_geometric.datasets.flickr import Flickr
-        from deeplearning.training.gnn_training import GNNTraining
-        from dataset.graph.graph_data_loader import GraphDataLoader
         from deeplearning.block.graph import GraphException
 
         try:
-            path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data', 'Flickr')
-            _dataset = Flickr(path)
-            _data = _dataset[0]
+            dataset_name = 'Cora'
+            neighbors = [6, 3]
+            num_layers = 4
+            GraphConvModelTest.execute_training(dataset_name, neighbors, num_layers)
 
-            training_attributes = {
-                'dataset_name': 'Flickr',
-                # Model training Hyperparameters
-                'learning_rate': 0.0005,
-                'batch_size': 32,
-                'loss_function': nn.CrossEntropyLoss(),
-                'momentum': 0.90,
-                'encoding_len': -1,
-                'train_eval_ratio': 0.9,
-                'weight_initialization': 'xavier',
-                'optim_label': 'adam',
-                'drop_out': 0.25,
-                'is_class_imbalance': True,
-                'class_weights': None,
-                'patience': 2,
-                'min_diff_loss': 0.02,
-                'epochs': 8,
-                # Model configuration
-                'hidden_channels': 64,
-                # Performance metric definition
-                'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1'],
-                'plot_parameters': [
-                    {'title': 'Accuracy', 'x_label': 'epoch', 'y_label': 'accuracy'},
-                    {'title': 'Precision', 'x_label': 'epochs', 'y_label': 'precision'},
-                    {'title': 'Recall', 'x_label': 'epochs', 'y_label': 'recall'},
-                    {'title': 'F1', 'x_label': 'epochs', 'y_label': 'F1'},
-                ]
-            }
-            attrs = {
-                'id': 'NeighborLoader',
-                'num_neighbors': [12, 6, 3],
-                'batch_size': 32,
-                'replace': True,
-                'num_workers': 4
-            }
-            hidden_channels = 64
-            in_features = 64
-            model_attributes = {
-                'model_id': 'MyModel',
-                'graph_conv_blocks': [
-                    {
-                        'block_id': 'MyBlock_1',
-                        'conv_layer': GraphConv(in_channels=_data.num_node_features, out_channels=hidden_channels),
-                        'num_channels': hidden_channels,
-                        'activation': nn.ReLU(),
-                        'batch_norm': BatchNorm(hidden_channels),
-                        'pooling': None,
-                        'dropout': 0.25
-                    },
-                    {
-                        'block_id': 'MyBlock_2',
-                        'conv_layer': GraphConv(in_channels=hidden_channels, out_channels=hidden_channels),
-                        'num_channels': hidden_channels,
-                        'activation': nn.ReLU(),
-                        'batch_norm': BatchNorm(hidden_channels),
-                        'pooling': None,
-                        'dropout': 0.25
-                    }
-                ],
-                'mlp_blocks': [
-                    {
-                        'block_id': 'Classifier',
-                        'in_features': in_features,
-                        'out_features': _dataset.num_classes,
-                        'activation': None,
-                        'dropout': 0.3
-                    }
-                ]
-            }
-            graph_conv_builder = GraphConvBuilder(model_attributes)
-            graph_conv_model = graph_conv_builder.build()
+            num_layers = 4
+            GraphConvModelTest.execute_training(dataset_name, neighbors, num_layers)
 
-            trainer = GNNTraining.build(training_attributes)
-            graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
-            train_loader, eval_loader = graph_data_loader()
-            graph_conv_model.train_model(trainer, train_loader, eval_loader)
+            neighbors = [20, 12]
+            num_layers = 2
+            GraphConvModelTest.execute_training(dataset_name, neighbors, num_layers)
         except KeyError as e:
             logging.error(e)
             self.assertTrue(False)
@@ -331,3 +265,142 @@ class GraphConvModelTest(unittest.TestCase):
         except GraphException as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
+
+    @staticmethod
+    def execute_training(dataset_name: AnyStr, neighbors: List[int], num_layers: int):
+        from deeplearning.training.gnn_training import GNNTraining
+        from dataset.graph.graph_data_loader import GraphDataLoader
+
+        pyg_dataset = PyGDatasets(dataset_name)
+        dataset = pyg_dataset()
+        _data = dataset[0]
+
+        class_weights = GraphDataLoader.class_weights(_data)
+        title = f'GraphConv_{dataset_name}_Neighbors{neighbors}_{num_layers}layers'
+
+        training_attributes = {
+                'dataset_name': 'Cora',
+                # Model training Hyperparameters
+                'learning_rate': 0.0008,
+                'weight_decay': 5e-4,
+                'batch_size': 32,
+                'loss_function': nn.CrossEntropyLoss(label_smoothing=0.05),
+                'momentum': 0.90,
+                'encoding_len': -1,
+                'train_eval_ratio': 0.9,
+                'weight_initialization': 'kaiming',
+                'optim_label': 'adam',
+                'drop_out': 0.25,
+                'is_class_imbalance': True,
+                'class_weights': class_weights,
+                'patience': 2,
+                'min_diff_loss': 0.02,
+                'epochs': 40,
+                # Model configuration
+                'hidden_channels': 64,
+                # Performance metric definition
+                'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1', 'AuROC', 'AuPR']
+            }
+        attrs = {
+                'id': 'NeighborLoader',
+                'num_neighbors': neighbors,
+                'batch_size': 32,
+                'replace': True,
+                'num_workers': 4
+            }
+        hidden_channels = 64
+
+        model_attributes_2 = {
+            'model_id': title,
+            'graph_conv_blocks': [
+                {
+                    'block_id': 'MyBlock_1',
+                    'conv_layer': GraphConv(in_channels=_data.num_node_features, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': None,
+                    'pooling': None,
+                    'dropout': 0.25
+                },
+                {
+                    'block_id': 'MyBlock_2',
+                    'conv_layer': GraphConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': None,
+                    'pooling': None,
+                    'dropout': 0.25
+                }
+            ],
+            'mlp_blocks': [
+                {
+                    'block_id': 'Output',
+                    'in_features': hidden_channels,
+                    'out_features': dataset.num_classes,
+                    'activation': None
+                }
+            ]
+        }
+
+        model_attributes_4 = {
+            'model_id': title,
+            'graph_conv_blocks': [
+                {
+                    'block_id': 'MyBlock_1',
+                    'conv_layer': GraphConv(in_channels=_data.num_node_features, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': None,
+                        'pooling': None,
+                        'dropout': 0.25
+                    },
+                    {
+                        'block_id': 'MyBlock_2',
+                        'conv_layer': GraphConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                        'num_channels': hidden_channels,
+                        'activation': nn.ReLU(),
+                        'batch_norm': None,
+                        'pooling': None,
+                        'dropout': 0.25
+                    },
+                    {
+                        'block_id': 'MyBlock_3',
+                        'conv_layer': GraphConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                        'num_channels': hidden_channels,
+                        'activation': nn.ReLU(),
+                        'batch_norm': None,
+                        'pooling': None,
+                        'dropout': 0.25
+                    },
+                    {
+                        'block_id': 'MyBlock_4',
+                        'conv_layer': GraphConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                        'num_channels': hidden_channels,
+                        'activation': nn.ReLU(),
+                        'batch_norm': None,
+                        'pooling': None,
+                        'dropout': 0.25
+                    }
+                ],
+                'mlp_blocks': [
+                    {
+                        'block_id': 'Output',
+                        'in_features': hidden_channels,
+                        'out_features': dataset.num_classes,
+                        'activation': None
+                    }
+                ]
+            }
+
+        match num_layers:
+            case 4: model_attributes = model_attributes_4
+            case _: model_attributes = model_attributes_2
+
+        graph_conv_builder = GraphConvBuilder(model_attributes)
+        graph_conv_model = graph_conv_builder.build()
+
+        trainer = GNNTraining.build(training_attributes)
+        graph_data_loader = GraphDataLoader(dataset_name=dataset_name, sampling_attributes=attrs)
+        train_loader, eval_loader = graph_data_loader()
+        graph_conv_model.train_model(trainer, train_loader, eval_loader)
+

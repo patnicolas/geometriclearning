@@ -14,7 +14,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import List, AnyStr, Optional, Any, Dict
+from typing import List, AnyStr, Optional, Any, Dict, Generic, TypeVar
 import logging
 # 3rd Party imports
 import torch
@@ -29,8 +29,11 @@ from deeplearning.training.gnn_training import GNNTraining
 import python
 __all__ = ['GraphConvModel', 'GraphConvBuilder']
 
+# CL for type of torch geometric convolutional layer module, P for Pooling module
+CL = TypeVar('CL')
+P = TypeVar('P')
 
-class GraphConvModel(GraphBaseModel):
+class GraphConvModel(GraphBaseModel, Generic[CL, P]):
     """
     A Graph Convolution Network may require one output multi-layer perceptron for classification purpose using
     SoftMax activation. We do not restrict a model from have multiple linear layers for output
@@ -38,7 +41,7 @@ class GraphConvModel(GraphBaseModel):
     """
     def __init__(self,
                  model_id: AnyStr,
-                 graph_conv_blocks: List[GraphConvBlock],
+                 graph_conv_blocks: List[GraphConvBlock[CL, P]],
                  mlp_blocks: Optional[List[MLPBlock]] = None) -> None:
         """
         Constructor for this simple Graph convolutional neural network
@@ -51,7 +54,6 @@ class GraphConvModel(GraphBaseModel):
         @type mlp_blocks: List[MLPBlock]
         """
         super(GraphConvModel, self).__init__(model_id, graph_conv_blocks, mlp_blocks)
-
 
     def forward(self, data: Data) -> torch.Tensor:
         """
@@ -81,20 +83,17 @@ class GraphConvModel(GraphBaseModel):
             x = mlp_block(x)
         return x
 
-    def train_model(self, gnn_training: GNNTraining, train_loader: DataLoader, val_loader: DataLoader) -> None:
+    def train_model(self, training: GNNTraining, train_loader: DataLoader, val_loader: DataLoader) -> None:
         """
         Training and evaluation of models using Graph Neural Training and train loader for training and evaluation data
-        @param gnn_training: Wrapper class for training Graph Neural Network
-        @type gnn_training:  GNNTraining
+        @param training: Wrapper class for training Graph Neural Network
+        @type training:  GNNTraining
         @param train_loader: Loader for the training data set
         @type train_loader: torch.utils.data.DataLoader
-        @param val_loader:   Loader for the validation data set
-        @type val_loader:  torch.utils.data.DataLoader
+        @param val_loader: Loader for the validation data set
+        @type val_loader: torch.utils.data.DataLoader
         """
-        gnn_training.train(neural_model=self,
-                           train_loader=train_loader,
-                           val_loader=val_loader,
-                           val_enabled=True)
+        training.train(neural_model=self, train_loader=train_loader, val_loader=val_loader)
 
 
 class GraphConvBuilder(NeuralBuilder):

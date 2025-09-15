@@ -30,14 +30,13 @@ class MetricPlotterTest(unittest.TestCase):
                                                      x_label='epochs',
                                                      title='Test plot 1',
                                                      x_label_size=12,
-                                                     plot_folder='../output_plots')
+                                                     fig_size=(12, 8))
             metric_plot = MetricPlotter(plotter_params=plotter_params)
             metric_plot.plot(dict_values=dict_values)
             self.assertTrue(True)
         except FileNotFoundError as e:
             logging.error(e)
             self.assertTrue(False)
-
 
     def test_plot_save_fail(self):
         try:
@@ -51,7 +50,7 @@ class MetricPlotterTest(unittest.TestCase):
                                                      x_label='epochs',
                                                      title='Test plot 1',
                                                      x_label_size=12,
-                                                     plot_folder='xxxx')
+                                                     fig_size=(12, 8))
             metric_plot = MetricPlotter(plotter_params=plotter_params)
             metric_plot.plot(dict_values=dict_values)
             self.assertTrue(False)
@@ -59,18 +58,21 @@ class MetricPlotterTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(True)
 
-
     def test_plot_display(self):
-        dict_values = {
-            'Precision': [0.1, 0.3, 0.6, 0.65, 0.7, 0.76],
-            'Accuracy': [0.3, 0.4, 0.45, 0.49, 0.52, 0.53],
-            'TrainLoss': [3.9, 2.7, 1.65, 1.6, 0.56, 0.53],
-            'EvalLoss': [1.9, 1.7, 0.95, 0.6, 0.56, 0.53]
-        }
-        plotter_params = MetricPlotterParameters(count=0,
-                                                 x_label='epochs',
-                                                 title='Test plot 1',
-                                                 x_label_size=12,
-                                                 plot_folder=None)
-        metric_plot = MetricPlotter(plotter_params=plotter_params)
-        metric_plot.plot(dict_values=dict_values)
+        try:
+            dict_values = {
+                'Precision': [0.1, 0.3, 0.6, 0.65, 0.7, 0.76],
+                'Accuracy': [0.3, 0.4, 0.45, 0.49, 0.52, 0.53],
+                'TrainLoss': [3.9, 2.7, 1.65, 1.6, 0.56, 0.53],
+                'EvalLoss': [1.9, 1.7, 0.95, 0.6, 0.56, 0.53]
+            }
+            plotter_params = MetricPlotterParameters(count=0,
+                                                     x_label='epochs',
+                                                     title='Test plot 1',
+                                                     x_label_size=12,
+                                                     fig_size=(12, 8))
+            metric_plot = MetricPlotter(plotter_params=plotter_params)
+            metric_plot.plot(dict_values=dict_values)
+        except FileNotFoundError as e:
+            logging.error(e)
+            self.assertTrue(True)

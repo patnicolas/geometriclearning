@@ -82,14 +82,15 @@ class GNNTraining(NeuralTraining):
         early_stopping = EarlyStopping.build(training_attributes)
 
         # Instantiate the Plots
-        plot_parameters = MetricPlotterParameters.build(training_attributes['plot_parameters'])
+        train_attrs = training_attributes.get('plot_parameters', None)
+        plot_parameters = MetricPlotterParameters.build(train_attrs) if train_attrs is not None else None
         return cls(hyper_params=hyper_params,
                    metrics_attributes=metric_attributes.registered_perf_metrics,
                    early_stopping=early_stopping,
                    plot_parameters=plot_parameters)
 
     def __str__(self) -> str:
-        metrics_str = '\n'.join([f'   {str(v)}' for _, v in self.performance_metrics.metrics.items()])
+        metrics_str = '\n'.join([f'   {str(v)}' for _, v in self.performance_metrics.collected_metrics.items()])
         return (f'\nHyper-parameters:\n{repr(self.hyper_params)}'
                 f'\nPerformance Metrics\n{metrics_str}'
                 f'\nEarly stop condition{self.early_stopping}')
@@ -107,8 +108,7 @@ class GNNTraining(NeuralTraining):
     def train(self,
               neural_model: nn.Module,
               train_loader: DataLoader,
-              val_loader: DataLoader,
-              val_enabled: bool = True) -> None:
+              val_loader: DataLoader) -> None:
         """
         Train and evaluation of a neural network given a data loader for a training set, a
         data loader for the evaluation/test1 set and an encoder_model. The weights of the various linear modules
@@ -120,8 +120,6 @@ class GNNTraining(NeuralTraining):
         @type train_loader: torch_geometric.loader.DataLoader
         @param val_loader: Data loader for the evaluation set
         @param val_loader: torch_geometric.loader.DataLoader
-        @param val_enabled: Enable validation
-        @param val_enabled: bool
         """
         torch.manual_seed(42)
 
@@ -136,13 +134,12 @@ class GNNTraining(NeuralTraining):
             self.__train_epoch(neural_model, epoch, train_loader)
 
             # Set mode and execute evaluation
-            if val_enabled:
+            if val_loader is not None:
                 self.__val_epoch(neural_model, epoch, val_loader)
             logging.info(f'Performance: {epoch=}\n{str(self.performance_metrics)}')
             # self.exec_config.apply_monitor_memory()
-
         # Generate summary
-        self.performance_metrics.summary(self.plot_parameters)
+        self.performance_metrics.summary(neural_model.model_id, self.plot_parameters)
         logging.info(f"\nMPS usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
 
     """ -----------------------------  Private helper methods ------------------------------  """

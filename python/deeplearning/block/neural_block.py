@@ -15,6 +15,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 # Standard Library imports
 from typing import Self, AnyStr, Optional
+from abc import ABC
 # 3rd Party imports
 from torch import nn
 # Library imports
@@ -22,7 +23,7 @@ from deeplearning import MLPException
 __all__ = ['NeuralBlock']
 
 
-class NeuralBlock(nn.Module):
+class NeuralBlock(nn.Module, ABC):
     """
     Basic Neural block for all deep learning architectures
     """

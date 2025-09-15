@@ -18,7 +18,10 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from typing import List, AnyStr, Self, Dict, Any
 # 3rd Party imports
 import torch.nn as nn
+import torch
+from torch.utils.data import DataLoader
 # Library imports
+from deeplearning.training.neural_training import NeuralTraining
 from deeplearning.block.conv import ConvDataType
 from deeplearning.model.neural_model import NeuralModel, NeuralBuilder
 from deeplearning.block.mlp.mlp_block import MLPBlock
@@ -42,8 +45,29 @@ class MLPModel(NeuralModel):
         self.neural_blocks = mlp_blocks
 
         # Define the sequence of modules from the layout of neural blocks
-        modules = [module for block in mlp_blocks for module in block.modules_list]
-        super(MLPModel, self).__init__(model_id, nn.Sequential(*modules))
+        # self.modules_list = [module for block in mlp_blocks for module in block.modules_list]
+        super(MLPModel, self).__init__(model_id)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        for mlp_block in self.mlp_blocks:
+            x = mlp_block(x)
+        return x
+
+    def train_model(self,
+                    training: NeuralTraining,
+                    train_loader: DataLoader,
+                    val_loader: DataLoader) -> None:
+        """
+        Training and evaluation of models using Neural Training and train loader for training and evaluation data
+
+        @param training: Wrapper class for training Neural Network
+        @type training: NeuralTraining
+        @param train_loader: Loader for the training data set
+        @type train_loader: torch.utils.data.DataLoader
+        @param val_loader:   Loader for the validation data set
+        @type val_loader:  torch.utils.data.DataLoader
+        """
+        training.train(self, train_loader, val_loader)
 
     def transpose(self, output_activation: nn.Module = None) -> Self:
         """
@@ -86,7 +110,6 @@ class MLPModel(NeuralModel):
 
     def save(self, extra_params: dict = None):
         raise NotImplementedError('NeuralModel.save is an abstract method')
-
 
 
 class MLPBuilder(NeuralBuilder):

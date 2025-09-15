@@ -13,7 +13,7 @@ class PerformanceMetricsTest(unittest.TestCase):
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_add_metric(self):
-        performance_metrics = PerformanceMetrics({})
+        performance_metrics = PerformanceMetrics()
         performance_metrics.register_metric(metric_type=MetricType.Accuracy, encoding_len=-1, is_weighted=False)
         performance_metrics.register_metric(metric_type=MetricType.Precision, encoding_len=-1, is_weighted=False)
 
@@ -81,14 +81,17 @@ class PerformanceMetricsTest(unittest.TestCase):
 
             logging.info(f'\n{performance_metrics=}')
 
-            output_file_name = '../output_plots/results'
-            performance_metrics.summary(output_file_name)
+            model_id = 'perf_metric_test1'
+            performance_metrics.summary(model_id)
             self.assertTrue(True)
+            results = PerformanceMetrics.load_summary(model_id)
+            logging.info(f'Loaded performance metrics\n{results}')
+            self.assertEqual(performance_metrics.collected_metrics, results)
         except (Union[AssertionError, MetricException]) as e:
             logging.error(e)
             self.assertTrue(False)
 
-    # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_plot_summary_batches(self):
         try:
             import numpy as np

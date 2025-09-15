@@ -75,10 +75,13 @@ class NeuralTraining(object):
         self.exec_config = exec_config
         self.performance_metrics = PerformanceMetrics(metrics_attributes)
 
+    def reset_perf_metrics(self) -> None:
+        self.performance_metrics.reset()
+
     def train(self,
               neural_model: nn.Module,
               train_loader: DataLoader,
-              eval_loader: DataLoader) -> None:
+              val_loader: DataLoader) -> None:
         """
         Train and evaluation of a neural network given a data loader for a training set, a
         data loader for the evaluation/test1 set and a encoder_model. The weights of the various linear modules
@@ -88,13 +91,12 @@ class NeuralTraining(object):
         @type neural_model: nn_Module
         @param train_loader: Data loader for the training set
         @type train_loader: DataLoader
-        @param eval_loader:  Data loader for the valuation set
-        @type eval_loader: DataLoader
+        @param val_loader:  Data loader for the valuation set
+        @type val_loader: DataLoader
         """
         torch.manual_seed(42)
-        neural_model.reset_parameters()
-        _modules = neural_model.get_modules()
         self.hyper_params.initialize_weight(neural_model.get_modules())
+        neural_model.reset_parameters()
 
         # Train and evaluation process
         for epoch in range(self.hyper_params.epochs):
@@ -102,7 +104,8 @@ class NeuralTraining(object):
             self.__train_epoch(neural_model, epoch, train_loader)
 
             # Set mode and execute evaluation
-            self.__val_epoch(neural_model, epoch, eval_loader)
+            if val_loader is not None:
+                self.__val_epoch(neural_model, epoch, val_loader)
             self.exec_config.apply_monitor_memory()
 
         # Generate summary

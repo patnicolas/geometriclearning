@@ -26,7 +26,7 @@ share/python-wheels/
 .DS_Store
 *.egg
 MANIFEST
-.idea
+*idea
 python/.idea
 __pycache__
 *.log

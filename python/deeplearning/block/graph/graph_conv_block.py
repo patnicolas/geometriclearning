@@ -27,6 +27,7 @@ from deeplearning.block.graph.message_passing_block import MessagePassingBlock
 __all__ = ['GraphConvBlock']
 
 # Class types
+# CL for type of torch geometric convolutional layer module, P for Pooling module
 CL = TypeVar('CL')
 P = TypeVar('P')
 
@@ -53,8 +54,10 @@ class GraphConvBlock(MessagePassingBlock, Generic[CL, P]):
             @param dropout_module: Drop out for training
             @type dropout_module: nn.Module subclass
             """
+        # Validate the PyTorch Geometric convolutional modules
         if not isinstance(graph_conv_layer, (GraphConv, GCNConv, GCN2Conv)):
             raise TypeError(f'Type of graph convolutional layer {type(graph_conv_layer)} is not supported')
+        # Validate the PyTorch Geometric pooling module
         if pooling_module is not None and not isinstance(pooling_module, (SAGPooling, TopKPooling)):
             raise TypeError(f'Type of pooling {type(pooling_module)} is not supported')
 
@@ -117,9 +120,11 @@ class GraphConvBlock(MessagePassingBlock, Generic[CL, P]):
         """
         # Process all the torch modules if defined
         for module in self.modules_list:
-            if isinstance(module, GraphConv):
+            # Invokes the forward method with edge indices for the convolutional module
+            if isinstance(module, (GraphConv, GCNConv, GCN2Conv)):
                 x = module(x, edge_index)
-            elif isinstance(module, TopKPooling):
+            # Invokes the forward method with edge indices and batch for the pooling modules
+            elif isinstance(module, (TopKPooling, SAGPooling)):
                 x, self.pooling_edge_index, _, _, _, _ = module(x, edge_index, None, batch)
             else:
                 x = module(x)

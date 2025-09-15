@@ -81,7 +81,7 @@ class MetricPlotterParameters:
 
     def __repr__(self) -> AnyStr:
         return (f'\nTitle: {self.title}\nX label: {self.x_label}\nX label Size: {self.x_label_size}'
-                f'\nPlot Filename: {self.self.plot_filename}\nFig size: {self.fig_size}')
+                f'\nPlot Filename: {self.plot_filename}\nFig size: {self.fig_size}')
 
 
 class MetricPlotter(object):

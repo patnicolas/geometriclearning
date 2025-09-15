@@ -68,7 +68,7 @@ class GraphDataLoader(object):
     def __init__(self,
                  dataset_name: AnyStr,
                  sampling_attributes: Dict[AnyStr, Any],
-                 num_subgraph_nodes: Optional[int] = -1) -> None:
+                 num_subgraph_nodes: int = 0) -> None:
         """
         Constructor for the Generic Graph Data Loader
 
@@ -82,7 +82,7 @@ class GraphDataLoader(object):
         """
         from dataset.graph.pyg_datasets import PyGDatasets
 
-        assert num_subgraph_nodes is None or -1 <= num_subgraph_nodes <= 65536, \
+        assert 0 <= num_subgraph_nodes <= 65536, \
             f'Number of subgraph nodes {num_subgraph_nodes} should be [1, 65536]'
 
         # Validate the attributes against the type of loader-sampler
@@ -92,7 +92,7 @@ class GraphDataLoader(object):
         dataset = pyg_datasets()
         # Load a subgraph is specified by the number of nodes
         self.data: Data = GraphDataLoader.__random_subgraph(dataset[0], num_subgraph_nodes) \
-            if num_subgraph_nodes is not None and num_subgraph_nodes > 0 else dataset[0]
+            if num_subgraph_nodes > 0 else dataset[0]
 
         self.subgraph_ratio = self.data.x.shape[0]/ dataset[0].x.shape[0]
         self.num_classes = dataset.num_classes

@@ -26,8 +26,8 @@ Geometric Deep Learning (GDL) is a field of machine learning that generalizes de
 The key concepts are:   
 ✅ __Invariance__: Output stays the same when input is transformed.     
 ✅ __Equivariance__: Preserves transformations. The output transforms predictably when input is transformed.    
-✅__Manifolds__: Operates directly on Non-euclidean or curved spaces or tangent spaces.     
-✅__Locality__: Uses local node structures and infinitesimal neighborhoods.    
+✅ __Manifolds__: Operates directly on Non-euclidean or curved spaces or tangent spaces.     
+✅ __Locality__: Uses local node structures and infinitesimal neighborhoods.    
      
 Here are some references to get you feet wet!     
 
@@ -69,6 +69,7 @@ The directory __geometry__ contains the definition and implementation the variou
 
 ## Lie Groups and Algebras
 Lie groups play a crucial role in Geometric Deep Learning by modeling symmetries such as rotation, translation, and scaling. This enables non-linear models to generalize effectively for tasks like object detection and transformations in generative models.    
+     
 Lie groups have numerous practical applications in various fields:        
 ✅ __Robotics__: Lie groups model the motion of robots, particularly in the context of rotation and translation (using groups like SO(3) and SE(3)).    
 ✅ __Control Theory__: Lie groups are used in the analysis and design of control systems, especially in systems with rotational or symmetrical behavior.     
@@ -85,9 +86,9 @@ __Note__: _Visualizing the SO(3) manifold in three dimensions is inherently chal
 [Reference: SO3 Visualization](https://en.wikipedia.org/wiki/Charts_on_SO(3))  
 
 ## Equivariance
-__Lie-equivariant__ networks are neural networks that are equivariant to transformations from a Lie group, such as rotations, translations, scaling, or Lorentz transformations. These networks are designed to respect the continuous symmetries inherent in many scientific and geometric problems.    
+👉 __Lie-equivariant networks__ are neural networks that are equivariant to transformations from a Lie group, such as rotations, translations, scaling, or Lorentz transformations. These networks are designed to respect the continuous symmetries inherent in many scientific and geometric problems.    
 
-__Group-equivariant Convolutional Neural Networks__ (G-CNN) are a generalization of standard Convolutional Neural Networks designed to respect symmetries in data, especially group symmetries (translational, Rotational, Reflectional and Permutational).    
+👉 __Group-equivariant Convolutional Neural Networks__ (G-CNN) are a generalization of standard Convolutional Neural Networks designed to respect symmetries in data, especially group symmetries (translational, Rotational, Reflectional and Permutational).    
 
 ## Graph Neural Networks    
 ### Overview
@@ -108,7 +109,7 @@ The key Attributes that define the complexity of a Graph Neural Network are
 - Aggregation method      
 - Data transformation prior aggregation       
 
-There are 5 different types of Graph Neural Networks:         
+There are many types of Graph Neural Networks as new ones are regularly introduced in research papers. Here is the list of the 5 common types of Graph Neural Networks:         
 ✅ Graph Convolutional Networks    
 ✅ Graph Attention Networks     
 ✅ GraphSAGE    

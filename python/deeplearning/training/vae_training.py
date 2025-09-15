@@ -95,23 +95,20 @@ class VAETraining(NeuralTraining, ABC):
                    plot_parameters=plot_parameters)
 
     def train(self,
-              model_id: AnyStr,
               neural_model: nn.Module,
               train_loader: DataLoader,
-              eval_loader: DataLoader) -> None:
+              val_loader: DataLoader) -> None:
         """
         Train and evaluation of a neural network given a data loader for a training set, a
         data loader for the evaluation/test1 set and a encoder_model. The weights of the various linear modules
         (neural_blocks) will be initialized if self.hyper_params using a Normal distribution
 
-        @param model_id: Identifier for the model
-        @type model_id: str
         @param neural_model: Neural model as torch module
         @type neural_model: nn_Module
         @param train_loader: Data loader for the training set
         @type train_loader: DataLoader
-        @param eval_loader:  Data loader for the valuation set
-        @type eval_loader: DataLoader
+        @param val_loader:  Data loader for the valuation set
+        @type val_loader: DataLoader
         """
         from deeplearning.model.generative.vae_model import VAEModel
 
@@ -127,9 +124,10 @@ class VAETraining(NeuralTraining, ABC):
             self.__train_epoch(neural_model, epoch, train_loader)
 
             # Set mode and execute evaluation
-            self.__val_epoch(neural_model, epoch, eval_loader)
+            if val_loader is not None:
+                self.__val_epoch(neural_model, epoch, val_loader)
         # Generate summary and save into file
-        self.performance_metrics.summary(f'{model_id}_metrics')
+        self.performance_metrics.summary(f'{neural_model.model_id}_metrics')
 
     @staticmethod
     def _reshape_output_variation(shapes: list, z: torch.Tensor) -> torch.Tensor:
