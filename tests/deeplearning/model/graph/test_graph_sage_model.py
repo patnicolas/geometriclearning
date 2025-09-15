@@ -472,7 +472,6 @@ class GraphSAGEModelTest(unittest.TestCase):
         latency = [1491, 8549, 31024]
         Plotter.plot([latency], labels, plotter_params)
 
-
     @staticmethod
     def load_data(filename: AnyStr, column: AnyStr) -> List[float]:
         import json
@@ -480,7 +479,6 @@ class GraphSAGEModelTest(unittest.TestCase):
         with open(filename, 'r', encoding='utf-8') as f:
             s = json.load(f)
         return s[column]
-
 
     @staticmethod
     def build_config(dataset_name: AnyStr,
