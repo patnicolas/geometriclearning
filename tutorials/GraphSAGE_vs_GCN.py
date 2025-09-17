@@ -25,9 +25,8 @@ import torch.nn as nn
 from dataset.graph.pyg_datasets import PyGDatasets
 from deeplearning.training import TrainingException
 from deeplearning.model.graph.graph_sage_model import GraphSAGEBuilder
+from deeplearning.model.graph.graph_conv_model import GraphConvBuilder
 import python
-
-
 
 @dataclass
 class GraphSAGEvsGCNConfig:
@@ -39,45 +38,63 @@ class GraphSAGEvsGCNConfig:
 
 class GraphSAGEvsGCNTutorial(object):
     """
-        Source code related to the Substack article 'Graph Convolutional vs GraphSAGE showdown'
+        Source code related to the Substack article 'Graph Convolutional or GraphSAGE: shootout'
+        For sake of clarity, the traditional hyperparameters are fixed and only the parameters relevant to
+        the comparison of the 2 models are considered:
+        - Number of neighbors and fanout for message aggregation
+        - Size of graph data
+        - Number of graph neural layers.
 
+        Reference:
     """
 
-    # Hyper-parameters fixed for evaluation
+    # Hyperparameters fixed for evaluation
     lr: float = 0.0008
     epochs: int = 40
     dropout = 0.4
 
-    def __init__(self, dataset_name: AnyStr, configs: List[GraphSAGEvsGCNConfig]) -> None:
-        self.configs = configs
+    def __init__(self, dataset_name: AnyStr, model_configs: List[GraphSAGEvsGCNConfig]) -> None:
+        """
+        Constructor for the comparison of GraphSAGE and GCN
+        @param dataset_name: Name of PyTorch Geometric graph dataset
+        @type dataset_name: str
+        @param model_configs: List of model configuration to compare
+        @type model_configs: List of GraphSAGEvsGCNConfig
+        """
+        self.model_configs = model_configs
         pyg_dataset = PyGDatasets(dataset_name)
         self.dataset = pyg_dataset()
         self.dataset_name = pyg_dataset.name
 
     def train_and_eval(self) -> None:
-        for config in self.configs:
-            self.__process_model(config)
+        """
+            Method to train, validate and compare several variant of GraphSAGE and GCN models
+        """
+        # Walk through the various models
+        for model_config in self.model_configs:
+            # Step 1: Load training parameters
+            train_attrs = self.__get_training_attributes(model_config)
+            # Step 2: Load the model parameters
+            match model_config.model_id:
+                case 'Conv':
+                    model_attrs = self.__build_graph_conv(model_config)
+                case 'SAGE':
+                    model_attrs = self.__build_graph_sage(model_config)
+                case _:
+                    raise TrainingException(f'GNN {model_config.model_id} is not supported')
+
+            logging.info(f'\nTraining attributes\n{train_attrs}\nModel attributes:\n{model_attrs}')
+            # step 3: Load the neighborhood sampling attributes
+            sampling_attrs = GraphSAGEvsGCNTutorial.__get_sampling_attrs(model_config)
+            # step 4: Execute training
+            GraphSAGEvsGCNTutorial.__execute_training(model_id=model_config.model_id,
+                                                      training_attributes=train_attrs,
+                                                      model_attributes=model_attrs,
+                                                      sampling_attrs=sampling_attrs)
 
     """ ----------------------  Private Supporting Methods ------------------------  """
 
-    def __process_model(self, tutorial_config: GraphSAGEvsGCNConfig) -> None:
-        # Parameterization
-
-        train_attrs = self.get_training_attributes(tutorial_config)
-        match tutorial_config.model_id:
-            case 'Conv':
-                model_attrs = self.__build_graph_conv(tutorial_config)
-            case 'SAGE':
-                model_attrs = self.__build_graph_sage(tutorial_config)
-            case _:
-                raise TrainingException(f'GNN {tutorial_config.model_id} is not supported')
-        logging.info(f'\nTraining attributes\n{train_attrs}\nModel attributes:\n{model_attrs}')
-        sampling_attrs = GraphSAGEvsGCNTutorial.__get_sampling_attrs(tutorial_config)
-        GraphSAGEvsGCNTutorial.__execute_training(training_attributes=train_attrs,
-                                                  model_attributes=model_attrs,
-                                                  sampling_attrs=sampling_attrs)
-
-    def get_training_attributes(self, tutorial_config: GraphSAGEvsGCNConfig):
+    def __get_training_attributes(self, tutorial_config: GraphSAGEvsGCNConfig):
         from dataset.graph.graph_data_loader import GraphDataLoader
 
         _data = self.dataset[0]
@@ -197,7 +214,8 @@ class GraphSAGEvsGCNTutorial(object):
         }
 
     @staticmethod
-    def __execute_training(training_attributes: Dict[AnyStr, Any],
+    def __execute_training(model_id: AnyStr,
+                           training_attributes: Dict[AnyStr, Any],
                            model_attributes: Dict[AnyStr, Any],
                            sampling_attrs: Dict[AnyStr, Any],
                            num_subgraph_nodes: int = 0) -> None:
@@ -205,8 +223,9 @@ class GraphSAGEvsGCNTutorial(object):
         from dataset.graph.graph_data_loader import GraphDataLoader
 
         # Step 1:
-        graph_SAGE_builder = GraphSAGEBuilder(model_attributes)
-        graph_SAVE_model = graph_SAGE_builder.build()
+        graph_builder = GraphSAGEBuilder(model_attributes) if model_id == 'SAGE' else GraphConvBuilder(model_attributes)
+        graph_model = graph_builder.build()
+
         # Step 2:  Create the trainer using the training attributes dictionary
         trainer = GNNTraining.build(training_attributes)
         # Step 3: Create the data loader and extract a sub graph
@@ -216,7 +235,7 @@ class GraphSAGEvsGCNTutorial(object):
         logging.info(graph_data_loader)
         train_loader, eval_loader = graph_data_loader()
         # Step 4: Train and Validate the model
-        graph_SAVE_model.train_model(trainer, train_loader, eval_loader)
+        graph_model.train_model(trainer, train_loader, eval_loader)
 
 
 if __name__ == '__main__':
@@ -224,7 +243,7 @@ if __name__ == '__main__':
     model2 = GraphSAGEvsGCNConfig(model_id='Conv', num_layers=4, neighbors=[6, 3], hidden_channels=64)
     model3 = GraphSAGEvsGCNConfig(model_id='SAGE', num_layers=2, neighbors=[6, 3], hidden_channels=64)
     model4 = GraphSAGEvsGCNConfig(model_id='SAGE', num_layers=4, neighbors=[6, 3], hidden_channels=64)
-    tutorial = GraphSAGEvsGCNTutorial(dataset_name='Cora', configs=[model1, model2, model3, model4])
+    tutorial = GraphSAGEvsGCNTutorial(dataset_name='Cora', model_configs=[model1, model2, model3, model4])
     tutorial.train_and_eval()
 
 
