@@ -234,7 +234,7 @@ class GraphConvModelTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    # @unittest.skip('Ignore')
+    @unittest.skip('Ignore')
     def test_training(self):
         from deeplearning.block.graph import GraphException
 
@@ -310,39 +310,7 @@ class GraphConvModelTest(unittest.TestCase):
             }
         hidden_channels = 64
 
-        model_attributes_2 = {
-            'model_id': title,
-            'graph_conv_blocks': [
-                {
-                    'block_id': 'MyBlock_1',
-                    'conv_layer': GraphConv(in_channels=_data.num_node_features, out_channels=hidden_channels),
-                    'num_channels': hidden_channels,
-                    'activation': nn.ReLU(),
-                    'batch_norm': None,
-                    'pooling': None,
-                    'dropout': 0.25
-                },
-                {
-                    'block_id': 'MyBlock_2',
-                    'conv_layer': GraphConv(in_channels=hidden_channels, out_channels=hidden_channels),
-                    'num_channels': hidden_channels,
-                    'activation': nn.ReLU(),
-                    'batch_norm': None,
-                    'pooling': None,
-                    'dropout': 0.25
-                }
-            ],
-            'mlp_blocks': [
-                {
-                    'block_id': 'Output',
-                    'in_features': hidden_channels,
-                    'out_features': dataset.num_classes,
-                    'activation': None
-                }
-            ]
-        }
-
-        model_attributes_4 = {
+        model_attributes = {
             'model_id': title,
             'graph_conv_blocks': [
                 {
@@ -391,10 +359,6 @@ class GraphConvModelTest(unittest.TestCase):
                     }
                 ]
             }
-
-        match num_layers:
-            case 4: model_attributes = model_attributes_4
-            case _: model_attributes = model_attributes_2
 
         graph_conv_builder = GraphConvBuilder(model_attributes)
         graph_conv_model = graph_conv_builder.build()

@@ -142,7 +142,7 @@ class GraphToSimplicialComplexTest(unittest.TestCase):
         logging.info(f'Duration lift_from_graph_neighbors {time.time() - start}')
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
-    def test_features_from_hodge_laplacian_pub_med(self):
+    def test_features_from_hodge_laplacian(self):
         import time
 
         dataset_name = 'KarateClub'
@@ -174,7 +174,7 @@ class GraphToSimplicialComplexTest(unittest.TestCase):
                      f"\nSimplicial faces:\n{faces_elements_str}")
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
-    def test_features_from_hodge_laplacian_karate_club(self):
+    def test_features_from_hodge_laplacian_2(self):
         graph_to_simplicial = GraphToSimplicialComplex[AnyStr](dataset='KarateClub',
                                                                nx_graph=None,
                                                                lifting_method=lift_from_graph_cliques)

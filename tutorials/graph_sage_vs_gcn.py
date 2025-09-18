@@ -66,7 +66,7 @@ class GraphSAGEvsGCNTutorial(object):
         self.dataset = pyg_dataset()
         self.dataset_name = pyg_dataset.name
 
-    def train_and_eval(self) -> None:
+    def evaluate(self) -> None:
         """
             Method to train, validate and compare several variant of GraphSAGE and GCN models
         """
@@ -244,6 +244,6 @@ if __name__ == '__main__':
     model3 = GraphSAGEvsGCNConfig(model_id='SAGE', num_layers=2, neighbors=[6, 3], hidden_channels=64)
     model4 = GraphSAGEvsGCNConfig(model_id='SAGE', num_layers=4, neighbors=[6, 3], hidden_channels=64)
     tutorial = GraphSAGEvsGCNTutorial(dataset_name='Cora', model_configs=[model1, model2, model3, model4])
-    tutorial.train_and_eval()
+    tutorial.evaluate()
 
 
