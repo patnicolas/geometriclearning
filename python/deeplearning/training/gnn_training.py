@@ -148,18 +148,18 @@ class GNNTraining(NeuralTraining):
         neural_model.train()
         total_loss = 0.0
         optimizer = self.hyper_params.optimizer(neural_model)
+        optimizer.zero_grad(set_to_none=True)
         model = neural_model.to(self.target_device, non_blocking=True)
 
         for idx, data in enumerate(train_loader):
             try:
-                optimizer.zero_grad()
                 # Force a conversion to float 32 if necessary
                 if data.x.dtype == torch.float64:
                     data.x = data.x.float()
 
                 # Move data to the GPU and non_blocking
                 data = data.to(device=self.target_device, non_blocking=True)
-                predicted = model(data)  # Call forward - prediction
+                predicted = model(data, chpt=True)  # Call forward - prediction
                 prediction = predicted[data.train_mask]
                 expected = data.y[data.train_mask]
                 raw_loss = self.hyper_params.loss_function(prediction, expected)
@@ -168,9 +168,9 @@ class GNNTraining(NeuralTraining):
                 raw_loss.backward(retain_graph=True)
                 total_loss += raw_loss.item()
 
-                # Monitoring and caching for performance
-                optimizer.step()
-                # self.exec_config.apply_batch_optimization(idx, optimizer)
+                # optimizer.step()
+                # Empty cache, and batch the accumulation of gradient
+                self.exec_config.apply_batch_optimization(idx, optimizer)
             except RuntimeError as e:
                 raise GraphException(str(e))
             except AttributeError as e:

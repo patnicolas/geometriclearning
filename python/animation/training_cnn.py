@@ -69,7 +69,7 @@ class TrainingCNN(Scene):
             outputs = model(images)
             loss = criterion(outputs, labels)
 
-            optimizer.zero_grad()
+            optimizer.zero_grad(set_to_none=True)
             loss.backward()
             optimizer.step()
 

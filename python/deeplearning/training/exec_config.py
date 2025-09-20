@@ -62,7 +62,7 @@ class ExecConfig(object):
         Default setting for the configuration of execution of training: All optimization are disabled
         @param device_conf: Name of the target device
         @type device_conf: str
-        @return: Instance of Execution configuraiotn
+        @return: Instance of Execution configuration
         @rtype: ExecConfig
         """
         return cls(empty_cache=True,
@@ -85,14 +85,14 @@ class ExecConfig(object):
 
             self.accumulator.append(usage)
             logging.info(f'\nAllocated MPS: {format(allocated_mem, ",")}'
-                  f'\nTotal MPS:     {format(total_mem, ",")}'
-                  f'\nUsage MPS:     {usage:.2f}'
+                         f'\nTotal MPS:     {format(total_mem, ",")}'
+                         f'\nUsage MPS:     {usage:.2f}'
             )
 
     def apply_grad_accu_steps(self, idx: int, optimizer: Optimizer) -> None:
         if self.grad_accu_steps == 1 or (idx+1) % self.grad_accu_steps == 0:
             optimizer.step()
-            optimizer.zero_grad()
+            optimizer.zero_grad(set_to_none=True)
 
     def apply_mix_precision(self, x: torch.Tensor) -> torch.Tensor:
         return x.half() if self.mix_precision else x

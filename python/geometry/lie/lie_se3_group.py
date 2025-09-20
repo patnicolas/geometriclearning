@@ -26,7 +26,7 @@ from geomstats.geometry.special_euclidean import SpecialEuclidean
 __all__ = ['SE3Element', 'LieSE3Group', 'SE3ElementDescriptor']
 
 
-@dataclass
+@dataclass(frozen=True)
 class SE3ElementDescriptor:
     """
     Visualization of Algebra matrix with description in a given location for display
@@ -57,7 +57,7 @@ class SE3ElementDescriptor:
                 bbox=dict(facecolor='white', edgecolor='black'))
 
 
-@dataclass
+@dataclass(frozen=True)
 class SE3Element:
     """
     Wrapper for Point or Matrix on SE3 manifold that leverages the Geomstats library.

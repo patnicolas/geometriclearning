@@ -26,7 +26,7 @@ from geomstats.geometry.riemannian_metric import RiemannianMetric
 __all__ = ['SPDTestData', 'BinaryLRManifold']
 
 
-@dataclass
+@dataclass(frozen=True)
 class SPDTestData:
     """
     Wrapper for the test data for the Symmetric Positive Define matrices

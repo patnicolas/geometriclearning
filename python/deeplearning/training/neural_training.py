@@ -123,6 +123,7 @@ class NeuralTraining(object):
         # Initialize the gradient for the optimizer
         loss_function = self.hyper_params.loss_function
         optimizer = self.hyper_params.optimizer(neural_model)
+        optimizer.zero_grad(set_to_none=True)
 
         _, torch_device = self.exec_config.apply_device()
         model = neural_model.to(torch_device, non_blocking=True)
@@ -131,22 +132,20 @@ class NeuralTraining(object):
 
         for features, labels in train_loader:
             try:
-                # Add noise if the mode is defined
-                # features = model.add_noise(features)
                 # Transfer the input data and labels to the target device
                 features = features.to(device=torch_device, non_blocking=True)
                 labels = labels.to(device=torch_device, non_blocking=True)
 
-                predicted = model(features)  # Call forward - prediction
+                # Invoke the forward method for the model and compute the loss function
+                predicted = model(features, chpt=True)  # Call forward - prediction
                 raw_loss = loss_function(predicted, labels)
 
-                # Set back propagation
+                # Set the computation forward graph for the back propagation
                 raw_loss.backward(retain_graph=True)
                 total_loss += raw_loss.item()
 
-                # Monitoring and caching for performance imp
-                self.exec_config.apply_empty_cache()
-                self.exec_config.apply_grad_accu_steps(idx, optimizer)
+                # Empty cache, and batch the accumulation of gradient
+                self.exec_config.apply_batch_optimization(idx, optimizer)
                 idx += 1
             except RuntimeError as e:
                 raise TrainingException(str(e))

@@ -8,7 +8,7 @@ import logging
 import python
 
 @dataclass
-class KalmanPlot:
+class KalmanPlot(frozen=True):
     estimated: List[np.array]
     observed: np.array
     title: AnyStr

@@ -20,12 +20,13 @@ import logging
 import networkx as nx
 import toponetx as tnx
 # Library imports
+from tutorials import Tutorial
 from topology.simplicial.abstract_simplicial_complex import SimplicialElement
 from topology.simplicial.graph_to_simplicial_complex import GraphToSimplicialComplex
 import python
 
 
-class TopologicalLiftingTutorial(object):
+class GraphToSimplicialComplexTutorial(Tutorial):
     """
     Source code related to the Substack article 'Topological Lifting of Graph Neural Networks'
 
@@ -45,10 +46,12 @@ class TopologicalLiftingTutorial(object):
         @param lifting_method: Lifting method wrapping TopoNetX function
         @type lifting_method: Callable
         """
+        super(GraphToSimplicialComplexTutorial, self).__init__()
+
         self.dataset_name = dataset_name
         self.lifting_method = lifting_method
 
-    def evaluate(self) -> None:
+    def eval(self) -> None:
         """
         Implementation of evaluation code as described in Substack article, including timing of execution
         """
@@ -64,7 +67,7 @@ class TopologicalLiftingTutorial(object):
 
         # Step 3: Generate the simplicial elements for nodes, edges and faces.
         #         Number of eigenvectors for node is 4, edges 5 and faces 4
-        num_eigenvectors = (10, 9, 9)
+        num_eigenvectors = (4, 5, 4)
         node_simplicial_elements, edge_simplicial_elements, face_simplicial_elements = (
             GraphToSimplicialComplex.features_from_hodge_laplacian(tnx_simplicial, num_eigenvectors)
         )
@@ -98,6 +101,7 @@ class TopologicalLiftingTutorial(object):
 
 """ 
 Wrapping functions for lifting methods defined in TopoNetX
+'Topological Lifting of Graph Neural Networks' - Code snippet 3
 """
 
 def lift_from_graph_cliques(graph: nx.Graph, params: Dict[str, Any]) -> tnx.SimplicialComplex:
@@ -114,20 +118,21 @@ def lift_from_graph_neighbors(graph: nx.Graph, params: Dict[str, Any]) -> tnx.Si
 
 
 if __name__ == '__main__':
-    topological_lifting_tutorial = TopologicalLiftingTutorial(dataset_name='Cora',
-                                                              lifting_method=lift_from_graph_cliques)
-    topological_lifting_tutorial.evaluate()
+    # Test 1 - Code snippet 4
+    topological_lifting_tutorial = GraphToSimplicialComplexTutorial(dataset_name='Cora',
+                                                                    lifting_method=lift_from_graph_cliques)
+    topological_lifting_tutorial.eval()
+    topological_lifting_tutorial = GraphToSimplicialComplexTutorial(dataset_name='KarateClub',
+                                                                    lifting_method=lift_from_graph_neighbors)
+    topological_lifting_tutorial.eval()
 
-    topological_lifting_tutorial = TopologicalLiftingTutorial(dataset_name='Cora',
-                                                              lifting_method=lift_from_graph_neighbors)
-    topological_lifting_tutorial.evaluate()
+    # Test 2 - Code snippet 6
+    topological_lifting_tutorial = GraphToSimplicialComplexTutorial(dataset_name='PubMed',
+                                                                    lifting_method=lift_from_graph_cliques)
+    topological_lifting_tutorial.eval()
+    topological_lifting_tutorial = GraphToSimplicialComplexTutorial(dataset_name='Cora',
+                                                                    lifting_method=lift_from_graph_neighbors)
+    topological_lifting_tutorial.eval()
 
-    topological_lifting_tutorial = TopologicalLiftingTutorial(dataset_name='KarateClub',
-                                                              lifting_method=lift_from_graph_neighbors)
-    topological_lifting_tutorial.evaluate()
-
-    topological_lifting_tutorial = TopologicalLiftingTutorial(dataset_name='PubMed',
-                                                              lifting_method=lift_from_graph_cliques)
-    topological_lifting_tutorial.evaluate()
 
 

@@ -16,7 +16,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 # Standard Library imports
 from typing import AnyStr
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 # 3rd Party imports
 import numpy as np
 
@@ -26,7 +26,7 @@ class LieException(Exception):
         super(LieException, self).__init__(args, kwargs)
 
 
-@dataclass
+@dataclass(frozen=True)
 class LieElement:
     """
     Wrapper for Point or Matrix on SO3 manifold that leverages the Geomstats library.
@@ -38,7 +38,7 @@ class LieElement:
     """
     group_element: np.array     # Point on the Manifold
     identity_element: np.array  # Reference point (Identity by default)
-    descriptor: AnyStr = 'lie Element'
+    descriptor: str = 'Lie Element'
 
 
 class UnitElements3D:
