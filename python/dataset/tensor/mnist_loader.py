@@ -13,16 +13,20 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dataset.base_loader import BaseLoader
+# Standard Library imports
 from typing import AnyStr
+import logging
+# 3rd Party imports
 from torch.utils.data import Dataset, DataLoader
 from torchvision.transforms import InterpolationMode
 from torchvision.datasets import MNIST
 import torchvision.transforms as transforms
-from dl.model import GrayscaleToRGB
+# Library imports
+from deeplearning.model import GrayscaleToRGB
 from dataset import DatasetException
-import logging
-logger = logging.getLogger('dataset.MNISTLoader')
+from dataset.base_loader import BaseLoader
+import python
+__all__ = ['MNISTLoader']
 
 
 class MNISTLoader(BaseLoader):
@@ -38,11 +42,10 @@ class MNISTLoader(BaseLoader):
         @type resize_image: int
         """
         assert 0 < batch_size <= 8192, f'Batch size {batch_size} should be [1, 8192]'
-        assert 0 < resize_image <= 8192, f'Resize image factor {resize_image} should be [1, 8192]'
+        assert 0 < resize_image <= 8192 or resize_image == -1, f'Resize image factor {resize_image} should be [1, 8192]'
 
         super(MNISTLoader, self).__init__(batch_size=batch_size, num_samples=-1)
         self.resize_image = resize_image
-
 
     @staticmethod
     def show_samples(images_set: Dataset, is_random: bool = True) -> None:
@@ -76,10 +79,11 @@ class MNISTLoader(BaseLoader):
         train_dataset, eval_dataset = self._extract_datasets(root_path)
         return train_dataset, eval_dataset
 
-
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):
         """
+        Polymorphic call
         Extract the training data and labels and test data and labels for this convolutional network.
+
         @param root_path: Root path to CIFAR10 data
         @type root_path: AnyStr
         @return Tuple (train data, labels, test data, labels)
@@ -114,6 +118,6 @@ class MNISTLoader(BaseLoader):
             )
             return train_dataset, eval_dataset
 
-        except RuntimeError as e:
-            logger.error(str(e))
+        except (RuntimeError | ValueError | TypeError) as e:
+            logging.error(str(e))
             raise DatasetException(str(e))

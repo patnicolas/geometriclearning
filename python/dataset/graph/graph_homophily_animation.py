@@ -13,16 +13,18 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
 from typing import List
+# 3rd Party imports
 import matplotlib.pyplot as plt
 from matplotlib.collections import PathCollection
 import matplotlib.animation as animation
 from networkx import Graph
 import networkx as nx
 from networkx.classes.reportviews import NodeView
+# Library imports
 from util.base_animation import BaseAnimation
 __all__ = ['GraphHomophilyAnimation']
-
 
 class GraphHomophilyAnimation(BaseAnimation):
     def __init__(self,
