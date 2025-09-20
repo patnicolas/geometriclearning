@@ -24,7 +24,7 @@ from dataclasses import dataclass
 __all__ = ['BoxParameter', 'FractalDimImage']
 
 
-@dataclass
+@dataclass(frozen=True)
 class BoxParameter:
     """
     Data class that wraps box parameters

@@ -22,13 +22,14 @@ from dataclasses import dataclass
 from torch_geometric.nn import SAGEConv, GraphConv
 import torch.nn as nn
 # Library imports
+from tutorials import Tutorial
 from dataset.graph.pyg_datasets import PyGDatasets
 from deeplearning.training import TrainingException
 from deeplearning.model.graph.graph_sage_model import GraphSAGEBuilder
 from deeplearning.model.graph.graph_conv_model import GraphConvBuilder
 import python
 
-@dataclass
+@dataclass(frozen=True)
 class GraphSAGEvsGCNConfig:
     model_id: AnyStr
     num_layers: int
@@ -36,7 +37,7 @@ class GraphSAGEvsGCNConfig:
     hidden_channels: int
 
 
-class GraphSAGEvsGCNTutorial(object):
+class GraphSAGEvsGCNTutorial(Tutorial):
     """
         Source code related to the Substack article 'Graph Convolutional or GraphSAGE: shootout'
         For sake of clarity, the traditional hyperparameters are fixed and only the parameters relevant to
@@ -47,7 +48,6 @@ class GraphSAGEvsGCNTutorial(object):
 
         Reference:
     """
-
     # Hyperparameters fixed for evaluation
     lr: float = 0.0008
     epochs: int = 40
@@ -61,12 +61,14 @@ class GraphSAGEvsGCNTutorial(object):
         @param model_configs: List of model configuration to compare
         @type model_configs: List of GraphSAGEvsGCNConfig
         """
+        super(GraphSAGEvsGCNTutorial, self).__init__()
+
         self.model_configs = model_configs
         pyg_dataset = PyGDatasets(dataset_name)
         self.dataset = pyg_dataset()
         self.dataset_name = pyg_dataset.name
 
-    def train_and_eval(self) -> None:
+    def evaluate(self) -> None:
         """
             Method to train, validate and compare several variant of GraphSAGE and GCN models
         """
@@ -244,6 +246,6 @@ if __name__ == '__main__':
     model3 = GraphSAGEvsGCNConfig(model_id='SAGE', num_layers=2, neighbors=[6, 3], hidden_channels=64)
     model4 = GraphSAGEvsGCNConfig(model_id='SAGE', num_layers=4, neighbors=[6, 3], hidden_channels=64)
     tutorial = GraphSAGEvsGCNTutorial(dataset_name='Cora', model_configs=[model1, model2, model3, model4])
-    tutorial.train_and_eval()
+    tutorial.evaluate()
 
 

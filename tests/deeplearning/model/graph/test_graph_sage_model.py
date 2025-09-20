@@ -527,7 +527,7 @@ class GraphSAGEModelTest(unittest.TestCase):
             'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1', 'AuROC', 'AuPR']
         }
 
-        model_attributes_2 = {
+        model_attributes = {
             'model_id': f'Graph{title}',
             'graph_SAGE_blocks': [
                 {
@@ -536,7 +536,7 @@ class GraphSAGEModelTest(unittest.TestCase):
                     'num_channels': hidden_channels,
                     'activation': nn.ReLU(),
                     'batch_norm': None,
-                    'dropout': 0.25
+                    'dropout': 0.4
                 },
                 {
                     'block_id': 'SAGE Layer 2',
@@ -544,7 +544,23 @@ class GraphSAGEModelTest(unittest.TestCase):
                     'num_channels': hidden_channels,
                     'activation': nn.ReLU(),
                     'batch_norm': None,
-                    'dropout': 0.25
+                    'dropout': 0.4
+                },
+                {
+                    'block_id': 'SAGE Layer 2',
+                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': None,
+                    'dropout': 0.4
+                },
+                {
+                    'block_id': 'SAGE Layer 2',
+                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
+                    'num_channels': hidden_channels,
+                    'activation': nn.ReLU(),
+                    'batch_norm': None,
+                    'dropout': 0.4
                 }
             ],
             'mlp_blocks': [
@@ -556,119 +572,6 @@ class GraphSAGEModelTest(unittest.TestCase):
                 }
             ]
         }
-
-        model_attributes_4 = {
-            'model_id': f'Graph{title}',
-            'graph_SAGE_blocks': [
-                {
-                    'block_id': 'SAGE Layer 1',
-                    'SAGE_layer': SAGEConv(in_channels=_dataset[0].num_node_features, out_channels=hidden_channels),
-                    'num_channels': hidden_channels,
-                    'activation': nn.ReLU(),
-                    'batch_norm': None,
-                    'dropout': 0.25
-                },
-                {
-                    'block_id': 'SAGE Layer 2',
-                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
-                    'num_channels': hidden_channels,
-                    'activation': nn.ReLU(),
-                    'batch_norm': None,
-                    'dropout': 0.25
-                },
-                {
-                    'block_id': 'SAGE Layer 2',
-                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
-                    'num_channels': hidden_channels,
-                    'activation': nn.ReLU(),
-                    'batch_norm': None,
-                    'dropout': 0.25
-                },
-                {
-                    'block_id': 'SAGE Layer 2',
-                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
-                    'num_channels': hidden_channels,
-                    'activation': nn.ReLU(),
-                    'batch_norm': None,
-                    'dropout': 0.25
-                }
-            ],
-            'mlp_blocks': [
-                {
-                    'block_id': 'Node classification block',
-                    'in_features': hidden_channels,
-                    'out_features': _dataset.num_classes,
-                    'activation': None
-                }
-            ]
-        }
-
-        model_attributes_6 = {
-            'model_id': f'Graph{title}',
-            'graph_SAGE_blocks': [
-                {
-                    'block_id': 'SAGE Layer 1',
-                    'SAGE_layer': SAGEConv(in_channels=_dataset[0].num_node_features, out_channels=hidden_channels),
-                    'num_channels': hidden_channels,
-                    'activation': nn.ReLU(),
-                    'batch_norm': None,
-                    'dropout': 0.25
-                },
-                {
-                    'block_id': 'SAGE Layer 2',
-                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
-                    'num_channels': hidden_channels,
-                    'activation': nn.ReLU(),
-                    'batch_norm': None,
-                    'dropout': 0.25
-                },
-                {
-                    'block_id': 'SAGE Layer 2',
-                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
-                    'num_channels': hidden_channels,
-                    'activation': nn.ReLU(),
-                    'batch_norm': None,
-                    'dropout': 0.25
-                },
-                {
-                    'block_id': 'SAGE Layer 2',
-                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
-                    'num_channels': hidden_channels,
-                    'activation': nn.ReLU(),
-                    'batch_norm': None,
-                    'dropout': 0.25
-                },
-                {
-                    'block_id': 'SAGE Layer 2',
-                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
-                    'num_channels': hidden_channels,
-                    'activation': nn.ReLU(),
-                    'batch_norm': None,
-                    'dropout': 0.25
-                },
-                {
-                    'block_id': 'SAGE Layer 2',
-                    'SAGE_layer': SAGEConv(in_channels=hidden_channels, out_channels=hidden_channels),
-                    'num_channels': hidden_channels,
-                    'activation': nn.ReLU(),
-                    'batch_norm': None,
-                    'dropout': 0.25
-                }
-            ],
-            'mlp_blocks': [
-                {
-                    'block_id': 'Node classification block',
-                    'in_features': hidden_channels,
-                    'out_features': _dataset.num_classes,
-                    'activation': None
-                }
-            ]
-        }
-        match num_layers:
-            case 2: model_attributes = model_attributes_2
-            case 4: model_attributes = model_attributes_4
-            case 6: model_attributes = model_attributes_6
-            case _: model_attributes = model_attributes_2
         return training_attributes, model_attributes
 
     @staticmethod

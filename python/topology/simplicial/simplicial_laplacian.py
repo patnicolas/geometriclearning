@@ -32,7 +32,7 @@ class SimplicialLaplacianType(Enum):
     HodgeLaplacian = 'Hodge-Laplacian'
 
 
-@dataclass
+@dataclass(frozen=True)
 class SimplicialLaplacian:
     """
     Define the components of the Laplacian for Simplicial Complexes

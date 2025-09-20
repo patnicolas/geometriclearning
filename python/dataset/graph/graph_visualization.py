@@ -20,7 +20,7 @@ from typing import AnyStr
 from torch_geometric.data import Data
 __all__ = ['SubgraphExtractor', 'GraphVisualization']
 
-@dataclass
+@dataclass(frozen=True)
 class SubgraphExtractor:
     """
     Attributes for sampling a graph for nodes and edges

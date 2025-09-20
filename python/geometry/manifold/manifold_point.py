@@ -24,7 +24,7 @@ from geomstats.geometry.base import LevelSet
 __all__ = ['ManifoldPoint']
 
 
-@dataclass
+@dataclass(frozen=True)
 class ManifoldPoint:
     """
         Data class for defining a Manifold point as a pair of data point on the manifold and
