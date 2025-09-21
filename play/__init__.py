@@ -28,5 +28,5 @@ class Play(ABC):
     def end(self) -> AnyStr:
         return '{:.3f}'.format(time.time() - self.start)
 
-    def eval(self) -> None:
+    def play(self) -> None:
         pass

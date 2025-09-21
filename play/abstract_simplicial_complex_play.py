@@ -52,29 +52,29 @@ class AbstractSimplicialComplexPlay(Play):
             edge_node_indices=edge_set,
             face_node_indices=face_set)
 
-    def eval(self) -> None:
+    def play(self) -> None:
         """
             Implementation of the evaluation code for the Substack article "Exploring Simplicial Complexes for Deep
             Learning: Concepts to Code" - Code snippets 5, 7 & 9
         """
-        self.eval_adjacency()
-        self.eval_incidence()
-        self.eval_up_laplacian()
-        self.eval_down_laplacian()
-        self.eval_hodge_laplacian()
+        self.play_adjacency()
+        self.play_incidence()
+        self.play_up_laplacian()
+        self.play_down_laplacian()
+        self.play_hodge_laplacian()
 
     # Test 1 - Code snippet 5
-    def eval_adjacency(self) -> None:
+    def play_adjacency(self) -> None:
         logging.info(f'\nAdjacency matrix:\n{self.abstract_simplicial_complex.adjacency_matrix()}')
 
     # Test 2 - Code snippet 7
-    def eval_incidence(self) -> None:
+    def play_incidence(self) -> None:
         for rank in range(1, 3):
             incidence_matrix = self.abstract_simplicial_complex.incidence_matrix(rank=rank)
             logging.info(f'\nDirected incidence matrix rank {rank}:\n{incidence_matrix}')
 
     # Test 3 - Code snippet 9
-    def eval_up_laplacian(self) -> None:
+    def play_up_laplacian(self) -> None:
         simplicial_laplacian_0 = SimplicialLaplacian(simplicial_laplacian_type=SimplicialLaplacianType.UpLaplacian,
                                                      rank=0,
                                                      signed=True)
@@ -87,7 +87,7 @@ class AbstractSimplicialComplexPlay(Play):
         logging.info(f'\nUP-Laplacian rank 1\n{up_laplacian_rk1}')
 
     # Test 4
-    def eval_down_laplacian(self) -> None:
+    def play_down_laplacian(self) -> None:
         simplicial_laplacian_1 = SimplicialLaplacian(
             simplicial_laplacian_type=SimplicialLaplacianType.DownLaplacian,
             rank=1,
@@ -102,7 +102,7 @@ class AbstractSimplicialComplexPlay(Play):
         logging.info(f'\nDown-Laplacian rank 2\n{down_laplacian_rk2}')
 
     # Test 5
-    def eval_hodge_laplacian(self) -> None:
+    def play_hodge_laplacian(self) -> None:
         simplicial_laplacian_0 = SimplicialLaplacian(
             simplicial_laplacian_type=SimplicialLaplacianType.HodgeLaplacian,
             rank=0,
@@ -132,25 +132,25 @@ if __name__ == '__main__':
 
     try:
         # Test 1
-        simplicial_complex_tutorial = AbstractSimplicialComplexPlay(node_feature_dimension=4,
-                                                                    edge_set=test_edge_set,
-                                                                    face_set=test_face_set)
-        simplicial_complex_tutorial.eval_adjacency()
+        simplicial_complex_play = AbstractSimplicialComplexPlay(node_feature_dimension=4,
+                                                                edge_set=test_edge_set,
+                                                                face_set=test_face_set)
+        simplicial_complex_play.play_adjacency()
 
         # Test 2
-        simplicial_complex_tutorial_2 = AbstractSimplicialComplexPlay(node_feature_dimension=5,
-                                                                      edge_set=test_edge_set,
-                                                                      face_set=test_face_set)
-        simplicial_complex_tutorial_2.eval_incidence()
+        simplicial_complex_play_2 = AbstractSimplicialComplexPlay(node_feature_dimension=5,
+                                                                  edge_set=test_edge_set,
+                                                                  face_set=test_face_set)
+        simplicial_complex_play_2.play_incidence()
 
         # Test 3
-        simplicial_complex_tutorial.eval_up_laplacian()
+        simplicial_complex_play.play_up_laplacian()
 
         # Test 4
-        simplicial_complex_tutorial.eval_down_laplacian()
+        simplicial_complex_play.play_down_laplacian()
 
         # Test 5
-        simplicial_complex_tutorial.eval_hodge_laplacian()
+        simplicial_complex_play.play_hodge_laplacian()
         assert True
     except AssertionError as e:
         logging.error(e)

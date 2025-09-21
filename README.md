@@ -206,6 +206,7 @@ The source tree is organized as follows:
 - Features in __python/__ 
 - Unit tests in __tests/__ 
 - Newsletter specific evaluation code in __play/__      
+- Animation in __tests/anim__   
 
 ## File & class Naming convention
 👉 Features file: python/topology/simplicial/abstract_simplicial_complex.py   

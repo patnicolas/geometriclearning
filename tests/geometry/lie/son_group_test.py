@@ -1,6 +1,6 @@
 import unittest
 
-from geometry.lie import SOnGroup
+from geometry.lie.son_group import SOnGroup
 import logging
 import torch
 from geometry.lie import LieException
@@ -403,18 +403,18 @@ class SOnGroupTest(unittest.TestCase):
         try:
             dim = 4
             son_group = SOnGroup(dim=dim, equip=True)
-            matrix = son_group.random_matrix()
+            rotation = son_group.random_matrix()
             # Validate rotation is SO(4)
-            SOnGroup.validate_points(matrix, dim=dim)
+            SOnGroup.validate_points(rotation, dim=dim)
 
-            inverse_matrix = son_group.inverse(matrix)
+            inverse_rotation = son_group.inverse(rotation)
             # Validate inverse rotation is SO(4)
-            SOnGroup.validate_points(inverse_matrix, dim=dim)
-            logging.info(f'\nMatrix:\n{matrix}\nInverse matrix:\n{inverse_matrix}')
+            SOnGroup.validate_points(inverse_rotation, dim=dim)
+            logging.info(f'\nRotation:\n{rotation}\nInverse Rotation:\n{inverse_rotation}')
 
             # Verify inverse
             identity = torch.eye(dim)
-            son_group.equal(matrix.T @ inverse_matrix, identity)
+            son_group.equal(rotation.T @ inverse_rotation, identity)
         except AssertionError as e:
             logging.error(e)
             self.assertTrue(False)

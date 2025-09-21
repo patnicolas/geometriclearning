@@ -51,6 +51,9 @@ class SOnGroup(object):
         basis_matrices = '\n'.join([f'{k}: {str(v)}' for k, v in SOnGroup.__basis_matrices(self.__group.n).items()])
         return f'{so_type}, representation: {representation}, {is_equipped} metric\n{basis_matrices}'
 
+    def dimension(self) -> int:
+        return self.__group.dim
+
     def lie_algebra(self, point: torch.Tensor, identity: torch.Tensor = None) -> torch.Tensor:
         """
         Compute the lie algebra (Rotation, skewed matrices) from a point on a manifold. The method leverages Geomstats
