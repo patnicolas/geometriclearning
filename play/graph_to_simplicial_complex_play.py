@@ -32,7 +32,7 @@ class GraphToSimplicialComplexPlay(Play):
     Source code related to the Substack article 'Topological Lifting of Graph Neural Networks'
 
     References:
-        Substack; https://patricknicolas.substack.com/p/topological-lifting-of-graph-neural
+        Substack: https://patricknicolas.substack.com/p/topological-lifting-of-graph-neural
         Github TopoNetX: https://github.com/pyt-team/TopoNetX/blob/main/toponetx/transform/graph_to_simplicial_complex.py
     """
     def __init__(self,
@@ -52,7 +52,7 @@ class GraphToSimplicialComplexPlay(Play):
         self.dataset_name = dataset_name
         self.lifting_method = lifting_method
 
-    def eval(self) -> None:
+    def play(self) -> None:
         """
         Implementation of evaluation code as described in Substack article, including timing of execution
         """
@@ -123,18 +123,18 @@ if __name__ == '__main__':
         # Test 1 - Code snippet 4
         topological_lifting_tutorial = GraphToSimplicialComplexPlay(dataset_name='Cora',
                                                                     lifting_method=lift_from_graph_cliques)
-        topological_lifting_tutorial.eval()
+        topological_lifting_tutorial.play()
         topological_lifting_tutorial = GraphToSimplicialComplexPlay(dataset_name='KarateClub',
                                                                     lifting_method=lift_from_graph_neighbors)
-        topological_lifting_tutorial.eval()
+        topological_lifting_tutorial.play()
 
         # Test 2 - Code snippet 6
         topological_lifting_tutorial = GraphToSimplicialComplexPlay(dataset_name='PubMed',
                                                                     lifting_method=lift_from_graph_cliques)
-        topological_lifting_tutorial.eval()
+        topological_lifting_tutorial.play()
         topological_lifting_tutorial = GraphToSimplicialComplexPlay(dataset_name='Cora',
                                                                     lifting_method=lift_from_graph_neighbors)
-        topological_lifting_tutorial.eval()
+        topological_lifting_tutorial.play()
     except AssertionError as e:
         logging.error(e)
         assert False

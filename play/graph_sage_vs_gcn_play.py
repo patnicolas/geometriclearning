@@ -71,7 +71,7 @@ class GraphSAGEvsGCNPlay(Play):
         self.dataset = pyg_dataset()
         self.dataset_name = pyg_dataset.name
 
-    def eval(self) -> None:
+    def play(self) -> None:
         """
             Method to train, validate and compare several variant of GraphSAGE and GCN models
         """
@@ -250,7 +250,7 @@ if __name__ == '__main__':
         model3 = GraphSAGEvsGCNConfig(model_id='SAGE', num_layers=2, neighbors=[6, 3], hidden_channels=64)
         model4 = GraphSAGEvsGCNConfig(model_id='SAGE', num_layers=4, neighbors=[6, 3], hidden_channels=64)
         tutorial = GraphSAGEvsGCNPlay(dataset_name='Cora', model_configs=[model1, model2, model3, model4])
-        tutorial.eval()
+        tutorial.play()
     except AssertionError as e:
         logging.error(e)
         assert False

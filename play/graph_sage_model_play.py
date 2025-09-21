@@ -49,7 +49,7 @@ class GraphSAGEModelPlay(Play):
         self.training_attributes = training_attributes
         self.sampling_attributes = sampling_attributes
 
-    def eval(self) -> None:
+    def play(self) -> None:
         """
             Implementation of the evaluation of GraphSAGE model as described in Substack article ''Revisiting Inductive
              Graph Neural Networks' - Code snippet 7
@@ -167,7 +167,7 @@ if __name__ == '__main__':
                                                        model_attributes=test_model_attributes,
                                                        training_attributes=test_training_attributes,
                                                        sampling_attributes=test_sampling_attributes)
-        graph_sage_model_tutorial.eval()
+        graph_sage_model_tutorial.play()
         assert True
     except AssertionError as e:
         logging.error(e)
