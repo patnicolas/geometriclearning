@@ -205,7 +205,15 @@ The directory __control__ contains the implementation of __Kalman__ filters.
 The source tree is organized as follows: 
 - Features in __python/__ 
 - Unit tests in __tests/__ 
-- Newsletter specific evaluation code in __play/__
+- Newsletter specific evaluation code in __play/__      
+
+## File & class Naming convention
+👉 Features file: python/topology/simplicial/abstract_simplicial_complex.py   
+👉 Features Class: AbstractSimplicialComplex.py     
+👉 Unit test file: python/topology/simplicial/abstract_simplicial_complex_test.py   
+👉 Unit test class:  python/topology/simplicial/AbstractSimplicialComplexTest.py     
+👉 Substack newsletter evaluation code:  play/AbstractSimplicialComplexPlay.py   
+
 
 
 ## 📚 Modules
