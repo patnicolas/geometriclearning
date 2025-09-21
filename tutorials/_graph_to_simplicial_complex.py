@@ -23,6 +23,7 @@ import toponetx as tnx
 from tutorials import Tutorial
 from topology.simplicial.abstract_simplicial_complex import SimplicialElement
 from topology.simplicial.graph_to_simplicial_complex import GraphToSimplicialComplex
+from deeplearning.training import TrainingException
 import python
 
 
@@ -118,21 +119,29 @@ def lift_from_graph_neighbors(graph: nx.Graph, params: Dict[str, Any]) -> tnx.Si
 
 
 if __name__ == '__main__':
-    # Test 1 - Code snippet 4
-    topological_lifting_tutorial = GraphToSimplicialComplexTutorial(dataset_name='Cora',
-                                                                    lifting_method=lift_from_graph_cliques)
-    topological_lifting_tutorial.eval()
-    topological_lifting_tutorial = GraphToSimplicialComplexTutorial(dataset_name='KarateClub',
-                                                                    lifting_method=lift_from_graph_neighbors)
-    topological_lifting_tutorial.eval()
+    try:
+        # Test 1 - Code snippet 4
+        topological_lifting_tutorial = GraphToSimplicialComplexTutorial(dataset_name='Cora',
+                                                                        lifting_method=lift_from_graph_cliques)
+        topological_lifting_tutorial.eval()
+        topological_lifting_tutorial = GraphToSimplicialComplexTutorial(dataset_name='KarateClub',
+                                                                        lifting_method=lift_from_graph_neighbors)
+        topological_lifting_tutorial.eval()
 
-    # Test 2 - Code snippet 6
-    topological_lifting_tutorial = GraphToSimplicialComplexTutorial(dataset_name='PubMed',
-                                                                    lifting_method=lift_from_graph_cliques)
-    topological_lifting_tutorial.eval()
-    topological_lifting_tutorial = GraphToSimplicialComplexTutorial(dataset_name='Cora',
-                                                                    lifting_method=lift_from_graph_neighbors)
-    topological_lifting_tutorial.eval()
+        # Test 2 - Code snippet 6
+        topological_lifting_tutorial = GraphToSimplicialComplexTutorial(dataset_name='PubMed',
+                                                                        lifting_method=lift_from_graph_cliques)
+        topological_lifting_tutorial.eval()
+        topological_lifting_tutorial = GraphToSimplicialComplexTutorial(dataset_name='Cora',
+                                                                        lifting_method=lift_from_graph_neighbors)
+        topological_lifting_tutorial.eval()
+    except AssertionError as e:
+        logging.error(e)
+        assert False
+    except TrainingException as e:
+        logging.error(e)
+        assert False
+
 
 
 

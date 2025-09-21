@@ -36,6 +36,15 @@ class AbstractSimplicialComplexTutorial(Tutorial):
                  node_feature_dimension: int,
                  edge_set: List[Tuple[int, ...]],
                  face_set: List[Tuple[int, ...]]) -> None:
+        """
+        Constructor for this tutorial
+        @param node_feature_dimension: Dimension (number of features) for nodes
+        @type node_feature_dimension: int
+        @param edge_set: List of tuple (source_node_index, target_node_index)
+        @type edge_set: List[Tuple[int, int]
+        @param face_set: List of tuple for face/triangles (first_node_index, second_node_index, third_node_index)
+        @type face_set: List[Tuple[int, int, int]
+        """
         super(AbstractSimplicialComplexTutorial, self).__init__()
 
         self.abstract_simplicial_complex = AbstractSimplicialComplex.random(
@@ -44,6 +53,10 @@ class AbstractSimplicialComplexTutorial(Tutorial):
             face_node_indices=face_set)
 
     def eval(self) -> None:
+        """
+            Implementation of the evaluation code for the Substack article "Exploring Simplicial Complexes for Deep
+            Learning: Concepts to Code" - Code snippets 5, 7 & 9
+        """
         self.eval_adjacency()
         self.eval_incidence()
         self.eval_up_laplacian()
