@@ -18,13 +18,13 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from typing import List, Tuple
 import logging
 # Library imports
-from tutorials import Tutorial
+from play import Play
 from topology.simplicial.abstract_simplicial_complex import AbstractSimplicialComplex
 from topology.simplicial.simplicial_laplacian import SimplicialLaplacianType, SimplicialLaplacian
 import python
 
 
-class AbstractSimplicialComplexTutorial(Tutorial):
+class AbstractSimplicialComplexPlay(Play):
     """
         Wrapper to implement the evaluation of Simplicial Simplex as defined in Substack article:
         "Exploring Simplicial Complexes for Deep Learning: Concepts to Code"
@@ -45,7 +45,7 @@ class AbstractSimplicialComplexTutorial(Tutorial):
         @param face_set: List of tuple for face/triangles (first_node_index, second_node_index, third_node_index)
         @type face_set: List[Tuple[int, int, int]
         """
-        super(AbstractSimplicialComplexTutorial, self).__init__()
+        super(AbstractSimplicialComplexPlay, self).__init__()
 
         self.abstract_simplicial_complex = AbstractSimplicialComplex.random(
             node_feature_dimension=node_feature_dimension,
@@ -132,15 +132,15 @@ if __name__ == '__main__':
 
     try:
         # Test 1
-        simplicial_complex_tutorial = AbstractSimplicialComplexTutorial(node_feature_dimension=4,
-                                                                        edge_set=test_edge_set,
-                                                                        face_set=test_face_set)
+        simplicial_complex_tutorial = AbstractSimplicialComplexPlay(node_feature_dimension=4,
+                                                                    edge_set=test_edge_set,
+                                                                    face_set=test_face_set)
         simplicial_complex_tutorial.eval_adjacency()
 
         # Test 2
-        simplicial_complex_tutorial_2 = AbstractSimplicialComplexTutorial(node_feature_dimension=5,
-                                                                          edge_set=test_edge_set,
-                                                                          face_set=test_face_set)
+        simplicial_complex_tutorial_2 = AbstractSimplicialComplexPlay(node_feature_dimension=5,
+                                                                      edge_set=test_edge_set,
+                                                                      face_set=test_face_set)
         simplicial_complex_tutorial_2.eval_incidence()
 
         # Test 3

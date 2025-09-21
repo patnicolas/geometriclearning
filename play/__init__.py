@@ -17,8 +17,11 @@ from abc import ABC
 from typing import AnyStr
 import time
 
+"""
+    This Python modules contains all the 
+"""
 
-class Tutorial(ABC):
+class Play(ABC):
     def __init__(self) -> None:
         self.start = time.time()
 

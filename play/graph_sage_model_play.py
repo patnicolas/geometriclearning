@@ -21,7 +21,7 @@ import logging
 from torch_geometric.nn import SAGEConv
 import torch.nn as nn
 # Library imports
-from tutorials import Tutorial
+from play import Play
 from dataset.graph.graph_data_loader import GraphDataLoader
 from dataset.graph.pyg_datasets import PyGDatasets
 from deeplearning.training import TrainingException
@@ -30,7 +30,7 @@ from deeplearning.training.gnn_training import GNNTraining
 import python
 
 
-class GraphSAGEModelTutorial(Tutorial):
+class GraphSAGEModelPlay(Play):
     """
       Source code related to the Substack article 'Revisiting Inductive Graph Neural Networks'. As with similar
       tutorial classes, model, training and neighborhood sampling are defined in declarative form (JSON string).
@@ -42,7 +42,7 @@ class GraphSAGEModelTutorial(Tutorial):
                  model_attributes: Dict[AnyStr, Any],
                  training_attributes: Dict[AnyStr, Any],
                  sampling_attributes: Dict[AnyStr, Any]) -> None:
-        super(GraphSAGEModelTutorial, self).__init__()
+        super(GraphSAGEModelPlay, self).__init__()
 
         self.dataset_name = dataset_name
         self.model_attributes = model_attributes
@@ -163,10 +163,10 @@ if __name__ == '__main__':
     }
 
     try:
-        graph_sage_model_tutorial = GraphSAGEModelTutorial(dataset_name=test_dataset_name,
-                                                           model_attributes=test_model_attributes,
-                                                           training_attributes=test_training_attributes,
-                                                           sampling_attributes=test_sampling_attributes)
+        graph_sage_model_tutorial = GraphSAGEModelPlay(dataset_name=test_dataset_name,
+                                                       model_attributes=test_model_attributes,
+                                                       training_attributes=test_training_attributes,
+                                                       sampling_attributes=test_sampling_attributes)
         graph_sage_model_tutorial.eval()
         assert True
     except AssertionError as e:

@@ -199,8 +199,51 @@ The directory __control__ contains the implementation of __Kalman__ filters.
     
 ![KalmanFilter](images/Kalman_Filter.png)
 
-# ⚙️ Reusable Neural Components Design
-## Neural Blocks
+# ⚙️ Implementation
+
+## Source Code Tree
+The source tree is organized as follows: 
+- Features in __python/__ 
+- Unit tests in __tests/__ 
+- Newsletter specific evaluation code in __play/__
+
+
+## 📚 Modules
+![Modules Navigation Map](images/Geometric_Learning_Modules_Diagram.png)   
+
+
+##  🛠️ Environment
+
+| Library         | Version |
+|:----------------|:--------|
+| Python          | 3.12.9  |
+| SymPy           | 1.12    |
+| Numpy           | 2.1.3   |
+| Pydantic        | 2.4.1   |
+| Shap            | 0.43.0  |
+| torch           | 2.6.0   |
+| torchVision     | 0.20.1  |
+| torch-geometric | 2.6.1   |
+| torch_sparse    | 0.6.18  |
+| torch_scatter   | 2.12    |
+| torch_cluster | 1.6.3   |
+| Scikit-learn    | 1.5.2   |
+| Geomstats       | 2.8.0   |
+| Jax | 0.4.34  |
+| PyTest | 8.3.3   |
+| matplotlib | 3.10.0  |
+| ffmpeg | 1.14  |
+| latex | 0.7.0  |
+| manim | 0.19.0  |
+| memory-profiler | 0.61.0  |
+| networkx | 3.4.2 |
+| optuna | 4.4.0 |
+| pillow | 11.1.0 |
+| pytorch-lightning | 2.5.1 |
+   
+## 🧩 Design
+
+### Neural Blocks
 A __block__ is defined as a logical grouping of neural components, implemented as Pytorch __Module__. All these components are assembled into a sequential set of torch modules.   
 ```
 class NeuralBlock(nn.Module):
@@ -210,7 +253,7 @@ class NeuralBlock(nn.Module):
         self.block_id = block_id
 ```
 
-### Multi-layer Perceptron Block
+#### Multi-layer Perceptron Block
 A MLP block a __fully-connected layer__, an activation function, and possibly a drop-out component.    
      
 ![MLP Block](images/MLP_Block.png)    
@@ -234,7 +277,7 @@ class MLPBlock(NeuralBlock):
         self.activation_module = activation_module
 ```
     
-### Convolutional Network Block
+#### Convolutional Network Block
 
 A Convolutional block may include a __convolutional layer__, kernel, batch normalization and possibly a drop-out components of type __Module__.     
      
@@ -268,7 +311,7 @@ class Conv2dBlock(ConvBlock):
             modules.append(drop_out_module)
         super(Conv2dBlock, self).__init__(block_id, modules)
 ```
-### Graph Neural Block
+#### Graph Neural Block
 
 ![Graph Block](images/GNN_Block.png)    
     
@@ -299,7 +342,7 @@ class GConvBlock(nn.Module):
         self.modules = modules
 ```
     
-### Neural Blocks Class Hierarchy
+#### Neural Blocks Class Hierarchy
     
 The current hierarchy of neural blocks is defined as:     
       
@@ -307,7 +350,7 @@ The current hierarchy of neural blocks is defined as:
    
 
     
-## Neural Models
+### Neural Models
 Neural models are dynamic sequence of neural blocks that are assembled and converted into a sequence of torch __Module__ instances.   
 The Base class for Neural model is defined as     
 ```
@@ -322,7 +365,7 @@ class NeuralModel(torch.nn.Module, ABC):
 ```
 Each model inherits from __NeuralModel__ (i.e. Convolutional neural network type : __ConvModel__)
 
-### MLP Model Builder
+#### MLP Model Builder
 A Multi-layer Perceptron generated from reusable neural blocks
     
 ![MLP Network Model](images/MLP_Network.png)   
@@ -360,7 +403,7 @@ class MLPBuilder(NeuralBuilder):
         return MLPModel(self._attributes['model_id'], mlp_blocks)
 ```
 
-### Convolutional Model Builder
+#### Convolutional Model Builder
 A convolutional neural network is generated from reusable neural blocks using the __Builder recursive pattern__.    
      
 ![Convolutional Network](images/Conv_Network.png)
@@ -405,7 +448,7 @@ class Conv2dBuilder(NeuralBuilder):
 ```
    
     
-### Graph Neural Network Builder 
+#### Graph Neural Network Builder 
     
 ![Graph Neural Model Builder](images/GNN_Builder.png)     
        
@@ -434,45 +477,12 @@ class GConvModel(nn.Module):
 ```
     
 
-### Neural Models Class Hierarchy
+#### Neural Models Class Hierarchy
 
 The current class hierarchy for Neural models is defined as:    
     
 ![Neural Class Hierarchy](images/Neural_Model_Hierarchy.png)
 
-
-##  🛠️ Environment
-
-| Library         | Version |
-|:----------------|:--------|
-| Python          | 3.12.9  |
-| SymPy           | 1.12    |
-| Numpy           | 2.1.3   |
-| Pydantic        | 2.4.1   |
-| Shap            | 0.43.0  |
-| torch           | 2.6.0   |
-| torchVision     | 0.20.1  |
-| torch-geometric | 2.6.1   |
-| torch_sparse    | 0.6.18  |
-| torch_scatter   | 2.12    |
-| torch_cluster | 1.6.3   |
-| Scikit-learn    | 1.5.2   |
-| Geomstats       | 2.8.0   |
-| Jax | 0.4.34  |
-| PyTest | 8.3.3   |
-| matplotlib | 3.10.0  |
-| ffmpeg | 1.14  |
-| latex | 0.7.0  |
-| manim | 0.19.0  |
-| memory-profiler | 0.61.0  |
-| networkx | 3.4.2 |
-| optuna | 4.4.0 |
-| pillow | 11.1.0 |
-| pytorch-lightning | 2.5.1 |
-   
-
-# Modules
-![Modules Navigation Map](images/Geometric_Learning_Modules_Diagram.png)   
 
 
 # 📘 References
