@@ -22,12 +22,13 @@ from dataclasses import dataclass
 from torch_geometric.nn import SAGEConv, GraphConv
 import torch.nn as nn
 # Library imports
-from tutorials import Tutorial
+from play import Play
 from dataset.graph.pyg_datasets import PyGDatasets
 from deeplearning.training import TrainingException
 from deeplearning.model.graph.graph_sage_model import GraphSAGEBuilder
 from deeplearning.model.graph.graph_conv_model import GraphConvBuilder
 import python
+
 
 @dataclass(frozen=True)
 class GraphSAGEvsGCNConfig:
@@ -37,9 +38,11 @@ class GraphSAGEvsGCNConfig:
     hidden_channels: int
 
 
-class GraphSAGEvsGCNTutorial(Tutorial):
+class GraphSAGEvsGCNPlay(Play):
     """
-        Source code related to the Substack article 'Graph Convolutional or GraphSAGE: shootout'
+        Source code related to the Substack article 'Graph Convolutional or GraphSAGE: shootout'. As with similar
+        tutorial classes, model, training and neighborhood sampling are defined in declarative form (JSON string).
+
         For sake of clarity, the traditional hyperparameters are fixed and only the parameters relevant to
         the comparison of the 2 models are considered:
         - Number of neighbors and fanout for message aggregation
@@ -61,14 +64,14 @@ class GraphSAGEvsGCNTutorial(Tutorial):
         @param model_configs: List of model configuration to compare
         @type model_configs: List of GraphSAGEvsGCNConfig
         """
-        super(GraphSAGEvsGCNTutorial, self).__init__()
+        super(GraphSAGEvsGCNPlay, self).__init__()
 
         self.model_configs = model_configs
         pyg_dataset = PyGDatasets(dataset_name)
         self.dataset = pyg_dataset()
         self.dataset_name = pyg_dataset.name
 
-    def evaluate(self) -> None:
+    def eval(self) -> None:
         """
             Method to train, validate and compare several variant of GraphSAGE and GCN models
         """
@@ -87,12 +90,12 @@ class GraphSAGEvsGCNTutorial(Tutorial):
 
             logging.info(f'\nTraining attributes\n{train_attrs}\nModel attributes:\n{model_attrs}')
             # step 3: Load the neighborhood sampling attributes
-            sampling_attrs = GraphSAGEvsGCNTutorial.__get_sampling_attrs(model_config)
+            sampling_attrs = GraphSAGEvsGCNPlay.__get_sampling_attrs(model_config)
             # step 4: Execute training
-            GraphSAGEvsGCNTutorial.__execute_training(model_id=model_config.model_id,
-                                                      training_attributes=train_attrs,
-                                                      model_attributes=model_attrs,
-                                                      sampling_attrs=sampling_attrs)
+            GraphSAGEvsGCNPlay.__execute_training(model_id=model_config.model_id,
+                                                  training_attributes=train_attrs,
+                                                  model_attributes=model_attrs,
+                                                  sampling_attrs=sampling_attrs)
 
     """ ----------------------  Private Supporting Methods ------------------------  """
 
@@ -106,7 +109,7 @@ class GraphSAGEvsGCNTutorial(Tutorial):
         return {
             'dataset_name': self.dataset_name,
             # Model training Hyperparameters
-            'learning_rate': GraphSAGEvsGCNTutorial.lr,
+            'learning_rate': GraphSAGEvsGCNPlay.lr,
             'batch_size': 32,
             'loss_function': nn.CrossEntropyLoss(label_smoothing=0.05),
             'momentum': 0.95,
@@ -115,12 +118,12 @@ class GraphSAGEvsGCNTutorial(Tutorial):
             'train_eval_ratio': 0.9,
             'weight_initialization': 'Kaiming',
             'optim_label': 'adam',
-            'drop_out': GraphSAGEvsGCNTutorial.dropout,
+            'drop_out': GraphSAGEvsGCNPlay.dropout,
             'is_class_imbalance': True,
             'class_weights': class_weights,
             'patience': 2,
             'min_diff_loss': 0.02,
-            'epochs': GraphSAGEvsGCNTutorial.epochs,
+            'epochs': GraphSAGEvsGCNPlay.epochs,
             # Model configuration
             'hidden_channels': tutorial_config.hidden_channels,
             # Performance metric definition
@@ -142,7 +145,7 @@ class GraphSAGEvsGCNTutorial(Tutorial):
                     'activation': nn.ReLU(),
                     'batch_norm': None,
                     'pooling': None,
-                    'dropout': GraphSAGEvsGCNTutorial.dropout
+                    'dropout': GraphSAGEvsGCNPlay.dropout
                 },
                 {
                     'block_id': 'MyBlock_2',
@@ -152,7 +155,7 @@ class GraphSAGEvsGCNTutorial(Tutorial):
                     'activation': nn.ReLU(),
                     'batch_norm': None,
                     'pooling': None,
-                    'dropout': GraphSAGEvsGCNTutorial.dropout
+                    'dropout': GraphSAGEvsGCNPlay.dropout
                 }
             ],
             'mlp_blocks': [
@@ -179,7 +182,7 @@ class GraphSAGEvsGCNTutorial(Tutorial):
                     'num_channels': tutorial_config.hidden_channels,
                     'activation': nn.ReLU(),
                     'batch_norm': None,
-                    'dropout': GraphSAGEvsGCNTutorial.dropout
+                    'dropout': GraphSAGEvsGCNPlay.dropout
                 },
                 {
                     'block_id': 'SAGE Layer 2',
@@ -188,7 +191,7 @@ class GraphSAGEvsGCNTutorial(Tutorial):
                     'num_channels': tutorial_config.hidden_channels,
                     'activation': nn.ReLU(),
                     'batch_norm': None,
-                    'dropout': GraphSAGEvsGCNTutorial.dropout
+                    'dropout': GraphSAGEvsGCNPlay.dropout
                 }
             ],
             'mlp_blocks': [
@@ -241,11 +244,18 @@ class GraphSAGEvsGCNTutorial(Tutorial):
 
 
 if __name__ == '__main__':
-    model1 = GraphSAGEvsGCNConfig(model_id='Conv', num_layers=2, neighbors=[6, 3], hidden_channels=64)
-    model2 = GraphSAGEvsGCNConfig(model_id='Conv', num_layers=4, neighbors=[6, 3], hidden_channels=64)
-    model3 = GraphSAGEvsGCNConfig(model_id='SAGE', num_layers=2, neighbors=[6, 3], hidden_channels=64)
-    model4 = GraphSAGEvsGCNConfig(model_id='SAGE', num_layers=4, neighbors=[6, 3], hidden_channels=64)
-    tutorial = GraphSAGEvsGCNTutorial(dataset_name='Cora', model_configs=[model1, model2, model3, model4])
-    tutorial.evaluate()
+    try:
+        model1 = GraphSAGEvsGCNConfig(model_id='Conv', num_layers=2, neighbors=[6, 3], hidden_channels=64)
+        model2 = GraphSAGEvsGCNConfig(model_id='Conv', num_layers=4, neighbors=[6, 3], hidden_channels=64)
+        model3 = GraphSAGEvsGCNConfig(model_id='SAGE', num_layers=2, neighbors=[6, 3], hidden_channels=64)
+        model4 = GraphSAGEvsGCNConfig(model_id='SAGE', num_layers=4, neighbors=[6, 3], hidden_channels=64)
+        tutorial = GraphSAGEvsGCNPlay(dataset_name='Cora', model_configs=[model1, model2, model3, model4])
+        tutorial.eval()
+    except AssertionError as e:
+        logging.error(e)
+        assert False
+    except TrainingException as e:
+        logging.error(e)
+        assert False
 
 
