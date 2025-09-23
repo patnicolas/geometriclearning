@@ -7,13 +7,13 @@ Patrick Nicolas - Last update 09.15.2025
 ![Under](../images/Under_construction.png)
 
 
-| Tutorial File                       | Substack Article                                                                                                                               |
-|:------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------|
-| graph_sage_vs_gcn_play.py           | Graph Convolutional or SAGE Networks? Shootout                                                                                                 | 
-| graph_to_simplicial_complex_play.py | [Topological Lifting of Graph Neural Networks](https://patricknicolas.substack.com/p/topological-lifting-of-graph-neural)                      |
-| abstract_simplicial_complex_play.py | [Exploring Simplicial Complexes for Deep Learning: Concepts to Code](https://patricknicolas.substack.com/p/exploring-simplicial-complexes-for) |
-| graph_sage_model_play.py            | [Revisiting Inductive Graph Neural Networks](https://patricknicolas.substack.com/p/revisiting-inductive-graph-neural)                          |     
-| son_group_play.py | [A Journey into the Lie Group SO(4)](https://patricknicolas.substack.com/p/a-journey-into-the-lie-group-so4)                                                                     |    
+| Tutorial File                       | Substack Article                                                                                                                                                                                        |
+|:------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| graph_sage_vs_gcn_play.py           | Graph Convolutional or SAGE Networks? Shootout                                                                                                                                                          | 
+| graph_to_simplicial_complex_play.py | [Topological Lifting of Graph Neural Networks](https://patricknicolas.substack.com/p/topological-lifting-of-graph-neural)                                                                               |
+| abstract_simplicial_complex_play.py | [Exploring Simplicial Complexes for Deep Learning: Concepts to Code](https://patricknicolas.substack.com/p/exploring-simplicial-complexes-for)                                                          |
+| graph_sage_model_play.py            | [Revisiting Inductive Graph Neural Networks](https://patricknicolas.substack.com/p/revisiting-inductive-graph-neural)                                                                                   |     
+| son_group_play.py | [A Journey into the Lie Group SO(4)](https://patricknicolas.substack.com/p/a-journey-into-the-lie-group-so4)  <br/>  [Mastering Special Orthogonal Groups With Practice](https://patricknicolas.substack.com/p/mastering-special-orthogonal-groups)                              |    
 
 ## Description   
 ✅ graph_sage_vs_gcn_play.py     
@@ -29,7 +29,8 @@ Introduction and evaluation of simplicial complexes using TopoNetX library, incl
 Description and evaluation of the GraphSAGE graph neural model using PyTorch Geometric     
 
 ✅ son_group_play.py      
-Introduction, implementation of SO(4) Lie group with evaluation of generation of random rotation, composition of rotation, inverse rotation and project
+- Introduction, implementation of SO(4) Lie group with evaluation of generation of random rotation, composition of rotation, inverse rotation and project    
+- Evaluation of SO(2) and SO(3) Lie groups with generation of random rotation, exponential and logarithm maps, compose, inverse and projection operations    
 
 ## Source Code Tree
 The source tree is organized as follows: 
