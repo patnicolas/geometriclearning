@@ -209,6 +209,8 @@ The source tree is organized as follows:
 - Animation in __tests/anim__   
 
 ## File & class Naming convention
+Files and classes in this repository follow a strict naming convention as illustrated in the following example:     
+
 👉 Features file: python/topology/simplicial/abstract_simplicial_complex.py   
 👉 Features Class: AbstractSimplicialComplex.py     
 👉 Unit test file: python/topology/simplicial/abstract_simplicial_complex_test.py   

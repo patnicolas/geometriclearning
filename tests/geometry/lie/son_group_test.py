@@ -385,8 +385,7 @@ class SOnGroupTest(unittest.TestCase):
             logging.info(f'\nMatrix:\n{matrix}\nInverse matrix:\n{inverse_matrix}')
             # Verify inverse
             identity = torch.eye(group_dim)
-            is_equal = so2_group.equal(matrix.T,  inverse_matrix, 1e-5)
-            self.assertTrue( is_equal )
+            self.assertTrue(so2_group.equal(matrix.T,  inverse_matrix, 1e-5))
             inverse_identity = so2_group.inverse(identity)
             # Validate inverse rotation is SO(2)
             SOnGroup.validate_points(inverse_identity, dim=group_dim)
