@@ -32,8 +32,12 @@ class GraphToSimplicialComplexPlay(Play):
     Source code related to the Substack article 'Topological Lifting of Graph Neural Networks'
 
     References:
-        Substack: https://patricknicolas.substack.com/p/topological-lifting-of-graph-neural
+    - Substack: https://patricknicolas.substack.com/p/topological-lifting-of-graph-neural
+    -  GraphToSimplicial:
+        https://github.com/patnicolas/geometriclearning/blob/main/python/topology/simplicial/graph_to_simplicial_complex.py
         Github TopoNetX: https://github.com/pyt-team/TopoNetX/blob/main/toponetx/transform/graph_to_simplicial_complex.py
+
+    The execution of the tests follows the same order as in the Substack article
     """
     def __init__(self,
                  dataset_name: AnyStr,

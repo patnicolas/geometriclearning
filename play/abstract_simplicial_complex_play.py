@@ -26,11 +26,15 @@ import python
 
 class AbstractSimplicialComplexPlay(Play):
     """
-        Wrapper to implement the evaluation of Simplicial Simplex as defined in Substack article:
-        "Exploring Simplicial Complexes for Deep Learning: Concepts to Code"
-        https://patricknicolas.substack.com/p/exploring-simplicial-complexes-for
+    Wrapper to implement the evaluation of Simplicial Simplex as defined in Substack article:
+    "Exploring Simplicial Complexes for Deep Learning: Concepts to Code"
 
-        The execution of the tests follow the same order as in the Substack article
+    References:
+    - Article: https://patricknicolas.substack.com/p/exploring-simplicial-complexes-for
+    - AbstractSimplicialComplex:
+        https://github.com/patnicolas/geometriclearning/blob/main/python/topology/simplicial/abstract_simplicial_complex.py
+
+    The execution of the tests follows the same order as in the Substack article
     """
     def __init__(self,
                  node_feature_dimension: int,

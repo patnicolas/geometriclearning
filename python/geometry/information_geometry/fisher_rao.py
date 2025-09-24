@@ -21,7 +21,6 @@ import os
 import torch
 ParamType = torch.Tensor | Tuple[torch.Tensor, torch.Tensor]
 # Library imports
-from geomstats.information_geometry.base import InformationManifoldMixin
 from geometry.information_geometry.cf_statistical_manifold import CFStatisticalManifold
 from geometry import GeometricException
 os.environ["GEOMSTATS_BACKEND"] = "pytorch"
@@ -138,7 +137,6 @@ class FisherRao(CFStatisticalManifold):
         return torch.sqrt(self.inner_product(point, v, v))
 
     """  -----------------------  Private Helpers methods ------------------   """
-
 
     @staticmethod
     def __distance_univariate_normal(point1: Tuple[torch.Tensor, torch.Tensor],
