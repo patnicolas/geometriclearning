@@ -40,9 +40,9 @@ class FisherRaoPlay(Play):
 
     The execution of the tests follows the same order as in the Substack article
     """
-    def __init__(self, statistical_manifold: InformationManifoldMixin, bounds: Tuple[float, float]) -> None:
+    def __init__(self, info_manifold: InformationManifoldMixin, bounds: Tuple[float, float]) -> None:
         super(FisherRaoPlay, self).__init__()
-        self.fisher_rao = FisherRao(statistical_manifold, bounds)
+        self.fisher_rao = FisherRao(info_manifold, bounds)
 
     def play(self) -> None:
         self.play_sample_distribution(n_samples=8)
@@ -89,10 +89,10 @@ class FisherRaoPlay(Play):
 
 if __name__ == '__main__':
     fisher_rao_plays = [
-        FisherRaoPlay(statistical_manifold=ExponentialDistributions(equip=True), bounds=(-2.0, 2.0)),
-        FisherRaoPlay(statistical_manifold=GeometricDistributions(equip=True), bounds=(1.0, 12.0)),
-        FisherRaoPlay(statistical_manifold=PoissonDistributions(equip=True), bounds=(0.0, 20.0)),
-        FisherRaoPlay(statistical_manifold=BinomialDistributions(equip=True, n_draws=8), bounds=(0.0, 20.0))
+        FisherRaoPlay(info_manifold=ExponentialDistributions(equip=True), bounds=(-2.0, 2.0)),
+        FisherRaoPlay(info_manifold=GeometricDistributions(equip=True), bounds=(1.0, 12.0)),
+        FisherRaoPlay(info_manifold=PoissonDistributions(equip=True), bounds=(0.0, 20.0)),
+        FisherRaoPlay(info_manifold=BinomialDistributions(equip=True, n_draws=8), bounds=(0.0, 20.0))
     ]
 
     # Test 1 for 'Shape Your Models with the Fisher-Rao Metric' - Code snippet 3

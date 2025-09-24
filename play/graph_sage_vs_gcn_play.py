@@ -40,16 +40,16 @@ class GraphSAGEvsGCNConfig:
 
 class GraphSAGEvsGCNPlay(Play):
     """
-        Source code related to the Substack article 'Graph Convolutional or GraphSAGE: shootout'. As with similar
+    Source code related to the Substack article 'Graph Convolutional or GraphSAGE: shootout'. As with similar
         tutorial classes, model, training and neighborhood sampling are defined in declarative form (JSON string).
 
-        For sake of clarity, the traditional hyperparameters are fixed and only the parameters relevant to
-        the comparison of the 2 models are considered:
-        - Number of neighbors and fanout for message aggregation
-        - Size of graph data
-        - Number of graph neural layers.
+    For sake of clarity, the traditional hyperparameters are fixed and only the parameters relevant to the comparison
+    of the 2 models are considered:
+    - Number of neighbors and fanout for message aggregation
+    - Size of graph data
+    - Number of graph neural layers.
 
-        Reference:
+    The execution of the tests follows the same order as in the Substack article
     """
     # Hyperparameters fixed for evaluation
     lr: float = 0.0008
