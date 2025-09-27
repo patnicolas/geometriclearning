@@ -34,6 +34,10 @@ class AbstractSimplicialComplexPlay(Play):
     - AbstractSimplicialComplex:
         https://github.com/patnicolas/geometriclearning/blob/main/python/topology/simplicial/abstract_simplicial_complex.py
 
+
+  The features are implemented by the class AbstractSimplicialComplex in the source file
+                  python/topology/simplicial/abstract_simplicial_complex.py
+    The class AbstractSimplicialComplexPlay is a wrapper of the class AbstractSimplicialComplex
     The execution of the tests follows the same order as in the Substack article
     """
     def __init__(self,

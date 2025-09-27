@@ -37,6 +37,9 @@ class GraphToSimplicialComplexPlay(Play):
         https://github.com/patnicolas/geometriclearning/blob/main/python/topology/simplicial/graph_to_simplicial_complex.py
         Github TopoNetX: https://github.com/pyt-team/TopoNetX/blob/main/toponetx/transform/graph_to_simplicial_complex.py
 
+    The features are implemented by the class GraphToSimplicialComplex in the source file
+                  python/topology/simplicial/graph_to_simplicial_complex.py
+    The class GraphToSimplicialComplexPlay is a wrapper of the class GraphToSimplicialComplex
     The execution of the tests follows the same order as in the Substack article
     """
     def __init__(self,

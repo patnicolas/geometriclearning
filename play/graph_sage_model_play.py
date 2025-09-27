@@ -35,10 +35,13 @@ class GraphSAGEModelPlay(Play):
     Source code related to the Substack article 'Revisiting Inductive Graph Neural Networks'. As with similar
     tutorial classes, model, training and neighborhood sampling are defined in declarative form (JSON string).
 
-    Article: https://patricknicolas.substack.com/p/revisiting-inductive-graph-neural
+    Reference: https://patricknicolas.substack.com/p/revisiting-inductive-graph-neural
     GraphSAGE model:
         https://github.com/patnicolas/geometriclearning/blob/main/python/deeplearning/model/graph/graph_sage_model.py
 
+    The features are implemented by the class GraphSAGEModel in the source file
+                  python/deeplearning/model/graph/graph_sage_model.py
+    The class GraphSAGEModelPlay is a wrapper of the class GraphSAGEModel
     The execution of the tests follows the same order as in the Substack article
     """
     def __init__(self,
