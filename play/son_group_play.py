@@ -35,6 +35,7 @@ class SOnGroupPlay(Play):
 
     The features are implemented in the class SOnGroup, python/geometry/lie/son_group.py
     The class SOnGroupPlay is a wrapper of the class SOnGroup
+    The execution of the tests (main) follows the same order as in the Substack article
     """
 
     def __init__(self, dimension: int) -> None:
@@ -323,7 +324,6 @@ if __name__ == '__main__':
         son_group_play.play_composition()
         son_group_play.play_inverse()
         son_group_play.play_projection()
-
     except AssertionError as e:
         logging.error(e)
         assert False

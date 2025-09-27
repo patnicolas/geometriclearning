@@ -33,11 +33,14 @@ import python
 class CfStatisticalManifoldPlay(Play):
     """
     Source code related to the Substack article 'Geometry of Closed-Form Statistical Manifolds'.
+    Reference: https://patricknicolas.substack.com/p/geometry-of-closed-form-statistical
 
-    Article: https://patricknicolas.substack.com/p/geometry-of-closed-form-statistical
     Statistical Manifolds:
     https://github.com/patnicolas/geometriclearning/blob/main/python/geometry/information_geometry/cf_statistical_manifold.py
 
+    The features are implemented by the class CfStatisticalManifold in the source file
+                  python/geometry/information_geometry/cf_statistical_manifold.py
+    The class CfStatisticalManifoldPlay is a wrapper of the class CfStatisticalManifold
     The execution of the tests follows the same order as in the Substack article
     """
     def __init__(self, info_manifold: InformationManifoldMixin, bounds: Tuple[float, float]) -> None:
@@ -93,7 +96,7 @@ class CfStatisticalManifoldPlay(Play):
         random_points = self.statistical_manifold.samples(2)
         base_point = random_points[0]
         manifold_point = random_points[1]
-        tgt_vector = self.statistical_manifold..log(manifold_point, base_point)
+        tgt_vector = self.statistical_manifold.log(manifold_point, base_point)
         distribution_type = self.statistical_manifold.info_manifold.__class__.__name__
         logging.info(f'\n{distribution_type} Distribution Manifold Tangent Vector\nBase:{base_point} '
                      f'to:{manifold_point}: {tgt_vector}')

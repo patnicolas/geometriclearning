@@ -38,6 +38,9 @@ class FisherRaoPlay(Play):
     Fisher-Rao:
         https://github.com/patnicolas/geometriclearning/blob/main/python/geometry/information_geometry/fisher_rao.py
 
+    The features are implemented by the class FisherRao in the source file
+                  python/geometry/information_geometry/fisher_rao.py
+    The class FisherRaoPlay is a wrapper of the class FisherRao
     The execution of the tests follows the same order as in the Substack article
     """
     def __init__(self, info_manifold: InformationManifoldMixin, bounds: Tuple[float, float]) -> None:

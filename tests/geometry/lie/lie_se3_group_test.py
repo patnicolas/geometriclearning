@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from geometry.lie.se3_visualization import SE3Visualization
-from geometry.lie import LieSE3Group
+from geometry.lie.lie_se3_group import LieSE3Group
 from geometry.lie import u3d
 import logging
 import os
@@ -139,7 +139,7 @@ class LieSE3GroupTest(unittest.TestCase):
             self.assertTrue(False)
 
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
-    def test_se3_matrix_generation(self):
+    def test_se3_matrix_generation_2(self):
         try:
             R = np.array([
                 [0.0, -1.0, 0.0],
