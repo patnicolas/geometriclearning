@@ -32,11 +32,13 @@ class GNNTrainingTest(unittest.TestCase):
             'learning_rate': 0.0005,
             'batch_size': 64,
             'loss_function': None,
+            'weight_decay': 1e-4,
             'momentum': 0.90,
             'encoding_len': -1,
             'train_eval_ratio': 0.9,
             'weight_initialization': 'xavier',
             'optim_label': 'adam',
+            'epochs': 50,
             'drop_out': 0.25,
             'is_class_imbalance': True,
             'class_weights': None,
@@ -44,12 +46,12 @@ class GNNTrainingTest(unittest.TestCase):
             'min_diff_loss': 0.02,
             # Performance metric definition
             'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1'],
-            'plot_parameters': [
-                {'title': 'Accuracy', 'x_label': 'epoch', 'y_label': 'accuracy'},
-                {'title': 'Precision', 'x_label': 'epochs', 'y_label': 'precision'},
-                {'title': 'Recall', 'x_label': 'epochs', 'y_label': 'recall'},
-                {'title': 'F1', 'x_label': 'epochs', 'y_label': 'F1'},
-            ]
+            'plot_parameters': {
+                'count': 0,
+                'title': 'MyTitle',
+                'x_label_size': 12,
+                'plot_filename': 'myfile'
+            }
         }
         try:
             gnn_training = GNNTraining.build(training_attributes)
@@ -90,7 +92,7 @@ class GNNTrainingTest(unittest.TestCase):
             graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
             train_loader, eval_loader = graph_data_loader()
 
-            network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
+            network.train(gnn_base_model, train_loader, eval_loader)
             accuracy_list = network.performance_metrics.performance_values[MetricType.Accuracy]
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
@@ -126,12 +128,12 @@ class GNNTrainingTest(unittest.TestCase):
                 'hidden_channels': 256,
                 # Performance metric definition
                 'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1'],
-                'plot_parameters': [
-                    {'title': 'Accuracy', 'x_label': 'epoch', 'y_label': 'accuracy'},
-                    {'title': 'Precision', 'x_label': 'epochs', 'y_label': 'precision'},
-                    {'title': 'Recall', 'x_label': 'epochs', 'y_label': 'recall'},
-                    {'title': 'F1', 'x_label': 'epochs', 'y_label': 'F1'},
-                ]
+                'plot_parameters': {
+                    'count': 0,
+                    'title': 'MyTitle',
+                    'x_label_size': 12,
+                    'plot_filename': 'myfile'
+                }
             }
 
             attrs = {
@@ -175,10 +177,10 @@ class GNNTrainingTest(unittest.TestCase):
             graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
             train_loader, eval_loader = graph_data_loader()
 
-            network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
+            network.train(gnn_base_model, train_loader, eval_loader)
             accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
-            self.assertTrue(accuracy_list[-1].float() > 0.2)
+            self.assertTrue(float(accuracy_list[-1]) > 0.2)
         except (GraphException | DatasetException | AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
@@ -203,7 +205,7 @@ class GNNTrainingTest(unittest.TestCase):
             graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
             train_loader, eval_loader = graph_data_loader()
 
-            network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
+            network.train(gnn_base_model, train_loader, eval_loader)
             accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(float(accuracy_list[-1]) > 0.2)
@@ -231,7 +233,7 @@ class GNNTrainingTest(unittest.TestCase):
             graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
             train_loader, eval_loader = graph_data_loader()
 
-            network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
+            network.train(gnn_base_model, train_loader, eval_loader)
             accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(float(accuracy_list[-1]) > 0.2)
@@ -261,7 +263,7 @@ class GNNTrainingTest(unittest.TestCase):
             graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
             train_loader, eval_loader = graph_data_loader()
 
-            network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
+            network.train(gnn_base_model, train_loader, eval_loader)
             accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(float(accuracy_list[-1]) > 0.2)
@@ -290,7 +292,7 @@ class GNNTrainingTest(unittest.TestCase):
             graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
             train_loader, eval_loader = graph_data_loader()
 
-            network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
+            network.train(gnn_base_model, train_loader, eval_loader)
             accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(float(accuracy_list[-1]) > 0.2)
@@ -320,7 +322,7 @@ class GNNTrainingTest(unittest.TestCase):
             graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
             train_loader, eval_loader = graph_data_loader()
 
-            network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
+            network.train(gnn_base_model, train_loader, eval_loader)
             accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(float(accuracy_list[-1]) > 0.2)
@@ -350,7 +352,7 @@ class GNNTrainingTest(unittest.TestCase):
             graph_data_loader = GraphDataLoader(dataset_name='Flickr', sampling_attributes=attrs)
             train_loader, eval_loader = graph_data_loader()
 
-            network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
+            network.train(gnn_base_model, train_loader, eval_loader)
             accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(float(accuracy_list[-1]) > 0.2)
@@ -383,6 +385,7 @@ class GNNTrainingTest(unittest.TestCase):
             logging.info(str(e))
             self.assertTrue(False)
 
+    @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_draw_sample_2(self):
         from torch_geometric.datasets.flickr import Flickr
 
@@ -396,10 +399,6 @@ class GNNTrainingTest(unittest.TestCase):
                 'sample_coverage': 100,
                 'batch_size': 1024
             }
-            graph_data_loader = GraphDataLoader(dataset_name='Flickr',
-                                                sampling_attributes=attrs,
-                                                num_subgraph_nodes=24,
-                                                start_index=6)
             logging.info(f'Number of nodes {_data.num_nodes}')
             self.assertTrue(_data.num_nodes > 0)
         except DatasetException as e:

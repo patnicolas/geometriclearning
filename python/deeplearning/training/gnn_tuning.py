@@ -93,12 +93,12 @@ class GNNTuning(object):
         'min_diff_loss': 0.02,
         'hidden_channels': 256,
         'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1'],
-        'plot_parameters': [
-            {'title': 'Accuracy', 'x_label': 'epochs', 'y_label': 'Accuracy'},
-            {'title': 'Precision', 'x_label': 'epochs', 'y_label': 'Precision'},
-            {'title': 'Recall', 'x_label': 'epochs', 'y_label': 'Recall'},
-            {'title': 'F1', 'x_label': 'epochs', 'y_label': 'F1'},
-        ]
+        'plot_parameters': {
+            'count': 0,
+            'title': 'MyTitle',
+            'x_label_size': 12,
+            'plot_filename': 'myfile'
+        }
     }
 
     @staticmethod
