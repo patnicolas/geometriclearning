@@ -14,42 +14,58 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 
-# Standard Library imports
+# Python standard library imports
 from typing import AnyStr, Dict, Any
 import logging
 # 3rd Party imports
-import torch.nn as nn
-import torch_geometric
-from torch_geometric.nn import GraphConv
 import torch
+import torch.nn as nn
 from torch_geometric.data import Data
 from torch.utils.data import DataLoader
+from torch_geometric.nn import GraphConv
 # Library imports
-from deeplearning.training.gnn_training import GNNTraining
-from deeplearning.block.graph import GraphException
-from dataset.graph.graph_data_loader import GraphDataLoader
+from play import Play
+from dataset import DatasetException
 from dataset.graph.pyg_datasets import PyGDatasets
+from deeplearning.training.gnn_training import GNNTraining
 from deeplearning.model.graph.graph_conv_model import GraphConvModel
+from dataset.graph.graph_data_loader import GraphDataLoader
+from deeplearning.block.graph import GraphException
+import python
 
 
-__all__ = ['EvalGConv']
+class GNNTrainingPlay(Play):
+    """
+    Source code related to the Substack article 'Plug & Play Training for Graph Convolutional Networks'.
+    As with similar tutorial classes, model, training and neighborhood sampling are defined in declarative form
+    (JSON string).
 
+    Reference: https://patricknicolas.substack.com/p/plug-and-play-training-for-graph
+    GraphSAGE model:
+        https://github.com/patnicolas/geometriclearning/blob/main/python/deeplearning/model/graph/graph_sage_model.py
 
-class EvalGConv(object):
+    The features are implemented by the class GNNTraining in the source file
+                  python/deeplearning/training/gnn_training.py
+    The class GNNTrainingPlay is a wrapper of the class GNNTraining
+    """
     def __init__(self,
                  _training_attributes: Dict[AnyStr, Any],
                  _sampling_attributes: Dict[AnyStr, Any]) -> None:
+        super(GNNTrainingPlay, self).__init__()
         assert len(_training_attributes) > 0, 'Training attributes are undefined'
         assert len(_sampling_attributes) > 0, 'Sampling attributes are undefined'
 
         self.training_attributes = _training_attributes
         self.sampling_attributes = _sampling_attributes
 
-    def start_training(self) -> None:
+    def play(self) -> None:
+        """
+        Source code related to Substack article 'Plug & Play Training for Graph Convolutional Networks' -
+        Code snippets, 6, 7, 8, 9, 10 & 11
+        Ref: https://patricknicolas.substack.com/p/shape-your-models-with-the-fisher
+        """
         # Step 1: Retrieve the evaluation model
         flickr_model, class_weights = self.__get_eval_model()
-        num_neighbors_str = '-'.join([str(n) for n in self.sampling_attributes['num_neighbors']])
-        title = f"{self.training_attributes['dataset_name']}_neighbors_sampling_{num_neighbors_str}"
 
         # Step 2: Retrieve the training environment
         gnn_training = self.__get_training_env(flickr_model, class_weights)
@@ -75,8 +91,8 @@ class EvalGConv(object):
     def __distribution(data: Data) -> torch.Tensor:
         class_distribution = data.y[data.train_mask]
         raw_distribution = torch.bincount(class_distribution)
-        raw_weights = 1.0/raw_distribution
-        return raw_weights/raw_weights.sum()
+        raw_weights = 1.0 / raw_distribution
+        return raw_weights / raw_weights.sum()
 
     def __get_training_env(self, model: GraphConvModel, class_weights: torch.Tensor = None) -> GNNTraining:
         self.training_attributes['loss_function'] = nn.NLLLoss(weight=class_weights.to('mps')) \
@@ -94,16 +110,17 @@ class EvalGConv(object):
         if flickr_dataset is None:
             raise GraphException("Failed to load Flickr")
 
-        _data: torch_geometric.data.Data = flickr_dataset[0]
+        _data: Data = flickr_dataset[0]
         logging.info(f'Number of features: {_data.num_node_features}\nNumber of classes: {flickr_dataset.num_classes}'
-              f'\nSize of training: {_data.train_mask.sum()}')
+                     f'\nSize of training: {_data.train_mask.sum()}')
 
-        my_model = self.__get_model(num_node_features=_data.num_node_features,
-                                    _num_classes=flickr_dataset.num_classes,
-                                    hidden_channels=384)
-        return my_model, EvalGConv.__distribution(_data)
+        my_model = GNNTrainingPlay.__get_model(num_node_features=_data.num_node_features,
+                                               _num_classes=flickr_dataset.num_classes,
+                                               hidden_channels=384)
+        return my_model, GNNTrainingPlay.__distribution(_data)
 
-    def __get_model(self, num_node_features: int, _num_classes: int, hidden_channels: int) -> GraphConvModel:
+    @staticmethod
+    def __get_model(num_node_features: int, _num_classes: int, hidden_channels: int) -> GraphConvModel:
         model_attributes = {
             'model_id': 'MyModel',
             'gconv_blocks': [
@@ -131,7 +148,7 @@ class EvalGConv(object):
                     'block_id': 'MyMLP',
                     'in_features': hidden_channels,
                     'out_features': _num_classes,
-                    'activation': nn.LogSoftmax(dim=-1),
+                    'activation': None,
                     'dropout': 0.0
                 }
             ]
@@ -144,19 +161,21 @@ if __name__ == '__main__':
         'dataset_name': 'Flickr',
         # Model training Hyperparameters
         'learning_rate': 0.0005,
+        'weight_decay': 1e-4,
         'momentum': 0.90,
         'batch_size': 64,
         'loss_function': None,
         'encoding_len': -1,
         'train_eval_ratio': 0.9,
         'epochs': 24,
-        'weight_initialization': 'xavier',
+        'weight_initialization': 'Kaiming',
         'optim_label': 'adam',
         'drop_out': 0.25,
         'is_class_imbalance': True,
         'class_weights': None,
         'patience': 2,
         'min_diff_loss': 0.02,
+        'hidden_channels': 384,
         # Performance metric definition
         'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1'],
         'plot_parameters': {
@@ -174,7 +193,10 @@ if __name__ == '__main__':
         'num_workers': 4
     }
 
-    eval_gconv = EvalGConv(training_attributes, sampling_attributes)
-    eval_gconv.start_training()
-
-
+    try:
+        gnn_training_play = GNNTrainingPlay(training_attributes, sampling_attributes)
+        gnn_training_play.play()
+        assert True
+    except (GraphException | DatasetException | AssertionError) as e:
+        logging.info(f'Error: {str(e)}')
+        assert False
