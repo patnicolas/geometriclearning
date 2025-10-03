@@ -72,8 +72,8 @@ class GraphDataLoaderTest(unittest.TestCase):
             graph_data_loader = GraphDataLoader(
                 sampling_attributes={
                     'id': 'RandomNodeLoader',
-                    'num_parts': 64,
-                    'batch_size': 32,
+                    'num_parts': 256,
+                    'batch_size': 64,
                     'num_workers': 2
                 },
                 dataset_name=dataset_name,

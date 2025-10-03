@@ -25,15 +25,15 @@ import python
 
 class GraphHomophilyPlay(Play):
     """
-      Source code related to the Substack article 'Neighbors Matter: How Homophily Shapes Graph Neural Networks'.
-      Reference: https://patricknicolas.substack.com/p/neighbors-matter-how-homophily-shapes
+    Source code related to the Substack article 'Neighbors Matter: How Homophily Shapes Graph Neural Networks'.
+    Reference: https://patricknicolas.substack.com/p/neighbors-matter-how-homophily-shapes
 
-      Source code for homophily computation:
-      https://github.com/patnicolas/geometriclearning/blob/main/python/dataset/graph/graph_homophily.py
+    Source code for homophily computation:
+    https://github.com/patnicolas/geometriclearning/blob/main/python/dataset/graph/graph_homophily.py
 
-      The features are implemented by the class GraphHomophily in the source file
+    The features are implemented by the class GraphHomophily in the source file
                     python/dataset/graph/graph_homophily.py
-      The class GraphHomophilyPlay is a wrapper of the class GraphHomophily
+    The class GraphHomophilyPlay is a wrapper of the class GraphHomophily
     """
     def __init__(self, dataset_names: List[AnyStr], homophily_types: List[GraphHomophilyType]) -> None:
         super(GraphHomophilyPlay, self).__init__()
