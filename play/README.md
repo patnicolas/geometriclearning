@@ -14,10 +14,14 @@ Patrick Nicolas - Last update 09.23.2025
 | abstract_simplicial_complex_play.py | [Exploring Simplicial Complexes for Deep Learning: Concepts to Code](https://patricknicolas.substack.com/p/exploring-simplicial-complexes-for)                                                                                                      |
 | graph_sage_model_play.py            | [Revisiting Inductive Graph Neural Networks](https://patricknicolas.substack.com/p/revisiting-inductive-graph-neural)                                                                                                                               |     
 | son_group_play.py                   | [A Journey into the Lie Group SO(4)](https://patricknicolas.substack.com/p/a-journey-into-the-lie-group-so4)  <br/>  [Mastering Special Orthogonal Groups With Practice](https://patricknicolas.substack.com/p/mastering-special-orthogonal-groups) |    
+| cf_statistical_manifold_play.py | [Geometry of Closed-Form Statistical Manifolds](https://patricknicolas.substack.com/p/geometry-of-closed-form-statistical) |
 | fisher_rao_play.py                  | [Shape Your Models with the Fisher-Rao Metric](https://patricknicolas.substack.com/p/shape-your-models-with-the-fisher)                                                                                                                             |                                                                                                                                                                                              |
 | lie_se3_group_play.py               | [SE3: The Lie Group That Moves the World](https://patricknicolas.substack.com/p/se3-the-lie-group-that-moves-the)                                                                                                                                   |   
-| gnn_tuning_play.py  | [How to Tune a Graph Convolutional Network](https://patricknicolas.substack.com/p/how-to-tune-a-graph-convolutional)                                                                                                                                |           
-| gnn_training_play.py | [Plug & Play Training for Graph Convolutional Networks](https://patricknicolas.substack.com/p/plug-and-play-training-for-graph)                                                                                                                     |
+| gnn_tuning_play.py                  | [How to Tune a Graph Convolutional Network](https://patricknicolas.substack.com/p/how-to-tune-a-graph-convolutional)                                                                                                                                |           
+| gnn_training_play.py                | [Plug & Play Training for Graph Convolutional Networks](https://patricknicolas.substack.com/p/plug-and-play-training-for-graph)                                                                                                                     |
+| graph_homophily_play.py             | [Neighbors Matter: How Homophily Shapes Graph Neural Networks](https://patricknicolas.substack.com/p/neighbors-matter-how-homophily-shapes) |
+| graph_data_loader_play.py           | [Demystifying Graph Sampling & Walk Methods](https://patricknicolas.substack.com/p/demystifying-graph-sampling-and-walk) |
+
 
 ## Description   
 ✅ graph_sage_vs_gcn_play.py     
@@ -36,9 +40,13 @@ Description and evaluation of the GraphSAGE graph neural model using PyTorch Geo
 - Introduction, implementation of SO(4) Lie group with evaluation of generation of random rotation, composition of rotation, inverse rotation and project.    
 - Evaluation of SO(2) and SO(3) Lie groups with generation of random rotation, exponential and logarithm maps, compose, inverse and projection operations.      
 
-✅ fisher_rao.play.py    
+✅ cf_statistical_manifold_.py    
+- Description and evaluation of Riemannian manifolds for the Exponential, Poisson, Binomial and Geometric distributions using closed-form formulas 
+  
+✅ fisher_rao_play.py    
 - Description and evaluation of Fisher-Rao metric with application to closed-form distributions such as exponential, geometric, Poisson and Binomial.   
   
+
 ✅ lie_se3_group_play.py    
 - Description and evaluation of Special Euclidean Group of 3 dimension
 
@@ -47,6 +55,12 @@ Description and evaluation of the GraphSAGE graph neural model using PyTorch Geo
 
 ✅ gnn_training_play.py
 - Implementation and evaluation of the training of a Graph Neural Network with application to Graph Convolutional Network using Pytorch Geometric Datasets/
+
+✅ graph_homophily_play.py
+- Evaluation of Node and Edge Homophily on a performance of a graph convolutional neural network
+
+✅ graph_data_loader_play.py
+- Evaluation of various data loader and neighborhood sampling for message aggregation for a graph convolutional network.
 
 ## Source Code Tree
 The source tree is organized as follows: 
