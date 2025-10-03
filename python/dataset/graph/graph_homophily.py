@@ -37,7 +37,7 @@ class GraphHomophilyType(StrEnum):
 
 
 class GraphHomophily(object):
-    r"""
+    """
         Implementation of the computation of the homophily of a graph using two methods
         - torch_geometric (__call__)
         - homegrown (compute) includes for reference...

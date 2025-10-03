@@ -29,7 +29,6 @@ from play import Play
 import python
 
 
-
 class CfStatisticalManifoldPlay(Play):
     """
     Source code related to the Substack article 'Geometry of Closed-Form Statistical Manifolds'.
