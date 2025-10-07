@@ -56,7 +56,8 @@ class Profiler(object):
         usage = memory_profiler.memory_usage(self.python_script)
         logging.info(f'Memory {usage=}')
 
-    def run_memory_profiler(self) -> None:
+    @staticmethod
+    def run_memory_profiler() -> None:
         """
         Execute the memory line profiler on a script or Python function defined in the constructor
         """
@@ -67,7 +68,7 @@ class Profiler(object):
 @profile
 def test_func():
     import math
-    arr=[]
+    arr = []
     for i in range(0, 100000):
         arr.append(math.sin(i*0.001) + math.log(1.0 + i*0.0002))
     del arr

@@ -253,8 +253,8 @@ if __name__ == '__main__':
         model2 = GraphSAGEvsGCNConfig(model_id='Conv', num_layers=4, neighbors=[6, 3], hidden_channels=64)
         model3 = GraphSAGEvsGCNConfig(model_id='SAGE', num_layers=2, neighbors=[6, 3], hidden_channels=64)
         model4 = GraphSAGEvsGCNConfig(model_id='SAGE', num_layers=4, neighbors=[6, 3], hidden_channels=64)
-        tutorial = GraphSAGEvsGCNPlay(dataset_name='Cora', model_configs=[model1, model2, model3, model4])
-        tutorial.play()
+        graph_SAGE_GCN_play = GraphSAGEvsGCNPlay(dataset_name='Cora', model_configs=[model1, model2, model3, model4])
+        graph_SAGE_GCN_play.play()
     except AssertionError as e:
         logging.error(e)
         assert False
