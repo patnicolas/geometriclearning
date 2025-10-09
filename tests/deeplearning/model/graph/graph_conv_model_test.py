@@ -234,7 +234,7 @@ class GraphConvModelTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skip('Ignore')
+    # @unittest.skip('Ignore')
     def test_training(self):
         from deeplearning.block.graph import GraphException
 
@@ -284,7 +284,7 @@ class GraphConvModelTest(unittest.TestCase):
                 'learning_rate': 0.0008,
                 'weight_decay': 5e-4,
                 'batch_size': 32,
-                'loss_function': nn.CrossEntropyLoss(label_smoothing=0.05),
+                'loss_function': nn.CrossEntropyLoss(label_smoothing=0.05, weight=class_weights),
                 'momentum': 0.90,
                 'encoding_len': -1,
                 'train_eval_ratio': 0.9,

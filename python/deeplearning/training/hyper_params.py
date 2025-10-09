@@ -51,7 +51,10 @@ class HyperParams(object):
                  train_eval_ratio: float = default_train_eval_ratio,
                  encoding_len: int = -1,
                  weight_initialization: Optional[AnyStr] = 'xavier',
-                 class_weights: Optional[torch.Tensor] = None):
+                 class_weights: Optional[torch.Tensor] = None,
+                 tensor_mix_precision: Optional[torch.dtype] = None,
+                 checkpoint_enabled: bool = False,
+                 target_device: Optional[AnyStr] = None):
         """
             Constructor
             @param lr: Learning rate for the selected optimizer
@@ -66,6 +69,8 @@ class HyperParams(object):
             @type batch_size: int
             @param loss_function: PyTorch nn.Module loss function (i.e BCELoss, MSELoss....)
             @type loss_function: torch.nn.Module
+            @param checkpoint_enabled: Flag to enable checkpoint output of activation
+            @type checkpoint_enabled bool
         """
         HyperParams.__check_constructor(lr, momentum, epochs, batch_size, train_eval_ratio, drop_out)
 
@@ -81,6 +86,9 @@ class HyperParams(object):
         self.optim_label = optim_label
         self.drop_out = drop_out
         self.class_weights = class_weights
+        self.tensor_mix_precision = tensor_mix_precision
+        self.checkpoint_enabled = checkpoint_enabled
+        self.target_device = target_device
         torch.manual_seed(42)
 
     @classmethod
@@ -106,7 +114,10 @@ class HyperParams(object):
                        train_eval_ratio=attributes['train_eval_ratio'],
                        encoding_len=attributes['encoding_len'],
                        weight_initialization=attributes['weight_initialization'],
-                       class_weights=attributes.get('class_weights', None))
+                       class_weights=attributes.get('class_weights', None),
+                       tensor_mix_precision=attributes.get('tensor_mix_precision', None),
+                       checkpoint_enabled=attributes.get('checkpoint_enabled', False),
+                       target_device=attributes.get('target_device', 'cpu'))
         except KeyError as e:
             logging.error(e)
             raise TrainingException(e)
@@ -185,10 +196,16 @@ class HyperParams(object):
         return optimizer
 
     def __repr__(self) -> str:
-        return f'   Learning rate:      {self.learning_rate}\n   Momentum:           {self.momentum}' \
+        device = self.target_device if self.target_device is not None else 'Auto'
+        mix_precision = self.tensor_mix_precision if self.tensor_mix_precision is not None else 'No'
+
+        return f'\n   Learning rate:      {self.learning_rate}\n   Momentum:           {self.momentum}' \
                f'\n   Number of epochs:   {self.epochs}\n   Batch size:         {self.batch_size}'\
                f'\n   Optimizer:          {self.optim_label}\n   Loss function:      {repr(self.loss_function)}'\
-               f'\n   Drop out rate:      {self.drop_out}\n   Train split ratio:  {self.train_eval_ratio}'
+               f'\n   Drop out rate:      {self.drop_out}\n   Train split ratio:  {self.train_eval_ratio}' \
+               f'\n   Device:             {device}\n   Checkpoint Enabled: {self.checkpoint_enabled }' \
+               f'\n   Class weights:      {self.class_weights}\n   Weight init:        {self.weight_initialization}' \
+               f'\n   Mix precision:      {mix_precision}'
 
     def get_label(self) -> str:
         return f'lr.{self.learning_rate}-bs.{self.batch_size}'

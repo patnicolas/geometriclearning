@@ -19,3 +19,8 @@ Conv2DataType = Tuple[int, int]
 Conv3DataType = Tuple[int, int, int]
 ConvDataType = int | Conv2DataType | Conv3DataType
 
+checkpoint = False
+def checkpoint_enable(enable: bool = True) -> None:
+    print(f'Checkpoint {"enabled" if enable else "disabled"}')
+    checkpoint = enable
+

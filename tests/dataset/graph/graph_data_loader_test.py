@@ -142,6 +142,22 @@ class GraphDataLoaderTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
+    def test_set_attribute(self):
+        graph_data_loader = GraphDataLoader(
+            sampling_attributes={
+                'id': 'NeighborLoader',
+                'num_neighbors': [5, 2],
+                'replace': True,
+                'batch_size': 8,
+                'pin_memory': False,
+                'num_workers': 1
+            },
+            dataset_name='Cora',
+            num_subgraph_nodes=64)
+        graph_data_loader.set_attribute('pin_memory', True)
+        graph_data_loader.set_attribute('num_workers', 6)
+        logging.info(graph_data_loader)
+
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_neighbor_node_facebook(self):
         try:
@@ -153,6 +169,7 @@ class GraphDataLoaderTest(unittest.TestCase):
                     'num_neighbors': [5, 2],
                     'replace': True,
                     'batch_size': 8,
+                    'pin_memory': False,
                     'num_workers': 1
                 },
                 dataset_name=dataset_name,

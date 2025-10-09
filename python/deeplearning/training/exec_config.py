@@ -30,7 +30,6 @@ class ExecConfig(object):
                  subset_size: int,
                  monitor_memory: bool,
                  grad_accu_steps: int = 1,
-                 device_config: AnyStr = None,
                  pin_mem: bool = True):
         """
         Constructor for the configuration of the execution of training of DL models
@@ -51,17 +50,15 @@ class ExecConfig(object):
         self.mix_precision = mix_precision
         self.subset_size = subset_size
         self.grad_accu_steps = grad_accu_steps
-        self.device_config = device_config
         self.pin_mem = pin_mem
+        self.device_config = None
         self.monitor_memory = monitor_memory
         self.accumulator = []
 
     @classmethod
-    def default(cls, device_conf: AnyStr = None) -> Self:
+    def default(cls) -> Self:
         """
         Default setting for the configuration of execution of training: All optimization are disabled
-        @param device_conf: Name of the target device
-        @type device_conf: str
         @return: Instance of Execution configuration
         @rtype: ExecConfig
         """
@@ -70,12 +67,11 @@ class ExecConfig(object):
                    subset_size=0,
                    monitor_memory=True,
                    grad_accu_steps=1,
-                   device_config=device_conf,
                    pin_mem=False)
 
     def __str__(self) -> AnyStr:
         return (f'\nEmpty cache: {self.empty_cache}\nMix precision {self.mix_precision}\nSubset size: {self.subset_size}'
-                f'\ngrad_accu_steps: {self.grad_accu_steps}\nDevice: {self.device_config}\nPin memory: {self.pin_mem}')
+                f'\ngrad_accu_steps: {self.grad_accu_steps}\nPin memory: {self.pin_mem}')
 
     def apply_monitor_memory(self) -> None:
         if self.monitor_memory and (self.device_config == 'mps' or self.device_config is None):

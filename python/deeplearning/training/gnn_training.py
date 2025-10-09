@@ -21,10 +21,10 @@ import logging
 import torch.nn as nn
 import torch
 import torch_geometric
+from torch_geometric.data import Data
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import numpy as np
-
 # Library imports
 from deeplearning.training.neural_training import NeuralTraining
 from deeplearning.training.hyper_params import HyperParams
@@ -50,7 +50,7 @@ class GNNTraining(NeuralTraining):
                  plot_parameters: Optional[MetricPlotterParameters] = None) -> None:
         """
         Default constructor for this variational auto-encoder
-        @param hyper_params:  Hyper-parameters for training and optimizatoin
+        @param hyper_params:  Hyper-parameters for training and optimization
         @type hyper_params: HyperParams
         @param early_stopping: Early stopping conditions
         @type early_stopping: EarlyStopping
@@ -63,6 +63,8 @@ class GNNTraining(NeuralTraining):
         """
         assert len(metrics_attributes) > 0, 'Metric attributes are undefined'
 
+        if hyper_params.target_device is not None:
+            exec_config.device_config = hyper_params.target_device
         super(GNNTraining, self).__init__(hyper_params,
                                           metrics_attributes,
                                           early_stopping,
@@ -87,6 +89,7 @@ class GNNTraining(NeuralTraining):
         return cls(hyper_params=hyper_params,
                    metrics_attributes=metric_attributes.registered_perf_metrics,
                    early_stopping=early_stopping,
+                   exec_config=ExecConfig.default(),
                    plot_parameters=plot_parameters)
 
     def __str__(self) -> str:
@@ -128,6 +131,9 @@ class GNNTraining(NeuralTraining):
         # Reset the parameters for the Graph Neural Layers
         neural_model.reset_parameters()
 
+        logging.info(repr(self.hyper_params))
+        logging.info(self.target_device)
+
         # Train and evaluation process
         for epoch in tqdm(range(self.hyper_params.epochs)):
             # Set training mode and execute training
@@ -140,7 +146,7 @@ class GNNTraining(NeuralTraining):
             # self.exec_config.apply_monitor_memory()
         # Generate summary
         self.performance_metrics.summary(neural_model.model_id, self.plot_parameters)
-        logging.info(f"\nMPS usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
+        logging.info(f"\nDevice usage profile for\n{str(self.exec_config)}\n{self.exec_config.accumulator}")
 
     """ -----------------------------  Private helper methods ------------------------------  """
 
@@ -153,13 +159,14 @@ class GNNTraining(NeuralTraining):
 
         for idx, data in enumerate(train_loader):
             try:
-                # Force a conversion to float 32 if necessary
-                if data.x.dtype == torch.float64:
-                    data.x = data.x.float()
+                # Force a conversion to float 32 or float 16 if necessary
+                # data.x = data.x.to(device=str(self.target_device),
+                #                   dtype=self.hyper_params.tensor_mix_precision)
 
-                # Move data to the GPU and non_blocking
+                # data.x = data.x.float()
                 data = data.to(device=self.target_device, non_blocking=True)
-                predicted = model(data, chpt=True)  # Call forward - prediction
+                predicted = model(data)  # Call forward - prediction
+                # Use training mask for both labels and predicted values
                 prediction = predicted[data.train_mask]
                 expected = data.y[data.train_mask]
                 raw_loss = self.hyper_params.loss_function(prediction, expected)
@@ -200,7 +207,6 @@ class GNNTraining(NeuralTraining):
 
                     data = data.to(self.target_device)
                     predicted = model(data)  # Call forward - prediction
-
                     prediction = predicted[data.val_mask]
                     expected = data.y[data.val_mask]
                     raw_loss = self.hyper_params.loss_function(prediction, expected)
@@ -227,6 +233,6 @@ class GNNTraining(NeuralTraining):
         # Record the values for the registered metrics (e.g., Precision)
         self.performance_metrics.collect_registered_metrics(all_predicted, all_labeled)
         # Record the validation loss
-        corrected_val_loss = 3.0 * len(eval_loader)/ total_loss
+        val_loss = total_loss/len(eval_loader)
         self.performance_metrics.collect_loss(is_validation=True,
-                                              np_loss=np.array(corrected_val_loss))
+                                              np_loss=np.array(val_loss))
