@@ -26,7 +26,7 @@ __all__ = ['PlotterParameters', 'Plotter']
 
 
 @dataclass
-class PlotterParameters(frozen=True):
+class PlotterParameters:
     """
         Wraps the parameters for plots. The static methods generated a '.png' file which name is time stamped.
     """
@@ -81,8 +81,8 @@ class PlotterParameters(frozen=True):
 class Plotter(object):
     plot_parameters_label = 'plot_parameters'
     images_folder = '../../output_plots'
-    markers = ['-', '--', '-.', '--', '^', '-']
-    colors = ['blue', 'green', 'red', 'black', 'orange', 'grey']
+    markers = ['-', '--', '-.', '--', ':', '-']
+    colors = ['blue', 'green', 'red', 'black', 'grey', 'orange']
 
     @staticmethod
     def set_images_folder(img_folder: AnyStr) -> None:

@@ -18,6 +18,8 @@ from typing import AnyStr, Dict, Any
 from functools import wraps
 # 3rd Party imports
 import torch
+
+from python import memory_monitor_enabled, identity
 __all__ = ['monitor_memory_device']
 
 """
@@ -132,5 +134,9 @@ def _monitor_memory_mps(fn):
     Generic lambda for collecting the memory consumption data for the right device (cpu, mps or cuda). 
     It reverts to cpu if cuda or mps is not detected.
 """
+
+# Select the proper wrapper to monitor memory according to the target device
 monitor_memory_device = _monitor_memory_cuda if torch.cuda.is_available() else _monitor_memory_mps \
     if torch.backends.mps.is_available() else _monitor_memory_cpu
+# Enable/Disable annotation
+monitor_memory_device = monitor_memory_device if memory_monitor_enabled else identity

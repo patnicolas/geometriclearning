@@ -12,7 +12,7 @@ class MetricPlotterTest(unittest.TestCase):
                                                  x_label='epochs',
                                                  title='Test plot 1',
                                                  x_label_size=12,
-                                                 plot_folder='../output_plots')
+                                                 plot_filename='../output_plots')
         logging.info(plotter_params)
         logging.info(repr(plotter_params))
         self.assertTrue(True)

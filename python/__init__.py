@@ -41,6 +41,12 @@ logger.setLevel(logging.INFO)
 logger.handlers = []  # Clear existing handlers
 logger.addHandler(handler)
 
+memory_monitor_enabled = True
+identity = lambda f: f
+
+def is_logging_debug() -> bool:
+    return logging.getLogger().level == logging.DEBUG
+
 
 """
 Evaluate if two tensors is almost identical, element-wize

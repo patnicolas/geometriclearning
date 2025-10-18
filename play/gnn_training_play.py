@@ -23,6 +23,8 @@ import torch.nn as nn
 from torch_geometric.data import Data
 from torch.utils.data import DataLoader
 from torch_geometric.nn import GraphConv
+
+from deeplearning.training.exec_config import ExecConfig
 # Library imports
 from play import Play
 from dataset import DatasetException
@@ -106,7 +108,13 @@ class GNNTrainingPlay(Play):
 
         self.training_attributes['encoding_len'] = model.mlp_blocks[-1].get_out_features()
         self.training_attributes['class_weights'] = class_weights
-        return GNNTraining.build(self.training_attributes)
+        exec_config = ExecConfig(empty_cache=True,
+                                 mix_precision=False,
+                                 subset_size=0,
+                                 monitor_memory=True,
+                                 grad_accu_steps=1,
+                                 pin_mem=True)
+        return GNNTraining.build(self.training_attributes, exec_config)
 
     def get_eval_model(self) -> (GraphConvModel, torch.Tensor):
         pyg_datasets = PyGDatasets(self.training_attributes['dataset_name'])
@@ -162,7 +170,7 @@ class GNNTrainingPlay(Play):
 
 if __name__ == '__main__':
     training_attrs = {
-        'dataset_name': 'Cora',
+        'dataset_name': 'Flickr',
         'target_device': None,
         # Model training Hyperparameters
         'learning_rate': 0.0005,
@@ -172,7 +180,7 @@ if __name__ == '__main__':
         'loss_function': None,
         'encoding_len': -1,
         'train_eval_ratio': 0.9,
-        'epochs': 24,
+        'epochs': 3,
         'weight_initialization': 'Kaiming',
         'optim_label': 'adam',
         'drop_out': 0.25,
@@ -180,11 +188,11 @@ if __name__ == '__main__':
         'class_weights': None,
         'patience': 2,
         'min_diff_loss': 0.02,
-        'hidden_channels': 384,
+        'hidden_channels': 128,
         'tensor_mix_precision': None,
         'checkpoint_enabled': False,
         # Performance metric definition
-        'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1'],
+        'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1', 'AuROC', 'AuPR'],
         'plot_parameters': {
             'count': 0,
             'title': 'MyTitle',

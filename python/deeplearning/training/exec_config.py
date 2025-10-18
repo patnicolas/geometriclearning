@@ -41,8 +41,6 @@ class ExecConfig(object):
         @type subset_size: int
         @param grad_accu_steps: Accumulate the computation of the gradient if > 0
         @type grad_accu_steps: in
-        @param device_config: Device {'cpu', 'cuda' ..}
-        @type device_config: str
         @param pin_mem: Flag to enable pin memory for data set loader
         @type pin_mem: bool
         """

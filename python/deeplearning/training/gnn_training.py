@@ -15,17 +15,17 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 
 # Standard Library imports
-from typing import Dict, AnyStr, Optional, List, Any, Self
+from typing import Dict, AnyStr, Optional, List, Any, Self, Tuple
 import logging
 # 3rd Party imports
 import torch.nn as nn
 import torch
 import torch_geometric
-from torch_geometric.data import Data
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import numpy as np
 # Library imports
+from util.monitor_memory_device import monitor_memory_device
 from deeplearning.training.neural_training import NeuralTraining
 from deeplearning.training.hyper_params import HyperParams
 from deeplearning.block.graph import GraphException
@@ -72,7 +72,7 @@ class GNNTraining(NeuralTraining):
                                           plot_parameters)
 
     @classmethod
-    def build(cls, training_attributes: Dict[AnyStr, Any]) -> Self:
+    def build(cls, training_attributes: Dict[AnyStr, Any], exec_config: ExecConfig=ExecConfig.default()) -> Self:
         # Instantiate the Hyper parameters from the training attributes
         hyper_params = HyperParams.build(training_attributes)
 
@@ -89,7 +89,7 @@ class GNNTraining(NeuralTraining):
         return cls(hyper_params=hyper_params,
                    metrics_attributes=metric_attributes.registered_perf_metrics,
                    early_stopping=early_stopping,
-                   exec_config=ExecConfig.default(),
+                   exec_config=exec_config,
                    plot_parameters=plot_parameters)
 
     def __str__(self) -> str:
@@ -151,31 +151,26 @@ class GNNTraining(NeuralTraining):
     """ -----------------------------  Private helper methods ------------------------------  """
 
     def __train_epoch(self, neural_model: nn.Module, epoch: int, train_loader: DataLoader) -> None:
+        from python import memory_monitor_enabled
+
+        memory_reports = []
         neural_model.train()
         total_loss = 0.0
         optimizer = self.hyper_params.optimizer(neural_model)
+
         optimizer.zero_grad(set_to_none=True)
         model = neural_model.to(self.target_device, non_blocking=True)
 
         for idx, data in enumerate(train_loader):
             try:
-                # Force a conversion to float 32 or float 16 if necessary
-                # data.x = data.x.to(device=str(self.target_device),
-                #                   dtype=self.hyper_params.tensor_mix_precision)
+                # If memory monitoring is enabled, apply the decorator monitor_memory_device
+                if memory_monitor_enabled:
+                    loss, report = self.__train_batch(data, model)
+                    memory_reports.append(report['end_bytes'])
+                else:
+                    loss = self.__train_batch(data, model)
+                total_loss += loss
 
-                # data.x = data.x.float()
-                data = data.to(device=self.target_device, non_blocking=True)
-                predicted = model(data)  # Call forward - prediction
-                # Use training mask for both labels and predicted values
-                prediction = predicted[data.train_mask]
-                expected = data.y[data.train_mask]
-                raw_loss = self.hyper_params.loss_function(prediction, expected)
-
-                # Set back propagation
-                raw_loss.backward(retain_graph=True)
-                total_loss += raw_loss.item()
-
-                # optimizer.step()
                 # Empty cache, and batch the accumulation of gradient
                 self.exec_config.apply_batch_optimization(idx, optimizer)
             except RuntimeError as e:
@@ -188,8 +183,34 @@ class GNNTraining(NeuralTraining):
         loss = total_loss/len(train_loader)
         if loss > 1e+6:
             raise TrainingException(f'Loss {loss} for {len(train_loader)} points is out of bounds')
+
+        # Collect the memory statistics for this epoch.
+        GNNTraining.__collect_memory(memory_reports)
+        # Cleanup
+        del memory_reports, model, optimizer
         self.performance_metrics.collect_loss(is_validation=False,
                                               np_loss=np.array(loss))
+
+    @staticmethod
+    def __collect_memory(memory_reports: List[AnyStr]) -> None:
+        import os
+        if not os.path.exists('pin_enabled_3'):
+            memory_reports_str = '\n'.join([str(entry) for entry in memory_reports])
+            with open('pin_enabled_3', 'wt') as f:
+                f.write(memory_reports_str)
+
+    @monitor_memory_device
+    def __train_batch(self, data: Tuple[int, Any], model: nn.Module) -> float:
+        data = data.to(device=self.target_device, non_blocking=True)
+        predicted = model(data)  # Call forward - prediction
+
+        prediction = predicted[data.train_mask]
+        expected = data.y[data.train_mask]
+        raw_loss = self.hyper_params.loss_function(prediction, expected)
+
+        # Set back propagation
+        raw_loss.backward(retain_graph=True)
+        return raw_loss.item()
 
     def __val_epoch(self, model: nn.Module, epoch: int, eval_loader: DataLoader) -> None:
         total_loss = 0
