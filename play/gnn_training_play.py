@@ -23,15 +23,19 @@ import torch.nn as nn
 from torch_geometric.data import Data
 from torch.utils.data import DataLoader
 from torch_geometric.nn import GraphConv
+
+from deeplearning.training.exec_config import ExecConfig
 # Library imports
 from play import Play
-from dataset import DatasetException
 from dataset.graph.pyg_datasets import PyGDatasets
 from deeplearning.training.gnn_training import GNNTraining
-from deeplearning.model.graph.graph_conv_model import GraphConvModel
+from deeplearning.model.graph.graph_conv_model import GraphConvModel, GraphConvBuilder
+from dataset import DatasetException
 from dataset.graph.graph_data_loader import GraphDataLoader
 from deeplearning.block.graph import GraphException
 import python
+
+__all__ = ['GNNTrainingPlay']
 
 
 class GNNTrainingPlay(Play):
@@ -49,81 +53,87 @@ class GNNTrainingPlay(Play):
     The class GNNTrainingPlay is a wrapper of the class GNNTraining
     """
     def __init__(self,
-                 _training_attributes: Dict[AnyStr, Any],
-                 _sampling_attributes: Dict[AnyStr, Any]) -> None:
+                 training_attributes: Dict[AnyStr, Any],
+                 sampling_attributes: Dict[AnyStr, Any],
+                 model_attributes: Dict[AnyStr, Any] = None) -> None:
         super(GNNTrainingPlay, self).__init__()
-        assert len(_training_attributes) > 0, 'Training attributes are undefined'
-        assert len(_sampling_attributes) > 0, 'Sampling attributes are undefined'
+        assert len(training_attributes) > 0, 'Training attributes are undefined'
+        assert len(sampling_attributes) > 0, 'Sampling attributes are undefined'
 
-        self.training_attributes = _training_attributes
-        self.sampling_attributes = _sampling_attributes
+        self.training_attributes = training_attributes
+        self.sampling_attributes = sampling_attributes
+        self.model_attributes = None
 
     def play(self) -> None:
         """
         Source code related to Substack article 'Plug & Play Training for Graph Convolutional Networks' -
         Code snippets, 6, 7, 8, 9, 10 & 11
-        Ref: https://patricknicolas.substack.com/p/shape-your-models-with-the-fisher
+        Ref:  https://patricknicolas.substack.com/p/plug-and-play-training-for-graph
         """
         # Step 1: Retrieve the evaluation model
-        flickr_model, class_weights = self.__get_eval_model()
+        this_model, class_weights = self.get_eval_model()
 
         # Step 2: Retrieve the training environment
-        gnn_training = self.__get_training_env(flickr_model, class_weights)
+        gnn_training = self.get_training_env(this_model, class_weights)
 
         # Step 3: Retrieve the training and validation data loader
-        train_loader, val_loader = self.__get_loaders()
+        train_loader, val_loader = self.get_loaders()
 
-        # Step 4: Train the model
-        gnn_training.train(neural_model=flickr_model,
+        # Step 4: Train the model using the GNNTraining class
+        gnn_training.train(neural_model=this_model,
                            train_loader=train_loader,
                            val_loader=val_loader)
 
-    """ --------------------------  Private Helper Methods -----------------------  """
-
-    def __get_loaders(self) -> (DataLoader, DataLoader):
-        flickr_loaders = GraphDataLoader(dataset_name=self.training_attributes['dataset_name'],
-                                         sampling_attributes=self.sampling_attributes)
-        logging.info(f'Graph data: {str(flickr_loaders.data)}')
-        train_loader, val_loader = flickr_loaders()
+    def get_loaders(self) -> (DataLoader, DataLoader):
+        graph_data_loaders = GraphDataLoader(dataset_name=self.training_attributes['dataset_name'],
+                                             sampling_attributes=self.sampling_attributes)
+        logging.info(f'Graph data: {str(graph_data_loaders.data)}')
+        train_loader, val_loader = graph_data_loaders()
         return train_loader, val_loader
 
-    @staticmethod
-    def __distribution(data: Data) -> torch.Tensor:
-        class_distribution = data.y[data.train_mask]
-        raw_distribution = torch.bincount(class_distribution)
-        raw_weights = 1.0 / raw_distribution
-        return raw_weights / raw_weights.sum()
+    def get_training_env(self, model: GraphConvModel, class_weights: torch.Tensor = None) -> GNNTraining:
+        target_device = self.training_attributes.get('target_device', 'cpu')
+        if class_weights is not None and target_device is not None:
+            class_weights = class_weights.to(target_device)
+            self.training_attributes['loss_function'] = nn.CrossEntropyLoss(label_smoothing=0.05, weight=class_weights)
+        else:
+            self.training_attributes['loss_function'] = nn.CrossEntropyLoss(label_smoothing=0.05)
 
-    def __get_training_env(self, model: GraphConvModel, class_weights: torch.Tensor = None) -> GNNTraining:
-        self.training_attributes['loss_function'] = nn.NLLLoss(weight=class_weights.to('mps')) \
-            if class_weights is not None \
-            else nn.NLLLoss()
         self.training_attributes['encoding_len'] = model.mlp_blocks[-1].get_out_features()
         self.training_attributes['class_weights'] = class_weights
-        return GNNTraining.build(self.training_attributes)
+        exec_config = ExecConfig(empty_cache=True,
+                                 mix_precision=False,
+                                 subset_size=0,
+                                 monitor_memory=True,
+                                 grad_accu_steps=1,
+                                 pin_mem=True)
+        return GNNTraining.build(self.training_attributes, exec_config)
 
-    def __get_eval_model(self) -> (GraphConvModel, torch.Tensor):
-        from torch_geometric.datasets.flickr import Flickr
+    def get_eval_model(self) -> (GraphConvModel, torch.Tensor):
+        pyg_datasets = PyGDatasets(self.training_attributes['dataset_name'])
+        this_dataset = pyg_datasets()
+        if this_dataset is None:
+            raise GraphException(f"Failed to load {self.training_attributes['dataset_name']}")
 
-        pyg_dataset = PyGDatasets(self.training_attributes['dataset_name'])
-        flickr_dataset: Flickr = pyg_dataset()
-        if flickr_dataset is None:
-            raise GraphException("Failed to load Flickr")
-
-        _data: Data = flickr_dataset[0]
-        logging.info(f'Number of features: {_data.num_node_features}\nNumber of classes: {flickr_dataset.num_classes}'
+        _data: Data = this_dataset[0]
+        logging.info(f'Number of features: {_data.num_node_features}\nNumber of classes: {this_dataset.num_classes}'
                      f'\nSize of training: {_data.train_mask.sum()}')
 
+        # Use the model attributes provided in the constructor if not None, otherwise load a default model.
         my_model = GNNTrainingPlay.__get_model(num_node_features=_data.num_node_features,
-                                               _num_classes=flickr_dataset.num_classes,
-                                               hidden_channels=384)
+                                               num_classes=this_dataset.num_classes,
+                                               hidden_channels=self.training_attributes['hidden_channels']) \
+            if self.model_attributes is None  \
+            else self.model_attributes
         return my_model, GNNTrainingPlay.__distribution(_data)
 
+    """ --------------------------  Private Helper Methods -----------------------  """
+
     @staticmethod
-    def __get_model(num_node_features: int, _num_classes: int, hidden_channels: int) -> GraphConvModel:
+    def __get_model(num_node_features: int, num_classes: int, hidden_channels: int) -> GraphConvModel:
         model_attributes = {
             'model_id': 'MyModel',
-            'gconv_blocks': [
+            'graph_conv_blocks': [
                 {
                     'block_id': 'MyBlock_1',
                     'conv_layer': GraphConv(in_channels=num_node_features, out_channels=hidden_channels),
@@ -147,17 +157,26 @@ class GNNTrainingPlay(Play):
                 {
                     'block_id': 'MyMLP',
                     'in_features': hidden_channels,
-                    'out_features': _num_classes,
+                    'out_features': num_classes,
                     'activation': None,
                     'dropout': 0.0
                 }
             ]
         }
-        return GraphConvModel.build(model_attributes)
+        return GraphConvBuilder(model_attributes).build()
+
+    @staticmethod
+    def __distribution(data: Data) -> torch.Tensor:
+        class_distribution = data.y[data.train_mask]
+        raw_distribution = torch.bincount(class_distribution)
+        raw_weights = 1.0 / raw_distribution
+        return raw_weights / raw_weights.sum()
 
 
 if __name__ == '__main__':
-    training_attributes = {
+    default_title = 'Flickr Neighbors Sampling'
+    training_attrs = {
+        'target_device': None,   # To be selected dynamically
         'dataset_name': 'Flickr',
         # Model training Hyperparameters
         'learning_rate': 0.0005,
@@ -167,7 +186,7 @@ if __name__ == '__main__':
         'loss_function': None,
         'encoding_len': -1,
         'train_eval_ratio': 0.9,
-        'epochs': 24,
+        'epochs': 3,
         'weight_initialization': 'Kaiming',
         'optim_label': 'adam',
         'drop_out': 0.25,
@@ -175,26 +194,31 @@ if __name__ == '__main__':
         'class_weights': None,
         'patience': 2,
         'min_diff_loss': 0.02,
-        'hidden_channels': 384,
+        'hidden_channels': 128,
+        'tensor_mix_precision': None,
+        'checkpoint_enabled': False,
         # Performance metric definition
-        'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1'],
+        'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1', 'AuROC', 'AuPR'],
         'plot_parameters': {
             'count': 0,
-            'title': 'MyTitle',
+            'x_label': 'Epochs',
             'x_label_size': 12,
-            'plot_filename': 'myfile'
+            'title': '',   # To be updated dynamically
+            'fig_size': (10, 10),
+            'plot_filename': ''  # To be updated dynamically
         }
     }
-    sampling_attributes = {
+    sampling_attrs = {
         'id': 'NeighborLoader',
         'num_neighbors': [4],
         'batch_size': 64,
         'replace': True,
+        'pin_memory': False,
         'num_workers': 4
     }
 
     try:
-        gnn_training_play = GNNTrainingPlay(training_attributes, sampling_attributes)
+        gnn_training_play = GNNTrainingPlay(training_attrs, sampling_attrs)
         gnn_training_play.play()
         assert True
     except (GraphException | DatasetException | AssertionError) as e:

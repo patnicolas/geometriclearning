@@ -63,7 +63,6 @@ class GCNBlock(MessagePassingBlock):
                                        message_passing_module=gcn_layer,
                                        batch_norm_module=batch_norm_module,
                                        activation_module=activation_module,
-                                       graph_pooling_module=None,
                                        dropout_module=dropout_module)
 
     @classmethod
@@ -80,14 +79,13 @@ class GCNBlock(MessagePassingBlock):
         gcn_layer = block_attributes['message_passing']
         batch_norm_module = block_attributes['batch_norm']
         activation_module = block_attributes['activation']
-        pooling_module = block_attributes['pooling']
         dropout_module = nn.Dropout(block_attributes['dropout_ratio']) if 0 < block_attributes['dropout_ratio'] < 1 \
             else None
+
         return cls(block_id=block_id,
-                   message_passing_module=gcn_layer,
+                   gcn_layer=gcn_layer,
                    batch_norm_module=batch_norm_module,
                    activation_module=activation_module,
-                   graph_pooling_module=pooling_module,
                    dropout_module=dropout_module)
 
     @classmethod
@@ -114,4 +112,4 @@ class GCNBlock(MessagePassingBlock):
         """
         gcn_layer = GCNConv(input_layer_dim, output_layer_dim)
         batch_norm = BatchNorm(output_layer_dim)
-        return cls(block_id, gcn_layer, batch_norm, activation, drop_out)
+        return cls(block_id, gcn_layer, batch_norm, activation, nn.Dropout(drop_out))

@@ -104,7 +104,8 @@ class GraphDataLoader(object):
                                    dataset_name: AnyStr,
                                    num_neighbors: List[int],
                                    batch_size: int,
-                                   num_workers: int) -> Self:
+                                   num_workers: int,
+                                   pin_memory: bool = True) -> Self:
         """
         Alternative constructor dedicated to the node neighbor loader
         @param dataset_name: Name of the dataset as defined in PyTorch Geometric
@@ -113,6 +114,8 @@ class GraphDataLoader(object):
         @type num_neighbors: List[in]
         @param batch_size: Size of the batch of graph nodes
         @type batch_size: int
+        @param pin_memory: Flag to pin the memory (default True)
+        @type pin_memory:  bool
         @param num_workers: Number of concurrent executors
         @type num_workers: int
         @return: Instance of GraphDataLoader
@@ -123,9 +126,13 @@ class GraphDataLoader(object):
             'num_neighbors': num_neighbors,
             'batch_size': batch_size,
             'replace': True,
+            'pin_memory': pin_memory,
             'num_workers': num_workers
         }
         return cls(dataset_name, attrs)
+
+    def set_attribute(self, key: AnyStr, value: Any) -> None:
+        self.attributes_map[key] = value
 
     def __call__(self) -> (DataLoader, DataLoader):
         """

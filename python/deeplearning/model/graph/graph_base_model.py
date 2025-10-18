@@ -14,7 +14,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import List, AnyStr, Optional, Self
+from typing import List, AnyStr, Optional, Self, Any
 from abc import ABC, abstractmethod
 # 3rd Party imports
 import torch
@@ -73,8 +73,17 @@ class GraphBaseModel(NeuralModel, ABC):
         @return: Ordered list of torch module for this model
         @rtype: List[Module]
         """
+        return list(self.get_modules_seq())
+
+    def get_modules_seq(self) -> torch.nn.Sequential:
+        """
+        Extract the ordered list of all the PyTorch modules in this model. The sequence of modules is computed
+        the first time it is invoked.
+        @return: Ordered list of torch module for this model
+        @rtype: List[Module]
+        """
         self._register_modules(self.graph_blocks, self.mlp_blocks)
-        return list(self.modules_seq.children())
+        return self.modules_seq.children()
 
     def __repr__(self) -> str:
         modules = [f'{idx}: {str(module)}' for idx, module in enumerate(self.get_modules())]

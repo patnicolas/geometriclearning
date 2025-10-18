@@ -93,3 +93,12 @@ def check_modules_availability(modules: List[AnyStr]) -> AnyStr:
         for mod in missing:
             summary += f" - {mod}"
     return summary
+
+
+torch_device = (
+    torch.device("cuda") if torch.cuda.is_available() else
+    torch.device("mps") if getattr(torch.backends, "mps", None) and torch.backends.mps.is_available() else
+    torch.device("cpu")
+)
+
+

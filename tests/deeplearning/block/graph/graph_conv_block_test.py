@@ -17,7 +17,8 @@ class GraphConvBlockTest(unittest.TestCase):
                                                                       graph_conv_layer=graph_conv_layer,
                                                                       batch_norm_module=BatchNorm(hidden_channels),
                                                                       activation_module=nn.ReLU(),
-                                                                      pooling_module=TopKPooling(hidden_channels,ratio=0.4),
+                                                                      pooling_module=TopKPooling(hidden_channels,
+                                                                                                 ratio=0.4),
                                                                       dropout_module=nn.Dropout(0.2))
             modules = list(graph_conv_block.modules_list)
             self.assertEqual(len(modules), 5)
