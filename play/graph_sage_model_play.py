@@ -90,6 +90,7 @@ if __name__ == '__main__':
 
     # Parameterization of the training attributes
     test_training_attributes = {
+        'target_device': 'mps',
         'dataset_name': test_dataset_name,
         # Model training Hyperparameters
         'learning_rate': lr,

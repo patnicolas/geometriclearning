@@ -64,8 +64,8 @@ class MetricPlotterParameters:
         return cls(count=attributes.get('count', 0),
                    x_label=attributes.get('x_label', 'X'),
                    title=attributes['title'],
-                   x_label_size=attributes['x_label_size'],
-                   plot_filename=attributes['plot_filename'],
+                   x_label_size=attributes.get('x_label_size', 12),
+                   plot_filename=attributes.get('plot_filename', 'default_metrics'),
                    fig_size=attributes.get('fig_size', (10, 8)))
 
     def save_plot(self, fig) -> bool:

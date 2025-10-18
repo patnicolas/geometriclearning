@@ -111,6 +111,7 @@ class GraphSAGEvsGCNPlay(Play):
 
         # Parameterization
         return {
+            'target_device': 'cuda',
             'dataset_name': self.dataset_name,
             # Model training Hyperparameters
             'learning_rate': GraphSAGEvsGCNPlay.lr,

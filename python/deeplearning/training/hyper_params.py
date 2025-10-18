@@ -97,8 +97,8 @@ class HyperParams(object):
         Alternative constructor that relies on dictionary of attributes
         @param attributes: Dictionary of attributes of hyper-parameters
         @type attributes: Dict[AnyStr, Any]
-        @return: Instance of this class, HyperParam
-        @rtype: HyperParam
+        @return: Instance of this class, HyperParams
+        @rtype: HyperParams
         """
         assert len(attributes), 'Attributes for hyper parameters are undefined'
 

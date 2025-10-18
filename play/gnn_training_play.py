@@ -27,10 +27,10 @@ from torch_geometric.nn import GraphConv
 from deeplearning.training.exec_config import ExecConfig
 # Library imports
 from play import Play
-from dataset import DatasetException
 from dataset.graph.pyg_datasets import PyGDatasets
 from deeplearning.training.gnn_training import GNNTraining
 from deeplearning.model.graph.graph_conv_model import GraphConvModel, GraphConvBuilder
+from dataset import DatasetException
 from dataset.graph.graph_data_loader import GraphDataLoader
 from deeplearning.block.graph import GraphException
 import python
@@ -54,13 +54,15 @@ class GNNTrainingPlay(Play):
     """
     def __init__(self,
                  training_attributes: Dict[AnyStr, Any],
-                 sampling_attributes: Dict[AnyStr, Any]) -> None:
+                 sampling_attributes: Dict[AnyStr, Any],
+                 model_attributes: Dict[AnyStr, Any] = None) -> None:
         super(GNNTrainingPlay, self).__init__()
         assert len(training_attributes) > 0, 'Training attributes are undefined'
         assert len(sampling_attributes) > 0, 'Sampling attributes are undefined'
 
         self.training_attributes = training_attributes
         self.sampling_attributes = sampling_attributes
+        self.model_attributes = None
 
     def play(self) -> None:
         """
@@ -77,26 +79,17 @@ class GNNTrainingPlay(Play):
         # Step 3: Retrieve the training and validation data loader
         train_loader, val_loader = self.get_loaders()
 
-        # Step 4: Train the model
+        # Step 4: Train the model using the GNNTraining class
         gnn_training.train(neural_model=this_model,
                            train_loader=train_loader,
                            val_loader=val_loader)
 
-    """ --------------------------  Private Helper Methods -----------------------  """
-
     def get_loaders(self) -> (DataLoader, DataLoader):
-        flickr_loaders = GraphDataLoader(dataset_name=self.training_attributes['dataset_name'],
-                                         sampling_attributes=self.sampling_attributes)
-        logging.info(f'Graph data: {str(flickr_loaders.data)}')
-        train_loader, val_loader = flickr_loaders()
+        graph_data_loaders = GraphDataLoader(dataset_name=self.training_attributes['dataset_name'],
+                                             sampling_attributes=self.sampling_attributes)
+        logging.info(f'Graph data: {str(graph_data_loaders.data)}')
+        train_loader, val_loader = graph_data_loaders()
         return train_loader, val_loader
-
-    @staticmethod
-    def __distribution(data: Data) -> torch.Tensor:
-        class_distribution = data.y[data.train_mask]
-        raw_distribution = torch.bincount(class_distribution)
-        raw_weights = 1.0 / raw_distribution
-        return raw_weights / raw_weights.sum()
 
     def get_training_env(self, model: GraphConvModel, class_weights: torch.Tensor = None) -> GNNTraining:
         target_device = self.training_attributes.get('target_device', 'cpu')
@@ -126,13 +119,18 @@ class GNNTrainingPlay(Play):
         logging.info(f'Number of features: {_data.num_node_features}\nNumber of classes: {this_dataset.num_classes}'
                      f'\nSize of training: {_data.train_mask.sum()}')
 
+        # Use the model attributes provided in the constructor if not None, otherwise load a default model.
         my_model = GNNTrainingPlay.__get_model(num_node_features=_data.num_node_features,
-                                               _num_classes=this_dataset.num_classes,
-                                               hidden_channels=self.training_attributes['hidden_channels'])
+                                               num_classes=this_dataset.num_classes,
+                                               hidden_channels=self.training_attributes['hidden_channels']) \
+            if self.model_attributes is None  \
+            else self.model_attributes
         return my_model, GNNTrainingPlay.__distribution(_data)
 
+    """ --------------------------  Private Helper Methods -----------------------  """
+
     @staticmethod
-    def __get_model(num_node_features: int, _num_classes: int, hidden_channels: int) -> GraphConvModel:
+    def __get_model(num_node_features: int, num_classes: int, hidden_channels: int) -> GraphConvModel:
         model_attributes = {
             'model_id': 'MyModel',
             'graph_conv_blocks': [
@@ -159,7 +157,7 @@ class GNNTrainingPlay(Play):
                 {
                     'block_id': 'MyMLP',
                     'in_features': hidden_channels,
-                    'out_features': _num_classes,
+                    'out_features': num_classes,
                     'activation': None,
                     'dropout': 0.0
                 }
@@ -167,11 +165,19 @@ class GNNTrainingPlay(Play):
         }
         return GraphConvBuilder(model_attributes).build()
 
+    @staticmethod
+    def __distribution(data: Data) -> torch.Tensor:
+        class_distribution = data.y[data.train_mask]
+        raw_distribution = torch.bincount(class_distribution)
+        raw_weights = 1.0 / raw_distribution
+        return raw_weights / raw_weights.sum()
+
 
 if __name__ == '__main__':
+    default_title = 'Flickr Neighbors Sampling'
     training_attrs = {
+        'target_device': None,   # To be selected dynamically
         'dataset_name': 'Flickr',
-        'target_device': None,
         # Model training Hyperparameters
         'learning_rate': 0.0005,
         'weight_decay': 1e-4,
@@ -195,9 +201,11 @@ if __name__ == '__main__':
         'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1', 'AuROC', 'AuPR'],
         'plot_parameters': {
             'count': 0,
-            'title': 'MyTitle',
+            'x_label': 'Epochs',
             'x_label_size': 12,
-            'plot_filename': 'myfile'
+            'title': '',   # To be updated dynamically
+            'fig_size': (10, 10),
+            'plot_filename': ''  # To be updated dynamically
         }
     }
     sampling_attrs = {
