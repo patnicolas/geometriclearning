@@ -188,7 +188,7 @@ class GNNMemoryMonitor(Play):
         Plotter.plot(all_values, all_labels, plot_parameters)
 
     @staticmethod
-    def __single_memory_usage(filename: AnyStr) -> List[int]:
+    def __single_memory_usage(filename: AnyStr) -> List[float]:
         with open(filename, 'rt') as f:
             lines = f.readlines()
             values = [int(line)/1024 for line in lines]  # To load as KB
@@ -197,7 +197,7 @@ class GNNMemoryMonitor(Play):
 
 if __name__ == '__main__':
     # Step 1: An example of a configuration for evaluation of memory consumption during training
-    gnn_memory_monitor_conf = GNNMemoryMonitorConfig(target_device='cuda',
+    gnn_memory_monitor_conf = GNNMemoryMonitorConfig(target_device='mps',
                                                      tensor_mixed_precision=None,
                                                      hidden_dimension=64,
                                                      checkpoint=False,
@@ -234,7 +234,14 @@ if __name__ == '__main__':
         'tensor_mix_precision': gnn_memory_monitor_conf.tensor_mixed_precision,
         'checkpoint_enabled': gnn_memory_monitor_conf.checkpoint,
         # Performance metric definition
-        'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1', 'AuROC', 'AuPR']
+        'metrics_list': ['Accuracy', 'Precision', 'Recall', 'F1', 'AuROC', 'AuPR'],
+        'plot_parameters': {
+            'count': 0,
+            'x_label': 'Batch count',
+            'title': '',
+            'x_label_size': 12,
+            'fig_size': (10, 8)
+        }
     }
 
     # A specific Graph Data Loader

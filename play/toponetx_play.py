@@ -15,99 +15,158 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 
 # Python standard library imports
-from typing import AnyStr, Callable, Dict, Any, List, Generic, TypeVar, Tuple
+from typing import AnyStr, Callable, Dict, Any, List, Generic, TypeVar, Tuple, Self
 import logging
-from toponetx import CellComplex, SimplicialComplex
 # 3rd Party imports
 from toponetx.classes.complex import Complex
+from toponetx import CellComplex, SimplicialComplex
+from toponetx.generators.random_cell_complexes import np_cell_complex
+from toponetx.generators.random_simplicial_complexes import random_clique_complex
 from torch.utils.data import Dataset
 import toponetx as tnx
 import networkx as nx
-import numpy as np
 # Library imports
 from play import Play
-from topology import TopologyException
-from topology.simplicial.abstract_simplicial_complex import ComplexElement
 from play.graph_to_simplicial_complex_play import lift_from_graph_cliques
+from topology.hodge_laplacian_eigenvectors import HodgeLaplacianEigenvectors
 
 # Supporting types
 T = TypeVar('T')
 
 
 class TopoNetXPlay(Play, Generic[T]):
-    def __init__(self, dataset: T, this_complex: Complex = None) -> None:
+    """
+    This class wraps the evaluation of the TopoNetX library for Simplicial and Cell complex. There are 3 constructor
+    for the class:
+       __init__: default with data set and predefined simplicial and cell complex
+       build_from_lift:  Complex generated through a partial lift from an existing graph data
+       build_from_random: Random generated complex using TopoNetX generator module
+
+    Simplicial Complexes ------
+    A simplicial complex is a particular kind of topological space built by joining together simplices—points,
+    line segments, triangles, and their higher-dimensional analogs.  It generalizes the idea of a triangle in a
+    triangulated surface or a tetrahedron in a three-dimensional manifold decomposition.
+
+    Simplicial complexes are the foundational structures in combinatorial topology, providing a discrete way to
+    analyze continuous spaces. For instance, a triangle can be viewed as a simplicial complex composed of three
+    vertices connected pairwise by edges, forming a 2-simplex. Similarly, a tetrahedron is a simplicial complex
+    consisting of four vertices, six edges, and four triangular faces, representing a 3-simplex.
+
+    Cell Complexes --------
+    A cell complex is a mathematical framework constructed from elementary building blocks known as cells. These cells
+    generalize familiar geometric shapes—such as points, line segments, triangles, and disks. By systematically
+    “gluing” these cells together according to specific rules, one can form intricate geometric structures that serve
+    as fundamental objects of study in topology and geometry.
+
+    Cell complexes provide a flexible way to represent diverse mathematical entities, including graphs, manifolds,
+    and other discrete geometric forms. They play a central role in algebraic topology and geometric analysis, where
+    they are used to investigate the shape, connectivity, and higher-order properties of these objects.
+    """
+    def __init__(self, dataset: T, this_complex: Complex) -> None:
+        """
+        Default constructor for the evaluation of the TopoNetX library for which a fully defined simplicial or
+        cell complex is provided.
+        A TypeError is thrown if complex type is not supported
+
+        @param dataset: Pytorch Geometric dataset used for evaluation
+        @type dataset: Generic (Str or Dataset type)
+        @param this_complex: Simplicial or Cell complex
+        @type this_complex: Complex
+        """
         super(Play, self).__init__()
+
+        # TypeError is thrown if complex type is not supported
+        if not isinstance(this_complex, (SimplicialComplex, CellComplex)):
+            raise TypeError(f"Unsupported topological complex type: {type(this_complex).__name__}")
+
         self.dataset, self.dataset_name = TopoNetXPlay.__extract_dataset_name(dataset)
         self.complex = this_complex
 
-        if this_complex is not None:
-            if not isinstance(this_complex, (SimplicialComplex, CellComplex)):
-                raise TypeError(f"Unsupported topological complex type: {type(this_complex).__name__}")
-
-    def lift(self,
-             lifting_method: Callable[[nx.Graph, Dict[str, Any]], tnx.Complex],
-             params: Dict[AnyStr, Any],
-             num_eigenvectors: Tuple[int, int, int]) -> None:
-        if self.complex is not None:
-            raise TopologyException(f'The complex of type  {type(self.complex).__name__} is already defined')
-
-        nx_graph = self.__build_networkx_graph()
-        if self.complex is None:
-            self.complex = lifting_method(nx_graph, params)
-
-            node_simplicial_elements, edge_simplicial_elements, face_simplicial_elements = (
-                self.simplex_features_from_hodge_laplacian(num_eigenvectors)
-            )
-            self.__output_simplicial(node_simplicial_elements,
-                                     edge_simplicial_elements,
-                                     face_simplicial_elements,
-                                     num_eigenvectors)
-
-    def simplex_features_from_hodge_laplacian(self, num_eigenvectors: (int, int, int)) \
-            -> (List[ComplexElement], List[ComplexElement], List[ComplexElement]):
+    @classmethod
+    def build_from_lift(cls,
+                        dataset: T,
+                        lifting_method: Callable[[nx.Graph, Dict[str, Any]], tnx.Complex],
+                        params: Dict[AnyStr, Any]) -> Self:
         """
-        STEP 3: Add features values to each node
-        STEP 4: Add features to edges
-        STEP 5: Add features to faces
+        Alternative constructor that relies on a lifting method and predefined configuration parameters.
 
-        @param num_eigenvectors: Number of eigenvector to generate the features values
-        @type num_eigenvectors: int
-        @return: Fully configured elements of the simplicial complex
-        @rtype: AbstractSimplicialComplex
+        Lifting a graph G=(V, E) into a complex Cplx=(V, E, C) means augmenting it with higher-dimensional entities
+        (faces, volumes, etc.) so that you can capture relationships beyond pairwise edges.
+        This implementation is a 'partial' lift. Full Simplicial lifting assigns signal/features to faces or triangles.
+        Partial Simplicial lifting uses topological domains in the message passing and aggregation only
+        (e.g., L1 Hodge Laplacian).
+
+        @see Substack article on Topological Lifting of Graph Neural Networks
+            https://patricknicolas.substack.com/p/topological-lifting-of-graph-neural
+
+
+        @param dataset: PyTorch Geometric graph dataset
+        @type dataset: torch.utils.data.Dataset or str
+        @param lifting_method: Lifting method to be used in generating the complex
+        @type lifting_method: Callable (Lambda)
+        @param params: Configuration parameters such as max_rank, weighs used in lift
+        @type params: Dictionary
+        @return: Instance of this class
+        @rtype: TopoNetXPlay
         """
+        # Initialize the graph
+        nx_graph = TopoNetXPlay.__build_networkx_graph(dataset)
+        # Apply the appropriate lifting method to generate the complex
+        this_complex = lifting_method(nx_graph, params)
+        return cls(dataset, this_complex)
+
+    @classmethod
+    def build_from_random(cls,
+                          dataset: T,
+                          complex_type: AnyStr,
+                          num_nodes: int,
+                          prob_edge: float) -> Self:
+        """
+        Alternative constructor to generate an instance for the evaluation of TopoNetX library
+
+        @param dataset: PyTorch Geometric graph dataset
+        @type dataset: torch.utils.data.Dataset or str
+        @param complex_type: Type of complex
+        @type complex_type: str
+        @param num_nodes: Number of nodes for random generation of the complex
+        @type num_nodes: int
+        @param prob_edge: Probability of an edge exist between any given nodes
+        @type prob_edge: float
+        @return: Instance of this class
+        @rtype: TopoNetXPlay
+        """
+        match complex_type:
+            case 'simplicial':
+                return cls(dataset, random_clique_complex(n=num_nodes, p=prob_edge))
+            case 'cell':
+                return cls(dataset, np_cell_complex(n=num_nodes, p=prob_edge))
+            case _:
+                raise TypeError(f'{complex_type} complex is not supported')
+
+    """
+    def lift(self, num_eigenvectors: Tuple[int, int, int]) -> None:
+        graph_complex_elements = self.simplex_features_from_hodge_laplacian(num_eigenvectors)
+        graph_complex_elements.show(3)
+    """
+
+    def __str__(self) -> AnyStr:
+        return f'\nDataset: {self.dataset}\n{str(self.complex)}'
+
+    """
+    def simplex_features_from_hodge_laplacian(self, num_eigenvectors: Tuple[int, int, int]) -> GraphComplexElements:
         from toponetx.algorithms.spectrum import hodge_laplacian_eigenvectors
 
         # Compute the laplacian weights for nodes, edges (L1) and faces (L2)
         complex_features = \
-            [hodge_laplacian_eigenvectors(self.complex.hodge_laplacian_matrix(idx),
-                                          num_eigenvectors[idx])[1]
+            [hodge_laplacian_eigenvectors(self.complex.hodge_laplacian_matrix(idx), num_eigenvectors[idx])[1]
              for idx in range(len(num_eigenvectors))]
         # Generate the simplices related to node, edge and faces (triangles and tetrahedrons)
-        return [TopoNetXPlay.__compute_complex_elements(complex_features, idx)
-                for idx in range(len(complex_features))]
+        complex_elements = [self.__compute_complex_elements(complex_features, idx)
+                            for idx in range(len(complex_features))]
+        return GraphComplexElements.build(complex_elements)
+    """
 
     """ ----------------------  Private Helper Methods ---------------------- """
-
-    def __output_simplicial(self,
-                            node_elements: List[ComplexElement],
-                            edge_elements: List[ComplexElement],
-                            face_elements: List[ComplexElement],
-                            num_eigenvectors: Tuple[int, int, int]
-                            ) -> None:
-        logging.info(
-            f"{self.dataset_name}: {len(node_elements)} nodes,  {len(edge_elements)} edges, "
-            f"{len(face_elements)} faces")
-
-        # Step 4: Prepare data for dumping results
-        nodes_elements = [node for idx, node, in enumerate(node_elements) if idx < 3]
-        edges_elements = [edge for idx, edge, in enumerate(edge_elements) if idx < 3]
-        faces_elements = [face for idx, face, in enumerate(face_elements) if idx < 3]
-        nodes_elements_str = '\n'.join([str(s) for s in nodes_elements])
-        edges_elements_str = '\n'.join([str(s) for s in edges_elements])
-        faces_elements_str = '\n'.join([str(s) for s in faces_elements])
-        logging.info(f"\nNodes: {num_eigenvectors[0]}, Edges: {num_eigenvectors[1]}, Faces: {num_eigenvectors[2]} "
-                     f"eigenvectors\nSimplicial nodes:\n{nodes_elements_str}\nSimplicial edges:\n{edges_elements_str}"
-                     f"\nSimplicial faces:\n{faces_elements_str}")
 
     @staticmethod
     def __extract_dataset_name(in_dataset: T) -> (Dataset, AnyStr):
@@ -118,29 +177,41 @@ class TopoNetXPlay(Play, Generic[T]):
             # The class PyGDatasets validate the dataset is part of PyTorch Geometric Library
             pyg_dataset = PyGDatasets(in_dataset)
             dataset = pyg_dataset()
-            return (dataset, in_dataset)
+            return dataset, in_dataset
 
         # If the dataset is provided as part of PyTorch Geometric Library
         elif str(type(in_dataset).__module__) == 'torch_geometric':
-            return (in_dataset, getattr(in_dataset, 'name'))
+            return in_dataset, getattr(in_dataset, 'name')
         else:
             raise TypeError(f'Dataset has incorrect type {str(type(in_dataset))}')
 
+    """
     def __compute_complex_elements(self,
                                    simplicial_features: List,
                                    index: int) -> List[ComplexElement]:
         # Create simplicial element containing node indices associated with the simplex and feature set
         simplicial_node_feat = zip(self.complex.skeleton(index), np.array(simplicial_features[index]), strict=True)
         return [ComplexElement(tuple(u), v) for u, v in simplicial_node_feat]
+    """
 
-    def __build_networkx_graph(self) -> nx.Graph:
+    @staticmethod
+    def __build_networkx_graph(in_dataset: Dataset) -> nx.Graph:
         """
         STEP 1: Initialization of the graph if it has not been initialized.
 
         @return: NetworkX undirected graph
         @rtype: NetworkX Graph
         """
-        data = self.dataset[0]
+        if type(in_dataset).__name__ == 'str':
+            from dataset.graph.pyg_datasets import PyGDatasets
+
+            # The class PyGDatasets validate the dataset is part of PyTorch Geometric Library
+            pyg_dataset = PyGDatasets(in_dataset)
+            dataset = pyg_dataset()
+        else:
+            dataset = in_dataset
+
+        data = dataset[0]
         # Create a NetworkX graph
         G = nx.Graph()
 
@@ -154,10 +225,34 @@ class TopoNetXPlay(Play, Generic[T]):
         return G
 
 
-
 if __name__ == '__main__':
-    toponetx_play = TopoNetXPlay[SimplicialComplex](dataset='Cora', this_complex=None)
-    toponetx_play.lift(lifting_method=lift_from_graph_cliques, params={'max_rank': 2}, num_eigenvectors=(4, 5, 4))
+    logging.info('\nSimplicial from lift')
+    toponetx_play = TopoNetXPlay[SimplicialComplex].build_from_lift(dataset='Cora',
+                                                                    lifting_method=lift_from_graph_cliques,
+                                                                    params={'max_rank': 2})
+    logging.info(toponetx_play)
+    hodge_laplacian = HodgeLaplacianEigenvectors(num_eigenvectors=(4, 5, 4))
+    lifted_simplicial_elements = hodge_laplacian.get_complex_features(toponetx_play.complex)
+    logging.info(f'\n{lifted_simplicial_elements.dump(4)}')
+    logging.info('\nSimplicial from random')
+    toponetx_play = TopoNetXPlay[SimplicialComplex].build_from_random(dataset='Cora',
+                                                                      complex_type='simplicial',
+                                                                      num_nodes=64,
+                                                                      prob_edge=0.44)
+    logging.info(toponetx_play)
+    lifted_simplicial_elements = hodge_laplacian.get_complex_features(toponetx_play.complex)
+    logging.info(f'\n{lifted_simplicial_elements.dump(4)}')
+
+    toponetx_play = TopoNetXPlay[CellComplex].build_from_lift(dataset='Cora',
+                                                              lifting_method=lift_from_graph_cliques,
+                                                              params={'max_rank': 2})
+    logging.info(toponetx_play)
+    toponetx_play = TopoNetXPlay[CellComplex].build_from_random(dataset='Cora',
+                                                                complex_type='simplicial',
+                                                                num_nodes=64,
+                                                                prob_edge=0.44)
+    logging.info(toponetx_play)
+
 
 
 

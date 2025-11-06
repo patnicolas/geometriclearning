@@ -84,7 +84,7 @@ class ImageTensor(object):
     def __show_image(self, img: Image, img_name: str):
         resize_h = img.size[0] * self.img_scale_factor
         resize_b = img.size[1] * self.img_scale_factor
-        img.resize((resize_h, resize_b)).show(img_name)
+        img.resize((resize_h, resize_b)).dump(img_name)
 
 
     @staticmethod

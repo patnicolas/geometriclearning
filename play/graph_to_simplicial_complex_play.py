@@ -44,7 +44,7 @@ class GraphToSimplicialComplexPlay(Play):
     """
     def __init__(self,
                  dataset_name: AnyStr,
-                 lifting_method: Callable[[nx.Graph, Dict[str, Any]], tnx.SimplicialComplex:]) -> None:
+                 lifting_method: Callable[[nx.Graph, Dict[str, Any]], tnx.SimplicialComplex]) -> None:
         """
         Constructor for the evaluation of the topological lifting methods as described in 'Topological Lifting of
         Graph Neural Networks' Substack article
@@ -115,8 +115,9 @@ Wrapping functions for lifting methods defined in TopoNetX
 def lift_from_graph_cliques(graph: nx.Graph, params: Dict[str, Any]) -> tnx.SimplicialComplex:
     from toponetx.transform import graph_to_clique_complex
 
-    logging.info('Graph lifted from NetworkX cliques with max rank 2')
-    return graph_to_clique_complex(graph, max_rank=params.get('max_rank', 2))
+    max_rank = params.get('max_rank', 2)
+    logging.info(f'\nGraph lifted from NetworkX cliques with max rank {max_rank}')
+    return graph_to_clique_complex(graph, max_rank=max_rank)
 
 def lift_from_graph_neighbors(graph: nx.Graph, params: Dict[str, Any]) -> tnx.SimplicialComplex:
     from toponetx.transform import graph_to_neighbor_complex
