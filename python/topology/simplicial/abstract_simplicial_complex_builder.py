@@ -14,13 +14,16 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import List, AnyStr
+from typing import AnyStr, Dict, Callable, Any, Tuple
 # 3rd Party imports
 from torch_geometric.data import Dataset
 import networkx as nx
+import toponetx as tnx
 # Library imports
+from topology.hodge_spectrum_configuration import HodgeSpectrumConfiguration
 from topology.simplicial.graph_to_simplicial_complex import GraphToSimplicialComplex
-from topology.simplicial.abstract_simplicial_complex import SimplicialElement, AbstractSimplicialComplex
+from topology.simplicial.abstract_simplicial_complex import AbstractSimplicialComplex
+from topology.networkx_graph import NetworkxGraph
 
 
 class AbstractSimplicialComplexBuilder(object):
@@ -35,24 +38,18 @@ class AbstractSimplicialComplexBuilder(object):
                  dataset: Dataset | AnyStr,
                  nx_graph: nx.Graph | None) -> None:
         self.dataset = dataset
+
+        # If Graph data structure is not provided
+        if nx.graph is None:
+            networkx_graph = NetworkxGraph(dataset[0])
+            self.nx_graph = networkx_graph.G
         self.nx_graph = nx_graph
-        self.simplicial_nodes = None
-        self.simplicial_edges = None
-        self.simplicial_faces = None
+        self.graph_complex_elements = None
 
-    def add_simplicial_nodes(self, simplicial_nodes: List[SimplicialElement]) -> None:
-        self.simplicial_nodes = simplicial_nodes
-
-    def add_simplicial_edges(self, simplicial_edges: List[SimplicialElement]) -> None:
-        self.simplicial_edges = simplicial_edges
-
-    def add_simplicial_faces(self, simplicial_faces: List[SimplicialElement]) -> None:
-        self.simplicial_faces = simplicial_faces
-
-    def __str__(self) -> AnyStr:
-        return AbstractSimplicialComplex.to_string(self.simplicial_nodes, self.simplicial_edges, self.simplicial_faces)
-
-    def __call__(self, num_eigenvectors: (int, int, int),  max_num_nodes_cliques: int) -> AbstractSimplicialComplex:
+    def __call__(self,
+                 num_eigenvectors: Tuple[int, int, int],
+                 lifting_method: Callable[[nx.Graph, Dict[str, Any]], tnx.SimplicialComplex])\
+            -> AbstractSimplicialComplex:
         """
             Method to convert a Graph into a simplicial complex with the following steps:
                 1: Initialization of an undirected graph using NetworkX
@@ -67,35 +64,15 @@ class AbstractSimplicialComplexBuilder(object):
             @param num_eigenvectors: List of number of eigenvectors for each of the type of simplicial elements (node,
                                     edge, face)
             @type num_eigenvectors: Tuple[int, int, int)
-            @param max_num_nodes_cliques:  Maximum number of graph nodes for which the simplicial complex is extracted
-                                        from cliques. The complex is extracted from the neighbors otherwise
-            @type max_num_nodes_cliques: int
+            @param lifting_method:  Lifting method from graph to a Simplicial Complex
+            @type lifting_method: Callable
             @return: New Simplicial elements
             @rtype: AbstractSimplicialComplex
         """
-        graph_to_simplicial = GraphToSimplicialComplex(self.nx_graph,
-                                                       self.dataset,
-                                                       max_num_nodes_cliques,
-                                                       SimplexType.WithTriangles)
+        graph_to_simplicial = GraphToSimplicialComplex(self.nx_graph, self.dataset, lifting_method)
         tnx_complex = graph_to_simplicial.add_faces()
 
-        # Generate the node, edge and face feature vectors using Hodge Laplacian
-        node_feature_from_hodge_laplacian, edge_feature_from_hodge_laplacian, face_feature_from_hodge_laplacian = (
-            GraphToSimplicialComplex.features_from_hodge_laplacian(tnx_complex, num_eigenvectors)
-        )
-        # Use the feature vector specified in the constructor for the graph nodes if provided (not None)
-        # otherwise use the node element from the computation of the Hodge Laplacian
-        node_simplicial_elements = node_feature_from_hodge_laplacian if self.simplicial_nodes is None \
-            else self.simplicial_nodes
+        hodge_spectrum_config = HodgeSpectrumConfiguration(num_eigenvectors)
+        graph_complex_elements = hodge_spectrum_config.get_complex_features(tnx_complex)
 
-        # Use the feature vector specified in the constructor for the graph edges if provided (not None)
-        # otherwise use the node element from the computation of the Hodge Laplacian
-        edge_simplicial_elements = edge_feature_from_hodge_laplacian if self.simplicial_edges is None \
-            else self.simplicial_edges
-
-        # Use the feature vector specified in the constructor for the simplicial faces if provided (not None)
-        # otherwise use the node element from the computation of the Hodge Laplacian
-        face_simplicial_elements = face_feature_from_hodge_laplacian if self.simplicial_faces is None \
-            else self.simplicial_faces
-
-        return AbstractSimplicialComplex(node_simplicial_elements, edge_simplicial_elements, face_simplicial_elements)
+        return AbstractSimplicialComplex(graph_complex_elements)

@@ -22,51 +22,11 @@ import toponetx as tnx
 import numpy as np
 import torch
 # Library imports
+from topology.complex_element import ComplexElement
 from topology import TopologyException
 from topology.simplicial.simplicial_laplacian import SimplicialLaplacian
-__all__ = ['AbstractSimplicialComplex', 'SimplicialElement', 'ComplexElement']
-
-
-@dataclass
-class ComplexElement:
-    """
-      Definition of the basic element of a Simplicial Complex {Node, Edge, Face} composed of
-      - Feature vector
-      - Indices of nodes defining this element
-
-      @param node_indices: List of indices of nodes composing this simplicial element
-      @type node_indices: List[int]
-      @param feature_set: Feature vector or set associated with this simplicial element
-      @type feature_set: Numpy array
-      """
-    node_indices: Tuple[int, ...] | None = None
-    feature_set: Optional[np.array] = None
-
-    def __call__(self, override_node_indices: Tuple[int, ...] | None = None) -> Tuple[Tuple, np.array] | None:
-        """
-        Generate a tuple (node indices, feature vector) for this specific element. The node indices list is
-        overridden only if it has not been already defined.
-        A topology exception is raised if the node indices to be returned is None
-
-        @param override_node_indices: Optional node indices
-        @type override_node_indices: List[int]
-        @return: Tuple (node indices, feature vector)
-        @rtype: Tuple[Tuple, np.array]
-        """
-        if self.node_indices is None and override_node_indices is not None:
-            self.node_indices = override_node_indices
-        if self.node_indices is None:
-            raise TopologyException('No node indices has been defined for this simplicial element')
-
-        return tuple(self.node_indices), self.feature_set
-
-    def __str__(self) -> AnyStr:
-        output = []
-        if self.feature_set is not None:
-            output.append(list(np.round(self.feature_set, 5)))
-        if self.node_indices is not None:
-            output.append(self.node_indices)
-        return ", ".join(map(str, output)) if len(output) > 0 else ""
+from topology.graph_complex_elements import GraphComplexElements
+__all__ = ['AbstractSimplicialComplex', 'SimplicialElement']
 
 
 @dataclass
@@ -122,32 +82,20 @@ class AbstractSimplicialComplex(object):
     triangle_colors = ['blue', 'red', 'green', 'purple', 'grey', 'orange']
     tetrahedron_color = 'lightgrey'
 
-    def __init__(self,
-                 simplicial_nodes: List[SimplicialElement],
-                 simplicial_edges: List[SimplicialElement],
-                 simplicial_faces: List[SimplicialElement]) -> None:
+    def __init__(self, graph_complex_elements: GraphComplexElements) -> None:
         """
         Constructor for the Simplicial Complex Model. Shape of Numpy array for the edge and face sets
         are evaluated for consistency.
         
-        @param simplicial_nodes: List of nodes elements
-        @type simplicial_nodes:  List[SimplicialElement]
-        @param simplicial_edges:  List of Edge elements
-        @type simplicial_edges:  List[SimplicialElement]
-        @param simplicial_faces:  List of Face elements
-        @type simplicial_faces:  List[SimplicialElement]
+        @param graph_complex_elements: Graph Complex elements for Node, Edges and Faces or cells
+        @type graph_complex_elements:  GraphComplexElements
         """
         # Validate the shape of indices of the simplicial complex
-        AbstractSimplicialComplex.__validate(simplicial_edges, simplicial_faces)
-        
-        self.simplicial_nodes = simplicial_nodes
-        # Tuple (Src -> Dest)
-        self.simplicial_edges = simplicial_edges
-        # Either triangle {x, y, z] or Tetrahedron {x, y, z, t}
-        self.simplicial_faces = simplicial_faces
+        AbstractSimplicialComplex.__validate(graph_complex_elements)
+        self.graph_complex_elements = graph_complex_elements
         # Extract the
-        edges_indices = [edge.node_indices for edge in simplicial_edges]
-        faces_indices = [edge.node_indices for edge in simplicial_faces]
+        edges_indices = [edge.node_indices for edge in graph_complex_elements.complex_edges]
+        faces_indices = [edge.node_indices for edge in graph_complex_elements.complex_simplex_2]
         self.simplicial_indices = edges_indices + faces_indices
 
     @classmethod
@@ -181,12 +129,12 @@ class AbstractSimplicialComplex(object):
         # Generate random feature vector for node
         random_feature_set = torch.rand(num_nodes, node_feature_dimension).numpy()
         # Build the simplicial nodes (the node indices are implicit)
-        simplicial_nodes = [SimplicialElement(feature_set=feat) for feat in random_feature_set]
+        simplicial_nodes = [ComplexElement(feature_set=feat) for feat in random_feature_set]
         # Build the simplicial edges with no feature vector
-        simplicial_edges = [SimplicialElement(tuple(edge_idx)) for edge_idx in edge_node_indices]
+        simplicial_edges = [ComplexElement(tuple(edge_idx)) for edge_idx in edge_node_indices]
         # Build the simplicial faces with no feature vector
-        simplicial_faces = [SimplicialElement(tuple(face_idx)) for face_idx in face_node_indices]
-        return cls(simplicial_nodes, simplicial_edges, simplicial_faces)
+        simplicial_faces = [ComplexElement(tuple(face_idx)) for face_idx in face_node_indices]
+        return cls(GraphComplexElements(simplicial_nodes, simplicial_edges, simplicial_faces))
 
     def node_features_map(self) -> Dict[Tuple, np.array]:
         """
@@ -196,8 +144,9 @@ class AbstractSimplicialComplex(object):
         @return: Dictionary of Tuple of node indices - Feature vectors
         @rtype: Dict[Tuple, np.array]
         """
-        node_indices = list(zip(list(range(len(self.simplicial_nodes)))))
-        nodes_feature_set = [simplicial_node.feature_set for simplicial_node in self.simplicial_nodes]
+        simplicial_nodes = self.graph_complex_elements.complex_nodes
+        node_indices = list(zip(list(range(len(simplicial_nodes)))))
+        nodes_feature_set = [simplicial_node.feature_set for simplicial_node in simplicial_nodes]
         return dict(zip(node_indices, nodes_feature_set))
 
     def edge_features_map(self) -> Dict[Tuple, np.array]:
@@ -208,8 +157,9 @@ class AbstractSimplicialComplex(object):
         @return: Dictionary of Tuple of the 2 node indices  - Feature vectors
         @rtype: Dict[Tuple, np.array]
         """
-        edges_node_indices = [tuple(simplicial_edge.node_indices) for simplicial_edge in self.simplicial_edges]
-        edges_feature_set = [simplicial_edge.feature_set for simplicial_edge in self.simplicial_edges]
+        simplicial_edges = self.graph_complex_elements.complex_edges
+        edges_node_indices = [tuple(simplicial_edge.node_indices) for simplicial_edge in simplicial_edges]
+        edges_feature_set = [simplicial_edge.feature_set for simplicial_edge in simplicial_edges]
         return dict(zip(edges_node_indices, edges_feature_set))
 
     def face_features_map(self) -> Dict[Tuple, np.array]:
@@ -220,25 +170,13 @@ class AbstractSimplicialComplex(object):
         @return: Dictionary of Tuple of the 3 or 4 node indices  - Feature vectors
         @rtype: Dict[Tuple, np.array]
         """
-        faces_node_indices = [tuple(simplicial_face.node_indices) for simplicial_face in self.simplicial_faces]
-        faces_feature_set = [simplicial_face.feature_set for simplicial_face in self.simplicial_faces]
+        simplicial_faces =  self.graph_complex_elements.complex_simplex_2
+        faces_node_indices = [tuple(simplicial_face.node_indices) for simplicial_face in simplicial_faces]
+        faces_feature_set = [simplicial_face.feature_set for simplicial_face in simplicial_faces]
         return dict(zip(faces_node_indices, faces_feature_set))
 
     def __str__(self) -> AnyStr:
-        return AbstractSimplicialComplex.to_string(self.simplicial_nodes, self.simplicial_edges, self.simplicial_faces)
-
-    @staticmethod
-    def to_string(simplicial_nodes: List[SimplicialElement],
-                  simplicial_edges: List[SimplicialElement],
-                  simplicial_faces: List[SimplicialElement]) -> AnyStr:
-        simplicial_nodes_str = "\n".join([str(node) for node in simplicial_nodes]) \
-            if simplicial_nodes is not None else "None"
-        simplicial_edges_str = "\n".join([str(edge) for edge in simplicial_edges]) \
-            if simplicial_edges is not None else "None"
-        simplicial_faces_str = "\n".join([str(face) for face in simplicial_faces]) \
-            if simplicial_faces is not None else "None"
-
-        return f'\nNodes:{simplicial_nodes_str}\nEdges:{simplicial_edges_str}\nFaces:{simplicial_faces_str}'
+        return str(self.graph_complex_elements)
 
     def adjacency_matrix(self, directed_graph: bool = False) -> np.array:
         """
@@ -249,11 +187,11 @@ class AbstractSimplicialComplex(object):
         @rtype: Numpy array
         """
         # Initialize adjacency matrix
-        n = len(np.concatenate([node.feature_set for node in self.simplicial_nodes]))
+        n = len(np.concatenate([node.feature_set for node in self.graph_complex_elements.complex_nodes]))
         A = np.zeros((n, n), dtype=int)
 
         # Fill in edges
-        for u, v in [edge.node_indices for edge in self.simplicial_edges]:
+        for u, v in [edge.node_indices for edge in self.graph_complex_elements.complex_edges]:
             A[u-1, v-1] = 1
             if directed_graph:
                 A[v-1, u-1] = 1
@@ -281,12 +219,14 @@ class AbstractSimplicialComplex(object):
     """ -------------------------  Private Supporting methods ------------------ """
 
     @staticmethod
-    def __validate(simplicial_edge: List[SimplicialElement], simplicial_face: List[SimplicialElement]) -> None:
+    def __validate(graph_complex_elements: GraphComplexElements) -> None:
+        simplicial_edge = graph_complex_elements.complex_edges
         if simplicial_edge is not None:
             edge_set = [edge.node_indices for edge in simplicial_edge]
             assert len(edge_set) > 0, 'Simplicial requires at least one edge'
             assert all(len(sublist) == 2 for sublist in edge_set), f'All elements of edge list should have 2 indices'
 
+        simplicial_face = graph_complex_elements.complex_simplex_2
         if simplicial_face is not None:
             face_set = [face.node_indices for face in simplicial_face]
             assert len(face_set) > 0, 'Simplicial requires at least face'

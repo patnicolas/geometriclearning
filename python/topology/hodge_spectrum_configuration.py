@@ -14,18 +14,19 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 # Python standard library imports
-from typing import AnyStr, List, Tuple
+from typing import AnyStr, List, Tuple, Self
 from dataclasses import dataclass
 # 3rd Party imports
 from toponetx.classes.complex import Complex
 import numpy as np
 # Library imports
-from topology.simplicial.abstract_simplicial_complex import ComplexElement
+from topology.complex_element import ComplexElement
 from topology.graph_complex_elements import GraphComplexElements
+__all__ = ['HodgeSpectrumConfiguration']
 
 
 @dataclass
-class HodgeLaplacianEigenvectors:
+class HodgeSpectrumConfiguration:
     """
     Class to generate a set of complex elements from a graph using the Hodge Laplacian
 
@@ -34,6 +35,21 @@ class HodgeLaplacianEigenvectors:
     @type num_eigenvectors: int
     """
     num_eigenvectors: Tuple[int, int, int]
+
+    @classmethod
+    def build(cls, num_node_eigenvectors: int, num_edge_eigenvectors: int, num_simplex_2_eigenvectors: int) -> Self:
+        """
+        Alternative constructor for defining the number of Eigenvectors for Hodge Laplacian
+        @param num_node_eigenvectors:  Number of eigen vectors for incidence matrix for nodes
+        @type num_node_eigenvectors: int
+        @param num_edge_eigenvectors: Number of eigen vectors for incidence matrix for edges
+        @type num_edge_eigenvectors: int
+        @param num_simplex_2_eigenvectors: Number of eigen vectors for incidence matrix for simplex-2
+        @type num_simplex_2_eigenvectors: int
+        @return: Instance of HodgeLaplacianEigenvectors
+        @rtype: HodgeSpectrumConfiguration
+        """
+        return cls((num_node_eigenvectors, num_edge_eigenvectors, num_simplex_2_eigenvectors))
 
     def get_num_node_eigenvalues(self) -> int:
         return self.num_eigenvectors[0]
@@ -59,8 +75,8 @@ class HodgeLaplacianEigenvectors:
 
         @param this_complex: This simplicial or cell complex
         @type this_complex: Complex
-        @return: Fully configured elements of the simplicial complex
-        @rtype: AbstractSimplicialComplex
+        @return: Fully configured, lifted elements of the complex
+        @rtype: GraphComplexElements
         """
         from toponetx.algorithms.spectrum import hodge_laplacian_eigenvectors
 
@@ -70,7 +86,7 @@ class HodgeLaplacianEigenvectors:
              for idx in range(len(self.num_eigenvectors))]
 
         # Generate the simplex related to node, edge and simplex_2 (triangles, cells ...)
-        complex_elements = [HodgeLaplacianEigenvectors.__compute_complex_elements(this_complex, complex_features, idx)
+        complex_elements = [HodgeSpectrumConfiguration.__compute_complex_elements(this_complex, complex_features, idx)
                             for idx in range(len(complex_features))]
         return GraphComplexElements.build(complex_elements)
 
@@ -80,4 +96,7 @@ class HodgeLaplacianEigenvectors:
                                    index: int) -> List[ComplexElement]:
         # Create simplicial element containing node indices associated with the simplex and feature set
         simplicial_node_feat = zip(this_complex.skeleton(index), np.array(complex_features[index]), strict=True)
-        return [ComplexElement(tuple(u), v) for u, v in simplicial_node_feat]
+        try:
+            return [ComplexElement(tuple(u), v) for u, v in simplicial_node_feat]
+        except TypeError as e:
+            print(e)

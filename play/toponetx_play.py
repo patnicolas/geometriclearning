@@ -28,7 +28,7 @@ import networkx as nx
 # Library imports
 from play import Play
 from play.graph_to_simplicial_complex_play import lift_from_graph_cliques
-from topology.hodge_laplacian_eigenvectors import HodgeLaplacianEigenvectors
+from topology.hodge_spectrum_configuration import HodgeSpectrumConfiguration
 
 # Supporting types
 T = TypeVar('T')
@@ -143,28 +143,8 @@ class TopoNetXPlay(Play, Generic[T]):
             case _:
                 raise TypeError(f'{complex_type} complex is not supported')
 
-    """
-    def lift(self, num_eigenvectors: Tuple[int, int, int]) -> None:
-        graph_complex_elements = self.simplex_features_from_hodge_laplacian(num_eigenvectors)
-        graph_complex_elements.show(3)
-    """
-
     def __str__(self) -> AnyStr:
         return f'\nDataset: {self.dataset}\n{str(self.complex)}'
-
-    """
-    def simplex_features_from_hodge_laplacian(self, num_eigenvectors: Tuple[int, int, int]) -> GraphComplexElements:
-        from toponetx.algorithms.spectrum import hodge_laplacian_eigenvectors
-
-        # Compute the laplacian weights for nodes, edges (L1) and faces (L2)
-        complex_features = \
-            [hodge_laplacian_eigenvectors(self.complex.hodge_laplacian_matrix(idx), num_eigenvectors[idx])[1]
-             for idx in range(len(num_eigenvectors))]
-        # Generate the simplices related to node, edge and faces (triangles and tetrahedrons)
-        complex_elements = [self.__compute_complex_elements(complex_features, idx)
-                            for idx in range(len(complex_features))]
-        return GraphComplexElements.build(complex_elements)
-    """
 
     """ ----------------------  Private Helper Methods ---------------------- """
 
@@ -184,15 +164,6 @@ class TopoNetXPlay(Play, Generic[T]):
             return in_dataset, getattr(in_dataset, 'name')
         else:
             raise TypeError(f'Dataset has incorrect type {str(type(in_dataset))}')
-
-    """
-    def __compute_complex_elements(self,
-                                   simplicial_features: List,
-                                   index: int) -> List[ComplexElement]:
-        # Create simplicial element containing node indices associated with the simplex and feature set
-        simplicial_node_feat = zip(self.complex.skeleton(index), np.array(simplicial_features[index]), strict=True)
-        return [ComplexElement(tuple(u), v) for u, v in simplicial_node_feat]
-    """
 
     @staticmethod
     def __build_networkx_graph(in_dataset: Dataset) -> nx.Graph:
@@ -225,37 +196,52 @@ class TopoNetXPlay(Play, Generic[T]):
         return G
 
 
-if __name__ == '__main__':
-    logging.info('\nSimplicial from lift')
-    toponetx_play = TopoNetXPlay[SimplicialComplex].build_from_lift(dataset='Cora',
+def play_build_simplicial_complex(dataset_name: AnyStr) -> None:
+    logging.info('\nSimplicial from Lift')
+    toponetx_play = TopoNetXPlay[SimplicialComplex].build_from_lift(dataset=dataset_name,
                                                                     lifting_method=lift_from_graph_cliques,
                                                                     params={'max_rank': 2})
     logging.info(toponetx_play)
-    hodge_laplacian = HodgeLaplacianEigenvectors(num_eigenvectors=(4, 5, 4))
-    lifted_simplicial_elements = hodge_laplacian.get_complex_features(toponetx_play.complex)
-    logging.info(f'\n{lifted_simplicial_elements.dump(4)}')
+    hodge_spectrum_config = HodgeSpectrumConfiguration.build(num_node_eigenvectors=4,
+                                                             num_edge_eigenvectors=5,
+                                                             num_simplex_2_eigenvectors=4)
+
+    lifted_complex_elements = hodge_spectrum_config.get_complex_features(toponetx_play.complex)
+    logging.info(f'\n{lifted_complex_elements.dump(4)}')
     logging.info('\nSimplicial from random')
-    toponetx_play = TopoNetXPlay[SimplicialComplex].build_from_random(dataset='Cora',
+    toponetx_play = TopoNetXPlay[SimplicialComplex].build_from_random(dataset=dataset_name,
                                                                       complex_type='simplicial',
                                                                       num_nodes=64,
                                                                       prob_edge=0.44)
     logging.info(toponetx_play)
-    lifted_simplicial_elements = hodge_laplacian.get_complex_features(toponetx_play.complex)
-    logging.info(f'\n{lifted_simplicial_elements.dump(4)}')
+    lifted_complex_elements = hodge_spectrum_config.get_complex_features(toponetx_play.complex)
+    logging.info(f'\n{lifted_complex_elements.dump(4)}')
 
-    toponetx_play = TopoNetXPlay[CellComplex].build_from_lift(dataset='Cora',
+
+def play_build_cell_complex(dataset_name: AnyStr) -> None:
+    logging.info('\nCell complex from Lift')
+    toponetx_play = TopoNetXPlay[CellComplex].build_from_lift(dataset=dataset_name,
                                                               lifting_method=lift_from_graph_cliques,
                                                               params={'max_rank': 2})
     logging.info(toponetx_play)
-    toponetx_play = TopoNetXPlay[CellComplex].build_from_random(dataset='Cora',
-                                                                complex_type='simplicial',
+    hodge_spectrum_config = HodgeSpectrumConfiguration.build(num_node_eigenvectors=4,
+                                                             num_edge_eigenvectors=5,
+                                                             num_simplex_2_eigenvectors=4)
+
+    lifted_complex_elements = hodge_spectrum_config.get_complex_features(toponetx_play.complex)
+    logging.info(f'\n{lifted_complex_elements.dump(4)}')
+    logging.info('\nSimplicial from random')
+    toponetx_play = TopoNetXPlay[CellComplex].build_from_random(dataset=dataset_name,
+                                                                complex_type='cell',
                                                                 num_nodes=64,
                                                                 prob_edge=0.44)
     logging.info(toponetx_play)
+    lifted_complex_elements = hodge_spectrum_config.get_complex_features(toponetx_play.complex)
+    logging.info(f'\n{lifted_complex_elements.dump(4)}')
 
 
-
-
-
-
-
+if __name__ == '__main__':
+    # play_build_simplicial_complex('Cora')
+    play_build_cell_complex('Cora')
+    #play_build_simplicial_complex('PubMed')
+    play_build_cell_complex('PubMed')

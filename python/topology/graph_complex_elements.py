@@ -17,7 +17,8 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 from typing import AnyStr, List, Self
 from dataclasses import dataclass
 # Library imports
-from topology.simplicial.abstract_simplicial_complex import ComplexElement
+from topology.complex_element import ComplexElement
+__all__ = ['GraphComplexElements']
 
 
 @dataclass
@@ -47,6 +48,15 @@ class GraphComplexElements:
         """
         assert len(complex_elements) == 3, f'The number of sets of complex elements {len(complex_elements)} should be 3'
         return cls(complex_elements[0], complex_elements[1], complex_elements[2])
+
+    def add_nodes(self, complex_nodes: List[ComplexElement]) -> None:
+        self.complex_nodes = complex_nodes
+
+    def add_edges(self, complex_edges: List[ComplexElement]) -> None:
+        self.complex_edges = complex_edges
+
+    def add_simplex_2(self, complex_simplex_2: List[ComplexElement]) -> None:
+        self.complex_simplex_2 = complex_simplex_2
 
     def dump(self, count: int) -> AnyStr:
         """
