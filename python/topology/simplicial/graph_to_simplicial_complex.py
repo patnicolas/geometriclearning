@@ -59,6 +59,7 @@ class GraphToSimplicialComplex(Generic[T]):
                                Generation of Vietoris-Rips complext
         @type lifting_method: Callable[[nx.Graph], tnx.SimplicialComplex]
         """
+        t = type(dataset).__module__
         # If the dataset is provided using its name
         if type(dataset).__name__ == 'str':
             from dataset.graph.pyg_datasets import PyGDatasets
@@ -68,10 +69,12 @@ class GraphToSimplicialComplex(Generic[T]):
             dataset = pyg_dataset()
             self.dataset_name = dataset
         # If the dataset is provided as part of PyTorch Geometric Library
-        elif str(type(dataset).__module__) == 'torch_geometric':
-            self.dataset_name = getattr(dataset, 'name')
         else:
-            raise TypeError(f'Dataset has incorrect type {str(type(dataset))}')
+            base_module = str(type(dataset).__module__) .split('.')[0]
+            if base_module == 'torch_geometric':
+                self.dataset_name = getattr(dataset, 'name')
+            else:
+                raise TypeError(f'Dataset has incorrect type {str(type(dataset))}')
 
         # Initialize the NetworkX graph if not provided in the constructor
         if nx_graph is None:

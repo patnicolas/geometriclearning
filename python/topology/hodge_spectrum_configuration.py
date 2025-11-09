@@ -36,10 +36,23 @@ class HodgeSpectrumConfiguration:
     """
     num_eigenvectors: Tuple[int, int, int]
 
+    def __post_init__(self) -> None:
+        """
+        Post initialization validation of input values - Throw a ValueError exception is input are out of bounds
+        """
+        if self.num_eigenvectors[0] < 1:
+            raise ValueError(f'\nNum of eigenvalues for nodes incidence {self.num_eigenvectors[0]} should be > 0')
+        if self.num_eigenvectors[1] < 1:
+            raise ValueError(f'\nNum of eigenvalues for edges incidence {self.num_eigenvectors[1]} should be > 0')
+        if self.num_eigenvectors[2] < 1:
+            raise ValueError(f'\nNum of eigenvalues for 2-simplex incidence {self.num_eigenvectors[2]} should be > 0')
+
     @classmethod
     def build(cls, num_node_eigenvectors: int, num_edge_eigenvectors: int, num_simplex_2_eigenvectors: int) -> Self:
         """
-        Alternative constructor for defining the number of Eigenvectors for Hodge Laplacian
+        Alternative constructor for defining the number of Eigenvectors for Hodge Laplacian. A Value error is thrown
+        if number of eigenvalue is out-of-range
+
         @param num_node_eigenvectors:  Number of eigen vectors for incidence matrix for nodes
         @type num_node_eigenvectors: int
         @param num_edge_eigenvectors: Number of eigen vectors for incidence matrix for edges

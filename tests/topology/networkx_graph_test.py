@@ -21,6 +21,9 @@ class NetworkxGraphTests(unittest.TestCase):
         except TypeError as e:
             logging.error(e)
             self.assertFalse(True)
+        except ValueError as e:
+            logging.error(e)
+            self.assertFalse(True)
 
     def test_init_2(self):
         try:
@@ -29,5 +32,8 @@ class NetworkxGraphTests(unittest.TestCase):
             self.assertTrue(networkx_graph.G is not None)
             logging.info(networkx_graph)
         except TypeError as e:
+            logging.error(e)
+            self.assertFalse(True)
+        except ValueError as e:
             logging.error(e)
             self.assertFalse(True)

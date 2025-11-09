@@ -30,7 +30,7 @@ __all__ = ['AbstractSimplicialComplex', 'SimplicialElement']
 
 
 @dataclass
-class SimplicialElement:
+class SimplicialElementXX:
     """
     Definition of the basic element of a Simplicial Complex {Node, Edge, Face} composed of
     - Feature vector
@@ -121,7 +121,8 @@ class AbstractSimplicialComplex(object):
         @rtype: AbstractSimplicialComplex
         """
         import itertools
-        assert node_feature_dimension > 0, f'Dimension of random vector {node_feature_dimension} should be > 0'
+        if node_feature_dimension <= 0:
+            raise ValueError(f'Dimension of random vector {node_feature_dimension} should be > 0')
 
         # Retrieve the number of nodes from the largest index in the edge indices list
         num_nodes = max(list(itertools.chain.from_iterable(edge_node_indices)))
@@ -207,7 +208,8 @@ class AbstractSimplicialComplex(object):
         @return: Incidence matrix 
         @rtype: Numpy array
         """
-        assert 0 <= rank < 3, f'Rank of incidence matrix {rank} should be [0, 2]'
+        if rank < 0 or rank > 2:
+            raise ValueError(f'Rank of incidence matrix {rank} should be [0, 2]')
 
         sc = tnx.SimplicialComplex(self.simplicial_indices)
         _, _, incidence = sc.incidence_matrix(rank=rank, index=True, signed=directed_graph)
