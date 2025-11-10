@@ -221,6 +221,6 @@ if __name__ == '__main__':
         gnn_training_play = GNNTrainingPlay(training_attrs, sampling_attrs)
         gnn_training_play.play()
         assert True
-    except (GraphException | DatasetException | AssertionError) as e:
-        logging.info(f'Error: {str(e)}')
+    except (GraphException, DatasetException, AssertionError, ValueError) as e:
+        logging.error(f'Error: {str(e)}')
         assert False

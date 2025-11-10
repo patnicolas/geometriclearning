@@ -4,6 +4,7 @@ from topology.simplicial.simplicial_laplacian import SimplicialLaplacian, Simpli
 import logging
 
 
+
 class SimplicialLaplacianTest(unittest.TestCase):
 
     def test_simplicial_up_laplacian(self):
@@ -17,7 +18,7 @@ class SimplicialLaplacianTest(unittest.TestCase):
             up_laplacian = simplicial_laplacian(edge_set + face_set)
             logging.info(up_laplacian)
             self.assertTrue(True)
-        except TopologyException as e:
+        except (ValueError, KeyError) as e:
             logging.error(e)
             self.assertTrue(False)
 
@@ -31,7 +32,8 @@ class SimplicialLaplacianTest(unittest.TestCase):
             down_laplacian = simplicial_laplacian(edge_set + face_set)
             logging.info(down_laplacian)
             self.assertTrue(False)
-        except TopologyException as e:
+        except (ValueError, KeyError) as e:
+            logging.error(e)
             self.assertTrue(True)
 
     def test_simplicial_hodge_laplacians(self):
@@ -47,5 +49,6 @@ class SimplicialLaplacianTest(unittest.TestCase):
                 hodge_laplacian = simplicial_laplacian(edge_set + face_set)
                 logging.info(hodge_laplacian)
             self.assertTrue(True)
-        except TopologyException as e:
+        except (ValueError, KeyError) as e:
+            logging.error(e)
             self.assertTrue(False)

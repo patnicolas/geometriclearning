@@ -22,7 +22,7 @@ import toponetx as tnx
 # Library imports
 from play import Play
 from topology.simplicial import lift_from_graph_cliques, lift_from_graph_neighbors
-from topology.simplicial.abstract_simplicial_complex import SimplicialElement
+from topology.simplicial.simplicial_complex_driver import SimplicialElement
 from topology.simplicial.graph_to_simplicial_complex import GraphToSimplicialComplex
 from deeplearning.training import TrainingException
 import python

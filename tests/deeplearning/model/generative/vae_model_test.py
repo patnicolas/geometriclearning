@@ -6,7 +6,7 @@ from deeplearning.model.mlp.mlp_model import MLPModel
 from deeplearning.model.conv.conv_model import ConvModel
 from deeplearning.block.conv.conv_2d_block import Conv2dBlock
 from deeplearning.model.generative.vae_model import VAEModel
-from deeplearning import VAEException, ConvException
+from deeplearning import GenerativeException, ConvException
 from deeplearning.training.vae_training import VAETraining
 import logging
 import os
@@ -33,7 +33,7 @@ class VAEModelTest(unittest.TestCase):
             vae_model = VAEModel(model_id='vae_ffnn', encoder=ffnn_model, latent_dim=latent_size)
             logging.info(str(vae_model))
             self.assertTrue(True)
-        except VAEException as e:
+        except GenerativeException as e:
             logging.info(f'ERROR: {str(e)}')
             self.assertTrue(True)
 
@@ -70,7 +70,7 @@ class VAEModelTest(unittest.TestCase):
             latent_size = 6
             vae_model = VAEModel(model_id='vae_ffnn', encoder=conv_model, latent_dim=latent_size, noise_func=None)
             logging.info(repr(vae_model))
-        except VAEException as e:
+        except GenerativeException as e:
             logging.info(f'ERROR: {str(e)}')
             self.assertTrue(True)
 
@@ -119,7 +119,7 @@ class VAEModelTest(unittest.TestCase):
         except ConvException as e:
             logging.info(str(e))
             self.assertTrue(False)
-        except VAEException as e:
+        except GenerativeException as e:
             logging.info(str(e))
             self.assertTrue(False)
 

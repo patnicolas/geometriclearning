@@ -22,11 +22,11 @@ import toponetx as tnx
 # Library imports
 from topology.hodge_spectrum_configuration import HodgeSpectrumConfiguration
 from topology.simplicial.graph_to_simplicial_complex import GraphToSimplicialComplex
-from topology.simplicial.abstract_simplicial_complex import AbstractSimplicialComplex
+from topology.simplicial.simplicial_complex_driver import SimplicialComplexDriver
 from topology.networkx_graph import NetworkxGraph
 
 
-class AbstractSimplicialComplexBuilder(object):
+class SimplicialComplexDriverBuilder(object):
     """
     This class implements the generation of Features vector for each of the Simplicial elements (node, edges and faces)
     It leverage TopoNetX library
@@ -49,7 +49,7 @@ class AbstractSimplicialComplexBuilder(object):
     def __call__(self,
                  num_eigenvectors: Tuple[int, int, int],
                  lifting_method: Callable[[nx.Graph, Dict[str, Any]], tnx.SimplicialComplex])\
-            -> AbstractSimplicialComplex:
+            -> SimplicialComplexDriver:
         """
             Method to convert a Graph into a simplicial complex with the following steps:
                 1: Initialization of an undirected graph using NetworkX
@@ -67,7 +67,7 @@ class AbstractSimplicialComplexBuilder(object):
             @param lifting_method:  Lifting method from graph to a Simplicial Complex
             @type lifting_method: Callable
             @return: New Simplicial elements
-            @rtype: AbstractSimplicialComplex
+            @rtype: SimplicialComplexDriver
         """
         graph_to_simplicial = GraphToSimplicialComplex(self.nx_graph, self.dataset, lifting_method)
         tnx_complex = graph_to_simplicial.add_faces()
@@ -75,4 +75,4 @@ class AbstractSimplicialComplexBuilder(object):
         hodge_spectrum_config = HodgeSpectrumConfiguration(num_eigenvectors)
         graph_complex_elements = hodge_spectrum_config.get_complex_features(tnx_complex)
 
-        return AbstractSimplicialComplex(graph_complex_elements)
+        return SimplicialComplexDriver(graph_complex_elements)

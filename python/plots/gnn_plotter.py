@@ -38,8 +38,8 @@ class GNNPlotter(object):
         @param sampled_node_index_range: Low and high bound of the indices of sampled nodes
         @type sampled_node_index_range: Tuple
         """
-        assert GNNPlotter.__validate(sampled_node_index_range), \
-            f'Incorrect indices for sampling graph nodes'
+        if not GNNPlotter.__validate(sampled_node_index_range):
+            raise ValueError(f'Incorrect indices for sampling graph nodes')
         self.graph = graph
         self.data = data
         self.sampled_node_index_range = sampled_node_index_range

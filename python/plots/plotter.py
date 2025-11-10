@@ -119,8 +119,8 @@ class Plotter(object):
         @param plotter_parameters: Plotter parameters (title, legend,..)
         @type plotter_parameters: PlotterParameters
         """
-        assert len(values) > 0 and len(values) == len(labels), \
-            f'Number of variables {len(values)} != number of labels {len(labels)}'
+        if len(values) == 0 or len(values) != len(labels):
+            raise ValueError(f'Number of variables {len(values)} != number of labels {len(labels)}')
 
         len_x = len(values[0])
         x = np.arange(0, len_x, 1)

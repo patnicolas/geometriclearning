@@ -15,72 +15,25 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 
 # Standard Library imports
-from typing import Self, AnyStr, List, Optional, Tuple, Dict
-from dataclasses import dataclass
+from typing import Self, AnyStr, List, Tuple, Dict
 # 3rd Party imports
 import toponetx as tnx
 import numpy as np
 import torch
 # Library imports
 from topology.complex_element import ComplexElement
-from topology import TopologyException
 from topology.simplicial.simplicial_laplacian import SimplicialLaplacian
 from topology.graph_complex_elements import GraphComplexElements
-__all__ = ['AbstractSimplicialComplex', 'SimplicialElement']
+__all__ = ['SimplicialComplexDriver']
 
 
-@dataclass
-class SimplicialElementXX:
-    """
-    Definition of the basic element of a Simplicial Complex {Node, Edge, Face} composed of
-    - Feature vector
-    - Indices of nodes defining this element
-
-    @param node_indices: List of indices of nodes composing this simplicial element
-    @type node_indices: List[int]
-    @param feature_set: Feature vector or set associated with this simplicial element
-    @type feature_set: Numpy array
-    """
-    node_indices: Tuple[int, ...] | None = None
-    feature_set: Optional[np.array] = None
-
-    def __call__(self, override_node_indices: Tuple[int, ...] | None = None) -> Tuple[Tuple, np.array] | None:
-        """
-        Generate a tuple (node indices, feature vector) for this specific element. The node indices list is
-        overridden only if it has not been already defined.
-        A topology exception is raised if the node indices to be returned is None
-
-        @param override_node_indices: Optional node indices
-        @type override_node_indices: List[int]
-        @return: Tuple (node indices, feature vector)
-        @rtype: Tuple[Tuple, np.array]
-        """
-        if self.node_indices is None and override_node_indices is not None:
-            self.node_indices = override_node_indices
-        if self.node_indices is None:
-            raise TopologyException('No node indices has been defined for this simplicial element')
-
-        return tuple(self.node_indices), self.feature_set
-
-    def __str__(self) -> AnyStr:
-        output = []
-        if self.feature_set is not None:
-            output.append(list(np.round(self.feature_set, 5)))
-        if self.node_indices is not None:
-            output.append(self.node_indices)
-        return ", ".join(map(str, output)) if len(output) > 0 else ""
-
-
-class AbstractSimplicialComplex(object):
+class SimplicialComplexDriver(object):
     """
     Implementation of the Simplicial Complex with operators and a feature set (embedded vector).
     The functionality is:
     - Computation of incidence and adjacency matrices
     - Computation of various Laplacian operators
-    - Visualization of Simplicial Complexes
     """
-    triangle_colors = ['blue', 'red', 'green', 'purple', 'grey', 'orange']
-    tetrahedron_color = 'lightgrey'
 
     def __init__(self, graph_complex_elements: GraphComplexElements) -> None:
         """
@@ -91,9 +44,9 @@ class AbstractSimplicialComplex(object):
         @type graph_complex_elements:  GraphComplexElements
         """
         # Validate the shape of indices of the simplicial complex
-        AbstractSimplicialComplex.__validate(graph_complex_elements)
+        SimplicialComplexDriver.__validate(graph_complex_elements)
         self.graph_complex_elements = graph_complex_elements
-        # Extract the
+        # Extract the indices for the edges and faces
         edges_indices = [edge.node_indices for edge in graph_complex_elements.complex_edges]
         faces_indices = [edge.node_indices for edge in graph_complex_elements.complex_simplex_2]
         self.simplicial_indices = edges_indices + faces_indices
@@ -118,7 +71,7 @@ class AbstractSimplicialComplex(object):
         @param face_node_indices:  Face set as a tensor of tensor with 3 node indices
         @type face_node_indices: Torch tensor
         @return: Instance of Simplicial model
-        @rtype: AbstractSimplicialComplex
+        @rtype: SimplicialComplexDriver
         """
         import itertools
         if node_feature_dimension <= 0:
@@ -171,7 +124,7 @@ class AbstractSimplicialComplex(object):
         @return: Dictionary of Tuple of the 3 or 4 node indices  - Feature vectors
         @rtype: Dict[Tuple, np.array]
         """
-        simplicial_faces =  self.graph_complex_elements.complex_simplex_2
+        simplicial_faces = self.graph_complex_elements.complex_simplex_2
         faces_node_indices = [tuple(simplicial_face.node_indices) for simplicial_face in simplicial_faces]
         faces_feature_set = [simplicial_face.feature_set for simplicial_face in simplicial_faces]
         return dict(zip(faces_node_indices, faces_feature_set))

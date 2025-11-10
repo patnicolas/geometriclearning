@@ -20,10 +20,13 @@ from typing import Optional
 import io
 import json
 import pickle
+import logging
 # 3rd Party imports
 import boto3
 import pandas as pd
 from pandas import json_normalize
+
+import python
 AWS_SHARED_CREDENTIALS_FILE = "~/.aws/credentials2"
 
 
@@ -97,7 +100,6 @@ class S3Util(object):
         obj_summaries = list(my_bucket.objects.filter(Prefix=self.s3_folder_name))
         object_summaries = obj_summaries[0: self.num_files] if self.num_files > 0 else obj_summaries
         sampled_object_summaries = [obj for obj in object_summaries if len(obj.key) > len(self.s3_folder_name)]
-        constants.log_info(f'Retrieve {len(sampled_object_summaries)} object summaries')
         assert len(sampled_object_summaries) > 0, 'S3 to DataFrame is empty'
 
         def gen_fields(data_list: str, cols: list) -> list:
@@ -140,7 +142,7 @@ class S3Util(object):
         obj_summaries = list(my_bucket.objects.filter(Prefix=self.s3_folder_name))
         object_summaries = obj_summaries[0: self.num_files] if self.num_files > 0 else obj_summaries
         sampled_object_summaries = [obj for obj in object_summaries if len(obj.key) > len(self.s3_folder_name)]
-        constants.log_info(f'Retrieve {len(sampled_object_summaries)} object summaries')
+        logging.info(f'Retrieve {len(sampled_object_summaries)} object summaries')
         assert len(sampled_object_summaries) > 0, 'S3 to DataFrame is empty'
 
         def gen_fields(data_list: str, cols: list) -> list:

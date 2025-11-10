@@ -20,7 +20,7 @@ from torch.nn.modules.loss import _Loss
 import torch
 import torch.nn as nn
 # Library imports
-from deeplearning import VAEException
+from deeplearning import GenerativeException
 __all__ = ['VAEKLLoss']
 
 
@@ -68,7 +68,7 @@ class VAEKLLoss(_Loss):
         @rtype: Tensor
         """
         if self.log_var is None or self.mu is None:
-            raise VAEException(f'Log var and mu variational parameters are not defined')
+            raise GenerativeException(f'Log var and mu variational parameters are not defined')
 
         reconstruction_loss = self.loss_func(x, target)
         log_var_value = self.log_var(z)

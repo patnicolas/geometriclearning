@@ -22,7 +22,7 @@ import torch.nn as nn
 # Library imports
 from deeplearning.model.neural_model import NeuralModel
 from deeplearning.block.mlp.variational_block import VariationalBlock
-from deeplearning import ConvException, MLPException, VAEException
+from deeplearning import ConvException, MLPException, GenerativeException
 __all__ = ['VAEModel']
 
 
@@ -77,10 +77,10 @@ class VAEModel(NeuralModel):
             self.z = None
         except ConvException as e:
             logging.error(str(e))
-            raise VAEException((str(e)))
+            raise GenerativeException((str(e)))
         except MLPException as e:
             logging.error(str(e))
-            raise VAEException((str(e)))
+            raise GenerativeException((str(e)))
 
     def get_mu_log_var(self) -> (nn.Module, nn.Module):
         return self.variational_block.mu, self.variational_block.log_var

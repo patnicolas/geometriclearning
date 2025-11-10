@@ -304,7 +304,7 @@ if __name__ == '__main__':
         # Step 5: Load the data and generate the plot for the parameter 'hidden_channels'
         test_config = ('memory_file_128', '128_node Hidden Layers')
         GNNMemoryMonitor.plot_memory_usage([test_config])
-    except (GraphException | DatasetException | AssertionError) as e:
+    except (GraphException,  DatasetException,  AssertionError, ValueError) as e:
         logging.info(f'Error: {str(e)}')
         assert False
 

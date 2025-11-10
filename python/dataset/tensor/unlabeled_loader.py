@@ -82,7 +82,7 @@ class UnlabeledLoader(BaseLoader):
                                                           num_samples=self.num_samples,
                                                           batch_size=self.batch_size,
                                                           split_ratio=self.split_ratio)
-        except (RuntimeError | ValueError | TypeError) as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logging.error(str(e))
             raise DatasetException(str(e))
 

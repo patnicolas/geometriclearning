@@ -38,7 +38,8 @@ class BaseLoader(ABC):
         @param num_samples: Number of samples loaded (or all data if num_samples <= 0)
         @type num_samples: int
         """
-        assert 2 <= batch_size <= 8192, f'Batch size {batch_size} should be [2, 8192]'
+        if batch_size < 2 or batch_size > 8192:
+            raise ValueError(f'Batch size {batch_size} should be [2, 8192]')
 
         self.batch_size = batch_size
         self.num_samples = num_samples

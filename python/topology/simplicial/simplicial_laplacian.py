@@ -44,6 +44,10 @@ class SimplicialLaplacian:
     rank: int
     signed: bool
 
+    def __post_init__(self) -> None:
+        if self.rank < 0:
+            raise ValueError(f'Rank {self.rank} is out of range')
+
     def __str__(self) -> AnyStr:
         return f'{self.simplicial_laplacian_type.value}, rank={self.rank}, signed={self.signed}'
 
@@ -57,24 +61,24 @@ class SimplicialLaplacian:
         @rtype: Numpy array
         """
         if len(simplicial_indices) < 1:
-            raise TopologyException('Cannot compute simplicial Laplacian with undefined indices')
+            raise ValueError('Cannot compute simplicial Laplacian with undefined indices')
 
         try:
             sc = tnx.SimplicialComplex(simplicial_indices)
             match self.simplicial_laplacian_type:
                 case SimplicialLaplacianType.UpLaplacian:
                     if self.rank < 0 or self.rank > 1:
-                        raise TopologyException(f'Up-Laplacian does not support rank {self.rank }')
+                        raise ValueError(f'Up-Laplacian does not support rank {self.rank }')
                     laplacian_matrix = sc.up_laplacian_matrix(self.rank, self.signed)
 
                 case SimplicialLaplacianType.DownLaplacian:
                     if self.rank < 1 or self.rank > 2:
-                        raise TopologyException(f'Down-Laplacian does not support rank {self.rank }')
+                        raise ValueError(f'Down-Laplacian does not support rank {self.rank }')
                     laplacian_matrix = sc.down_laplacian_matrix(self.rank, self.signed)
 
                 case SimplicialLaplacianType.HodgeLaplacian:
                     if self.rank < 0 or self.rank > 2:
-                        raise TopologyException(f'Hodge-Laplacian does not support rank {self.rank}')
+                        raise ValueError(f'Hodge-Laplacian does not support rank {self.rank}')
                     laplacian_matrix = sc.hodge_laplacian_matrix(self.rank, self.signed)
 
             return laplacian_matrix.toarray()

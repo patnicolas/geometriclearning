@@ -41,9 +41,12 @@ class Caltech101Loader(BaseLoader):
         @param resize_image: Size of image to be resized. The image is not resized if -1
         @type resize_image: int
         """
-        assert 0 < batch_size <= 8192, f'Batch size {batch_size} should be [1, 8192]'
-        assert 0.5 <= split_ratio <= 0.95, f'Training-validation split ratio {split_ratio} should be [0.5, 0.95]'
-        assert 0 < resize_image <= 8192, f'Resize image factor {resize_image} should be [1, 8192]'
+        if batch_size <= 0 or batch_size > 8192:
+            raise ValueError('Batch size {batch_size} should be [1, 8192]')
+        if split_ratio < 0.5 or split_ratio > 0.95:
+            raise ValueError(f'Training-validation split ratio {split_ratio} should be [0.5, 0.95]')
+        if resize_image <= 0 or resize_image > 8192:
+            raise ValueError(f'Resize image factor {resize_image} should be [1, 8192]')
 
         super(Caltech101Loader, self).__init__(batch_size=batch_size, num_samples=-1)
         self.split_ratio = split_ratio
@@ -111,7 +114,7 @@ class Caltech101Loader(BaseLoader):
             train_size = int(self.split_ratio * len(caltech_101_dataset))
             test_size = len(caltech_101_dataset) - train_size
             return torch.utils.data.random_split(caltech_101_dataset, lengths=[train_size, test_size])
-        except (RuntimeError | ValueError | TypeError) as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logging.error(str(e))
             raise DatasetException(str(e))
 

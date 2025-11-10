@@ -96,7 +96,7 @@ class GNNTrainingTest(unittest.TestCase):
             accuracy_list = network.performance_metrics.performance_values[MetricType.Accuracy]
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(accuracy_list[-1].float() > 0.2)
-        except (GraphException | DatasetException | AssertionError) as e:
+        except (GraphException, DatasetException, AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
@@ -150,7 +150,7 @@ class GNNTrainingTest(unittest.TestCase):
             train_loader, eval_loader = graph_data_loader()
             network.train(gnn_base_model.model_id, gnn_base_model, train_loader, eval_loader)
 
-        except (GraphException | DatasetException | AssertionError) as e:
+        except (GraphException, DatasetException, AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
@@ -181,7 +181,7 @@ class GNNTrainingTest(unittest.TestCase):
             accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(float(accuracy_list[-1]) > 0.2)
-        except (GraphException | DatasetException | AssertionError) as e:
+        except (GraphException, DatasetException, AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
@@ -209,7 +209,7 @@ class GNNTrainingTest(unittest.TestCase):
             accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(float(accuracy_list[-1]) > 0.2)
-        except (GraphException | DatasetException | AssertionError) as e:
+        except (GraphException, DatasetException, AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
@@ -237,7 +237,7 @@ class GNNTrainingTest(unittest.TestCase):
             accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(float(accuracy_list[-1]) > 0.2)
-        except (GraphException | DatasetException | AssertionError) as e:
+        except (GraphException, DatasetException, AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
@@ -267,7 +267,7 @@ class GNNTrainingTest(unittest.TestCase):
             accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(float(accuracy_list[-1]) > 0.2)
-        except (GraphException | DatasetException | AssertionError) as e:
+        except (GraphException, DatasetException, AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
@@ -296,7 +296,7 @@ class GNNTrainingTest(unittest.TestCase):
             accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(float(accuracy_list[-1]) > 0.2)
-        except (GraphException | DatasetException | AssertionError) as e:
+        except (GraphException, DatasetException, AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
@@ -326,7 +326,7 @@ class GNNTrainingTest(unittest.TestCase):
             accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(float(accuracy_list[-1]) > 0.2)
-        except (GraphException | DatasetException | AssertionError) as e:
+        except (GraphException, DatasetException, AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 
@@ -356,7 +356,7 @@ class GNNTrainingTest(unittest.TestCase):
             accuracy_list = network.get_metric_history(MetricType.Accuracy)
             self.assertTrue(len(accuracy_list) > 1)
             self.assertTrue(float(accuracy_list[-1]) > 0.2)
-        except (GraphException | DatasetException | AssertionError) as e:
+        except (GraphException, DatasetException, AssertionError) as e:
             logging.info(f'Error: {str(e)}')
             self.assertTrue(False)
 

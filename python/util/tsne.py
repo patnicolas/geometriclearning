@@ -40,7 +40,8 @@ class TSNE(object):
         @param title: Title of the plot
         @type title: str
         """
-        assert 2 <= n_components <= 3, f'TSNE: num of components {n_components} should be [2, 3]'
+        if n_components < 2 or n_components > 3:
+            raise ValueError(f'TSNE: num of components {n_components} should be [2, 3]')
 
         self.t_sne = TSNE(n_components = n_components)
         self.cmap = cmap

@@ -1,6 +1,6 @@
 import unittest
 import logging
-from topology.simplicial.abstract_simplicial_complex import AbstractSimplicialComplex
+from topology.simplicial.simplicial_complex_driver import SimplicialComplexDriver
 from topology.simplicial.simplicial_visualization import SimplicialVisualization
 
 
@@ -21,7 +21,7 @@ class SimplicialVisualizationTest(unittest.TestCase):
             logging.info(f'Number of faces: {len(face_set)}')
             font_attributes = {'title_font_size': 18, 'face_font_size': 15, 'feature_font_size': 10 }
             simplicial_visualization = SimplicialVisualization(
-                AbstractSimplicialComplex.random(4, edge_set, face_set),
+                SimplicialComplexDriver.random(4, edge_set, face_set),
                 font_attributes
             )
             simplicial_visualization.show()
@@ -47,7 +47,7 @@ class SimplicialVisualizationTest(unittest.TestCase):
             logging.info(f'Number of faces: {len(face_set)}')
             font_attributes = {'title_font_size': 18, 'face_font_size': 15, 'feature_font_size': 10 }
             simplicial_visualization = SimplicialVisualization(
-                AbstractSimplicialComplex.random(3, edge_set, face_set),
+                SimplicialComplexDriver.random(3, edge_set, face_set),
                 font_attributes
             )
             simplicial_visualization.show()
@@ -67,7 +67,7 @@ def test_show_2(self):
     try:
         font_attributes = {'title_font_size': 18, 'face_font_size': 15, 'feature_font_size': 10}
         simplicial_visualization = SimplicialVisualization(
-            AbstractSimplicialComplex.random(6, edge_set, face_set),
+            SimplicialComplexDriver.random(6, edge_set, face_set),
             font_attributes
         )
         simplicial_visualization.show()
@@ -82,7 +82,7 @@ def test_show_3(self):
     try:
         font_attributes = {'title_font_size': 18, 'face_font_size': 15, 'feature_font_size': 10}
         simplicial_visualization = SimplicialVisualization(
-            AbstractSimplicialComplex.random(node_feature_dimension=6, edge_node_indices=edge_set, face_node_indices=face_set),
+            SimplicialComplexDriver.random(node_feature_dimension=6, edge_node_indices=edge_set, face_node_indices=face_set),
             font_attributes
         )
         simplicial_visualization.show()

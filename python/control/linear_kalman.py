@@ -113,12 +113,9 @@ class LinearKalmanFilter(object):
             self.x = self.A @ self.x + v if self.B is None else self.A @ self.x + self.B @ self.u + v
             # Error covariance:  P[n] = A[n].P[n-1].A[n]^T + Q[n]
             self.P = self.A @ self.P @ self.A.T + self.Q
-        except RuntimeWarning as trw:
+        except (RuntimeWarning, RuntimeError) as trw:
             logging.warning(trw)
             raise ControlException(f'Linear Kalman Filter: {trw}')
-        except RuntimeError as e:
-            logging.error(e)
-            raise ControlException(f'Linear Kalman Filter: {e}')
 
     def update(self, z: np.array) -> None:
         """
@@ -139,12 +136,9 @@ class LinearKalmanFilter(object):
             self.x = self.x + G @ y
             g = np.eye(self.P.shape[0]) - G @ self.H
             self.P = g @ self.P
-        except RuntimeWarning as trw:
+        except (RuntimeWarning, RuntimeError) as trw:
             logging.warning(trw)
             raise ControlException(f'Linear Kalman Filter: {trw}')
-        except RuntimeError as e:
-            logging.error(e)
-            raise ControlException(f'Linear Kalman Filter: {e}')
 
     def simulate(self,
                  num_measurements: int,
@@ -176,12 +170,13 @@ class LinearKalmanFilter(object):
                    _P0: np.array,
                    _A: np.array,
                    _H: np.array) -> None:
-        assert _A.shape[0] == _x0.shape[0], \
-                f'Shape A {_A.shape} is inconsistent with x0 shape {_x0.shape}'
-        assert _A.shape[0] == _A.shape[1], f'A shape {_A.shape} should be square'
-        assert _A.shape[0] == _H.shape[0], \
-                f'Shape A {_A.shape} is inconsistent with H shape {_H.shape}'
-        assert _A.shape[0] == _P0.shape[1], \
-                f'Shape A {_A.shape} is inconsistent with P0 shape {_P0.shape}'
+        if _A.shape[0] != _x0.shape[0]:
+            raise ValueError(f'Shape A {_A.shape} is inconsistent with x0 shape {_x0.shape}')
+        if _A.shape[0] != _A.shape[1]:
+            raise ValueError(f'A shape {_A.shape} should be square')
+        if _A.shape[0] != _H.shape[0]:
+            raise ValueError(f'Shape A {_A.shape} is inconsistent with H shape {_H.shape}')
+        if _A.shape[0] == _P0.shape[1]:
+             raise ValueError(f'Shape A {_A.shape} is inconsistent with P0 shape {_P0.shape}')
 
 
