@@ -177,7 +177,7 @@ class ConvModel(NeuralModel, ABC):
         }
 
     @staticmethod
-    def is_valid(conv_blocks: List[ConvBlock], mlp_blocks: List[MLPBlock], input_size: ConvDataType) -> bool:
+    def is_valid(conv_blocks: List[ConvBlock], mlp_blocks: List[MLPBlock], input_size: ConvDataType) -> None:
         """
         Test if the layout/configuration of convolutional neural blocks and feed-forward neural blocks
         are valid
@@ -187,15 +187,10 @@ class ConvModel(NeuralModel, ABC):
         @type mlp_blocks: List[MLPBlock]
         @param input_size: Input size as int (1D) or Tuple (2D)
         """
-        try:
-            assert conv_blocks, 'This convolutional model has not defined neural blocks'
-            ConvModel.__validate(conv_blocks, input_size)
-            if not mlp_blocks:
-                MLPModel.is_valid(mlp_blocks)
-            return True
-        except AssertionError as e:
-            logging.error(e)
-            return False
+        assert conv_blocks is not None and len(conv_blocks) > 0
+        ConvModel.__validate(conv_blocks, input_size)
+        if not mlp_blocks:
+            MLPModel.is_valid(mlp_blocks)
 
     """ ----------------------------   Private helper methods --------------------------- """
 
@@ -208,17 +203,16 @@ class ConvModel(NeuralModel, ABC):
         return last_conv_block.get_out_channels() * conv_output_sizes[0] * conv_output_sizes[1]
 
     @staticmethod
-    def __validate(neural_blocks: List[ConvBlock], input_size: ConvDataType):
-        assert len(neural_blocks) > 0, "Deep Feed Forward network needs at least one layer"
+    def __validate(conv_blocks: List[ConvBlock], input_size: ConvDataType):
 
-        for index in range(len(neural_blocks) - 1):
+        for index in range(len(conv_blocks) - 1):
             # Validate the in-channel and out-channels
-            next_in_channels = neural_blocks[index + 1].get_in_channels()
-            this_out_channels = neural_blocks[index].get_out_channels()
+            next_in_channels = conv_blocks[index + 1].get_in_channels()
+            this_out_channels = conv_blocks[index].get_out_channels()
             assert next_in_channels == this_out_channels, \
                 f'Layer {index} input_tensor != layer {index+1} output'
 
-            this_output_shape = neural_blocks[index].get_conv_output_size()
+            this_output_shape = conv_blocks[index].get_conv_output_size()
             next_input_shape = input_size
             assert this_output_shape == next_input_shape, \
                 f'This output shape {str(this_output_shape)} should = next input shape {str(next_input_shape)}'

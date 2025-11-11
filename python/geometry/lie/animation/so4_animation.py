@@ -35,7 +35,8 @@ class SO4Animation(BaseAnimation):
         @param **kwargs: Dictionary of configuration parameters for any given animation
         @type **kwargs: Dictionary
         """
-        assert len(n_geodesics) == 2, f'Number of elements of geodesics {len(n_geodesics)} should be 2'
+        if len(n_geodesics) != 2:
+            raise ValueError(f'Number of elements of geodesics {len(n_geodesics)} should be 2')
 
         super(SO4Animation, self).__init__(**kwargs)
         fig_size = self.config['fig_size']

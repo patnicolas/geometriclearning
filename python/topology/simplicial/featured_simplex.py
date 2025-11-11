@@ -20,23 +20,23 @@ from dataclasses import dataclass
 import numpy as np
 # Library imports
 from topology import TopologyException
-__all__ = ['ComplexElement']
+__all__ = ['FeaturedSimplex']
 
 
 @dataclass
-class ComplexElement:
+class FeaturedSimplex:
     """
       Definition of the basic element of a Simplicial Complex {Node, Edge, Face} composed of
       - Feature vector
       - Indices of nodes defining this element
 
-      @param node_indices: List of indices of nodes composing this simplicial element
+      @param simplex_indices: List of indices of nodes composing this simplicial element
       @type node_indices: List[int]
-      @param feature_set: Feature vector or set associated with this simplicial element
-      @type feature_set: Numpy array
+      @param features: Feature vector or set associated with this simplicial element
+      @type features: Numpy array
       """
-    node_indices: Tuple[int, ...] | None = None
-    feature_set: Optional[np.array] = None
+    simplex_indices: Tuple[int, ...] | None = None
+    features: Optional[np.array] = None
 
     def __call__(self, override_node_indices: Tuple[int, ...] | None = None) -> Tuple[Tuple, np.array] | None:
         """
@@ -49,18 +49,18 @@ class ComplexElement:
         @return: Tuple (node indices, feature vector)
         @rtype: Tuple[Tuple, np.array]
         """
-        if self.node_indices is None and override_node_indices is not None:
-            self.node_indices = override_node_indices
-        if self.node_indices is None:
+        if self.simplex_indices is None and override_node_indices is not None:
+            self.simplex_indices = override_node_indices
+        if self.simplex_indices is None:
             raise TopologyException('No node indices has been defined for this simplicial element')
 
-        return tuple(self.node_indices), self.feature_set
+        return tuple(self.simplex_indices), self.features
 
     def __str__(self) -> AnyStr:
         output = []
-        if self.feature_set is not None:
-            output.append(list(np.round(self.feature_set, 5)))
-        if self.node_indices is not None:
-            output.append(self.node_indices)
+        if self.features is not None:
+            output.append(list(np.round(self.features, 5)))
+        if self.simplex_indices is not None:
+            output.append(self.simplex_indices)
         return ", ".join(map(str, output)) if len(output) > 0 else ""
 

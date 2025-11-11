@@ -19,8 +19,7 @@ from typing import Dict, AnyStr, Generic, TypeVar, Callable, Any
 import networkx as nx
 import toponetx as tnx
 # Library imports
-import python
-from topology.graph_complex_elements import GraphComplexElements
+from topology.simplicial.featured_simplicial_elements import FeaturedSimplicialElements
 from topology.networkx_graph import NetworkxGraph
 from topology.hodge_spectrum_configuration import HodgeSpectrumConfiguration
 _all_ = ['GraphToSimplicialComplex']
@@ -110,14 +109,14 @@ class GraphToSimplicialComplex(Generic[T]):
 
     @staticmethod
     def features_from_hodge_laplacian(tnx_simplicial: tnx.SimplicialComplex,
-                                      num_eigenvectors: (int, int, int)) -> GraphComplexElements:
+                                      num_eigenvectors: (int, int, int)) -> FeaturedSimplicialElements:
         """
         @param tnx_simplicial: TopoX simplicial complex
         @type tnx_simplicial: tnx.SimplicialComplex
         @param num_eigenvectors: Number of eigenvector to generate the features values
         @type num_eigenvectors: int
         @return: Fully configured elements of the complex
-        @rtype: GraphComplexElements
+        @rtype: FeaturedSimplicialElements
         """
         hodge_spectrum_config = HodgeSpectrumConfiguration(num_eigenvectors)
         return hodge_spectrum_config.get_complex_features(tnx_simplicial)

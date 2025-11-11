@@ -39,7 +39,8 @@ class EarlyStopping(object):
         @param min_diff_loss: Optional minimum value of increase of loss to trigger early stopping
         @type min_diff_loss: float
         """
-        assert 1 <= patience <= 10, f'Patience for early stopping {patience} should be [1, 10]'
+        if patience < 1 or patience > 10:
+            raise ValueError(f'Patience for early stopping {patience} should be [1, 10]')
 
         self.patience = patience
         self.min_diff_loss = min_diff_loss

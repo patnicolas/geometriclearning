@@ -108,12 +108,14 @@ class LieSE3Group(object):
         @param point_type: Representation of the SE3 element (default matrix)
         @type point_type: AnyStr
         """
-        assert rot_matrix.shape == (3, 3), \
-            f'Rotation matrix has incorrect shape {rot_matrix.shape}'
-        assert trans_matrix.shape == (3,), \
-            f'Translation matrix has incorrect shape {trans_matrix.shape}'
-        assert 0 <= epsilon <= 0.2, f'Epsilon {epsilon} is out of range [0, 0.2]'
-        assert point_type in ['matrix', 'vector'], f'Point type {point_type} should be matrix or vector'
+        if rot_matrix.shape != (3, 3):
+            raise ValueError(f'Rotation matrix has incorrect shape {rot_matrix.shape}')
+        if trans_matrix.shape != (3,):
+            raise ValueError(f'Translation matrix has incorrect shape {trans_matrix.shape}')
+        if epsilon < 0 or epsilon > 0.2:
+            raise ValueError(f'Epsilon {epsilon} is out of range [0, 0.2]')
+        if point_type not in ['matrix', 'vector']:
+            raise ValueError(f'Point type {point_type} should be matrix or vector')
 
         self.point_type = point_type
         self.lie_group = SpecialEuclidean(n=3, point_type=point_type, epsilon=epsilon, equip=True)
@@ -147,10 +149,10 @@ class LieSE3Group(object):
         @return: Instance of LieSE3Group
         @rtype: SE3Visualization
         """
-        assert len(flatten_rotation_matrix) == 3 * 3, \
-            f'The rotation matrix has {len(flatten_translation_vector)} elements. It should be 3'
-        assert len(flatten_translation_vector) == 3, \
-            f'Length of translation vector {len(flatten_translation_vector)} should be 3'
+        if len(flatten_rotation_matrix) != 3 * 3:
+            raise ValueError(f'The rotation matrix has {len(flatten_translation_vector)} elements. It should be 3')
+        if len(flatten_translation_vector) != 3:
+            raise ValueError(f'Length of translation vector {len(flatten_translation_vector)} should be 3')
 
         np_rotation_matrix = np.reshape(flatten_rotation_matrix, (3, 3))
         np_translation_matrix = np.reshape(flatten_translation_vector, (1, 3))

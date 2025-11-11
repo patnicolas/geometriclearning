@@ -131,7 +131,9 @@ class Conv2dBuilder(NeuralBuilder):
         @param input_size: Input size as int (1D) or Tuple (2D)
         """
         from deeplearning.model.mlp.mlp_model import MLPBuilder
-        assert conv_blocks, 'This convolutional model has not defined neural blocks'
+
+        if conv_blocks is None or len(conv_blocks) == 0:
+            raise ValueError('This convolutional model has not defined neural blocks')
         Conv2dBuilder.validate_conv(conv_blocks, input_size)
         MLPBuilder.validate(mlp_blocks)
 

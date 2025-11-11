@@ -52,9 +52,12 @@ class UnlabeledLoader(BaseLoader):
         @param split_ratio: Training-validation random split ratio
         @type split_ratio: float
         """
-        assert 0 < batch_size <= 8192, f'Batch size {batch_size} should be [1, 8192]'
-        assert 0.5 <= split_ratio <= 0.95, f'Training-validation split ratio {split_ratio} should be [0.5, 0.95]'
-        assert -2 < num_samples <= 1e+6 and num_samples != 0, f'Number of samples {num_samples} should be [1, 1e+6]'
+        if batch_size <= 0 or batch_size > 8192:
+            raise ValueError(f'Batch size {batch_size} should be [1, 8192]')
+        if split_ratio < 0.5 or split_ratio > 0.98:
+            raise ValueError(f'Training-validation split ratio {split_ratio} should be [0.5, 0.95]')
+        if num_samples < -1 or num_samples > 1e+6 or num_samples ==0:
+            raise ValueError(f'Number of samples {num_samples} should be [1, 1e+6]')
 
         super(UnlabeledLoader, self).__init__(batch_size, num_samples)
         self.split_ratio = split_ratio

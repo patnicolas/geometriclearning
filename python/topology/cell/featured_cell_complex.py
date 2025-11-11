@@ -14,25 +14,32 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import Self, AnyStr, List, Tuple, Dict
+from typing import Tuple
+from abc import abstractmethod
 # 3rd Party imports
 import toponetx as tnx
 import numpy as np
-import torch
 # Library imports
-from topology.complex_element import ComplexElement
-from topology.simplicial.simplicial_laplacian import SimplicialLaplacian
-from topology.graph_complex_elements import GraphComplexElements
-__all__ = ['AbstractCellComplex']
+from topology.featured_complex import FeaturedComplex
+__all__ = ['FeaturedCellComplex']
 
 
-class AbstractCellComplex(object):
-    def __init__(self, graph_complex_elements: GraphComplexElements) -> None:
-        self.graph_complex_elements = graph_complex_elements
+class FeaturedCellComplex(FeaturedComplex):
+    def __init__(self, cells: Tuple[tnx.Cell, ...]) -> None:
+        super(FeaturedCellComplex, self).__init__()
+        self.cells = cells
 
-        edges_indices = [edge.node_indices for edge in graph_complex_elements.complex_edges]
-        cell_indices = [edge.node_indices for edge in graph_complex_elements.complex_simplex_2]
-        self.cell_indices = edges_indices + cell_indices
+    def adjacency_matrix(self, directed_graph: bool = False) -> np.array:
+        # Initialize adjacency matrix
+        n = len(np.concatenate([node.features for node in self.simplex_elements.featured_nodes]))
+        A = np.zeros((n, n), dtype=int)
+
+        # Fill in edges
+        for u, v in [edge.simplex_indices for edge in self.simplex_elements.featured_edges]:
+            A[u - 1, v - 1] = 1
+            if directed_graph:
+                A[v - 1, u - 1] = 1
+        return A
 
     def incidence_matrix(self, rank: int = 1, directed_graph: bool = True) -> np.array:
         """
@@ -47,7 +54,14 @@ class AbstractCellComplex(object):
         if rank < 0 or rank > 2:
             raise ValueError(f'Rank of incidence matrix {rank} should be [0, 2]')
 
-        sc = tnx.CellComplex(self.cell_indices)
+        sc = tnx.CellComplex(self.cells)
         _, _, incidence = sc.incidence_matrix(rank=rank, index=True, signed=directed_graph)
         return incidence.todense()
 
+    @abstractmethod
+    def _validate(self) -> None:
+        pass
+
+    @abstractmethod
+    def laplacian(self, complex_laplacian: T) -> np.array:
+        pass

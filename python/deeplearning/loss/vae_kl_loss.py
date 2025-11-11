@@ -46,7 +46,8 @@ class VAEKLLoss(_Loss):
         @param beta: Optional beta parameter
         @type beta: float
         """
-        assert 0 < num_records, f'Number of records {num_records} should be > 0'
+        if num_records <= 0:
+            raise ValueError(f'Number of records {num_records} should be > 0')
 
         super(VAEKLLoss, self).__init__(size_average=None, reduce=None, reduction='mean')
         self.mu = mu

@@ -19,7 +19,7 @@ from typing import List, Tuple
 import logging
 # Library imports
 from play import Play
-from topology.simplicial.simplicial_complex_driver import SimplicialComplexDriver
+from topology.simplicial.featured_simplicial_complex import FeaturedSimplicialComplex
 from topology.simplicial.simplicial_laplacian import SimplicialLaplacianType, SimplicialLaplacian
 import python
 
@@ -36,7 +36,7 @@ class AbstractSimplicialComplexPlay(Play):
 
 
   The features are implemented by the class AbstractSimplicialComplex in the source file
-                  python/topology/simplicial/simplicial_complex_driver.py
+                  python/topology/simplicial/featured_simplicial_complex.py
     The class AbstractSimplicialComplexPlay is a wrapper of the class AbstractSimplicialComplex
     The execution of the tests follows the same order as in the Substack article
     """
@@ -55,7 +55,7 @@ class AbstractSimplicialComplexPlay(Play):
         """
         super(AbstractSimplicialComplexPlay, self).__init__()
 
-        self.abstract_simplicial_complex = SimplicialComplexDriver.random(
+        self.abstract_simplicial_complex = FeaturedSimplicialComplex.random(
             node_feature_dimension=node_feature_dimension,
             edge_node_indices=edge_set,
             face_node_indices=face_set)

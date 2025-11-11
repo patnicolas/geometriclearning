@@ -20,8 +20,8 @@ from dataclasses import dataclass
 from toponetx.classes.complex import Complex
 import numpy as np
 # Library imports
-from topology.complex_element import ComplexElement
-from topology.graph_complex_elements import GraphComplexElements
+from topology.simplicial.featured_simplex import FeaturedSimplex
+from topology.simplicial.featured_simplicial_elements import FeaturedSimplicialElements
 __all__ = ['HodgeSpectrumConfiguration']
 
 
@@ -77,7 +77,7 @@ class HodgeSpectrumConfiguration:
         return (f'\n{self.num_eigenvectors[0]} node eigenvalues {self.num_eigenvectors[1]} edges eigenvalues '
                 f'{self.num_eigenvectors[2]} edges eigenvalues')
 
-    def get_complex_features(self, this_complex: Complex) -> GraphComplexElements:
+    def get_complex_features(self, this_complex: Complex) -> FeaturedSimplicialElements:
         """
         Extract the simplex features for nodes, edges and simplex_2
 
@@ -89,7 +89,7 @@ class HodgeSpectrumConfiguration:
         @param this_complex: This simplicial or cell complex
         @type this_complex: Complex
         @return: Fully configured, lifted elements of the complex
-        @rtype: GraphComplexElements
+        @rtype: FeaturedSimplicialElements
         """
         from toponetx.algorithms.spectrum import hodge_laplacian_eigenvectors
 
@@ -101,15 +101,15 @@ class HodgeSpectrumConfiguration:
         # Generate the simplex related to node, edge and simplex_2 (triangles, cells ...)
         complex_elements = [HodgeSpectrumConfiguration.__compute_complex_elements(this_complex, complex_features, idx)
                             for idx in range(len(complex_features))]
-        return GraphComplexElements.build(complex_elements)
+        return FeaturedSimplicialElements.build(complex_elements)
 
     @staticmethod
     def __compute_complex_elements(this_complex: Complex,
                                    complex_features: List,
-                                   index: int) -> List[ComplexElement]:
+                                   index: int) -> List[FeaturedSimplex]:
         # Create simplicial element containing node indices associated with the simplex and feature set
         simplicial_node_feat = zip(this_complex.skeleton(index), np.array(complex_features[index]), strict=True)
         try:
-            return [ComplexElement(tuple(u), v) for u, v in simplicial_node_feat]
+            return [FeaturedSimplex(tuple(u), v) for u, v in simplicial_node_feat]
         except TypeError as e:
             print(e)

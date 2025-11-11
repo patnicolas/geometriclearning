@@ -131,7 +131,8 @@ class VAETraining(NeuralTraining, ABC):
 
     @staticmethod
     def _reshape_output_variation(shapes: list, z: torch.Tensor) -> torch.Tensor:
-        assert 2 < len(shapes) < 5, f'Shape {str(shapes)} for variational auto encoder should have at least 3 dimension'
+        if len(shapes) <= 2 or len(shapes) >= 5:
+            raise ValueError(f'Shape {str(shapes)} for variational auto encoder should have at least 3 dimension')
         return z.view(shapes[0], shapes[1], shapes[2], shapes[3]) if len(shapes) == 4 \
             else z.view(shapes[0], shapes[1], shapes[2])
 

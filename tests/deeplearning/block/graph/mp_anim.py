@@ -22,7 +22,7 @@ ax.set_title("3D GNN Message Passing Animation")
 ax.set_axis_off()
 
 # Initial node features (scalar values)
-features = {i: np.random.rand(3) for i in G.nodes()}
+features = {i: np.random.rand(3) for i in G.featured_nodes()}
 aggregated_features = features.copy()
 
 # Draw static nodes
@@ -31,13 +31,13 @@ aggregated_features = features.copy()
 # Draw static edges
 
 edge_lines = []
-for i, j in G.edges:
+for i, j in G.featured_edges:
     line = ax.plot([pos[i][0], pos[j][0]], [pos[i][1], pos[j][1]], [pos[i][2], pos[j][2]], 'gray', lw=2.0, alpha=0.5)
     edge_lines.append(line)
 
 
 # Message passing animation (highlight one edge at a time)
-edges = list(G.edges)
+edges = list(G.featured_edges)
 arrows = []
 
 def update(frame):

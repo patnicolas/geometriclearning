@@ -95,13 +95,13 @@ class ImageTensor(object):
             2 Height of the image
             3 Number of channels (1 for shades of greay, 3 for RGB)
             @param input: Input input_tensor
-            @param file_name: Name of the images
+            @param img_name: Name of the images
             @param n_channels: Number of channels should be either 1 or 3
-            @param to_show: Specify that the image has to be shown.
         """
         from PIL import Image
+        if n_channels not in [1, 3]:
+            raise ValueError( f'Number of channels {n_channels} should be {1, 3}')
 
-        assert n_channels in [1, 3], f'Number of channels {n_channels} should be {1, 3}'
         shapes = list(input.size())
         assert len(shapes) == n_channels, f'ImageTensor.to_image: Num shapes {len(shapes)} should be 3'
         assert shapes[2] == n_channels, f'ImageTensor.to_image: 3rd dimension {shapes[2]} should be {n_channels}'
@@ -115,7 +115,6 @@ class ImageTensor(object):
          for j in range(shapes[1]) for k in range(shapes[2]) if input[i, j, k] > 0.0]
         data = t.numpy()
         return Image.fromarray(data)
-
 
     @staticmethod
     def show_image(input_data: list, target_data: list, title: str, num_items: int):

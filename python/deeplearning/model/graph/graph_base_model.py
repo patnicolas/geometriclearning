@@ -46,7 +46,8 @@ class GraphBaseModel(NeuralModel, ABC):
         @param mlp_blocks: List of Feed-Forward Neural Blocks
         @type mlp_blocks: List[MLPBlock]
         """
-        assert len(graph_blocks) > 0, f'Number of message passing blocks {graph_blocks} should not be empty'
+        if len(graph_blocks) == 0:
+            raise ValueError( f'Number of message passing blocks {graph_blocks} should not be empty')
 
         self.graph_blocks = graph_blocks
         if mlp_blocks is not None:

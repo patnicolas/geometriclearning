@@ -41,8 +41,10 @@ class FractalDimObject(object):
         @param threshold: Threshold used to extract the counting boxes
         @type threshold: float
         """
-        assert len(xyz.shape) == 3, f'The shape of data {xyz.shape} should be 3'
-        assert 0.8 <= threshold < 1.0, f'Threshold {threshold} should be [0.8, 1,0['
+        if len(xyz.shape) != 3:
+            raise ValueError(f'The shape of data {xyz.shape} should be 3')
+        if threshold < 0.8 or threshold >= 1.0:
+            raise ValueError(f'Threshold {threshold} should be [0.8, 1,0[')
 
         self.xyz = xyz
         self.threshold = threshold
@@ -59,8 +61,8 @@ class FractalDimObject(object):
         @rtype: FractalDimObject
         """
         import random
-
-        assert 0.8 <= threshold < 1.0, f'Threshold {threshold} should be [0.8, 1,0['
+        if threshold < 0.8 or threshold > 1.0:
+            raise ValueError(f'Threshold {threshold} should be [0.8, 1,0[')
 
         _xyz = np.zeros((size, size, size))
         # Create a 3D fractal-like structure such as cube

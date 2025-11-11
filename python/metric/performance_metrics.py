@@ -96,7 +96,8 @@ class PerformanceMetrics(object):
         @return: Instance of PerformanceMetrics
         @rtype: PerformanceMetrics
         """
-        assert len(metrics_list) > 0, 'The list of performance metrics is undefined'
+        if len(metrics_list) == 0:
+            raise ValueError('The list of performance metrics is undefined')
 
         metrics = {metric_type: BuiltInMetric(metric_type=metric_type,
                                               is_weighted=is_class_imbalance) for metric_type in metrics_list}

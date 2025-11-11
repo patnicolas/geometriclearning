@@ -49,7 +49,6 @@ class GraphToSimplicialComplexTest(unittest.TestCase):
             logging.error(e)
             self.assertFalse(False)
 
-
     # @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_init_cora_lift_neighbors(self):
         try:
@@ -211,8 +210,8 @@ class GraphToSimplicialComplexTest(unittest.TestCase):
             num_eigenvectors = (4, 5, 4)
             graph_complex_elements =  GraphToSimplicialComplex.features_from_hodge_laplacian(tnx_simplicial, num_eigenvectors)
 
-            result = [face for idx, face, in enumerate(graph_complex_elements.complex_simplex_2) if idx < 3]
-            self.assertEqual(result[0].node_indices,  (0, 1, 2))
+            result = [face for idx, face, in enumerate(graph_complex_elements.featured_faces) if idx < 3]
+            self.assertEqual(result[0].simplex_indices, (0, 1, 2))
             logging.info(result[0])
         except (ValueError, AssertionError, TypeError) as e:
             logging.error(e)

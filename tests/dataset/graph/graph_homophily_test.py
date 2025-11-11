@@ -177,7 +177,7 @@ class GraphHomophilyTest(unittest.TestCase):
         nx.draw_networkx_labels(G, pos, ax=ax)
 
         # Highlight central node
-        node_colors = ['red' if n == central_node else 'lightgray' for n in G.nodes()]
+        node_colors = ['red' if n == central_node else 'lightgray' for n in G.featured_nodes()]
         node_artists.set_color(node_colors)
 
         # 4. Animation update function
@@ -188,12 +188,12 @@ class GraphHomophilyTest(unittest.TestCase):
             new_colors = []
             if frame < len(neighbors):
                 highlighted_nodes.append(neighbors[frame])
-                new_colors = ['orange' if n in highlighted_nodes else 'lightgray' for n in G.nodes()]
+                new_colors = ['orange' if n in highlighted_nodes else 'lightgray' for n in G.featured_nodes()]
                 new_colors[central_node] = 'red'
             else:
                 # DEBUG
                 highlighted_nodes_2.append(neighbors_neighbors[frame- len(neighbors)])
-                for n in G.nodes():
+                for n in G.featured_nodes():
                     if n in highlighted_nodes:
                         new_colors.append('orange')
                     elif n in highlighted_nodes_2:

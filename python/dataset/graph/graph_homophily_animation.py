@@ -72,7 +72,7 @@ class GraphHomophilyAnimation(BaseAnimation):
                         s=f"1st Hop: {len(highlighted_nodes)} neighbors",
                         fontdict={'fontsize': 14, 'fontname': 'Helvetica', 'fontweight': 'bold', 'color': 'orange'},
                         bbox=dict(facecolor='black', edgecolor='black'))
-                new_colors = ['orange' if n in highlighted_nodes else 'lightgray' for n in self.G.nodes()]
+                new_colors = ['orange' if n in highlighted_nodes else 'lightgray' for n in self.G.featured_nodes()]
                 new_colors[self.central_node] = 'red'
             else:
                 if frame - len(hop1_neighbors) < len(hop2_neighbors):
@@ -83,7 +83,7 @@ class GraphHomophilyAnimation(BaseAnimation):
                         fontdict={'fontsize': 14, 'fontname': 'Helvetica', 'color': 'yellow'},
                         bbox=dict(facecolor='black', edgecolor='black'))
 
-                for n in self.G.nodes():
+                for n in self.G.featured_nodes():
                     if n in highlighted_nodes:
                         new_colors.append('orange')
                     elif n in highlighted_nodes_2:
@@ -124,7 +124,7 @@ class GraphHomophilyAnimation(BaseAnimation):
         node_artists = nx.draw_networkx_nodes(self.G, pos, node_color='darkgray', ax=ax)
         nx.draw_networkx_labels(self.G, pos, ax=ax)
         # Highlight central node
-        node_colors = ['red' if n == self.central_node else 'lightgray' for n in self.G.nodes()]
+        node_colors = ['red' if n == self.central_node else 'lightgray' for n in self.G.featured_nodes()]
         node_artists.set_color(node_colors)
         return node_artists
 
