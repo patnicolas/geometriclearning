@@ -14,28 +14,30 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import Tuple
-from abc import abstractmethod
+from typing import Any, List, AnyStr
 # 3rd Party imports
 import toponetx as tnx
 import numpy as np
 # Library imports
+from topology.cell.featured_cell import FeaturedCell
 from topology.featured_complex import FeaturedComplex
 __all__ = ['FeaturedCellComplex']
 
 
 class FeaturedCellComplex(FeaturedComplex):
-    def __init__(self, cells: Tuple[tnx.Cell, ...]) -> None:
+    def __init__(self, featured_cells: List[FeaturedCell]) -> None:
         super(FeaturedCellComplex, self).__init__()
-        self.cells = cells
+        self.featured_cells = featured_cells
+
+    def __str__(self) -> AnyStr:
+        return '\n'.join([str(f_cell) for f_cell in self.featured_cells])
 
     def adjacency_matrix(self, directed_graph: bool = False) -> np.array:
         # Initialize adjacency matrix
-        n = len(np.concatenate([node.features for node in self.simplex_elements.featured_nodes]))
+        cc = tnx.CellComplex([featured_cell.cell for featured_cell in self.featured_cells])
+        n = len(set(cc.skeleton(rank=0)))
         A = np.zeros((n, n), dtype=int)
-
-        # Fill in edges
-        for u, v in [edge.simplex_indices for edge in self.simplex_elements.featured_edges]:
+        for u, v in set(cc.skeleton(rank=1)):
             A[u - 1, v - 1] = 1
             if directed_graph:
                 A[v - 1, u - 1] = 1
@@ -54,14 +56,12 @@ class FeaturedCellComplex(FeaturedComplex):
         if rank < 0 or rank > 2:
             raise ValueError(f'Rank of incidence matrix {rank} should be [0, 2]')
 
-        sc = tnx.CellComplex(self.cells)
-        _, _, incidence = sc.incidence_matrix(rank=rank, index=True, signed=directed_graph)
+        cc = tnx.CellComplex([featured_cell.cell for featured_cell in self.featured_cells])
+        _, _, incidence = cc.incidence_matrix(rank=rank, index=True, signed=directed_graph)
         return incidence.todense()
 
-    @abstractmethod
     def _validate(self) -> None:
-        pass
+        print('hello')
 
-    @abstractmethod
-    def laplacian(self, complex_laplacian: T) -> np.array:
-        pass
+    def laplacian(self, complex_laplacian: Any) -> np.array:
+        return None

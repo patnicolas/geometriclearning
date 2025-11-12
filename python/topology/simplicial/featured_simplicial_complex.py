@@ -20,8 +20,6 @@ from typing import Self, AnyStr, List, Tuple, Dict
 import toponetx as tnx
 import numpy as np
 import torch
-from torch_geometric.io.planetoid import edge_index_from_dict
-
 # Library imports
 from topology.simplicial.featured_simplex import FeaturedSimplex
 from topology.simplicial.simplicial_laplacian import SimplicialLaplacian
