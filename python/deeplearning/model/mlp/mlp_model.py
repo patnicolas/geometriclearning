@@ -150,7 +150,8 @@ class MLPBuilder(NeuralBuilder):
 
     @staticmethod
     def validate(mlp_blocks: List[MLPBlock]) -> None:
-        assert len(mlp_blocks) > 0, "MLP needs at least one layer"
+        if len(mlp_blocks) == 0:
+            raise ValueError("MLP needs at least one layer")
 
         # Check consistency of number of input and output features
         for index in range(len(mlp_blocks) - 1):

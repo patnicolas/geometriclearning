@@ -61,8 +61,8 @@ class CFStatisticalManifold(object):
         @type bounds: Tuple[float, float]
         """
         class_name = info_manifold.__class__.__name__
-        assert class_name in CFStatisticalManifold.closed_form_manifolds, \
-            f'Information Geometry for {class_name} is not supported'
+        if class_name not in CFStatisticalManifold.closed_form_manifolds:
+            raise TypeError( f'Information Geometry for {class_name} is not supported')
 
         self.info_manifold = info_manifold
         self.fisher_rao_metric = FisherRaoMetric(info_manifold, bounds)

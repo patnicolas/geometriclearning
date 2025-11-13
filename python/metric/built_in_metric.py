@@ -100,9 +100,8 @@ class BuiltInMetric(Metric):
            @return metric value
            @rtype float
            """
-        assert len(predicted) == len(labels), \
-            f'Number of prediction {len(predicted)} != Number of labels {len(labels)}'
-
+        if  len(predicted) != len(labels):
+            raise ValueError(f'Number of prediction {len(predicted)} != Number of labels {len(labels)}')
         np_predicted = np.array(predicted)
         np_labels = np.array(labels)
         np_metric = self.from_numpy(np_predicted, np_labels)

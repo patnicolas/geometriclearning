@@ -36,10 +36,11 @@ class BaseAnimation(ABC):
         @param **kwargs: Dictionary of configuration parameters for any given animation
         @type **kwargs: Dictionary
         """
-        assert 1 < kwargs.get('interval', 128) <= 4096, \
-            f'Interval for animation { kwargs.get("interval", 128)} should be [2, 4096]'
-        assert 0 < kwargs.get('fps', 128) <= 2048, \
-            f'Frame per second for animation {kwargs.get("fps", 128)} should be [1, 2048]'
+        if kwargs.get('interval', 128) <= 1 or kwargs.get('interval', 128) > 4096:
+            raise ValueError(f'Interval for animation { kwargs.get("interval", 128)} should be [2, 4096]')
+        if kwargs.get('fps', 128) <= 1 or kwargs.get('fps', 128) > 2048:
+            raise ValueError(f'Frame per second for animation {kwargs.get("fps", 128)} should be [1, 2048]')
+
         _dict = kwargs
         self.config = _dict['kwargs']
 

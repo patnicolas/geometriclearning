@@ -22,7 +22,7 @@ import numpy as np
 import torch
 # Library imports
 from topology.simplicial.featured_simplex import FeaturedSimplex
-from topology.simplicial.simplicial_laplacian import SimplicialLaplacian
+from topology.complex_laplacian import ComplexLaplacian
 from topology.simplicial.featured_simplicial_elements import FeaturedSimplicialElements
 from topology.featured_complex import  FeaturedComplex
 __all__ = ['FeaturedSimplicialComplex']
@@ -171,7 +171,7 @@ class FeaturedSimplicialComplex(FeaturedComplex):
         _, _, incidence = sc.incidence_matrix(rank=rank, index=True, signed=directed_graph)
         return incidence.todense()
 
-    def laplacian(self, simplicial_laplacian: SimplicialLaplacian) -> np.array:
+    def laplacian(self, simplicial_laplacian: ComplexLaplacian) -> np.array:
         return simplicial_laplacian(self.simplicial_indices)
 
     """ -------------------------  Private Supporting methods ------------------ """

@@ -84,12 +84,13 @@ class FrechetEstimator(object):
     """ ----------------------------   Private helper methods --------------------------- """
 
     def __belongs(self, x: np.array) -> bool:
-        assert x.shape[0] == 3, f'Point {x} should have 3 dimension'
         """
         Test if a point belongs to this hypersphere
-        @param point defined as a list of 3 values
+        @param x defined as a list of 3 values
         @return True if the point belongs to the manifold, False otherwise
         """
+        if x.shape[0] != 3:
+            raise ValueError(f'Point {x} should have 3 dimension')
         return self.space.belongs(x)
 
 

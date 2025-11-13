@@ -14,13 +14,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import Any, List, AnyStr
+from typing import List, AnyStr
 # 3rd Party imports
 import toponetx as tnx
 import numpy as np
 # Library imports
 from topology.cell.featured_cell import FeaturedCell
 from topology.featured_complex import FeaturedComplex
+from topology.complex_laplacian import ComplexLaplacian
 __all__ = ['FeaturedCellComplex']
 
 
@@ -63,5 +64,6 @@ class FeaturedCellComplex(FeaturedComplex):
     def _validate(self) -> None:
         print('hello')
 
-    def laplacian(self, complex_laplacian: Any) -> np.array:
-        return None
+    def laplacian(self, simplicial_laplacian: ComplexLaplacian) -> np.array:
+        simplicial_indices = [featured_cell.cell.elements for featured_cell in self.featured_cells]
+        return simplicial_laplacian(simplicial_indices)

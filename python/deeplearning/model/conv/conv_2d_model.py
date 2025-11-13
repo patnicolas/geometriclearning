@@ -141,8 +141,8 @@ class Conv2dBuilder(NeuralBuilder):
 
     @staticmethod
     def validate_conv(conv_blocks: List[Conv2dBlock], input_size: Conv2DataType) -> None:
-        assert len(conv_blocks) > 0, \
-            "Convolutional network needs at least one layer"
+        if len(conv_blocks) == 0:
+            raise ValueError( "Convolutional network needs at least one layer")
 
         for index in range(len(conv_blocks) - 1):
             # 1. Validate the in-channel and out-channels

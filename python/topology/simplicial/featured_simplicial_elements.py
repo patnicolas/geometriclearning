@@ -46,7 +46,8 @@ class FeaturedSimplicialElements:
         @return: Instance of GraphComplexElements
         @rtype: FeaturedSimplicialElements
         """
-        assert len(featured_simplex) == 3, f'The number of sets of complex elements {len(featured_simplex)} should be 3'
+        if len(featured_simplex) != 3:
+            raise ValueError(f'The number of sets of complex elements {len(featured_simplex)} should be 3')
         return cls(featured_simplex[0], featured_simplex[1], featured_simplex[2])
 
     def add_nodes(self, featured_nodes: List[FeaturedSimplex]) -> None:
@@ -66,7 +67,8 @@ class FeaturedSimplicialElements:
         @return: Dump of complex elements
         @rtype: str
         """
-        assert count > 0, f'Count {count} to display complex elements associated with a graph should be >0'
+        if count <= 0:
+            raise ValueError(f'Count {count} to display complex elements associated with a graph should be >0')
 
         nodes_elements_str = '\n'.join([str(s) for s in self.featured_nodes[:count]])
         edges_elements_str = '\n'.join([str(s) for s in self.featured_edges[:count]])

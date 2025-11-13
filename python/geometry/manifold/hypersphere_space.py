@@ -72,9 +72,10 @@ class HypersphereSpace(GeometricSpace):
         @return mean value as a Numpy array
         @rtype Numpy array
         """
-        assert len(manifold_pts) > 1, f'Frechet mean for hypersphere requires at least 2 manifold points'
         from geomstats.learning.frechet_mean import FrechetMean
 
+        if len(manifold_pts) == 0:
+            raise ValueError('Frechet mean for hypersphere requires at least 2 manifold points')
         frechet_mean = FrechetMean(self.space)
         x = np.stack(arrays=(manifold_pts[0].location, manifold_pts[1].location), axis=0)
         frechet_mean.fit(x)

@@ -38,7 +38,8 @@ def log_size(x: torch.Tensor, comment: AnyStr = "") -> NoReturn:
     @param comment: Optional comments
     @type comment: AnyStr
     """
-    assert isinstance(x, torch.Tensor), '\nNot a Tensor type'
+    if not isinstance(x, torch.Tensor):
+        raise TypeError( '\nNot a Tensor type')
     sz = list(x.size())
     logging.info(f'{str(sz)} {comment}')
 

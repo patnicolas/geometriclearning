@@ -117,7 +117,8 @@ class DeConv2dModel(NeuralModel, ABC):
         @param ffnn_blocks:  List of neural blocks which layout is to be evaluated
         @type ffnn_blocks: List[MLPBlock]
         """
-        assert de_conv_blocks, 'This convolutional model has not defined neural blocks'
+        if de_conv_blocks is None:
+            raise ValueError('This convolutional model has not defined neural blocks')
         DeConv2dModel.__validate(de_conv_blocks)
         if not ffnn_blocks:
             MLPModel.is_valid(ffnn_blocks)
@@ -126,7 +127,8 @@ class DeConv2dModel(NeuralModel, ABC):
 
     @staticmethod
     def __validate(neural_blocks: List[DeConv2dBlock]):
-        assert len(neural_blocks) > 0, "Deep Feed Forward network needs at least one layer"
+        if len(neural_blocks) == 0:
+            raise ValueError("Deep Feed Forward network needs at least one layer")
         for index in range(len(neural_blocks) - 1):
             assert neural_blocks[index + 1].in_channels == neural_blocks[index].out_channels, \
                 f'Layer {index} input_tensor != layer {index + 1} output'

@@ -67,8 +67,8 @@ class GeometricSpace(ABC):
         @param intrinsic: Flag that specifies if the coordinates system is intrinsic
         @type intrinsic: bool
         """
-        assert 0 < dimension < 32, f'Dimension of manifold {dimension} should be [1, 31]'
-
+        if dimension <= 0 or dimension >= 32:
+            raise ValueError(f'Dimension of manifold {dimension} should be [1, 31]')
         self.dimension = dimension
         self.intrinsic = intrinsic
 

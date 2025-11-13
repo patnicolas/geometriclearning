@@ -4,7 +4,8 @@ import numpy as np
 from topology.simplicial.featured_simplicial_elements import FeaturedSimplicialElements
 from topology.simplicial.featured_simplicial_complex import FeaturedSimplicialComplex
 from topology.simplicial.featured_simplex import FeaturedSimplex
-from topology.simplicial.simplicial_laplacian import SimplicialLaplacian, SimplicialLaplacianType
+from topology.complex_laplacian import ComplexLaplacian
+from topology import LaplacianType
 import logging
 
 
@@ -95,14 +96,14 @@ class FeaturedSimplicialComplexTest(unittest.TestCase):
                                                                            edge_node_indices=edge_set,
                                                                            face_node_indices=face_set)
             # simplicial_feature_set.show()
-            simplicial_laplacian_0 = SimplicialLaplacian(simplicial_laplacian_type=SimplicialLaplacianType.UpLaplacian,
-                                                         rank=0,
-                                                         signed=True)
+            simplicial_laplacian_0 = ComplexLaplacian(laplacian_type=LaplacianType.UpLaplacian,
+                                                      rank=0,
+                                                      signed=True)
             up_laplacian_rk0 = featured_simplicial_complex.laplacian(simplicial_laplacian_0)
             logging.info(f'\nUP-Laplacian rank 0\n{up_laplacian_rk0}')
-            simplicial_laplacian_1 = SimplicialLaplacian(simplicial_laplacian_type=SimplicialLaplacianType.UpLaplacian,
-                                                         rank=1,
-                                                         signed=True)
+            simplicial_laplacian_1 = ComplexLaplacian(laplacian_type=LaplacianType.UpLaplacian,
+                                                      rank=1,
+                                                      signed=True)
             up_laplacian_rk1 = featured_simplicial_complex.laplacian(simplicial_laplacian_1)
             logging.info(f'\nUP-Laplacian rank 1\n{up_laplacian_rk1}')
         except (AssertionError, ValueError) as e:
@@ -116,14 +117,14 @@ class FeaturedSimplicialComplexTest(unittest.TestCase):
             featured_simplicial_complex = FeaturedSimplicialComplex.random(node_feature_dimension=4,
                                                                            edge_node_indices=edge_set,
                                                                            face_node_indices=face_set)
-            simplicial_laplacian_1 = SimplicialLaplacian(
-                simplicial_laplacian_type=SimplicialLaplacianType.DownLaplacian,
+            simplicial_laplacian_1 = ComplexLaplacian(
+                laplacian_type=LaplacianType.DownLaplacian,
                 rank=1,
                 signed=True)
             down_laplacian_rk1 = featured_simplicial_complex.laplacian(simplicial_laplacian_1)
             logging.info(f'\nDown-Laplacian rank 1\n{down_laplacian_rk1}')
-            simplicial_laplacian_2 = SimplicialLaplacian(
-                simplicial_laplacian_type=SimplicialLaplacianType.DownLaplacian,
+            simplicial_laplacian_2 = ComplexLaplacian(
+                laplacian_type=LaplacianType.DownLaplacian,
                 rank=2,
                 signed=True)
             down_laplacian_rk2 = featured_simplicial_complex.laplacian(simplicial_laplacian_2)
@@ -139,22 +140,22 @@ class FeaturedSimplicialComplexTest(unittest.TestCase):
             featured_simplicial_complex = FeaturedSimplicialComplex.random(node_feature_dimension=5,
                                                                            edge_node_indices=edge_set,
                                                                            face_node_indices=face_set)
-            simplicial_laplacian_0 = SimplicialLaplacian(
-                simplicial_laplacian_type=SimplicialLaplacianType.HodgeLaplacian,
+            simplicial_laplacian_0 = ComplexLaplacian(
+                laplacian_type=LaplacianType.HodgeLaplacian,
                 rank=0,
                 signed=True)
             hodge_laplacian_rk0 = featured_simplicial_complex.laplacian(simplicial_laplacian_0)
             logging.info(f'\nHodge-Laplacian rank 0\n{hodge_laplacian_rk0}')
 
-            simplicial_laplacian_1 = SimplicialLaplacian(
-                simplicial_laplacian_type=SimplicialLaplacianType.HodgeLaplacian,
+            simplicial_laplacian_1 = ComplexLaplacian(
+                laplacian_type=LaplacianType.HodgeLaplacian,
                 rank=1,
                 signed=True)
             hodge_laplacian_rk1 = featured_simplicial_complex.laplacian(simplicial_laplacian_1)
             logging.info(f'\nHodge-Laplacian rank 1\n{hodge_laplacian_rk1}')
 
-            simplicial_laplacian_2 = SimplicialLaplacian(
-                simplicial_laplacian_type=SimplicialLaplacianType.HodgeLaplacian,
+            simplicial_laplacian_2 = ComplexLaplacian(
+                laplacian_type=LaplacianType.HodgeLaplacian,
                 rank=2,
                 signed=True
             )

@@ -4,7 +4,8 @@ from toponetx.classes.cell import Cell
 import numpy as np
 from topology.cell.featured_cell_complex import FeaturedCellComplex
 from topology.cell.featured_cell import FeaturedCell
-import python
+from topology.complex_laplacian import ComplexLaplacian
+from topology import LaplacianType
 
 
 class FeaturedCellComplexTest(unittest.TestCase):
@@ -54,3 +55,20 @@ class FeaturedCellComplexTest(unittest.TestCase):
         except ValueError as e:
             logging.error(e)
             self.assertFalse(False)
+
+    def test_up_laplacian(self):
+        edges = [[1, 2], [1, 3], [2, 3], [2, 4], [3, 4], [2, 5], [4, 5]]
+        faces = [[2, 3, 4], [1, 2, 3], [1, 3, 4, 5]]
+        edge_cells = [FeaturedCell.build(indices=edge, rank=1) for edge in edges]
+        face_cells = [FeaturedCell.build(indices=face, rank=2) for face in faces]
+        cells = edge_cells + face_cells
+        featured_cell_complex = FeaturedCellComplex(cells)
+        logging.info(featured_cell_complex)
+
+        simplicial_laplacian_0 = ComplexLaplacian(laplacian_type=LaplacianType.UpLaplacian,
+                                                  rank=0,
+                                                  signed=True)
+        up_laplacian_rk0 = featured_cell_complex.laplacian(simplicial_laplacian_0)
+        logging.info(f'\nUP Laplacian Rank 0:\n{up_laplacian_rk0}')
+
+

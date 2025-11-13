@@ -52,8 +52,10 @@ class LieSO3Group(object):
         @param identity_element: Reference element on the manifold (Identity  if not defined)
         @type identity_element: Numpy array
         """
-        assert algebra_element.size == 9, f'Tangent vector size {algebra_element.size} should be 9'
-        assert identity_element.size == 9, f'Base point size {algebra_element.size} should be 9'
+        if algebra_element.size != 9:
+            raise ValueError( f'Tangent vector size {algebra_element.size} should be 9')
+        if  identity_element.size != 9:
+            raise ValueError(f'Base point size {algebra_element.size} should be 9')
 
         self.algebra_element = gs.array(algebra_element)
         # Exp. a left-invariant vector field from a base point
@@ -76,9 +78,8 @@ class LieSO3Group(object):
         @return: Instance of LieSO3Group
         @rtype: LieSO3Group
         """
-        assert identity_matrix is None or len(identity_matrix) == 9, \
-            f'Dimension of base point, {len(identity_matrix)} should be 9'
-
+        if identity_matrix is not None and len(identity_matrix) != 9:
+            raise ValueError(f'Dimension of base point, {len(identity_matrix)} should be 9')
         np_algebra_element = np.reshape(algebra_element, (3, 3))
         np_identity_element = np.reshape(identity_matrix, (3, 3)) \
             if identity_matrix is not None else LieSO3Group.identity_matrix

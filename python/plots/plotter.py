@@ -168,9 +168,10 @@ class Plotter(object):
     def __two_plot(values1: List[float],
                    values2: List[float],
                    plotter_parameters_list: List[PlotterParameters]) -> None:
-        assert len(plotter_parameters_list) == 2, f'Number of plots {plotter_parameters_list.count} should be 2'
-        assert len(values1) == len(values2), f'Number of values1 {len(values1)} != number values2 {len(values2)}'
-
+        if len(plotter_parameters_list) != 2:
+            raise ValueError(f'Number of plots {plotter_parameters_list.count} should be 2')
+        if len(values1) != len(values2):
+            raise ValueError(f'Number of values1 {len(values1)} != number values2 {len(values2)}')
         fig, axes = plt.subplots(2)
         x = np.arange(0, len(values1), 1)
         for i in range(2):
@@ -184,9 +185,12 @@ class Plotter(object):
             values2: List[float],
             values3: List[float],
             plotter_parameters_list: List[PlotterParameters]) -> None:
-        assert len(plotter_parameters_list) == 3, f'Number of plots {plotter_parameters_list.count} should be 3'
-        assert len(values1) == len(values2), f'Size of features {len(values1)} should be == Size labels {len(values2)}'
-        assert len(values1) == len(values3), f'Size of features {len(values1)} should be == Size z {len(values3)}'
+        if len(plotter_parameters_list) != 3:
+            raise ValueError(f'Number of plots {plotter_parameters_list.count} should be 3')
+        if len(values1) != len(values2):
+            raise ValueError(f'Size of features {len(values1)} should be == Size labels {len(values2)}')
+        if len(values1) != len(values3):
+            raise ValueError(f'Size of features {len(values1)} should be == Size z {len(values3)}')
 
         fig, axes = plt.subplots(3)
         x = np.arange(0, len(values1), 1)

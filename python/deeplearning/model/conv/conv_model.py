@@ -187,6 +187,9 @@ class ConvModel(NeuralModel, ABC):
         @type mlp_blocks: List[MLPBlock]
         @param input_size: Input size as int (1D) or Tuple (2D)
         """
+        if conv_blocks is None or len(conv_blocks) == 0:
+            raise ValueError('Cannot validate undefined list of convolutional blocks')
+
         assert conv_blocks is not None and len(conv_blocks) > 0
         ConvModel.__validate(conv_blocks, input_size)
         if not mlp_blocks:

@@ -41,15 +41,15 @@ class SE3Visualization(LieSE3Group):
         super(SE3Visualization, self).__init__(rot_matrix=rot_matrix, trans_matrix=trans_matrix, point_type='vector')
 
     def visualize(self,
-                  se3_element_descs: List[SE3ElementDescriptor],
+                  se3_element_descriptors: List[SE3ElementDescriptor],
                   initial_point: np.array,
                   scale: Tuple[float, float],
                   num_points: int,
                   title: AnyStr = '') -> None:
         """
         Visualize the multiple tangent vectors geodesics from a single SE3 element
-        @param se3_element_descs: List of initial tangent vectors
-        @type se3_element_descs: List of Numpy array
+        @param se3_element_descriptors: List of initial tangent vectors
+        @type se3_element_descriptors: List of Numpy array
         @param initial_point: Initial point on a manifold. Identity if not specified
         @type initial_point:  Numpy array
         @param num_points: Number of data points along the geodesics
@@ -68,7 +68,7 @@ class SE3Visualization(LieSE3Group):
         ax.set_facecolor('#F2F9FE')
 
         self.__draw(ax,
-                    se3_element_descs,
+                    se3_element_descriptors,
                     initial_point,
                     scale,
                     num_points,
