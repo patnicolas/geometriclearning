@@ -54,7 +54,7 @@ class ComplexLaplacianTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    @unittest.skip('Ignored')
+    # @unittest.skip('Ignored')
     def test_cell_down_laplacian_2(self):
         try:
             cell_laplacian = ComplexLaplacian[CellType](laplacian_type=LaplacianType.DownLaplacian,

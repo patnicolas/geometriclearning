@@ -68,5 +68,5 @@ class FeaturedCellComplex(FeaturedComplex):
         return incidence.todense()
 
     def laplacian(self, complex_laplacian: ComplexLaplacian) -> np.array:
-        cell_indices = [featured_cell.cell.elements for featured_cell in self.featured_cells]
-        return complex_laplacian(cell_indices)
+        cells = [featured_cell.cell for featured_cell in self.featured_cells]
+        return complex_laplacian(cells)

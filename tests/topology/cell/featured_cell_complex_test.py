@@ -66,6 +66,25 @@ class FeaturedCellComplexTest(unittest.TestCase):
             logging.error(e)
             self.assertFalse(False)
 
+    def test_exercise_hodge_laplacian(self):
+        try:
+            edges = [[1, 2], [1, 4], [1, 5], [2, 3], [3, 6], [4, 6], [4, 5]]
+            cells_2 = [[1, 2, 3, 6, 4], [1, 4, 5]]
+
+            featured_edges = [FeaturedCell.build(indices=edge, rank=1) for edge in edges]
+            features_cells_2 = [FeaturedCell.build(indices=face, rank=2) for face in cells_2]
+            featured_cells = featured_edges + features_cells_2
+            featured_cell_complex = FeaturedCellComplex(featured_cells)
+            complex_laplacian = ComplexLaplacian[CellType](laplacian_type=LaplacianType.HodgeLaplacian,
+                                                           rank=1,
+                                                           signed=True)
+            hodge_laplacian_rk1 = featured_cell_complex.laplacian(complex_laplacian)
+            logging.info(f'\nHodge Laplacian Rank 1:\n{hodge_laplacian_rk1}')
+        except (TypeError, ValueError) as e:
+            logging.error(e)
+            self.assertFalse(False)
+
+
     @staticmethod
     def generate_featured_cell_complex() -> FeaturedCellComplex:
         edges = [[1, 2], [1, 3], [2, 3], [2, 4], [3, 4], [2, 5], [4, 5]]

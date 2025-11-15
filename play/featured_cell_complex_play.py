@@ -33,10 +33,11 @@ class FeaturedCellComplexPlay(Play):
       "Graphs Reimagined: The Power of Cell Complexes"
 
       References:
-      - Article: https://patricknicolas.substack.com/p/exploring-simplicial-complexes-for
+      - Article:  https://patricknicolas.substack.com/p/graphs-reimagined-the-power-of-cell
       - FeaturedCellComplex:
-          https://github.com/patnicolas/geometriclearning/blob/main/python/topology/simplicial/abstract_simplicial_complex.py
-
+          https://github.com/patnicolas/geometriclearning/blob/main/python/topology/cell/featured_cell_complex.py
+      - Evaluation
+           https://github.com/patnicolas/geometriclearning/blob/main/play/featured_cell_complex_play.py
 
       The features are implemented by the class FeaturedCellComplex in the source file
                     python/topology/cell/featured_cell_complex.py

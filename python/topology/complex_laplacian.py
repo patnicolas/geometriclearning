@@ -46,7 +46,7 @@ class ComplexLaplacian(Generic[CellDescriptor]):
     def __str__(self) -> AnyStr:
         return f'{self.laplacian_type.value}, rank={self.rank}, signed={self.signed}'
 
-    def __call__(self, complex_elements: CellDescriptor) -> np.array:
+    def __call__(self, complex_elements: List[CellDescriptor]) -> np.array:
         """
         Compute the various combination of Laplacian (UP, DOWN, Hodge) for different rank.
 
@@ -81,13 +81,13 @@ class ComplexLaplacian(Generic[CellDescriptor]):
             raise ValueError(f'Rank {rank} for DOWN Laplacian is out-of-bounds')
 
     @staticmethod
-    def __get_complex(complex_elements: CellDescriptor) -> Complex:
+    def __get_complex(complex_elements: List[CellDescriptor]) -> Complex:
         if isinstance(complex_elements[0], SimplexType):
             cplx = tnx.SimplicialComplex(complex_elements)
         elif isinstance(complex_elements[0], CellType):
             cplx = tnx.CellComplex(complex_elements)
         else:
-            raise TypeError(f'Type of Complex elements {complex_elements} is not supported')
+            raise TypeError(f'Type of Complex elements {complex_elements[0]} is not supported')
         return cplx
 
 
