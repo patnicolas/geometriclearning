@@ -65,8 +65,9 @@ class SimplicialAnimation(object):
                  edge_set: List[Tuple[int, int]],
                  face_set: List[List[int]],
                  config: Dict[AnyStr, Any]) -> None:
+        if len(nodes) == 0:
+            raise ValueError('Cannot animate a simplicial with no node')
 
-        assert len(nodes) > 1, 'Cannot animate a simplicial with no node'
         self.nodes = nodes
         self.edge_set = edge_set
 

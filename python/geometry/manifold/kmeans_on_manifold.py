@@ -68,9 +68,10 @@ class KMeansOnManifold(object):
         @param random_gen: Random generator identifier on the hypersphere
         @type random_gen: AnyStr
         """
-        assert 0 < num_samples <= 19384, f'Number of samples {num_samples} should be [1, 19384]'
-        assert 0 < num_clusters <= 1024, f'Number of clusters {num_clusters} should be [1, 1024]'
-
+        if num_samples <= 0 or num_samples > 19384:
+            raise ValueError(f'Number of samples {num_samples} should be [1, 19384]')
+        if num_clusters <= 0 or num_clusters > 1024:
+            raise ValueError(f'Number of clusters {num_clusters} should be [1, 1024]')
         # Step 1: Initialize the manifold
         self.hypersphere = Hypersphere(dim=2, equip=True)
 

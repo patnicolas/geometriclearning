@@ -64,7 +64,8 @@ def are_tensors_close(t1: torch.Tensor, t2: torch.Tensor, rtol: float = 1e-6) ->
     @return: True if the two tensors are almost identical, False otherwise
     @rtype: boolean
     """
-    assert 1e-15 < rtol < 0.01, f'Error tolerance {rtol} is out of range'
+    if rtol <= 1e-15 or rtol >= 0.01:
+        raise ValueError(f'Error tolerance {rtol} is out of range')
 
     is_match = t1.shape == t2.shape
     if is_match:

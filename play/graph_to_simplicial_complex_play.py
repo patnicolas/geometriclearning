@@ -21,7 +21,8 @@ import networkx as nx
 import toponetx as tnx
 # Library imports
 from play import Play
-from topology.simplicial.abstract_simplicial_complex import SimplicialElement
+from topology.simplicial import lift_from_graph_cliques, lift_from_graph_neighbors
+from topology.simplicial.featured_simplicial_complex import SimplicialElement
 from topology.simplicial.graph_to_simplicial_complex import GraphToSimplicialComplex
 from deeplearning.training import TrainingException
 import python
@@ -44,7 +45,7 @@ class GraphToSimplicialComplexPlay(Play):
     """
     def __init__(self,
                  dataset_name: AnyStr,
-                 lifting_method: Callable[[nx.Graph, Dict[str, Any]], tnx.SimplicialComplex:]) -> None:
+                 lifting_method: Callable[[nx.Graph, Dict[str, Any]], tnx.SimplicialComplex]) -> None:
         """
         Constructor for the evaluation of the topological lifting methods as described in 'Topological Lifting of
         Graph Neural Networks' Substack article
@@ -105,24 +106,6 @@ class GraphToSimplicialComplexPlay(Play):
         logging.info(f"\nNodes: {num_eigenvectors[0]}, Edges: {num_eigenvectors[1]}, Faces: {num_eigenvectors[2]} "
                      f"eigenvectors\nSimplicial nodes:\n{nodes_elements_str}\nSimplicial edges:\n{edges_elements_str}"
                      f"\nSimplicial faces:\n{faces_elements_str}")
-
-
-""" 
-Wrapping functions for lifting methods defined in TopoNetX
-'Topological Lifting of Graph Neural Networks' - Code snippet 3
-"""
-
-def lift_from_graph_cliques(graph: nx.Graph, params: Dict[str, Any]) -> tnx.SimplicialComplex:
-    from toponetx.transform import graph_to_clique_complex
-
-    logging.info('Graph lifted from NetworkX cliques with max rank 2')
-    return graph_to_clique_complex(graph, max_rank=params.get('max_rank', 2))
-
-def lift_from_graph_neighbors(graph: nx.Graph, params: Dict[str, Any]) -> tnx.SimplicialComplex:
-    from toponetx.transform import graph_to_neighbor_complex
-
-    logging.info('Graph lifted from node neighbors')
-    return graph_to_neighbor_complex(graph)
 
 
 if __name__ == '__main__':

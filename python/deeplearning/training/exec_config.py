@@ -147,8 +147,8 @@ class ExecConfig(object):
         @return: Pair (device name, torch device)
         @rtype: Tuple[AnyStr, torch.device]
         """
-        assert self.device_config is None or self.device_config in ['auto', 'cpu', 'mps', 'cuda'], \
-            f'Device {self.device_config} is not supported'
+        if self.device_config is not None and self.device_config not in ['auto', 'cpu', 'mps', 'cuda']:
+            raise ValueError(f'Device {self.device_config} is not supported')
 
         if self.device_config is None:
             if torch.cuda.is_available():

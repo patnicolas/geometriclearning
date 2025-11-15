@@ -131,7 +131,9 @@ class Conv2dBuilder(NeuralBuilder):
         @param input_size: Input size as int (1D) or Tuple (2D)
         """
         from deeplearning.model.mlp.mlp_model import MLPBuilder
-        assert conv_blocks, 'This convolutional model has not defined neural blocks'
+
+        if conv_blocks is None or len(conv_blocks) == 0:
+            raise ValueError('This convolutional model has not defined neural blocks')
         Conv2dBuilder.validate_conv(conv_blocks, input_size)
         MLPBuilder.validate(mlp_blocks)
 
@@ -139,8 +141,8 @@ class Conv2dBuilder(NeuralBuilder):
 
     @staticmethod
     def validate_conv(conv_blocks: List[Conv2dBlock], input_size: Conv2DataType) -> None:
-        assert len(conv_blocks) > 0, \
-            "Convolutional network needs at least one layer"
+        if len(conv_blocks) == 0:
+            raise ValueError( "Convolutional network needs at least one layer")
 
         for index in range(len(conv_blocks) - 1):
             # 1. Validate the in-channel and out-channels

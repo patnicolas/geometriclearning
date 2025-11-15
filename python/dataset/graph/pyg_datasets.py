@@ -66,8 +66,9 @@ class PyGDatasets(object):
         @param dataset_name: Name of the dataset loaded from PyTorch Geometric
         @type dataset_name: AnyStr
         """
-        assert dataset_name in PyGDatasets.valid_dataset_dict, \
-            f'Data set {dataset_name} is not supported for Graph Neural Networks'
+        if dataset_name not in PyGDatasets.valid_dataset_dict:
+            raise ValueError(f'Data set {dataset_name} is not supported for Graph Neural Networks')
+
         self.name = dataset_name
 
     def __call__(self) -> Optional[Dataset]:

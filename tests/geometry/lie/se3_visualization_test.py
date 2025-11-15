@@ -98,7 +98,7 @@ class SE3VisualizationTest(unittest.TestCase):
                                                   z=-4.8,
                                                   s=f'Vector [{rot_trans_str}]',
                                                   color='blue')
-        se3_visualization.visualize(se3_element_descs=[se3_element_1_desc, se3_element_2_desc],
+        se3_visualization.visualize(se3_element_descriptors=[se3_element_1_desc, se3_element_2_desc],
                                     initial_point=se3_visualization.identity(),
                                     scale=(-1.0, 1.0),
                                     num_points=84,
@@ -135,7 +135,7 @@ class SE3VisualizationTest(unittest.TestCase):
                                                     color='blue')
 
         se3_visualization = SE3Visualization(rot_matrix=u3d.y_rot,trans_matrix=u3d.x_trans)
-        se3_visualization.visualize(se3_element_descs=[se3_element_desc, se3_inv_element_desc],
+        se3_visualization.visualize(se3_element_descriptors=[se3_element_desc, se3_inv_element_desc],
                                     initial_point=se3_visualization.identity(),
                                     scale=(-1.0, 1.0),
                                     num_points=48,
@@ -182,9 +182,9 @@ class SE3VisualizationTest(unittest.TestCase):
                                                          color='green')
 
         se3_visualization = SE3Visualization(rot_matrix=u3d.y_rot, trans_matrix=u3d.x_trans)
-        se3_visualization.visualize(se3_element_descs=[se3_element_1_desc,
-                                                       se3_element_2_desc,
-                                                       se3_composed_element_desc],
+        se3_visualization.visualize(se3_element_descriptors=[se3_element_1_desc,
+                                                             se3_element_2_desc,
+                                                             se3_composed_element_desc],
                                     initial_point=se3_visualization.identity(),
                                     num_points=64,
                                     scale=(-0.7, 0.7),
@@ -216,7 +216,7 @@ class SE3VisualizationTest(unittest.TestCase):
                                                          s=composed_vec_descriptor,
                                                          color='blue')
         se3_visualization = SE3Visualization(rot_matrix=u3d.y_rot, trans_matrix=u3d.x_trans)
-        se3_visualization.visualize(se3_element_descs=[se3_element_desc, se3_composed_element_desc],
+        se3_visualization.visualize(se3_element_descriptors=[se3_element_desc, se3_composed_element_desc],
                                     num_points=48,
                                     initial_point=se3_visualization.identity(),
                                     scale=(-0.35, 0.35),

@@ -100,8 +100,8 @@ class HyperParams(object):
         @return: Instance of this class, HyperParams
         @rtype: HyperParams
         """
-        assert len(attributes), 'Attributes for hyper parameters are undefined'
-
+        if len(attributes) == 0:
+            raise ValueError( 'Attributes for hyper parameters are undefined')
         try:
             return cls(lr=attributes['learning_rate'],
                        momentum=attributes['momentum'],
@@ -243,12 +243,18 @@ class HyperParams(object):
                             batch_size: int,
                             train_eval_ratio: float,
                             drop_out: float) -> None:
-        assert 1e-6 <= lr <= 0.1, f'Learning rate {lr} should be [1e-6, 0.1]'
-        assert 1 <= epochs <= 2048, f'Number of epochs {epochs} should be [1, 2048]'
-        assert 0.4 <= momentum <= 0.999, f'Context stride {momentum} should be [0.5, 0.999]'
-        assert 1 <= batch_size <= 2048, f'Size of batch {batch_size} should be [2, 1024]'
-        assert 0.5 < train_eval_ratio < 0.98, f'Train eval ratio {train_eval_ratio} is out of range ]0.5, 9.98['
-        assert 0.0 <= drop_out <= 1.0, f'Drop out {drop_out} should be [0, 1]'
+        if lr < 1e-6 or lr > 0.1:
+            raise ValueError(f'Learning rate {lr} should be [1e-6, 0.1]')
+        if epochs < 1 or epochs > 2048:
+            raise ValueError(f'Number of epochs {epochs} should be [1, 2048]')
+        if momentum < 0.4 or momentum > 0.999:
+            raise ValueError( f'Context stride {momentum} should be [0.5, 0.999]')
+        if batch_size < 1 or batch_size > 2048:
+            raise ValueError(f'Size of batch {batch_size} should be [2, 1024]')
+        if train_eval_ratio <= 0.5 or train_eval_ratio >= 0.98:
+            raise ValueError(f'Train eval ratio {train_eval_ratio} is out of range ]0.5, 9.98[')
+        if drop_out < 0.0 or drop_out > 1.0:
+            raise ValueError(f'Drop out {drop_out} should be [0, 1]')
 
     @staticmethod
     def __check_grid_search(lr_rates: List[float], batch_sizes: List[int]) -> bool:

@@ -14,20 +14,18 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import Dict, List, AnyStr, Generic, TypeVar, Callable, Any
+from typing import Dict, AnyStr, Generic, TypeVar, Callable, Any
 # 3rd Party imports
-from torch_geometric.data import Data
-import numpy as np
 import networkx as nx
 import toponetx as tnx
 # Library imports
-import python
-from topology.simplicial.abstract_simplicial_complex import SimplicialElement, AbstractSimplicialComplex
+from topology.simplicial.featured_simplicial_elements import FeaturedSimplicialElements
+from topology.networkx_graph import NetworkxGraph
+from topology.hodge_spectrum_configuration import HodgeSpectrumConfiguration
 _all_ = ['GraphToSimplicialComplex']
 
 # Supporting types
 T = TypeVar('T')
-NXGraph = nx.Graph | None
 
 
 class GraphToSimplicialComplex(Generic[T]):
@@ -42,7 +40,7 @@ class GraphToSimplicialComplex(Generic[T]):
             5: Add features with values from eigen decomposition to each face
     """
     def __init__(self,
-                 nx_graph: NXGraph,
+                 nx_graph: nx.Graph | None,
                  dataset: T,
                  lifting_method: Callable[[nx.Graph, Dict[str, Any]], tnx.SimplicialComplex]) -> None:
         """
@@ -60,6 +58,7 @@ class GraphToSimplicialComplex(Generic[T]):
                                Generation of Vietoris-Rips complext
         @type lifting_method: Callable[[nx.Graph], tnx.SimplicialComplex]
         """
+        t = type(dataset).__module__
         # If the dataset is provided using its name
         if type(dataset).__name__ == 'str':
             from dataset.graph.pyg_datasets import PyGDatasets
@@ -69,13 +68,17 @@ class GraphToSimplicialComplex(Generic[T]):
             dataset = pyg_dataset()
             self.dataset_name = dataset
         # If the dataset is provided as part of PyTorch Geometric Library
-        elif str(type(dataset).__module__) == 'torch_geometric':
-            self.dataset_name = getattr(dataset, 'name')
         else:
-            raise TypeError(f'Dataset has incorrect type {str(type(dataset))}')
+            base_module = str(type(dataset).__module__) .split('.')[0]
+            if base_module == 'torch_geometric':
+                self.dataset_name = getattr(dataset, 'name')
+            else:
+                raise TypeError(f'Dataset has incorrect type {str(type(dataset))}')
 
         # Initialize the NetworkX graph if not provided in the constructor
-        self.nx_graph = GraphToSimplicialComplex.__build_networkx_graph(nx_graph, dataset[0])
+        if nx_graph is None:
+            networkx_graph = NetworkxGraph(dataset[0])
+            self.nx_graph = networkx_graph.G
         self.data = dataset[0]
         self.lifting_method = lifting_method
 
@@ -95,29 +98,6 @@ class GraphToSimplicialComplex(Generic[T]):
         return {GraphToSimplicialComplex.types_map[length]: sum(1 for _ in group)
                 for length, group in groupby(sorted_simplex, key=len) if length < 5}
 
-    @staticmethod
-    def __build_networkx_graph(G: nx.Graph, data: Data) -> nx.Graph:
-        """
-        STEP 1: Initialization of the graph if it has not been initialized.
-
-        @param G: NetworkX graph if provided, None if not provided
-        @type G: nx.Graph
-        @param data: Graph data
-        @type data: torch_geometric.data.Data
-        @return: NetworkX undirected graph
-        @rtype: Graph
-        """
-        if G is None:
-            # Create a NetworkX graph
-            G = nx.Graph()
-            # Populate with the node from the dataset
-            G.add_nodes_from(range(data.num_nodes))
-            # Populate with the edges from the dataset: We need to transpose the tensor from 2 x num edges shape to
-            # num edges x 2 shape
-            edge_idx = data.edge_index.cpu().T
-            G.add_edges_from(edge_idx.tolist())
-        return G
-
     def add_faces(self, params: Dict[str, Any] = None) -> tnx.SimplicialComplex:
         """
         STEP 2: Add faces (triangles and Tetrahedrons) to the existing undirected graph G
@@ -129,38 +109,14 @@ class GraphToSimplicialComplex(Generic[T]):
 
     @staticmethod
     def features_from_hodge_laplacian(tnx_simplicial: tnx.SimplicialComplex,
-                                      num_eigenvectors: (int, int, int)) \
-            -> (List[SimplicialElement], List[SimplicialElement], List[SimplicialElement]):
+                                      num_eigenvectors: (int, int, int)) -> FeaturedSimplicialElements:
         """
-        STEP 3: Add features values to each node
-        STEP 4: Add features to edges
-        STEP 5: Add features to faces
-
         @param tnx_simplicial: TopoX simplicial complex
         @type tnx_simplicial: tnx.SimplicialComplex
         @param num_eigenvectors: Number of eigenvector to generate the features values
         @type num_eigenvectors: int
-        @return: Fully configured elements of the simplicial complex
-        @rtype: AbstractSimplicialComplex
+        @return: Fully configured elements of the complex
+        @rtype: FeaturedSimplicialElements
         """
-        from toponetx.algorithms.spectrum import hodge_laplacian_eigenvectors
-
-        # Compute the laplacian weights for nodes, edges (L1) and faces (L2)
-        simplicial_features = \
-            [hodge_laplacian_eigenvectors(tnx_simplicial.hodge_laplacian_matrix(idx),
-                                          num_eigenvectors[idx])[1]
-             for idx in range(len(num_eigenvectors))]
-        # Generate the simplices related to node, edge and faces (triangles and tetrahedrons)
-        return [GraphToSimplicialComplex.__compute_simplicial_elements(tnx_simplicial, simplicial_features, idx)
-                for idx in range(len(simplicial_features))]
-
-    """ ----------------  Private Helper Methods -------------------- """
-
-    @staticmethod
-    def __compute_simplicial_elements(tnx_simplicial: tnx.SimplicialComplex,
-                                      simplicial_features: List,
-                                      index: int) -> List[SimplicialElement]:
-        # Create simplicial element containing node indices associated with the simplex and feature set
-        simplicial_node_feat = zip(tnx_simplicial.skeleton(index), np.array(simplicial_features[index]), strict=True)
-        return [SimplicialElement(tuple(u), v) for u, v in simplicial_node_feat]
-
+        hodge_spectrum_config = HodgeSpectrumConfiguration(num_eigenvectors)
+        return hodge_spectrum_config.get_complex_features(tnx_simplicial)

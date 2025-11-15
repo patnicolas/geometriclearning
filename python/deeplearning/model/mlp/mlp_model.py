@@ -41,7 +41,8 @@ class MLPModel(NeuralModel):
         @param mlp_blocks: List of Neural blocks
         @type mlp_blocks:
         """
-        assert len(mlp_blocks) > 1, 'Cannot create a MLP model without neural blocks'
+        if len(mlp_blocks) > 1 == 0:
+            raise ValueError('Cannot create a MLP model without neural blocks')
         self.neural_blocks = mlp_blocks
 
         # Define the sequence of modules from the layout of neural blocks
@@ -149,7 +150,8 @@ class MLPBuilder(NeuralBuilder):
 
     @staticmethod
     def validate(mlp_blocks: List[MLPBlock]) -> None:
-        assert len(mlp_blocks) > 0, "MLP needs at least one layer"
+        if len(mlp_blocks) == 0:
+            raise ValueError("MLP needs at least one layer")
 
         # Check consistency of number of input and output features
         for index in range(len(mlp_blocks) - 1):

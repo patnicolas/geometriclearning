@@ -38,7 +38,8 @@ def log_size(x: torch.Tensor, comment: AnyStr = "") -> NoReturn:
     @param comment: Optional comments
     @type comment: AnyStr
     """
-    assert isinstance(x, torch.Tensor), '\nNot a Tensor type'
+    if not isinstance(x, torch.Tensor):
+        raise TypeError( '\nNot a Tensor type')
     sz = list(x.size())
     logging.info(f'{str(sz)} {comment}')
 
@@ -53,7 +54,8 @@ def log_size(x: torch.Tensor, y: torch.Tensor, comment: AnyStr = '') -> NoReturn
     @param comment: Optional comments
     @type comment: AnyStr
     """
-    assert isinstance(x, torch.Tensor) and isinstance(y, torch.Tensor), '\nNot a Tensor type'
+    if not isinstance(x, torch.Tensor) or not isinstance(y, torch.Tensor):
+        raise TypeError(f'\n{x} or {y} is not a tensor type')
     szx = list(x.size())
     szy = list(y.size())
     logging.info(f'{str(szx)} {str(szy)} {comment}')
@@ -72,7 +74,8 @@ def check_modules_availability(modules: List[AnyStr]) -> AnyStr:
     @return: Summary of modules available and missing
     @rtype: AnyStr
     """
-    assert len(modules) > 0, 'Cannot check availability of undefined set of Python modules'
+    if len(modules) <= 0:
+        raise ValueError('Cannot check availability of undefined set of Python modules')
 
     available = []
     missing = []

@@ -82,8 +82,8 @@ class GraphDataLoader(object):
         """
         from dataset.graph.pyg_datasets import PyGDatasets
 
-        assert 0 <= num_subgraph_nodes <= 65536, \
-            f'Number of subgraph nodes {num_subgraph_nodes} should be [1, 65536]'
+        if num_subgraph_nodes < 0 or num_subgraph_nodes > 65536:
+            raise ValueError(f'Number of subgraph nodes {num_subgraph_nodes} should be [1, 65536]')
 
         # Validate the attributes against the type of loader-sampler
         GraphDataLoader.__validate(sampling_attributes)
@@ -336,7 +336,9 @@ class GraphDataLoader(object):
 
     @staticmethod
     def __extract_subgraph(data: Data, num_random_indices: int, start_index: int) -> Data:
-        assert num_random_indices > 0, f'Number of random indices {num_random_indices} should be >0'
+        if num_random_indices <= 0:
+            raise ValueError(f'Number of random indices {num_random_indices} should be >0')
+
         import torch
         import random
         from torch_geometric.utils import subgraph

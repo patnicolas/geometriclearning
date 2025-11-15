@@ -41,8 +41,10 @@ class MNISTLoader(BaseLoader):
         @param resize_image: Image to be resize if positive value, otherwise the original image is preserved
         @type resize_image: int
         """
-        assert 0 < batch_size <= 8192, f'Batch size {batch_size} should be [1, 8192]'
-        assert 0 < resize_image <= 8192 or resize_image == -1, f'Resize image factor {resize_image} should be [1, 8192]'
+        if batch_size <= 0 or batch_size > 8192:
+            raise ValueError(f'Batch size {batch_size} should be [1, 8192]')
+        if resize_image <= 0 or resize_image > 8192:
+            raise ValueError(f'Resize image factor {resize_image} should be [1, 8192]')
 
         super(MNISTLoader, self).__init__(batch_size=batch_size, num_samples=-1)
         self.resize_image = resize_image
@@ -118,6 +120,6 @@ class MNISTLoader(BaseLoader):
             )
             return train_dataset, eval_dataset
 
-        except (RuntimeError | ValueError | TypeError) as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logging.error(str(e))
             raise DatasetException(str(e))

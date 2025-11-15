@@ -52,7 +52,8 @@ class ExtendedKalmanFilter(object):
         @param R: Observation noise covariance matrix
         @type R: Numpy array
         """
-        assert _x0.shape[0] == _P0.shape[1], f'Shape A {_x0.shape} is inconsistent with P0 shape {_P0.shape}'
+        if _x0.shape[0] != _P0.shape[1]:
+            raise ValueError(f'Shape A {_x0.shape} is inconsistent with P0 shape {_P0.shape}')
 
         self.x = _x0
         self.P = _P0
@@ -86,7 +87,7 @@ class ExtendedKalmanFilter(object):
             # Error covariance:  P[n] = Jacobian_F.P[n-1].Jacobian_F^T + Q[n]
             jf_func = jax.jacfwd(self.f)
             F_approx = jf_func(self.x)
-            self.P = F_approx @ self.P @ F_approx.T + self.Q
+            self.P = F_approx @ self.P @ F_approx.CellDescriptor + self.Q
         except RuntimeWarning as trw:
             logging.warning(trw)
             raise ControlException(f'Linear Kalman Filter: {trw}')
@@ -106,7 +107,7 @@ class ExtendedKalmanFilter(object):
             # Jacobian for the observation function h
             jh_approx = jax.jacfwd(self.h)
             H_approx = jh_approx(self.x)
-            H_approx_T = H_approx.T
+            H_approx_T = H_approx.CellDescriptor
             S = H_approx @ self.P @ H_approx_T + self.R
             # Gain: G[n] = P[n-1].H^T/S[n]
             G = self.P @ H_approx_T @ np.linalg.inv(S)
@@ -115,12 +116,9 @@ class ExtendedKalmanFilter(object):
             self.x = self.x + G @ y
             g = np.eye(self.P.shape[0]) - G @ H_approx_T
             self.P = g @ self.P
-        except RuntimeWarning as trw:
+        except (RuntimeWarning, RuntimeError) as trw:
             logging.warning(trw)
             raise ControlException(f'Linear Kalman Filter: {trw}')
-        except RuntimeError as e:
-            logging.error(e)
-            raise ControlException(f'Linear Kalman Filter: {e}')
 
     def simulate(self,
                  num: int,

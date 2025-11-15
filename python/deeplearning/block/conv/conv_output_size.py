@@ -85,7 +85,8 @@ class ConvOutputSize(object):
             return self.__pooling_output_shape(input_size=input_size)
 
     def __layer_output_shape(self, input_size: int, dim: int) -> int:
-        assert 0 <= dim <= 1, f'Dimension {dim} for computing output channel is out of bounds (0, 1)'
+        if dim < 0 or dim > 1:
+            raise ValueError(f'Dimension {dim} for computing output channel is out of bounds (0, 1)')
         assert self.stride[dim] > 0, f'Stride {self.stride} should be > 0'
 
         stride = self.stride[dim]

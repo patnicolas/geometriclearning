@@ -100,9 +100,8 @@ class BuiltInMetric(Metric):
            @return metric value
            @rtype float
            """
-        assert len(predicted) == len(labels), \
-            f'Number of prediction {len(predicted)} != Number of labels {len(labels)}'
-
+        if  len(predicted) != len(labels):
+            raise ValueError(f'Number of prediction {len(predicted)} != Number of labels {len(labels)}')
         np_predicted = np.array(predicted)
         np_labels = np.array(labels)
         np_metric = self.from_numpy(np_predicted, np_labels)
@@ -119,8 +118,8 @@ class BuiltInMetric(Metric):
         @return metric tensor
         @rtype Torch tensor
         """
-        assert len(predicted) == len(labels), \
-            f'Number of prediction {len(predicted)} != Number of labels {len(labels)}'
+        if len(predicted) != len(labels):
+            raise ValueError(f'Number of prediction {len(predicted)} != Number of labels {len(labels)}')
 
         np_predicted = predicted.numpy()
         np_labels = labels.numpy()
@@ -142,7 +141,7 @@ class BuiltInMetric(Metric):
         @rtype: Torch Tensor
         """
         if len(predicted) != len(labeled):
-            raise MetricException(f'Number of predicted values {len(predicted)} != Number of labels {len(labeled)}')
+            raise ValueError(f'Number of predicted values {len(predicted)} != Number of labels {len(labeled)}')
 
         _predicted = np.array(predicted)
         _labeled = np.array(labeled)
@@ -158,18 +157,21 @@ class BuiltInMetric(Metric):
 
     def __accuracy(self, _labeled: np.array, _predicted: np.array) -> np.array:
         from sklearn.metrics import accuracy_score
+
         labeled, predicted = BuiltInMetric.__get_class_prediction(_labeled, _predicted)
         score = accuracy_score(labeled, predicted, normalize=True)
         return np.array([score])
 
     def __precision(self, _labeled: np.array, _predicted: np.array) -> np.array:
         from sklearn.metrics import precision_score
+
         labeled, predicted = BuiltInMetric.__get_class_prediction(_labeled, _predicted)
         score = precision_score(y_true=labeled, y_pred=predicted, average='macro', zero_division=1.0)
         return np.array([score])
 
     def __recall(self, _labeled: np.array, _predicted: np.array) -> np.array:
         from sklearn.metrics import recall_score
+
         labeled, predicted = BuiltInMetric.__get_class_prediction(_labeled, _predicted)
         score = recall_score(y_true=labeled,
                              y_pred=predicted,
@@ -184,6 +186,7 @@ class BuiltInMetric(Metric):
 
     def __auroc_score(self, _labeled: np.array, _predicted: np.array) -> np.array:
         from sklearn.metrics import roc_auc_score
+
         # One vs rest AUC
         _labeled_bin = BuiltInMetric.__get_labeled_classes(_labeled)
         return roc_auc_score(y_true=_labeled_bin,
@@ -193,6 +196,7 @@ class BuiltInMetric(Metric):
 
     def __aupr_score(self, _labeled: np.array, _predicted: np.array) -> np.array:
         from sklearn.metrics import average_precision_score
+
         # One vs rest AUC
         _labeled_bin = BuiltInMetric.__get_labeled_classes(_labeled)
         return average_precision_score(y_true=_labeled_bin,
@@ -208,6 +212,7 @@ class BuiltInMetric(Metric):
     @staticmethod
     def __get_labeled_classes(_labeled: np.array) -> np.array:
         from sklearn.preprocessing import label_binarize
+
         max_class = np.max(_labeled)
         _classes = [0] + list(range(1, max_class + 1))
         return label_binarize(_labeled, classes=_classes)

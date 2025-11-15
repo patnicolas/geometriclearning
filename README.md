@@ -217,7 +217,31 @@ Files and classes in this repository follow a strict naming convention as illust
 👉 Unit test class:  python/topology/simplicial/AbstractSimplicialComplexTest.py     
 👉 Substack newsletter evaluation code:  play/AbstractSimplicialComplexPlay.py   
 
+## Exceptions
+Here are the list of exceptions used in this library.    
 
+| Exception                    | Description                                                            |
+|:-----------------------------|:-----------------------------------------------------------------------|
+| __Standard Library__         | |
+| TypeError                    | Incorrect type of argument                                             |
+| ValueError                   | Incorrect value of argument                                            |
+| KeyError                     | Incorrect key lookup in dictionary                                     |
+| IndexError                   | Index in sequence out of range                                         |
+| AssertError                  | Internal validation failed                                             |
+| NotImplementedError          | Not Implemented                                                        |
+| __Geometric Learning__       | |
+| DatasetException             | Failure of execution for datasets                                      |
+| GraphException               | Failure of execution for Graph Neural Networks                         |
+| MetricException              | Failure of execution for Metrics                                       |
+| TrainingException            | Failure of execution during model training                             |
+| MLPException                 | Failure of execution for Multi-layer perceptron                        |
+| ConvException                | Failure of execution for Convolutional neural networks                 |
+| MCMCException                | Failure of execution for Markov Chain Monte Carlo                      |
+| TopologyException            | Failure of execution for Topological data analysis or deep learning    |
+| InformationGeometryException | Failure of execution for statistical manifold and information geometry |
+| ManifoldException            | Failure of execution for smooth, Riemannian manifold                   |
+| LieException                 | Failure of execution for Lie groups and algebras                       |
+| GenerativeException          | Failure of execution for Generative and Auto-encoders models           |   
 
 ## 📚 Modules
 ![Modules Navigation Map](images/Geometric_Learning_Modules_Diagram.png)   

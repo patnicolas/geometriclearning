@@ -13,7 +13,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__all__ = ['MLPException', 'ConvException', 'VAEException', 'GraphException', 'TrainingException', 'ValidationException']
+__all__ = ['MLPException', 'ConvException', 'GenerativeException', 'GraphException', 'TrainingException', 'ValidationException']
 
 class MLPException(Exception):
     def __init__(self, *args, **kwargs):
@@ -30,6 +30,6 @@ class GraphException(Exception):
         super(GraphException, self).__init__(args, kwargs)
 
 
-class VAEException(Exception):
+class GenerativeException(Exception):
     def __init__(self, *args, **kwargs):
-        super(VAEException, self).__init__(args, kwargs)
+        super(GenerativeException, self).__init__(args, kwargs)

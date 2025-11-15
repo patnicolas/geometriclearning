@@ -61,7 +61,8 @@ class GNNTraining(NeuralTraining):
         @param plot_parameters: Optional plotting parameters
         @type plot_parameters: PlotterParameters
         """
-        assert len(metrics_attributes) > 0, 'Metric attributes are undefined'
+        if len(metrics_attributes) == 0:
+            raise ValueError('Metric attributes are undefined')
 
         if hyper_params.target_device is not None:
             exec_config.device_config = hyper_params.target_device

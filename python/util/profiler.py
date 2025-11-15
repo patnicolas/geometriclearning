@@ -25,7 +25,8 @@ class Profiler(object):
         self.python_script = python_script
 
     def run(self, num_records: int, stats_file_name: str) -> None:
-        assert num_records > 1, f'Number of records for Profiler {num_records} should be  > 1'
+        if num_records <= 1:
+            raise ValueError(f'Number of records for Profiler {num_records} should be  > 1')
         """
             Use C-Profiler to compute the time duration of a function and inner calls. The
             methods are sorted by decreasing order of cumulative time

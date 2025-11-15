@@ -20,7 +20,7 @@ import torch
 from torch import nn
 # Library imports
 from deeplearning.block.neural_block import NeuralBlock
-from deeplearning import VAEException
+from deeplearning import GenerativeException
 __all__ = ['VariationalBlock']
 
 
@@ -57,7 +57,7 @@ class VariationalBlock(NeuralBlock):
         return cls(mu, log_var, sampler)
 
     def transpose(self, extra: Optional[nn.Module] = None) -> Self:
-        raise VAEException('Cannot invert variational Neural block')
+        raise GenerativeException('Cannot invert variational Neural block')
 
     def in_features(self) -> int:
         return self.mu.in_features
@@ -103,7 +103,7 @@ class VariationalBlock(NeuralBlock):
         z = VariationalBlock.re_parameterize(mu, log_var)
         if VariationalBlock.__is_z_nan(z):
             has_non_zeros = VariationalBlock.input_has_non_zeros(x)
-            raise VAEException(f'VAE z is nan with x has non zeros? {has_non_zeros}')
+            raise GenerativeException(f'VAE z is nan with x has non zeros? {has_non_zeros}')
         return self.sampler(z), mu, log_var
 
     @staticmethod

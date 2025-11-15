@@ -94,7 +94,7 @@ if __name__ == "__main__":
         }
         graph_data_loader_play = GraphDataLoaderPlay(dataset, sampling_attrs, n_subgraph_nodes)
         graph_data_loader_play.play()
-    except (AssertionError | DatasetException) as e:
+    except (AssertionError, ValueError, DatasetException) as e:
         logging.error(e)
 
 

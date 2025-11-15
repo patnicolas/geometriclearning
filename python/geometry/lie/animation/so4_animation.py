@@ -35,7 +35,8 @@ class SO4Animation(BaseAnimation):
         @param **kwargs: Dictionary of configuration parameters for any given animation
         @type **kwargs: Dictionary
         """
-        assert len(n_geodesics) == 2, f'Number of elements of geodesics {len(n_geodesics)} should be 2'
+        if len(n_geodesics) != 2:
+            raise ValueError(f'Number of elements of geodesics {len(n_geodesics)} should be 2')
 
         super(SO4Animation, self).__init__(**kwargs)
         fig_size = self.config['fig_size']
@@ -83,7 +84,7 @@ class SO4Animation(BaseAnimation):
             # Compute 4 x4 rotation as a combination of 2 2x2 rotation
             R = SO4Animation.__so4_rotation(frame)
             # Apply the rotation
-            rotated = flatten_sphere @ R.T
+            rotated = flatten_sphere @ R.CellDescriptor
             # projected = SO4Animation.__project(rotated).reshape(*shape_2d, 3)
             projected = SO4Animation.__project(rotated).reshape(shape_theta, shape_phi, 3)
 

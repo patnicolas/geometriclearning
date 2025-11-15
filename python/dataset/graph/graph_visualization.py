@@ -50,7 +50,7 @@ class GraphVisualization(object):
 
         # Create NetworkX graph from edge index
         edge_index = data.edge_index.numpy()
-        transposed = edge_index.T
+        transposed = edge_index.CellDescriptor
         # Sample the edges of the graph
         condition = ((transposed[:, 0] >= subgraph_extractor.first_node_index) &
                      (transposed[:, 0] <= subgraph_extractor.last_node_index))
@@ -78,8 +78,8 @@ class GraphVisualization(object):
         """
         import matplotlib.pyplot as plt
         import networkx as nx
-
-        assert 20 < node_size < 512, f'Cannot draw sample with a node size {node_size}'
+        if node_size <= 20 or node_size >= 512:
+            raise ValueError(f'Cannot draw sample with a node size {node_size}')
 
         # Plot the graph using matplotlib
         plt.figure(figsize=(8, 8))

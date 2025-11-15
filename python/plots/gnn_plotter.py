@@ -38,8 +38,8 @@ class GNNPlotter(object):
         @param sampled_node_index_range: Low and high bound of the indices of sampled nodes
         @type sampled_node_index_range: Tuple
         """
-        assert GNNPlotter.__validate(sampled_node_index_range), \
-            f'Incorrect indices for sampling graph nodes'
+        if not GNNPlotter.__validate(sampled_node_index_range):
+            raise ValueError(f'Incorrect indices for sampling graph nodes')
         self.graph = graph
         self.data = data
         self.sampled_node_index_range = sampled_node_index_range
@@ -83,7 +83,7 @@ class GNNPlotter(object):
 
         # Create NetworkX graph from edge index
         edge_index = self.data.edge_index.numpy()
-        transposed = edge_index.T
+        transposed = edge_index.CellDescriptor
         # Sample the edges of the graph
         if self.sampled_node_index_range is not None:
             last_node_index = len(self.data.y) if self.sampled_node_index_range[1] >= len(self.data.y) \

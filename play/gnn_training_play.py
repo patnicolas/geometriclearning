@@ -54,8 +54,7 @@ class GNNTrainingPlay(Play):
     """
     def __init__(self,
                  training_attributes: Dict[AnyStr, Any],
-                 sampling_attributes: Dict[AnyStr, Any],
-                 model_attributes: Dict[AnyStr, Any] = None) -> None:
+                 sampling_attributes: Dict[AnyStr, Any]) -> None:
         super(GNNTrainingPlay, self).__init__()
         assert len(training_attributes) > 0, 'Training attributes are undefined'
         assert len(sampling_attributes) > 0, 'Sampling attributes are undefined'
@@ -221,6 +220,6 @@ if __name__ == '__main__':
         gnn_training_play = GNNTrainingPlay(training_attrs, sampling_attrs)
         gnn_training_play.play()
         assert True
-    except (GraphException | DatasetException | AssertionError) as e:
-        logging.info(f'Error: {str(e)}')
+    except (GraphException, DatasetException, AssertionError, ValueError) as e:
+        logging.error(f'Error: {str(e)}')
         assert False

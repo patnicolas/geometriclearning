@@ -26,7 +26,7 @@ from geomstats.geometry.riemannian_metric import RiemannianMetric
 __all__ = ['SPDTestData', 'BinaryLRManifold']
 
 
-@dataclass(frozen=True)
+@dataclass
 class SPDTestData:
     """
     Wrapper for the test data for the Symmetric Positive Define matrices
@@ -92,9 +92,10 @@ class BinaryLRManifold(object):
         @param n_samples: Number of samples
         @type n_samples: int
         """
-        assert(n_features > 1, f'Number of features {n_features} should be > 1')
-        assert (n_samples > 0, f'Number of features {n_samples} should be > 0')
-
+        if n_features <= 1:
+            raise ValueError(f'Number of features {n_features} should be > 1')
+        if n_samples <= 0:
+            raise ValueError(f'Number of features {n_samples} should be > 0')
         self.n_features = n_features
         self.n_samples = n_samples
 

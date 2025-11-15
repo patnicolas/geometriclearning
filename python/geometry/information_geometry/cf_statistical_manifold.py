@@ -61,8 +61,8 @@ class CFStatisticalManifold(object):
         @type bounds: Tuple[float, float]
         """
         class_name = info_manifold.__class__.__name__
-        assert class_name in CFStatisticalManifold.closed_form_manifolds, \
-            f'Information Geometry for {class_name} is not supported'
+        if class_name not in CFStatisticalManifold.closed_form_manifolds:
+            raise TypeError( f'Information Geometry for {class_name} is not supported')
 
         self.info_manifold = info_manifold
         self.fisher_rao_metric = FisherRaoMetric(info_manifold, bounds)
@@ -88,7 +88,8 @@ class CFStatisticalManifold(object):
         the manifold
         @rtype: bool
         """
-        assert len(points) > 0, 'Cannot test undefined number of points belongs to a manifold'
+        if len(points) == 0:
+            raise ValueError('Cannot test undefined number of points belongs to a manifold')
 
         all_pts_belongs = [self.info_manifold.belongs(pt.numpy()) for pt in points]
         return all(all_pts_belongs)
@@ -101,7 +102,8 @@ class CFStatisticalManifold(object):
         @return: Tensor of the random samplers
         @rtype: torch.Tensor
         """
-        assert n_samples > 0, f'Number of samples {n_samples} should be > 0'
+        if n_samples <= 0:
+            raise ValueError(f'Number of samples {n_samples} should be > 0')
 
         lower_bound, upper_bound = self.get_bounds()
         delta = upper_bound - lower_bound \

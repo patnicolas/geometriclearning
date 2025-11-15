@@ -29,7 +29,7 @@ from plots.plotter import PlotterParameters
 from metric.built_in_metric import BuiltInMetric
 from metric.metric_type import MetricType
 from deeplearning.training.exec_config import ExecConfig
-from deeplearning import ConvException, VAEException
+from deeplearning import ConvException, GenerativeException
 from deeplearning.loss.vae_kl_loss import VAEKLLoss
 __all__ = ['VAETraining']
 
@@ -113,7 +113,7 @@ class VAETraining(NeuralTraining, ABC):
         from deeplearning.model.generative.vae_model import VAEModel
 
         if not isinstance(neural_model, VAEModel):
-            raise VAEException(f'Neural model {type(neural_model)} cannot not be trained as VAE')
+            raise GenerativeException(f'Neural model {type(neural_model)} cannot not be trained as VAE')
 
         # Initialization of the weights
         torch.manual_seed(42)
@@ -131,7 +131,8 @@ class VAETraining(NeuralTraining, ABC):
 
     @staticmethod
     def _reshape_output_variation(shapes: list, z: torch.Tensor) -> torch.Tensor:
-        assert 2 < len(shapes) < 5, f'Shape {str(shapes)} for variational auto encoder should have at least 3 dimension'
+        if len(shapes) <= 2 or len(shapes) >= 5:
+            raise ValueError(f'Shape {str(shapes)} for variational auto encoder should have at least 3 dimension')
         return z.view(shapes[0], shapes[1], shapes[2], shapes[3]) if len(shapes) == 4 \
             else z.view(shapes[0], shapes[1], shapes[2])
 
@@ -165,22 +166,22 @@ class VAETraining(NeuralTraining, ABC):
                 loss = vae_kl_loss(_reconstructed, model.z, _input)
 
                 if loss is torch.nan:
-                    raise VAEException(f'Train loss: {_reconstructed}, z: {model.z} output {_input} is NAN')
+                    raise GenerativeException(f'Train loss: {_reconstructed}, z: {model.z} output {_input} is NAN')
                 loss.backward(retain_graph=True)
                 total_loss += loss.item()
 
                 encoder_optimizer.step()
                 decoder_optimizer.step()
             except ConvException as e:
-                raise VAEException(str(e))
+                raise GenerativeException(str(e))
             except RuntimeError as e:
-                raise VAEException(str(e))
+                raise GenerativeException(str(e))
             except ValueError as e:
-                raise VAEException(str(e))
+                raise GenerativeException(str(e))
             except KeyError as e:
-                raise VAEException(str(e))
+                raise GenerativeException(str(e))
             except AttributeError as e:
-                raise VAEException(str(e))
+                raise GenerativeException(str(e))
 
         return total_loss / num_records
 
@@ -210,21 +211,21 @@ class VAETraining(NeuralTraining, ABC):
                     _reconstructed = reconstructed.view(input_data.size(0), input_data.size(1), -1)
                     loss = vae_kl_loss(_reconstructed, model.z, _input)
                     if loss is torch.nan:
-                        raise VAEException(f'Eval Loss: {_reconstructed}, z: {model.z}, output {_input} is NAN')
+                        raise GenerativeException(f'Eval Loss: {_reconstructed}, z: {model.z}, output {_input} is NAN')
                     total_loss += loss.item()
 
                     if self.__are_images(images_cnt):
                         eval_images.append((data, data, reconstructed))
             except ConvException as e:
-                raise VAEException(str(e))
+                raise GenerativeException(str(e))
             except RuntimeError as e:
-                raise VAEException(str(e))
+                raise GenerativeException(str(e))
             except ValueError as e:
-                raise VAEException(str(e))
+                raise GenerativeException(str(e))
             except KeyError as e:
-                raise VAEException(str(e))
+                raise GenerativeException(str(e))
             except AttributeError as e:
-                raise VAEException(str(e))
+                raise GenerativeException(str(e))
 
         eval_loss = total_loss / num_records
         self.performance_metrics.collect_metric(MetricType.EvalLoss, eval_loss)

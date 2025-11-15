@@ -66,7 +66,8 @@ class NeuralTraining(object):
         @param plot_parameters: Parameters for plotting metrics, training and test losses
         @type plot_parameters: Optional List[PlotterParameters]
         """
-        assert len(metrics_attributes) > 0, 'Metric attributes are undefined'
+        if len(metrics_attributes) == 0:
+            raise ValueError('Metric attributes are undefined')
 
         self.hyper_params = hyper_params
         _, self.target_device = exec_config.apply_device()

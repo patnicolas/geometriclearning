@@ -17,11 +17,12 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # Python standard library imports
 from typing import List, Tuple
 import logging
+import python
 # Library imports
 from play import Play
-from topology.simplicial.abstract_simplicial_complex import AbstractSimplicialComplex
-from topology.simplicial.simplicial_laplacian import SimplicialLaplacianType, SimplicialLaplacian
-import python
+from topology.simplicial.featured_simplicial_complex import FeaturedSimplicialComplex
+from topology.complex_laplacian import ComplexLaplacian
+from topology import LaplacianType
 
 
 class AbstractSimplicialComplexPlay(Play):
@@ -35,8 +36,8 @@ class AbstractSimplicialComplexPlay(Play):
         https://github.com/patnicolas/geometriclearning/blob/main/python/topology/simplicial/abstract_simplicial_complex.py
 
 
-  The features are implemented by the class AbstractSimplicialComplex in the source file
-                  python/topology/simplicial/abstract_simplicial_complex.py
+    The features are implemented by the class AbstractSimplicialComplex in the source file
+                  python/topology/simplicial/featured_simplicial_complex.py
     The class AbstractSimplicialComplexPlay is a wrapper of the class AbstractSimplicialComplex
     The execution of the tests follows the same order as in the Substack article
     """
@@ -55,7 +56,7 @@ class AbstractSimplicialComplexPlay(Play):
         """
         super(AbstractSimplicialComplexPlay, self).__init__()
 
-        self.abstract_simplicial_complex = AbstractSimplicialComplex.random(
+        self.abstract_simplicial_complex = FeaturedSimplicialComplex.random(
             node_feature_dimension=node_feature_dimension,
             edge_node_indices=edge_set,
             face_node_indices=face_set)
@@ -83,27 +84,27 @@ class AbstractSimplicialComplexPlay(Play):
 
     # Test 3 - Code snippet 9
     def play_up_laplacian(self) -> None:
-        simplicial_laplacian_0 = SimplicialLaplacian(simplicial_laplacian_type=SimplicialLaplacianType.UpLaplacian,
-                                                     rank=0,
-                                                     signed=True)
+        simplicial_laplacian_0 = ComplexLaplacian(laplacian_type=LaplacianType.UpLaplacian,
+                                                  rank=0,
+                                                  signed=True)
         up_laplacian_rk0 = self.abstract_simplicial_complex.laplacian(simplicial_laplacian_0)
         logging.info(f'\nUP-Laplacian rank 0\n{up_laplacian_rk0}')
-        simplicial_laplacian_1 = SimplicialLaplacian(simplicial_laplacian_type=SimplicialLaplacianType.UpLaplacian,
-                                                     rank=1,
-                                                     signed=True)
+        simplicial_laplacian_1 = ComplexLaplacian(laplacian_type=LaplacianType.UpLaplacian,
+                                                  rank=1,
+                                                  signed=True)
         up_laplacian_rk1 = self.abstract_simplicial_complex.laplacian(simplicial_laplacian_1)
         logging.info(f'\nUP-Laplacian rank 1\n{up_laplacian_rk1}')
 
     # Test 4
     def play_down_laplacian(self) -> None:
-        simplicial_laplacian_1 = SimplicialLaplacian(
-            simplicial_laplacian_type=SimplicialLaplacianType.DownLaplacian,
+        simplicial_laplacian_1 = ComplexLaplacian(
+            laplacian_type=LaplacianType.DownLaplacian,
             rank=1,
             signed=True)
         down_laplacian_rk1 = self.abstract_simplicial_complex.laplacian(simplicial_laplacian_1)
         logging.info(f'\nDown-Laplacian rank 1\n{down_laplacian_rk1}')
-        simplicial_laplacian_2 = SimplicialLaplacian(
-            simplicial_laplacian_type=SimplicialLaplacianType.DownLaplacian,
+        simplicial_laplacian_2 = ComplexLaplacian(
+            laplacian_type=LaplacianType.DownLaplacian,
             rank=2,
             signed=True)
         down_laplacian_rk2 = self.abstract_simplicial_complex.laplacian(simplicial_laplacian_2)
@@ -111,22 +112,22 @@ class AbstractSimplicialComplexPlay(Play):
 
     # Test 5
     def play_hodge_laplacian(self) -> None:
-        simplicial_laplacian_0 = SimplicialLaplacian(
-            simplicial_laplacian_type=SimplicialLaplacianType.HodgeLaplacian,
+        simplicial_laplacian_0 = ComplexLaplacian(
+            laplacian_type=LaplacianType.HodgeLaplacian,
             rank=0,
             signed=True)
         hodge_laplacian_rk0 = self.abstract_simplicial_complex.laplacian(simplicial_laplacian_0)
         logging.info(f'\nHodge-Laplacian rank 0\n{hodge_laplacian_rk0}')
 
-        simplicial_laplacian_1 = SimplicialLaplacian(
-            simplicial_laplacian_type=SimplicialLaplacianType.HodgeLaplacian,
+        simplicial_laplacian_1 = ComplexLaplacian(
+            laplacian_type=LaplacianType.HodgeLaplacian,
             rank=1,
             signed=True)
         hodge_laplacian_rk1 = self.abstract_simplicial_complex.laplacian(simplicial_laplacian_1)
         logging.info(f'\nHodge-Laplacian rank 1\n{hodge_laplacian_rk1}')
 
-        simplicial_laplacian_2 = SimplicialLaplacian(
-            simplicial_laplacian_type=SimplicialLaplacianType.HodgeLaplacian,
+        simplicial_laplacian_2 = ComplexLaplacian(
+            laplacian_type=LaplacianType.HodgeLaplacian,
             rank=2,
             signed=True
         )

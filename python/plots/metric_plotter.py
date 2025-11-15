@@ -105,8 +105,8 @@ class MetricPlotter(object):
         @type dict_values:  Dict[AnyStr, List[tensor]]
         """
         num_dict_values = len(dict_values)
-        assert num_dict_values > 0, 'Dictionary of values to be plotted is undefined'
-
+        if num_dict_values == 0:
+            raise ValueError('Dictionary of values to be plotted is undefined')
         num_rows = num_dict_values // 2 if num_dict_values % 2 == 0 else (num_dict_values // 2) + 1
         fig, axes = plt.subplots(ncols=2, nrows=num_rows, figsize=self.plotter_params.fig_size)
 

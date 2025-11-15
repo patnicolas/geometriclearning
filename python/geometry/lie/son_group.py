@@ -37,8 +37,10 @@ class SOnGroup(object):
         @param atol: Error tolerance for tensor value
         @type atol: float
         """
-        assert dim in (2, 3, 4), f'Dimension of SO({dim}) group is not supported'
-        assert 1e-8 <= atol <= 1e-3, f'Atol argument {atol} should be [1e-8, 1e-3]'
+        if dim not in (2, 3, 4):
+            raise ValueError(f'Dimension of SO({dim}) group is not supported')
+        if atol < 1e-8 or atol > 1e-3:
+            raise ValueError(f'Atol argument {atol} should be [1e-8, 1e-3]')
 
         self.__atol = atol
         # Invoke Geomstats Special Orthogonal group
@@ -85,7 +87,8 @@ class SOnGroup(object):
         @return: Tensor containing the points on the SO(n) manifold
         @rtype: torch Tensor
         """
-        assert 0 < n_samples < 1024, f'Number of random samples {n_samples} should be [1, 1024['
+        if n_samples <= 0 or n_samples > 1024:
+            raise ValueError(f'Number of random samples {n_samples} should be [1, 1024[')
         points = torch.Tensor(self.__group.n, n_samples)
         SOnGroup.validate_points(points, dim=self.__group.n, rtol=self.__atol)
         return points

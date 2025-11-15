@@ -49,9 +49,12 @@ class MetropolisHastings(MCMC):
         @param sigma_delta: Covariance or standard deviation used for each step theta -> theta_star
         @type sigma_delta: float
         """
-        assert 2 <= num_iterations <= 100000, f'Number of iterations {num_iterations} is out of bounds [2, 10000]'
-        assert 0.0 < sigma_delta < 1.0, f'Sigma differential {sigma_delta} is out of bounds ]0.0, 1.0['
-        assert 0.0 <= burn_in_ratio <= 0.5, f'Burn-in ratio {burn_in_ratio} is out of bounds [0.0, 0.5]'
+        if num_iterations < 2 or num_iterations > 100000:
+            raise ValueError(f'Number of iterations {num_iterations} is out of bounds [2, 10000]')
+        if sigma_delta <= 0.0 or sigma_delta >= 1.0:
+            raise ValueError(f'Number of iterations {num_iterations} is out of bounds [2, 10000]')
+        if burn_in_ratio < 0.0 or burn_in_ratio > 0.5:
+            raise ValueError(f'Burn-in ratio {burn_in_ratio} is out of bounds [0.0, 0.5]')
         burn_ins = int(num_iterations*burn_in_ratio)
         assert num_iterations > burn_ins, \
             f'Number of iterations {num_iterations} should be > number of burn-ins {burn_ins}'
@@ -103,7 +106,7 @@ class MetropolisHastings(MCMC):
                         if i > self.burn_ins:
                             theta_walk[j + 1] = theta_walk[j]
                             j += 1
-            except (ArithmeticError | ValueError | IndexError) as e:
+            except (ArithmeticError, ValueError, IndexError) as e:
                 logging.error(e)
                 raise MCMCException(e)
 
@@ -122,7 +125,7 @@ class MetropolisHastings(MCMC):
         @rtype: float
         """
         if newValue < currentValue:
-            raise MCMCException(f'New value {newValue} should be >  current value {currentValue}')
+            raise ValueError(f'New value {newValue} should be >  current value {currentValue}')
 
         residual = newValue - currentValue
         return True if newValue > currentValue else np.random.uniform(0, 1) < np.exp(residual)

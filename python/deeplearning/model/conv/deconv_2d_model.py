@@ -39,8 +39,6 @@ class DeConv2dModel(NeuralModel, ABC):
         @type model_id: Str
         @param deconv_blocks: List of Convolutional Neural Blocks
         @type deconv_blocks: List[ConvBlock]
-        @param ffnn_blocks: Optional list of Feed-Forward Neural Blocks
-        @type ffnn_blocks: List[MLPBlock]
         """
         self.deconv_blocks = deconv_blocks
 
@@ -60,7 +58,7 @@ class DeConv2dModel(NeuralModel, ABC):
         @return: Instance of decoder of type DeConvModel
         @rtype: DeConv2dModel
         """
-        return cls(model_id, de_conv_blocks, [])
+        return cls(model_id, de_conv_blocks)
 
     def has_fully_connected(self) -> bool:
         """
@@ -110,7 +108,7 @@ class DeConv2dModel(NeuralModel, ABC):
         }
 
     @staticmethod
-    def is_valid(de_conv_blocks: List[DeConv2dBlock], ffnn_blocks: List[MLPBlock]) -> bool:
+    def is_valid(de_conv_blocks: List[DeConv2dBlock], ffnn_blocks: List[MLPBlock]) -> None:
         """
         Test if the layout/configuration of convolutional neural blocks and feed-forward neural blocks
         are valid
@@ -119,21 +117,18 @@ class DeConv2dModel(NeuralModel, ABC):
         @param ffnn_blocks:  List of neural blocks which layout is to be evaluated
         @type ffnn_blocks: List[MLPBlock]
         """
-        try:
-            assert de_conv_blocks, 'This convolutional model has not defined neural blocks'
-            DeConv2dModel.__validate(de_conv_blocks)
-            if not ffnn_blocks:
-                MLPModel.is_valid(ffnn_blocks)
-            return True
-        except AssertionError as e:
-            logging.error(e)
-            return False
+        if de_conv_blocks is None:
+            raise ValueError('This convolutional model has not defined neural blocks')
+        DeConv2dModel.__validate(de_conv_blocks)
+        if not ffnn_blocks:
+            MLPModel.is_valid(ffnn_blocks)
 
     """ ----------------------------   Private helper methods --------------------------- """
 
     @staticmethod
     def __validate(neural_blocks: List[DeConv2dBlock]):
-        assert len(neural_blocks) > 0, "Deep Feed Forward network needs at least one layer"
+        if len(neural_blocks) == 0:
+            raise ValueError("Deep Feed Forward network needs at least one layer")
         for index in range(len(neural_blocks) - 1):
             assert neural_blocks[index + 1].in_channels == neural_blocks[index].out_channels, \
                 f'Layer {index} input_tensor != layer {index + 1} output'

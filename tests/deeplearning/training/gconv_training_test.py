@@ -114,7 +114,7 @@ class GConvTest(unittest.TestCase):
                           neural_model=flickr_model,
                           train_loader=train_loader,
                           val_loader=val_loader)
-        except (GraphException | MLPException | DatasetException | TrainingException) as e:
+        except (GraphException, MLPException, DatasetException, TrainingException) as e:
             logging.info(e)
             self.assertTrue(False)
 
