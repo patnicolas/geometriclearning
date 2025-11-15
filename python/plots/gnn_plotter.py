@@ -83,7 +83,7 @@ class GNNPlotter(object):
 
         # Create NetworkX graph from edge index
         edge_index = self.data.edge_index.numpy()
-        transposed = edge_index.T
+        transposed = edge_index.CellDescriptor
         # Sample the edges of the graph
         if self.sampled_node_index_range is not None:
             last_node_index = len(self.data.y) if self.sampled_node_index_range[1] >= len(self.data.y) \

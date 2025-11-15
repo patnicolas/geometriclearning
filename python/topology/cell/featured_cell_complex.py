@@ -33,16 +33,22 @@ class FeaturedCellComplex(FeaturedComplex):
     def __str__(self) -> AnyStr:
         return '\n'.join([str(f_cell) for f_cell in self.featured_cells])
 
-    def adjacency_matrix(self, directed_graph: bool = False) -> np.array:
+    def adjacency_matrix(self, signed: bool = False) -> np.array:
+        # Instantiate the cell complex as defined by
+        cc = tnx.CellComplex(cells=[featured_cell.cell for featured_cell in self.featured_cells], signed=signed)
         # Initialize adjacency matrix
-        cc = tnx.CellComplex([featured_cell.cell for featured_cell in self.featured_cells])
         n = len(set(cc.skeleton(rank=0)))
-        A = np.zeros((n, n), dtype=int)
+        A = np.zeros(shape=(n, n), dtype=int)
+        # Fill out adjacency
         for u, v in set(cc.skeleton(rank=1)):
             A[u - 1, v - 1] = 1
-            if directed_graph:
+            if signed:
                 A[v - 1, u - 1] = 1
         return A
+
+    def co_adjacency_matrix(self, rank: int = 1, signed: bool = False) -> np.array:
+        cc = tnx.CellComplex(cells=[featured_cell.cell for featured_cell in self.featured_cells], signed=signed)
+        return cc.coadjacency_matrix(rank=rank, signed=signed)
 
     def incidence_matrix(self, rank: int = 1, directed_graph: bool = True) -> np.array:
         """
@@ -61,9 +67,6 @@ class FeaturedCellComplex(FeaturedComplex):
         _, _, incidence = cc.incidence_matrix(rank=rank, index=True, signed=directed_graph)
         return incidence.todense()
 
-    def _validate(self) -> None:
-        print('hello')
-
-    def laplacian(self, simplicial_laplacian: ComplexLaplacian) -> np.array:
-        simplicial_indices = [featured_cell.cell.elements for featured_cell in self.featured_cells]
-        return simplicial_laplacian(simplicial_indices)
+    def laplacian(self, complex_laplacian: ComplexLaplacian) -> np.array:
+        cell_indices = [featured_cell.cell.elements for featured_cell in self.featured_cells]
+        return complex_laplacian(cell_indices)

@@ -180,7 +180,7 @@ class LieSE3Group(object):
             omega = np.zeros(3)
         else:
             # Skew-symmetric part of the rotation
-            omega_hat = (rotation - rotation.T) / (2 * np.sin(theta))
+            omega_hat = (rotation - rotation.CellDescriptor) / (2 * np.sin(theta))
             omega = np.array([
                 omega_hat[2, 1],
                 omega_hat[0, 2],
@@ -308,7 +308,7 @@ class LieSE3Group(object):
         rotation_matrix = gs.array(rotation_matrix)
         translation_matrix = gs.array(translation_matrix)
         rotation_matrix = np.concatenate([rotation_matrix, u3d.extend_rotation], axis=0)
-        translation_matrix = np.concatenate([translation_matrix.T, u3d.extend_translation])
+        translation_matrix = np.concatenate([translation_matrix.CellDescriptor, u3d.extend_translation])
         return rotation_matrix,  translation_matrix
 
     @staticmethod

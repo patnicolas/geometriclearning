@@ -84,7 +84,7 @@ class SO4Animation(BaseAnimation):
             # Compute 4 x4 rotation as a combination of 2 2x2 rotation
             R = SO4Animation.__so4_rotation(frame)
             # Apply the rotation
-            rotated = flatten_sphere @ R.T
+            rotated = flatten_sphere @ R.CellDescriptor
             # projected = SO4Animation.__project(rotated).reshape(*shape_2d, 3)
             projected = SO4Animation.__project(rotated).reshape(shape_theta, shape_phi, 3)
 

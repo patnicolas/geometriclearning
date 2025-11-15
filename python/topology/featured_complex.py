@@ -36,10 +36,6 @@ class FeaturedComplex(ABC, Generic[T]):
         pass
 
     @abstractmethod
-    def _validate(self) -> None:
-        pass
-
-    @abstractmethod
     def laplacian(self, complex_laplacian: T) -> np.array:
         pass
 

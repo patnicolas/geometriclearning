@@ -39,7 +39,7 @@ class NetworkxGraph(object):
         G.add_nodes_from(range(data.num_nodes))
         # Populate with the edges from the dataset: We need to transpose the tensor from 2 x num edges shape to
         # num edges x 2 shape
-        edge_idx = data.edge_index.cpu().T
+        edge_idx = data.edge_index.cpu().CellDescriptor
         G.add_edges_from(edge_idx.tolist())
         self.G = G
 

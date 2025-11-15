@@ -26,7 +26,7 @@ def triangles_from_edge_index(edge_index: torch.Tensor,
                               use_cliques_if_small: bool = True,
                               degree_cap: int | None = None,
                               max_tris: int | None = None) -> np.ndarray:
-    ei = edge_index.cpu().numpy().T
+    ei = edge_index.cpu().numpy().CellDescriptor
     ei = np.unique(np.sort(ei, axis=1), axis=0)  # undirected unique
     m = ei.shape[0]
 
@@ -82,7 +82,7 @@ def build_B1_B2(edge_index: torch.Tensor,
                 num_nodes: int,
                 faces2: np.ndarray) -> Tuple[sp.csr_matrix, sp.csr_matrix, np.ndarray]:
     # Unique undirected edges (u<v) and id map
-    E = np.unique(np.sort(edge_index.cpu().numpy().T, axis=1), axis=0)
+    E = np.unique(np.sort(edge_index.cpu().numpy().CellDescriptor, axis=1), axis=0)
     num_edges = E.shape[0]
     edge_id = { (u, v): i for i, (u, v) in enumerate(map(tuple, E)) }
 

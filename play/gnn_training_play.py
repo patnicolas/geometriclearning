@@ -54,8 +54,7 @@ class GNNTrainingPlay(Play):
     """
     def __init__(self,
                  training_attributes: Dict[AnyStr, Any],
-                 sampling_attributes: Dict[AnyStr, Any],
-                 model_attributes: Dict[AnyStr, Any] = None) -> None:
+                 sampling_attributes: Dict[AnyStr, Any]) -> None:
         super(GNNTrainingPlay, self).__init__()
         assert len(training_attributes) > 0, 'Training attributes are undefined'
         assert len(sampling_attributes) > 0, 'Sampling attributes are undefined'

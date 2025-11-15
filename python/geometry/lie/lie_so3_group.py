@@ -63,7 +63,7 @@ class LieSO3Group(object):
         self.identity_element = identity_element
 
     def validate(self) -> np.array:
-        det = np.dot(self.group_element, self.group_element.T)
+        det = np.dot(self.group_element, self.group_element.CellDescriptor)
         diff = np.abs(det - LieSO3Group.identity_matrix)
         return diff
 

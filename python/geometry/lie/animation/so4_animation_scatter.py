@@ -51,7 +51,7 @@ class SO4AnimationScatter(BaseAnimation):
         def update(frame: int) -> None:
             theta = np.radians(frame)
             R = SO4AnimationScatter.__so4_rotation_matrix(theta, 2 * theta)
-            rotated = points_on_sphere @ R.T
+            rotated = points_on_sphere @ R.CellDescriptor
             proj = SO4AnimationScatter.__project_rotation(rotated)
             Z = proj[:, 2]
             self.ax.plot_wireframe(X=proj[:, 0], Y=proj[:, 1], Z=proj[:, 2], s=8, color='C0', cmap='viridis_r')

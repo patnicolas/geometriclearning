@@ -50,7 +50,7 @@ class GraphVisualization(object):
 
         # Create NetworkX graph from edge index
         edge_index = data.edge_index.numpy()
-        transposed = edge_index.T
+        transposed = edge_index.CellDescriptor
         # Sample the edges of the graph
         condition = ((transposed[:, 0] >= subgraph_extractor.first_node_index) &
                      (transposed[:, 0] <= subgraph_extractor.last_node_index))

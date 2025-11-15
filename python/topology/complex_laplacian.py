@@ -23,12 +23,14 @@ from toponetx.classes.complex import Complex
 import numpy as np
 # Library imports
 from topology import LaplacianType
-__all__ = ['ComplexLaplacian']
 
-T = TypeVar('T')
+CellDescriptor = TypeVar('CellDescriptor')
+SimplexType = List
+CellType = Cell
+__all__ = ['SimplexType', 'CellType', 'ComplexLaplacian']
 
 
-class ComplexLaplacian(Generic[T]):
+class ComplexLaplacian(Generic[CellDescriptor]):
     def __init__(self, laplacian_type:  LaplacianType, rank: int, signed: bool) -> None:
         """
         Constructor that defines the components of the Laplacian for Simplicial Complexes
@@ -44,7 +46,7 @@ class ComplexLaplacian(Generic[T]):
     def __str__(self) -> AnyStr:
         return f'{self.laplacian_type.value}, rank={self.rank}, signed={self.signed}'
 
-    def __call__(self, complex_elements: T) -> np.array:
+    def __call__(self, complex_elements: CellDescriptor) -> np.array:
         """
         Compute the various combination of Laplacian (UP, DOWN, Hodge) for different rank.
 
@@ -56,17 +58,16 @@ class ComplexLaplacian(Generic[T]):
         if len(complex_elements) < 1:
             raise ValueError('Cannot compute simplicial Laplacian with undefined indices')
 
-        sc = ComplexLaplacian.__get_complex(complex_elements)
+        # Retrieve the appropriate Toponetx instance of cell or simplicial complex
+        cplx = ComplexLaplacian.__get_complex(complex_elements)
 
         match self.laplacian_type:
             case LaplacianType.UpLaplacian:
-                laplacian_matrix = sc.up_laplacian_matrix(self.rank, self.signed)
-
+                laplacian_matrix = cplx.up_laplacian_matrix(self.rank, self.signed)
             case LaplacianType.DownLaplacian:
-                laplacian_matrix = sc.down_laplacian_matrix(self.rank, self.signed)
-
+                laplacian_matrix = cplx.down_laplacian_matrix(self.rank, self.signed)
             case LaplacianType.HodgeLaplacian:
-                laplacian_matrix = sc.hodge_laplacian_matrix(self.rank, self.signed)
+                laplacian_matrix = cplx.hodge_laplacian_matrix(self.rank, self.signed)
         return laplacian_matrix.toarray()
 
     """  -------------------------  Private Helper Methods -------------------- """
@@ -80,23 +81,14 @@ class ComplexLaplacian(Generic[T]):
             raise ValueError(f'Rank {rank} for DOWN Laplacian is out-of-bounds')
 
     @staticmethod
-    def __get_complex(complex_elements: T) -> Complex:
-        if isinstance(complex_elements[0], List):
+    def __get_complex(complex_elements: CellDescriptor) -> Complex:
+        if isinstance(complex_elements[0], SimplexType):
             cplx = tnx.SimplicialComplex(complex_elements)
-        elif isinstance(complex_elements[0], Cell):
+        elif isinstance(complex_elements[0], CellType):
             cplx = tnx.CellComplex(complex_elements)
         else:
             raise TypeError(f'Type of Complex elements {complex_elements} is not supported')
         return cplx
 
-    @staticmethod
-    def __get_complexT(complex_elements: T) -> Complex:
-        if isinstance(complex_elements[0], List):
-            cplx = tnx.SimplicialComplex(complex_elements)
-        elif isinstance(complex_elements[0], Cell):
-            cplx = tnx.CellComplex(complex_elements)
-        else:
-            raise TypeError(f'Type of Complex elements {complex_elements} is not supported')
-        return cplx
 
 

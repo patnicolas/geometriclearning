@@ -87,7 +87,7 @@ class ExtendedKalmanFilter(object):
             # Error covariance:  P[n] = Jacobian_F.P[n-1].Jacobian_F^T + Q[n]
             jf_func = jax.jacfwd(self.f)
             F_approx = jf_func(self.x)
-            self.P = F_approx @ self.P @ F_approx.T + self.Q
+            self.P = F_approx @ self.P @ F_approx.CellDescriptor + self.Q
         except RuntimeWarning as trw:
             logging.warning(trw)
             raise ControlException(f'Linear Kalman Filter: {trw}')
@@ -107,7 +107,7 @@ class ExtendedKalmanFilter(object):
             # Jacobian for the observation function h
             jh_approx = jax.jacfwd(self.h)
             H_approx = jh_approx(self.x)
-            H_approx_T = H_approx.T
+            H_approx_T = H_approx.CellDescriptor
             S = H_approx @ self.P @ H_approx_T + self.R
             # Gain: G[n] = P[n-1].H^T/S[n]
             G = self.P @ H_approx_T @ np.linalg.inv(S)

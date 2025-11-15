@@ -54,7 +54,7 @@ class SO3Plot(ManifoldPlot):
         for i, rotation in enumerate(self.manifold_points):
             # Apply the rotation to the sphere points
             points = np.stack(arrays=[x.ravel(), y.ravel(), z.ravel()], axis=1)
-            r_points = gs.matmul(rotation, points.T).T  # Apply rotation
+            r_points = gs.matmul(rotation, points.T).CellDescriptor  # Apply rotation
 
             # Reshape rotated points for plotting
             x_r = r_points[:, 0].reshape(num_points, num_points)

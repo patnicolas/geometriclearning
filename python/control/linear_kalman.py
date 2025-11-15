@@ -112,7 +112,7 @@ class LinearKalmanFilter(object):
             # State:  x[n] = A.x~[n-1] + B.u[n-1] + v
             self.x = self.A @ self.x + v if self.B is None else self.A @ self.x + self.B @ self.u + v
             # Error covariance:  P[n] = A[n].P[n-1].A[n]^T + Q[n]
-            self.P = self.A @ self.P @ self.A.T + self.Q
+            self.P = self.A @ self.P @ self.A.CellDescriptor + self.Q
         except (RuntimeWarning, RuntimeError) as trw:
             logging.warning(trw)
             raise ControlException(f'Linear Kalman Filter: {trw}')
@@ -127,9 +127,9 @@ class LinearKalmanFilter(object):
         """
         try:
             # Innovation:  S[n] = H.P[n-1].H^T + R[n]
-            S = self.H @ self.P @ self.H.T + self.R
+            S = self.H @ self.P @ self.H.CellDescriptor + self.R
             # Gain: G[n] = P[n-1].H^T/S[n]
-            G = self.P @ self.H.T @ np.linalg.inv(S)
+            G = self.P @ self.H.CellDescriptor @ np.linalg.inv(S)
 
             # State estimate y[n] = z[n] - H.x
             y = z - self.H @ self.x

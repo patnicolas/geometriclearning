@@ -17,10 +17,12 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # Python standard library imports
 from typing import List, Tuple
 import logging
+import python
 # Library imports
 from play import Play
 from topology.simplicial.featured_simplicial_complex import FeaturedSimplicialComplex
-from topology.complex_laplacian import LaplacianType, ComplexLaplacian
+from topology.complex_laplacian import ComplexLaplacian
+from topology import LaplacianType
 
 
 class AbstractSimplicialComplexPlay(Play):
@@ -34,7 +36,7 @@ class AbstractSimplicialComplexPlay(Play):
         https://github.com/patnicolas/geometriclearning/blob/main/python/topology/simplicial/abstract_simplicial_complex.py
 
 
-  The features are implemented by the class AbstractSimplicialComplex in the source file
+    The features are implemented by the class AbstractSimplicialComplex in the source file
                   python/topology/simplicial/featured_simplicial_complex.py
     The class AbstractSimplicialComplexPlay is a wrapper of the class AbstractSimplicialComplex
     The execution of the tests follows the same order as in the Substack article
