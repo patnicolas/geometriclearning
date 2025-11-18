@@ -13,6 +13,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# 3rd Party imports
 from PIL import Image
 import torch
 from torchvision import datasets, transforms
@@ -83,7 +84,7 @@ class ImageTensor(object):
     def __show_image(self, img: Image, img_name: str):
         resize_h = img.size[0] * self.img_scale_factor
         resize_b = img.size[1] * self.img_scale_factor
-        img.resize((resize_h, resize_b)).show(img_name)
+        img.resize((resize_h, resize_b)).dump(img_name)
 
 
     @staticmethod
@@ -94,13 +95,13 @@ class ImageTensor(object):
             2 Height of the image
             3 Number of channels (1 for shades of greay, 3 for RGB)
             @param input: Input input_tensor
-            @param file_name: Name of the images
+            @param img_name: Name of the images
             @param n_channels: Number of channels should be either 1 or 3
-            @param to_show: Specify that the image has to be shown.
         """
         from PIL import Image
+        if n_channels not in [1, 3]:
+            raise ValueError( f'Number of channels {n_channels} should be {1, 3}')
 
-        assert n_channels in [1, 3], f'Number of channels {n_channels} should be {1, 3}'
         shapes = list(input.size())
         assert len(shapes) == n_channels, f'ImageTensor.to_image: Num shapes {len(shapes)} should be 3'
         assert shapes[2] == n_channels, f'ImageTensor.to_image: 3rd dimension {shapes[2]} should be {n_channels}'
@@ -114,7 +115,6 @@ class ImageTensor(object):
          for j in range(shapes[1]) for k in range(shapes[2]) if input[i, j, k] > 0.0]
         data = t.numpy()
         return Image.fromarray(data)
-
 
     @staticmethod
     def show_image(input_data: list, target_data: list, title: str, num_items: int):

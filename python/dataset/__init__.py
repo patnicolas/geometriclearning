@@ -35,7 +35,7 @@ def min_max_scaler(x: torch.Tensor) -> torch.Tensor:
         y = MinMaxScaler().fit_transform(x)
         z = torch.tensor(y, dtype=x.dtype)
         return z
-    except ValueError | NotFittedError | TypeError as e:
+    except (ValueError, NotFittedError, TypeError) as e:
         traceback.print_exc()
         raise DatasetException(f'MinMaxScaler failed {e}')
 
