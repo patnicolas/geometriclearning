@@ -1,7 +1,6 @@
 import unittest
 import numpy as np
 
-from topology.simplicial.featured_simplicial_elements import FeaturedSimplicialElements
 from topology.simplicial.featured_simplicial_complex import FeaturedSimplicialComplex
 from topology.simplicial.featured_simplex import FeaturedSimplex
 from topology.complex_laplacian import ComplexLaplacian
@@ -53,9 +52,9 @@ class FeaturedSimplicialComplexTest(unittest.TestCase):
                 FeaturedSimplex(simplex_indices=(2, 3), features=np.array([0.00, 0.87])),
             ]
             simplicial_faces = [FeaturedSimplex(simplex_indices=(1, 2, 3), features=np.array([0.17, 0.22, 0.1, 0.99]))]
-            featured_simplicial_elements = FeaturedSimplicialElements(simplicial_nodes, simplicial_edges, simplicial_faces)
-
-            featured_simplicial_complex = FeaturedSimplicialComplex(featured_simplicial_elements)
+            featured_simplicial_complex = FeaturedSimplicialComplex(simplicial_nodes +
+                                                                    simplicial_edges +
+                                                                    simplicial_faces)
             node_map = featured_simplicial_complex.node_features_map()
             edge_map = featured_simplicial_complex.edge_features_map()
             face_map = featured_simplicial_complex.face_features_map()

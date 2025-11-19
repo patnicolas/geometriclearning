@@ -26,17 +26,25 @@ __all__ = ['FeaturedSimplex']
 @dataclass
 class FeaturedSimplex:
     """
-      Definition of the basic element of a Simplicial Complex {Node, Edge, Face} composed of
+    Definition of the basic element of a Simplicial Complex {Node, Edge, Face} composed of
       - Feature vector
       - Indices of nodes defining this element
 
-      @param simplex_indices: List of indices of nodes composing this simplicial element
-      @type node_indices: List[int]
-      @param features: Feature vector or set associated with this simplicial element
-      @type features: Numpy array
-      """
+    @param simplex_indices: List of indices of nodes composing this simplicial element
+    @type simplex_indices: List[int]
+    @param features: Feature vector or set associated with this simplicial element
+    @type features: Numpy array
+    """
     simplex_indices: Tuple[int, ...] | None = None
     features: Optional[np.array] = None
+
+    def get_rank(self) -> int:
+        """
+        Extract the rank of this simplicial complex from the number of the node indices in the simplex
+        @return: Rank of the simplex
+        @rtype: int
+        """
+        return len(self.simplex_indices)-1
 
     def __call__(self, override_node_indices: Tuple[int, ...] | None = None) -> Tuple[Tuple, np.array] | None:
         """

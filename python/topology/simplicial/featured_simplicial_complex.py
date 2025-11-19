@@ -16,6 +16,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 # Standard Library imports
 from typing import Self, AnyStr, List, Tuple, Dict
+import itertools
 # 3rd Party imports
 import toponetx as tnx
 import numpy as np
@@ -23,8 +24,7 @@ import torch
 # Library imports
 from topology.simplicial.featured_simplex import FeaturedSimplex
 from topology.complex_laplacian import ComplexLaplacian
-from topology.simplicial.featured_simplicial_elements import FeaturedSimplicialElements
-from topology.featured_complex import  FeaturedComplex
+from topology.featured_complex import FeaturedComplex
 __all__ = ['FeaturedSimplicialComplex']
 
 
@@ -35,23 +35,29 @@ class FeaturedSimplicialComplex(FeaturedComplex):
     - Computation of incidence and adjacency matrices
     - Computation of various Laplacian operators
     """
-    def __init__(self, featured_simplicial_elements: FeaturedSimplicialElements) -> None:
+    def __init__(self, featured_simplices: List[FeaturedSimplex]) -> None:
         """
         Constructor for the Simplicial Complex Model. Shape of Numpy array for the edge and face sets
         are evaluated for consistency.
         
-        @param featured_simplicial_elements: Graph Complex elements for Node, Edges and Faces or cells
-        @type featured_simplicial_elements:  FeaturedSimplicialElements
+        @param featured_simplices: Graph Complex elements for Node, Edges and Faces or cells
+        @type featured_simplices:  FeaturedSimplicialElements
         """
-        # Validate the shape of indices of the simplicial complex
         super(FeaturedSimplicialComplex, self).__init__()
-        self.featured_simplicial_elements = featured_simplicial_elements
-        self._validate()
-        # Extract the indices for the edges and faces
 
-        edges_indices = [edge.simplex_indices for edge in featured_simplicial_elements.featured_edges]
-        faces_indices = [edge.simplex_indices for edge in featured_simplicial_elements.featured_faces]
-        self.simplicial_indices = edges_indices + faces_indices
+        # Assign index for the featured nodes if it is not defined in the argument
+        # of the constructor
+        node_index = 1
+        for featured_simplex in featured_simplices:
+            if featured_simplex.simplex_indices is None:
+                featured_simplex.simplex_indices = [node_index]
+                node_index += 1
+
+        self.featured_simplices = featured_simplices
+        self._validate()
+        # Store all node indices for all the simplices of this complex
+        self.simplicial_indices = [simplex.simplex_indices for simplex in self.featured_simplices]
+        # Instantiate the TopoNetX module
         self.simplicial_complex = tnx.SimplicialComplex(self.simplicial_indices)
 
     @classmethod
@@ -76,13 +82,11 @@ class FeaturedSimplicialComplex(FeaturedComplex):
         @return: Instance of Simplicial model
         @rtype: FeaturedSimplicialComplex
         """
-        import itertools
         if node_feature_dimension <= 0:
             raise ValueError(f'Dimension of random vector {node_feature_dimension} should be > 0')
 
         # Retrieve the number of nodes from the largest index in the edge indices list
         num_nodes = max(list(itertools.chain.from_iterable(edge_node_indices)))
-
         # Generate random feature vector for node
         random_feature_set = torch.rand(num_nodes, node_feature_dimension).numpy()
         # Build the simplicial nodes (the node indices are implicit)
@@ -91,7 +95,12 @@ class FeaturedSimplicialComplex(FeaturedComplex):
         simplicial_edges = [FeaturedSimplex(tuple(edge_idx)) for edge_idx in edge_node_indices]
         # Build the simplicial faces with no feature vector
         simplicial_faces = [FeaturedSimplex(tuple(face_idx)) for face_idx in face_node_indices]
-        return cls(FeaturedSimplicialElements(simplicial_nodes, simplicial_edges, simplicial_faces))
+        return cls(simplicial_nodes + simplicial_edges + simplicial_faces)
+
+    def get_featured_simplices(self, rank: int) -> List[FeaturedSimplex]:
+        if rank < 0 or rank > 2:
+            raise ValueError(f'Simplex rank {rank}is out of bounds')
+        return [simplex for simplex in self.featured_simplices if simplex.get_rank() == rank]
 
     def node_features_map(self) -> Dict[Tuple, np.array]:
         """
@@ -101,7 +110,7 @@ class FeaturedSimplicialComplex(FeaturedComplex):
         @return: Dictionary of Tuple of node indices - Feature vectors
         @rtype: Dict[Tuple, np.array]
         """
-        simplicial_nodes = self.featured_simplicial_elements.featured_nodes
+        simplicial_nodes = self.get_featured_simplices(rank=0)
         node_indices = list(zip(list(range(len(simplicial_nodes)))))
         nodes_feature_set = [simplicial_node.features for simplicial_node in simplicial_nodes]
         return dict(zip(node_indices, nodes_feature_set))
@@ -114,7 +123,7 @@ class FeaturedSimplicialComplex(FeaturedComplex):
         @return: Dictionary of Tuple of the 2 node indices  - Feature vectors
         @rtype: Dict[Tuple, np.array]
         """
-        simplicial_edges = self.featured_simplicial_elements.featured_edges
+        simplicial_edges = self.get_featured_simplices(rank=1)
         edges_node_indices = [tuple(simplicial_edge.simplex_indices) for simplicial_edge in simplicial_edges]
         edges_feature_set = [simplicial_edge.features for simplicial_edge in simplicial_edges]
         return dict(zip(edges_node_indices, edges_feature_set))
@@ -127,40 +136,40 @@ class FeaturedSimplicialComplex(FeaturedComplex):
         @return: Dictionary of Tuple of the 3 or 4 node indices  - Feature vectors
         @rtype: Dict[Tuple, np.array]
         """
-        simplicial_faces = self.featured_simplicial_elements.featured_faces
+        simplicial_faces = self.get_featured_simplices(rank=2)
         faces_node_indices = [tuple(simplicial_face.simplex_indices) for simplicial_face in simplicial_faces]
         faces_feature_set = [simplicial_face.features for simplicial_face in simplicial_faces]
         return dict(zip(faces_node_indices, faces_feature_set))
 
     def __str__(self) -> AnyStr:
-        return str(self.featured_simplicial_elements)
+        return str(self.featured_simplices)
 
-    def adjacency_matrix(self, directed_graph: bool = False) -> np.array:
+    def adjacency_matrix(self, signed: bool = False) -> np.array:
         """
           Computation of the adjacency matrix (edges - nodes)
-          @param directed_graph: Flag that specify if the graph is directed or not (Default Undirected graph)
-          @type directed_graph: bool
+          @param signed: Flag that specify if the graph is directed or not (Default Undirected graph)
+          @type signed: bool
           @return: Adjacency matrix as a dense matrix
           @rtype: Numpy array
           """
         # Initialize adjacency matrix
-        n = len(np.concatenate([node.features for node in self.featured_simplicial_elements.featured_nodes]))
+        n = len(np.concatenate([node.features for node in self.get_featured_simplices(rank=0)]))
         A = np.zeros((n, n), dtype=int)
 
         # Fill in edges
-        for u, v in [edge.simplex_indices for edge in self.featured_simplicial_elements.featured_edges]:
+        for u, v in [edge.simplex_indices for edge in self.get_featured_simplices(rank=1)]:
             A[u - 1, v - 1] = 1
-            if directed_graph:
+            if signed:
                 A[v - 1, u - 1] = 1
         return A
 
-    def incidence_matrix(self, rank: int = 1, directed_graph: bool = True) -> np.array:
+    def incidence_matrix(self, rank: int = 1, signed: bool = True) -> np.array:
         """
         Extract the incidence matrix for a given rank and directed/undirected graph
         @param rank: Rank of the Simplicial complex
         @type rank: int
-        @param directed_graph: Flag that specifies if the graph is directed
-        @type directed_graph: bool
+        @param signed: Flag that specifies if the graph is directed
+        @type signed: bool
         @return: Incidence matrix 
         @rtype: Numpy array
         """
@@ -168,7 +177,7 @@ class FeaturedSimplicialComplex(FeaturedComplex):
             raise ValueError(f'Rank of incidence matrix {rank} should be [0, 2]')
 
         sc = tnx.SimplicialComplex(self.simplicial_indices)
-        _, _, incidence = sc.incidence_matrix(rank=rank, index=True, signed=directed_graph)
+        _, _, incidence = sc.incidence_matrix(rank=rank, index=True, signed=signed)
         return incidence.todense()
 
     def laplacian(self, simplicial_laplacian: ComplexLaplacian) -> np.array:
@@ -177,13 +186,13 @@ class FeaturedSimplicialComplex(FeaturedComplex):
     """ -------------------------  Private Supporting methods ------------------ """
 
     def _validate(self) -> None:
-        simplicial_edge = self.featured_simplicial_elements.featured_edges
+        simplicial_edge = self.get_featured_simplices(rank=1)
         if simplicial_edge is not None:
             edge_set = [edge.simplex_indices for edge in simplicial_edge]
             assert len(edge_set) > 0, 'Simplicial requires at least one edge'
             assert all(len(sublist) == 2 for sublist in edge_set), f'All elements of edge list should have 2 indices'
 
-        simplicial_face = self.featured_simplicial_elements.featured_faces
+        simplicial_face = self.get_featured_simplices(rank=2)
         if simplicial_face is not None:
             face_set = [face.simplex_indices for face in simplicial_face]
             assert len(face_set) > 0, 'Simplicial requires at least face'

@@ -14,13 +14,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import Dict, AnyStr, Generic, TypeVar, Callable, Any
+from typing import Dict, AnyStr, Generic, TypeVar, Callable, Any, List
 # 3rd Party imports
 import networkx as nx
 import toponetx as tnx
 # Library imports
-from topology.simplicial.featured_simplicial_elements import FeaturedSimplicialElements
+# from topology.simplicial.featured_simplicial_elements import FeaturedSimplicialElements
 from topology.networkx_graph import NetworkxGraph
+from topology.simplicial.featured_simplex import FeaturedSimplex
 from topology.hodge_spectrum_configuration import HodgeSpectrumConfiguration
 _all_ = ['GraphToSimplicialComplex']
 
@@ -109,7 +110,7 @@ class GraphToSimplicialComplex(Generic[T]):
 
     @staticmethod
     def features_from_hodge_laplacian(tnx_simplicial: tnx.SimplicialComplex,
-                                      num_eigenvectors: (int, int, int)) -> FeaturedSimplicialElements:
+                                      num_eigenvectors: (int, int, int)) -> List[FeaturedSimplex]:
         """
         @param tnx_simplicial: TopoX simplicial complex
         @type tnx_simplicial: tnx.SimplicialComplex

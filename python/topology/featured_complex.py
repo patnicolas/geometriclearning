@@ -18,8 +18,6 @@ from typing import TypeVar, Generic
 from abc import ABC, abstractmethod
 # 3rd Party imports
 import numpy as np
-# Library imports
-from topology.simplicial.featured_simplicial_elements import FeaturedSimplicialElements
 
 __all__ = ['FeaturedComplex']
 T = TypeVar('T')
