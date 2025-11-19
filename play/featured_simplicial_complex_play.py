@@ -25,7 +25,7 @@ from topology.complex_laplacian import ComplexLaplacian
 from topology import LaplacianType
 
 
-class AbstractSimplicialComplexPlay(Play):
+class FeaturedSimplicialComplexPlay(Play):
     """
     Wrapper to implement the evaluation of Simplicial Simplex as defined in Substack article:
     "Exploring Simplicial Complexes for Deep Learning: Concepts to Code"
@@ -33,12 +33,12 @@ class AbstractSimplicialComplexPlay(Play):
     References:
     - Article: https://patricknicolas.substack.com/p/exploring-simplicial-complexes-for
     - AbstractSimplicialComplex:
-        https://github.com/patnicolas/geometriclearning/blob/main/python/topology/simplicial/abstract_simplicial_complex.py
+        https://github.com/patnicolas/geometriclearning/blob/main/python/topology/simplicial/featured_simplicial_complex.py
 
 
-    The features are implemented by the class AbstractSimplicialComplex in the source file
+    The features are implemented by the class FeaturedSimplicialComplex in the source file
                   python/topology/simplicial/featured_simplicial_complex.py
-    The class AbstractSimplicialComplexPlay is a wrapper of the class AbstractSimplicialComplex
+    The class AbstractSimplicialComplexPlay is a wrapper of the class FeaturedSimplicialComplex
     The execution of the tests follows the same order as in the Substack article
     """
     def __init__(self,
@@ -54,9 +54,9 @@ class AbstractSimplicialComplexPlay(Play):
         @param face_set: List of tuple for face/triangles (first_node_index, second_node_index, third_node_index)
         @type face_set: List[Tuple[int, int, int]
         """
-        super(AbstractSimplicialComplexPlay, self).__init__()
+        super(FeaturedSimplicialComplexPlay, self).__init__()
 
-        self.abstract_simplicial_complex = FeaturedSimplicialComplex.random(
+        self.featured_simplicial_complex = FeaturedSimplicialComplex.random(
             node_feature_dimension=node_feature_dimension,
             edge_node_indices=edge_set,
             face_node_indices=face_set)
@@ -74,25 +74,25 @@ class AbstractSimplicialComplexPlay(Play):
 
     # Test 1 - Code snippet 5
     def play_adjacency(self) -> None:
-        logging.info(f'\nAdjacency matrix:\n{self.abstract_simplicial_complex.adjacency_matrix()}')
+        logging.info(f'\nAdjacency matrix:\n{self.featured_simplicial_complex.adjacency_matrix()}')
 
     # Test 2 - Code snippet 7
     def play_incidence(self) -> None:
         for rank in range(1, 3):
-            incidence_matrix = self.abstract_simplicial_complex.incidence_matrix(rank=rank)
+            incidence_matrix = self.featured_simplicial_complex.incidence_matrix(rank=rank)
             logging.info(f'\nDirected incidence matrix rank {rank}:\n{incidence_matrix}')
 
-    # Test 3 - Code snippet 9
+    # Test 3 - Code snippet 9, 10 & 11
     def play_up_laplacian(self) -> None:
         simplicial_laplacian_0 = ComplexLaplacian(laplacian_type=LaplacianType.UpLaplacian,
                                                   rank=0,
                                                   signed=True)
-        up_laplacian_rk0 = self.abstract_simplicial_complex.laplacian(simplicial_laplacian_0)
+        up_laplacian_rk0 = self.featured_simplicial_complex.laplacian(simplicial_laplacian_0)
         logging.info(f'\nUP-Laplacian rank 0\n{up_laplacian_rk0}')
         simplicial_laplacian_1 = ComplexLaplacian(laplacian_type=LaplacianType.UpLaplacian,
                                                   rank=1,
                                                   signed=True)
-        up_laplacian_rk1 = self.abstract_simplicial_complex.laplacian(simplicial_laplacian_1)
+        up_laplacian_rk1 = self.featured_simplicial_complex.laplacian(simplicial_laplacian_1)
         logging.info(f'\nUP-Laplacian rank 1\n{up_laplacian_rk1}')
 
     # Test 4
@@ -101,13 +101,13 @@ class AbstractSimplicialComplexPlay(Play):
             laplacian_type=LaplacianType.DownLaplacian,
             rank=1,
             signed=True)
-        down_laplacian_rk1 = self.abstract_simplicial_complex.laplacian(simplicial_laplacian_1)
+        down_laplacian_rk1 = self.featured_simplicial_complex.laplacian(simplicial_laplacian_1)
         logging.info(f'\nDown-Laplacian rank 1\n{down_laplacian_rk1}')
         simplicial_laplacian_2 = ComplexLaplacian(
             laplacian_type=LaplacianType.DownLaplacian,
             rank=2,
             signed=True)
-        down_laplacian_rk2 = self.abstract_simplicial_complex.laplacian(simplicial_laplacian_2)
+        down_laplacian_rk2 = self.featured_simplicial_complex.laplacian(simplicial_laplacian_2)
         logging.info(f'\nDown-Laplacian rank 2\n{down_laplacian_rk2}')
 
     # Test 5
@@ -116,14 +116,14 @@ class AbstractSimplicialComplexPlay(Play):
             laplacian_type=LaplacianType.HodgeLaplacian,
             rank=0,
             signed=True)
-        hodge_laplacian_rk0 = self.abstract_simplicial_complex.laplacian(simplicial_laplacian_0)
+        hodge_laplacian_rk0 = self.featured_simplicial_complex.laplacian(simplicial_laplacian_0)
         logging.info(f'\nHodge-Laplacian rank 0\n{hodge_laplacian_rk0}')
 
         simplicial_laplacian_1 = ComplexLaplacian(
             laplacian_type=LaplacianType.HodgeLaplacian,
             rank=1,
             signed=True)
-        hodge_laplacian_rk1 = self.abstract_simplicial_complex.laplacian(simplicial_laplacian_1)
+        hodge_laplacian_rk1 = self.featured_simplicial_complex.laplacian(simplicial_laplacian_1)
         logging.info(f'\nHodge-Laplacian rank 1\n{hodge_laplacian_rk1}')
 
         simplicial_laplacian_2 = ComplexLaplacian(
@@ -131,7 +131,7 @@ class AbstractSimplicialComplexPlay(Play):
             rank=2,
             signed=True
         )
-        hodge_laplacian_rk2 = self.abstract_simplicial_complex.laplacian(simplicial_laplacian_2)
+        hodge_laplacian_rk2 = self.featured_simplicial_complex.laplacian(simplicial_laplacian_2)
         logging.info(f'\nHodge-Laplacian rank 2\n{hodge_laplacian_rk2}')
 
 
@@ -141,13 +141,13 @@ if __name__ == '__main__':
 
     try:
         # Test 1
-        simplicial_complex_play = AbstractSimplicialComplexPlay(node_feature_dimension=4,
+        simplicial_complex_play = FeaturedSimplicialComplexPlay(node_feature_dimension=4,
                                                                 edge_set=test_edge_set,
                                                                 face_set=test_face_set)
         simplicial_complex_play.play_adjacency()
 
         # Test 2
-        simplicial_complex_play_2 = AbstractSimplicialComplexPlay(node_feature_dimension=5,
+        simplicial_complex_play_2 = FeaturedSimplicialComplexPlay(node_feature_dimension=5,
                                                                   edge_set=test_edge_set,
                                                                   face_set=test_face_set)
         simplicial_complex_play_2.play_incidence()
