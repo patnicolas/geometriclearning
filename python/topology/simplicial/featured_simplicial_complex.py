@@ -34,6 +34,12 @@ class FeaturedSimplicialComplex(FeaturedComplex):
     The functionality is:
     - Computation of incidence and adjacency matrices
     - Computation of various Laplacian operators
+
+    References:
+
+
+    Note: The implementation of the adjacency matrix is specific to graph. The TopoNetX library has a generic
+    adjacency matrix to support edges - edges and faces -faces.
     """
     def __init__(self, featured_simplices: List[FeaturedSimplex]) -> None:
         """
@@ -146,12 +152,14 @@ class FeaturedSimplicialComplex(FeaturedComplex):
 
     def adjacency_matrix(self, signed: bool = False) -> np.array:
         """
-          Computation of the adjacency matrix (edges - nodes)
-          @param signed: Flag that specify if the graph is directed or not (Default Undirected graph)
-          @type signed: bool
-          @return: Adjacency matrix as a dense matrix
-          @rtype: Numpy array
-          """
+        Computation of the adjacency matrix nodes - nodes
+        Note: TopoNetX library has a generic adjacency matrix to support edges - edges and
+            faces - faces.
+        @param signed: Flag that specify if the graph is directed or not (Default Undirected graph)
+        @type signed: bool
+        @return: Adjacency matrix as a dense matrix
+        @rtype: Numpy array
+        """
         # Initialize adjacency matrix
         n = len(np.concatenate([node.features for node in self.get_featured_simplices(rank=0)]))
         A = np.zeros((n, n), dtype=int)
