@@ -208,7 +208,8 @@ class GraphToSimplicialComplexTest(unittest.TestCase):
                                                                    lifting_method=lift_from_graph_cliques)
             tnx_simplicial = graph_to_simplicial.add_faces({'max_rank': 2})
             num_eigenvectors = (4, 5, 4)
-            graph_complex_elements =  GraphToSimplicialComplex.features_from_hodge_laplacian(tnx_simplicial, num_eigenvectors)
+            graph_complex_elements =  GraphToSimplicialComplex.features_from_hodge_laplacian(tnx_simplicial,
+                                                                                             num_eigenvectors)
 
             result = [face for idx, face, in enumerate(graph_complex_elements.featured_faces) if idx < 3]
             self.assertEqual(result[0].simplex_indices, (0, 1, 2))

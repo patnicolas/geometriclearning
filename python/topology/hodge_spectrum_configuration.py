@@ -16,12 +16,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # Python standard library imports
 from typing import AnyStr, List, Tuple, Self
 from dataclasses import dataclass
+import logging
 # 3rd Party imports
 from toponetx.classes.complex import Complex
 import numpy as np
 # Library imports
 from topology.simplicial.featured_simplex import FeaturedSimplex
-# from topology.simplicial.featured_simplicial_elements import FeaturedSimplicialElements
+import python
+
 __all__ = ['HodgeSpectrumConfiguration']
 
 
@@ -30,7 +32,7 @@ class HodgeSpectrumConfiguration:
     """
     Class to generate a set of complex elements from a graph using the Hodge Laplacian
 
-    @param num_eigenvectors: Number of eigenvectors or eigenvalues used for each of the Indidence matrices for
+    @param num_eigenvectors: Number of eigenvectors or eigenvalues used for each of the incidence matrices for
                     nodes, edges and simplex-2
     @type num_eigenvectors: int
     """
@@ -95,23 +97,26 @@ class HodgeSpectrumConfiguration:
 
         # Compute the laplacian weights for nodes, edges (L1) and faces (L2)
         complex_features = \
-            [hodge_laplacian_eigenvectors(this_complex.hodge_laplacian_matrix(idx), self.num_eigenvectors[idx])[1]
+            [hodge_laplacian_eigenvectors(this_complex.hodge_laplacian_matrix(idx),
+                                          self.num_eigenvectors[idx])[1]
              for idx in range(len(self.num_eigenvectors))]
 
         # Generate the simplex related to node, edge and simplex_2 (triangles, cells ...)
-        complex_elements = [HodgeSpectrumConfiguration.__compute_complex_elements(this_complex, complex_features, idx)
-                            for idx in range(len(complex_features))]
-        return sum(complex_elements, [])
+        featured_simplices = [HodgeSpectrumConfiguration.__compute_complex_elements(
+            this_complex, complex_features, idx
+        ) for idx in range(len(complex_features))]
+        # Flatten and returns the list of elements
+        return sum(featured_simplices, [])
 
     """  ------------------------  Private supporting methods"""
 
     @staticmethod
     def __compute_complex_elements(this_complex: Complex,
-                                   complex_features: List,
+                                   featured_simplices: List,
                                    index: int) -> List[FeaturedSimplex]:
         # Create simplicial element containing node indices associated with the simplex and feature set
-        simplicial_node_feat = zip(this_complex.skeleton(index), np.array(complex_features[index]), strict=True)
+        simplicial_node_feat = zip(this_complex.skeleton(index), np.array(featured_simplices[index]), strict=True)
         try:
             return [FeaturedSimplex(tuple(u), v) for u, v in simplicial_node_feat]
         except TypeError as e:
-            print(e)
+            logging.error(e)

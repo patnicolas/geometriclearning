@@ -22,7 +22,7 @@ import toponetx as tnx
 # Library imports
 from play import Play
 from topology.simplicial import lift_from_graph_cliques, lift_from_graph_neighbors
-from topology.simplicial.featured_simplicial_complex import SimplicialElement
+from topology.simplicial.featured_simplex import FeaturedSimplex
 from topology.simplicial.graph_to_simplicial_complex import GraphToSimplicialComplex
 from deeplearning.training import TrainingException
 import python
@@ -77,29 +77,26 @@ class GraphToSimplicialComplexPlay(Play):
         # Step 3: Generate the simplicial elements for nodes, edges and faces.
         #         Number of eigenvectors for node is 4, edges 5 and faces 4
         num_eigenvectors = (4, 5, 4)
-        node_simplicial_elements, edge_simplicial_elements, face_simplicial_elements = (
-            GraphToSimplicialComplex.features_from_hodge_laplacian(tnx_simplicial, num_eigenvectors)
-        )
-        self.__output_simplicial(node_simplicial_elements,
-                                 edge_simplicial_elements,
-                                 face_simplicial_elements,
-                                 num_eigenvectors)
+        featured_simplices = GraphToSimplicialComplex.features_from_hodge_laplacian(tnx_simplicial,
+                                                                                    num_eigenvectors)
+
+        self.__output_simplicial(featured_simplices, num_eigenvectors)
         logging.info(f'Duration: {time.time() - start}')
 
     def __output_simplicial(self,
-                            node_simplicial_elements: List[SimplicialElement],
-                            edge_simplicial_elements: List[SimplicialElement],
-                            face_simplicial_elements: List[SimplicialElement],
-                            num_eigenvectors: Tuple[int, int, int]
-                            ) -> None:
+                            featured_simplices: List[FeaturedSimplex],
+                            num_eigenvectors: Tuple[int, int, int]) -> None:
+        featured_nodes = [simplex for simplex in featured_simplices if simplex.get_rank() == 0]
+        featured_edges = [simplex for simplex in featured_simplices if simplex.get_rank() == 1]
+        featured_faces = [simplex for simplex in featured_simplices if simplex.get_rank() > 1]
         logging.info(
-            f"{self.dataset_name}: {len(node_simplicial_elements)} nodes,  {len(edge_simplicial_elements)} edges, "
-            f"{len(face_simplicial_elements)} faces")
+            f"{self.dataset_name}: {len(featured_nodes)} nodes,  {len(featured_edges)} edges, "
+            f"{len(featured_faces)} faces")
 
         # Step 4: Prepare data for dumping results
-        nodes_elements = [node for idx, node, in enumerate(node_simplicial_elements) if idx < 3]
-        edges_elements = [edge for idx, edge, in enumerate(edge_simplicial_elements) if idx < 3]
-        faces_elements = [face for idx, face, in enumerate(face_simplicial_elements) if idx < 3]
+        nodes_elements = [node for idx, node, in enumerate(featured_nodes) if idx < 3]
+        edges_elements = [edge for idx, edge, in enumerate(featured_edges) if idx < 3]
+        faces_elements = [face for idx, face, in enumerate(featured_faces) if idx < 3]
         nodes_elements_str = '\n'.join([str(s) for s in nodes_elements])
         edges_elements_str = '\n'.join([str(s) for s in edges_elements])
         faces_elements_str = '\n'.join([str(s) for s in faces_elements])

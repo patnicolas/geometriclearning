@@ -59,7 +59,6 @@ class GraphToSimplicialComplex(Generic[T]):
                                Generation of Vietoris-Rips complext
         @type lifting_method: Callable[[nx.Graph], tnx.SimplicialComplex]
         """
-        t = type(dataset).__module__
         # If the dataset is provided using its name
         if type(dataset).__name__ == 'str':
             from dataset.graph.pyg_datasets import PyGDatasets
