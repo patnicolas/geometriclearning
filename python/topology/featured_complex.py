@@ -14,7 +14,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, Tuple
 from abc import ABC, abstractmethod
 # 3rd Party imports
 import numpy as np
@@ -26,11 +26,11 @@ T = TypeVar('T')
 class FeaturedComplex(ABC, Generic[T]):
 
     @abstractmethod
-    def adjacency_matrix(self, directed_graph: bool = False) -> np.array:
+    def adjacency_matrix(self, rank: Tuple[int, int] | int, signed: bool = False) -> np.array:
         pass
 
     @abstractmethod
-    def incidence_matrix(self, rank: int = 1, directed_graph: bool = True) -> np.array:
+    def incidence_matrix(self, rank: Tuple[int, int] | int, signed: bool = True) -> np.array:
         pass
 
     @abstractmethod

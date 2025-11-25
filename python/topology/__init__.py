@@ -21,7 +21,6 @@ class LaplacianType(Enum):
     HodgeLaplacian = 'Hodge-Laplacian'
 
 
-
 class TopologyException(Exception):
     def __init__(self, *args, **kwargs):
         super(TopologyException, self).__init__(args, kwargs)

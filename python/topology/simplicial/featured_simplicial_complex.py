@@ -15,7 +15,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 
 # Standard Library imports
-from typing import Self, AnyStr, List, Tuple, Dict
+from typing import Self, AnyStr, List, Tuple, Dict, TypeVar
 import itertools
 # 3rd Party imports
 import toponetx as tnx
@@ -26,22 +26,32 @@ from topology.simplicial.featured_simplex import FeaturedSimplex
 from topology.complex_laplacian import ComplexLaplacian
 from topology.featured_complex import FeaturedComplex
 __all__ = ['FeaturedSimplicialComplex']
+T = TypeVar('T')
 
 
-class FeaturedSimplicialComplex(FeaturedComplex):
+class FeaturedSimplicialComplex(FeaturedComplex[T]):
     """
     Implementation of the Simplicial Complex with operators and a feature set (embedded vector).
     The functionality is:
+    - Generation of random simplicial complex
     - Computation of incidence and adjacency matrices
     - Computation of various Laplacian operators
 
-    References:
+    A simplicial complex is a graph with faces. It generalizes graphs that model higher-order relationships
+    among data elements—not just pairwise (edges), but also triplets, quadruplets, and beyond (0-simplex: node,
+    1-simplex: edge, 2-simplex: Triangle, 3-simplex: Tetrahedron,)
+    Simplicial complex are usually associated with the analysis of shape in data, field known as Topological Data
+    Analysis (TDA).
 
+    The parameter type 'T' is the type of the first element of the representation of the components of this topological
+    domain - Simplicial -> List[int],  Cell -> Cell, Hypergraph -> List[Tuple[int]]
+
+    Reference Substack article: https://patricknicolas.substack.com/p/exploring-simplicial-complexes-for
 
     Note: The implementation of the adjacency matrix is specific to graph. The TopoNetX library has a generic
     adjacency matrix to support edges - edges and faces -faces.
     """
-    def __init__(self, featured_simplices: List[FeaturedSimplex]) -> None:
+    def __init__(self, featured_simplices: frozenset[FeaturedSimplex]) -> None:
         """
         Constructor for the Simplicial Complex Model. Shape of Numpy array for the edge and face sets
         are evaluated for consistency.
@@ -101,7 +111,7 @@ class FeaturedSimplicialComplex(FeaturedComplex):
         simplicial_edges = [FeaturedSimplex(tuple(edge_idx)) for edge_idx in edge_node_indices]
         # Build the simplicial faces with no feature vector
         simplicial_faces = [FeaturedSimplex(tuple(face_idx)) for face_idx in face_node_indices]
-        return cls(simplicial_nodes + simplicial_edges + simplicial_faces)
+        return cls(frozenset(simplicial_nodes + simplicial_edges + simplicial_faces))
 
     def get_featured_simplices(self, rank: int) -> List[FeaturedSimplex]:
         if rank < 0 or rank > 2:
@@ -150,11 +160,13 @@ class FeaturedSimplicialComplex(FeaturedComplex):
     def __str__(self) -> AnyStr:
         return str(self.featured_simplices)
 
-    def adjacency_matrix(self, signed: bool = False) -> np.array:
+    def adjacency_matrix(self, rank: Tuple[int, int] | int, signed: bool = False) -> np.array:
         """
         Computation of the adjacency matrix nodes - nodes
         Note: TopoNetX library has a generic adjacency matrix to support edges - edges and
             faces - faces.
+        @param rank: Rank of the Simplicial complex
+        @type rank: int
         @param signed: Flag that specify if the graph is directed or not (Default Undirected graph)
         @type signed: bool
         @return: Adjacency matrix as a dense matrix
@@ -171,7 +183,7 @@ class FeaturedSimplicialComplex(FeaturedComplex):
                 A[v - 1, u - 1] = 1
         return A
 
-    def incidence_matrix(self, rank: int = 1, signed: bool = True) -> np.array:
+    def incidence_matrix(self, rank: Tuple[int, int] | int, signed: bool = True) -> np.array:
         """
         Extract the incidence matrix for a given rank and directed/undirected graph
         @param rank: Rank of the Simplicial complex
@@ -189,6 +201,15 @@ class FeaturedSimplicialComplex(FeaturedComplex):
         return incidence.todense()
 
     def laplacian(self, simplicial_laplacian: ComplexLaplacian) -> np.array:
+        """
+        Computation of Up, Down, and Hodge Laplacian for Simplicial complex or rank 0, 1, and 2. This method invokes
+        ComplexLaplacian.__call__ method
+
+        @param simplicial_laplacian: Instance of the Laplacian for simplicial complex
+        @type simplicial_laplacian: ComplexLaplacian
+        @return: Laplacian for this simplicial as 2-dimensional Numpy array
+        @rtype: Numpy array
+        """
         return simplicial_laplacian(self.simplicial_indices)
 
     """ -------------------------  Private Supporting methods ------------------ """
