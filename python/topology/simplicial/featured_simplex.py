@@ -28,7 +28,7 @@ class FeaturedSimplex:
     """
     Definition of the basic element of a Simplicial Complex {Node, Edge, Face} composed of
       - Feature vector
-      - Indices of nodes defining this element
+      - Indices of nodes defining this element (e.g., edge (3, 4), face (5, 7, 8)0
 
     @param simplex_indices: List of indices of nodes composing this simplicial element
     @type simplex_indices: List[int]

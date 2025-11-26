@@ -114,6 +114,13 @@ class FeaturedSimplicialComplex(FeaturedComplex[T]):
         return cls(frozenset(simplicial_nodes + simplicial_edges + simplicial_faces))
 
     def get_featured_simplices(self, rank: int) -> List[FeaturedSimplex]:
+        """
+        Retrieve the featured simplices for a given rank {0, 1 or 2}
+        #param rank: Rank of the simplex
+        @type rank: int
+        @return: List of Features simplex for a given rank
+        @rtype:  List[FeaturedSimplex]
+        """
         if rank < 0 or rank > 2:
             raise ValueError(f'Simplex rank {rank}is out of bounds')
         return [simplex for simplex in self.featured_simplices if simplex.get_rank() == rank]

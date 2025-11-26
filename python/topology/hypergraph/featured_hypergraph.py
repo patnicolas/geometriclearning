@@ -18,8 +18,8 @@ from typing import List, Tuple, Self, TypeVar, AnyStr, Dict
 # 3rd Party imports
 import numpy as np
 from toponetx import ColoredHyperGraph
-# Library imports
 from toponetx.classes.hyperedge import HyperEdge
+# Library imports
 from topology.hypergraph.featured_hyperedge import FeaturedHyperEdge
 from topology.featured_complex import FeaturedComplex
 __all__ = ['FeaturedHyperGraph']
@@ -29,15 +29,18 @@ T = TypeVar('T')
 class FeaturedHyperGraph(FeaturedComplex[T]):
     """
     Implementation of featured hypergraph:
-    This implementation leverages the class toponetx.ColoredHypergraph. A hypergraph is a generalization of a graph
-    where a hyperedge can connect any number of nodes or vertices. Similarly to Cell and Simplicial Complexes, a node
-    and a hyperedge are said to be incident if the vertex is a member of the hyperedge.
+    This implementation leverages the class toponetx.classes.ColoredHypergraph. A hypergraph is a generalization of a 
+    graph where a hyperedge can connect any number of nodes or vertices. Similarly to Cell and Simplicial Complexes, 
+    a node and a hyperedge are said to be incident if the vertex is a member of the hyperedge.
     The parameter type 'T' is the type of the first element of the representation of the components of this topological
     domain - Simplicial -> List[int],  Cell -> Cell, Hypergraph -> List[Tuple[int]]
 
     The Up, Down and Hodge Laplacian matrices are computed by converting the Hypergraph into a Simplicial Complex then
     computing the appropriate Laplacian matrices. Therefore, the simplicial complex dictionary {rank : List of Tuple
     of node indices} is defined as empty and initialized once any of the Laplacian matrices has to be computed.
+
+    The adjacency and incidence matrices are computed as a dense Numpy arrau for sake of clarity and supporting
+    Substack articles. Very large graphs may cause memory overflow.
 
     Note: Hyperedges can be labeled with any identifier. I use indices (int) start with 1 to stay consistent with
     my implementation of simplicial complex and cell complexes in the GitHub repository.
@@ -65,9 +68,9 @@ class FeaturedHyperGraph(FeaturedComplex[T]):
 
     @classmethod
     def build(cls,
-              hyperedge_indices_list: List[Tuple[int, ...]],
-              ranks: List[int],
-              features_list: List[np.array] = None) -> Self:
+              hyperedge_indices_list: frozenset[Tuple[int, ...]],
+              ranks: frozenset[int],
+              features_list: frozenset[np.array] = None) -> Self:
         """
         Alternative constructor for the featured hypergraph using a higher granularity descriptor for the hyperedges
         The list of hyperedge node indices, ranks and feature vectors should be identical and a ValueError is raised
@@ -135,21 +138,46 @@ class FeaturedHyperGraph(FeaturedComplex[T]):
         # Step 1: Create the equivalent simplicial complex
         if len(self.simplicial_complex_dict) == 0:
             self.set_simplicial_complex()
-
         # Step 2: Collect the simplices node indices
         collected_simplices_list = list(self.simplicial_complex_dict.values())
-
         # Step 3: Flatten the list of list of simplices
         simplices = list(chain.from_iterable(collected_simplices_list))
+        # Step 4: Invoke ComplexLaplacian.__call__
         return complex_laplacian(simplices)
 
     def adjacency_matrix(self, ranks: Tuple[int, int] | int, signed: bool = False) -> np.array:
+        """
+        Compute the adjacency matrix for this featured hypergraph using the toponetx.classes.ColoredHypergraph. The
+        argument signed is not used but kept in the signature of the method for consistency purpose.
+        The adjacency matrix is computed as a dense Numpy arrau for sake of clarity and supporting Substack articles.
+        Large graphs may cause memory overflow.
+        
+        @param ranks: Pair of ranks for the source and destination hyperedge
+        @type ranks: Tuple[int, int]
+        @param signed: Specify if the graph is directed (True) or undirected (False)
+        @type signed: bool
+        @return: Adjacency as Numpy dense array
+        @rtype: Numpy array
+        """
         if ranks[0] >= ranks[1]:
             raise ValueError(f'Ranks for adjacency matrix {ranks} should be rank1 < rank2')
         colored_hyper_graph = self.__get_colored_hypergraph()
         return colored_hyper_graph.adjacency_matrix(rank=ranks[0], via_rank=ranks[1]).todense()
 
-    def incidence_matrix(self, ranks: Tuple[int, int] = (0, 1), directed_graph: bool = True) -> np.array:
+    def incidence_matrix(self, ranks: Tuple[int, int] = (0, 1), signed: bool = True) -> np.array:
+        """
+        Compute the incidence matrix for this featured hypergraph with the class toponetx.classes.ColoredHypergraph.
+        The argument signed is not used but kept in the signature of the method for consistency purpose.
+        The incidence matrix is computed as a Numpy arrau for sake of clarity and supporting Substack articles. Large
+        graphs may cause memory overflow.
+        
+        @param ranks: Pair of ranks for the source and destination hyperedge
+        @type ranks: Tuple[int, int]
+        @param signed: Specify if the graph is directed (True) or undirected (False)
+        @type signed: bool
+        @return: Incidence matrix as a dense numpy array
+        @rtype: numpy array
+        """
         if ranks[0] >= ranks[1]:
             raise ValueError(f'Ranks for incidence matrix {ranks} should be rank1 < rank2')
 

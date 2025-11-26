@@ -13,36 +13,62 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import FrozenSet, Optional, AnyStr, Tuple, Self
+# Standard Library imports
+from typing import FrozenSet, AnyStr, Self
 from dataclasses import dataclass
-
+# Library imports
 import numpy as np
-
 from toponetx.classes.hyperedge import HyperEdge
 
 @dataclass
 class FeaturedHyperEdge:
     """
     Define a featured hyperedge or cell of a hypergraph as a combination of a TopoNetX hyperedge and a features vector
-    defined as a Numpy array
+    defined as a Numpy array.
+    This implementation leverages the class toponetx.classes.HyperEdge
+
+    Note: Hyperedges can be labeled with any identifier. I use indices (int) start with 1 to stay consistent with
+    my implementation of simplicial complex and cell complexes in the GitHub repository.
 
     @param hyperedge: Toponetx hyperedge
     @type hyperedge: HyperEdge
     @param features: Feature vector (dim=1)
-    @type features: numpy.array
+    @type features: numpy array
     """
     hyperedge: HyperEdge
     features: np.array = None
 
     @classmethod
-    def build(cls, hyperedge_indices: Tuple[int, ...], rank: int = None, features:  np.array = None) -> Self:
+    def build(cls, hyperedge_indices: frozenset[int, ...], rank: int = None, features:  np.array = None) -> Self:
+        """
+        Alternative constructor that builds a featured hyper from a tuple of node indices associated with the 
+        hyperedge, rank and an optional features vector
+        @param hyperedge_indices: Tuple of node indices associated with this hyperedge
+        @type hyperedge_indices: Tuple[int, ...]
+        @param rank: Rank of the hyperedge {0, 1, 2, 3,.)
+        @type rank: int
+        @param features: Optional features vector associated with this hyperedge
+        @type features: Numpy array
+        @return: Instance of FeaturedHyperEdge
+        @rtype: FeaturedHyperEdge
+        """
         return cls(HyperEdge(hyperedge_indices, rank), features)
 
-    def get_indices(self) -> Tuple[int, ...]:
+    def get_indices(self) -> frozenset[int, ...]:
+        """
+        Retrieve the indices of the indices or labels associated with this featured hyperedge
+        @return: Tuple of node indices associated with this hyperedge
+        @rtype: Tuple[int, ...]
+        """
         indices: FrozenSet = self.hyperedge.elements
-        return tuple(indices)
+        return indices
 
     def get_rank(self) -> int:
+        """
+        Retrieve the rank of this hyperedge as property of toponetx.classes.HyperEdge class
+        @return: rank of this hyperedge
+        @rtype: int
+        """
         return self.hyperedge.rank
 
     def __str__(self) -> AnyStr:
