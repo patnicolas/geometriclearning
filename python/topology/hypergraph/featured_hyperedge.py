@@ -14,7 +14,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import FrozenSet, AnyStr, Self
+from typing import FrozenSet, AnyStr, Self, Tuple
 from dataclasses import dataclass
 # Library imports
 import numpy as np
@@ -39,7 +39,7 @@ class FeaturedHyperEdge:
     features: np.array = None
 
     @classmethod
-    def build(cls, hyperedge_indices: frozenset[int, ...], rank: int = None, features:  np.array = None) -> Self:
+    def build(cls, hyperedge_indices: frozenset[int], rank: int = None, features:  np.array = None) -> Self:
         """
         Alternative constructor that builds a featured hyper from a tuple of node indices associated with the 
         hyperedge, rank and an optional features vector

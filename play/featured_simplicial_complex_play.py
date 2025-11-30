@@ -41,30 +41,18 @@ class FeaturedSimplicialComplexPlay(Play):
     The class AbstractSimplicialComplexPlay is a wrapper of the class FeaturedSimplicialComplex
     The execution of the tests follows the same order as in the Substack article
     """
-    def __init__(self,
-                 node_feature_dimension: int,
-                 edge_set: List[Tuple[int, ...]],
-                 face_set: List[Tuple[int, ...]]) -> None:
+    def __init__(self) -> None:
         """
         Constructor for this tutorial
-        @param node_feature_dimension: Dimension (number of features) for nodes
-        @type node_feature_dimension: int
-        @param edge_set: List of tuple (source_node_index, target_node_index)
-        @type edge_set: List[Tuple[int, int]
-        @param face_set: List of tuple for face/triangles (first_node_index, second_node_index, third_node_index)
-        @type face_set: List[Tuple[int, int, int]
         """
         super(FeaturedSimplicialComplexPlay, self).__init__()
 
-        self.featured_simplicial_complex = FeaturedSimplicialComplex.random(
-            node_feature_dimension=node_feature_dimension,
-            edge_node_indices=edge_set,
-            face_node_indices=face_set)
+        self.featured_simplicial_complex = FeaturedSimplicialComplexPlay.__generate_featured_simplicial_complex()
 
     def play(self) -> None:
         """
-            Implementation of the evaluation code for the Substack article "Exploring Simplicial Complexes for Deep
-            Learning: Concepts to Code" - Code snippets 5, 7 & 9
+        Implementation of the evaluation code for the Substack article "Exploring Simplicial Complexes for Deep
+        Learning: Concepts to Code" - Code snippets 5, 7 & 9
         """
         self.play_adjacency()
         self.play_incidence()
@@ -134,33 +122,21 @@ class FeaturedSimplicialComplexPlay(Play):
         hodge_laplacian_rk2 = self.featured_simplicial_complex.laplacian(simplicial_laplacian_2)
         logging.info(f'\nHodge-Laplacian rank 2\n{hodge_laplacian_rk2}')
 
+    @staticmethod
+    def __generate_featured_simplicial_complex() -> FeaturedSimplicialComplex:
+        node_feature_dimension = 4
+        test_edge_set = [(1, 2), (1, 3), (2, 3), (2, 4), (3, 4), (2, 5), (4, 5)]
+        test_face_set = [(2, 3, 4), (1, 2, 3)]
+
+        return FeaturedSimplicialComplex.random(
+            node_feature_dimension=node_feature_dimension,
+            edge_node_indices=test_edge_set,
+            face_node_indices=test_face_set)
+
 
 if __name__ == '__main__':
-    test_edge_set = [(1, 2), (1, 3), (2, 3), (2, 4), (3, 4), (2, 5), (4, 5)]
-    test_face_set = [(2, 3, 4), (1, 2, 3)]
-
     try:
-        # Test 1
-        simplicial_complex_play = FeaturedSimplicialComplexPlay(node_feature_dimension=4,
-                                                                edge_set=test_edge_set,
-                                                                face_set=test_face_set)
-        simplicial_complex_play.play_adjacency()
-
-        # Test 2
-        simplicial_complex_play_2 = FeaturedSimplicialComplexPlay(node_feature_dimension=5,
-                                                                  edge_set=test_edge_set,
-                                                                  face_set=test_face_set)
-        simplicial_complex_play_2.play_incidence()
-
-        # Test 3
-        simplicial_complex_play.play_up_laplacian()
-
-        # Test 4
-        simplicial_complex_play.play_down_laplacian()
-
-        # Test 5
-        simplicial_complex_play.play_hodge_laplacian()
-        assert True
-    except AssertionError as e:
+        simplicial_complex_play = FeaturedSimplicialComplexPlay()
+        simplicial_complex_play.play()
+    except (AssertionError, ValueError, TypeError) as e:
         logging.error(e)
-        assert False

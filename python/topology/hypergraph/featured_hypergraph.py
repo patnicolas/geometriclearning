@@ -45,7 +45,7 @@ class FeaturedHyperGraph(FeaturedComplex[T]):
     Note: Hyperedges can be labeled with any identifier. I use indices (int) start with 1 to stay consistent with
     my implementation of simplicial complex and cell complexes in the GitHub repository.
     """
-    def __init__(self, featured_hyperedges: frozenset[FeaturedHyperEdge]) -> None:
+    def __init__(self, featured_hyperedges: List[FeaturedHyperEdge]) -> None:
         """
         Default constructor for the Featured Hypergraph. The features Hypergraph consists of an immutable list of
         Featured hyperedge defined as toponetx hyperedge + feature vector.
@@ -69,15 +69,15 @@ class FeaturedHyperGraph(FeaturedComplex[T]):
     @classmethod
     def build(cls,
               hyperedge_indices_list: frozenset[Tuple[int, ...]],
-              ranks: frozenset[int],
-              features_list: frozenset[np.array] = None) -> Self:
+              ranks: List[int],
+              features_list: List[np.array] = None) -> Self:
         """
         Alternative constructor for the featured hypergraph using a higher granularity descriptor for the hyperedges
         The list of hyperedge node indices, ranks and feature vectors should be identical and a ValueError is raised
         if this condition is not met.
 
-        @param hyperedge_indices_list: List of Tuple of indices
-        @type hyperedge_indices_list: List[Tuple[int, ...]]
+        @param hyperedge_indices_list: Immutable set of Tuple of indices
+        @type hyperedge_indices_list: frozenset[Tuple[int, ...]]
         @param ranks: List of rank for each hyperedge
         @type ranks: List[int]
         @param features_list: List of features
@@ -93,10 +93,10 @@ class FeaturedHyperGraph(FeaturedComplex[T]):
             raise ValueError(
                 f'Num of hyperedges {len(hyperedge_indices_list)} should == num of ranks {len(ranks)}'
             )
-        featured_hyperedges = frozenset([FeaturedHyperEdge(hyperedge=HyperEdge(elements=featured_indices, rank=rank),
+        featured_hyperedges = [FeaturedHyperEdge(hyperedge=HyperEdge(elements=featured_indices, rank=rank),
                                                            features=features)
                                         for featured_indices, rank, features
-                                         in zip(hyperedge_indices_list, ranks, features_list)])
+                                         in zip(hyperedge_indices_list, ranks, features_list)]
         return cls(featured_hyperedges)
 
     def set_simplicial_complex(self) -> None:
