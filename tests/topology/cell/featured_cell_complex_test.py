@@ -14,7 +14,7 @@ class FeaturedCellComplexTest(unittest.TestCase):
         featured_cells = [FeaturedCell(Cell(elements=[1, 2], rank=1)),
                           FeaturedCell(Cell(elements=[1, 3], rank=1)),
                           FeaturedCell(Cell(elements=[3, 2], rank=1))]
-        featured_cell_complex = FeaturedCellComplex(featured_cells)
+        featured_cell_complex = FeaturedCellComplex(frozenset(featured_cells))
         logging.info(featured_cell_complex)
         self.assertTrue(True)
 
@@ -24,7 +24,7 @@ class FeaturedCellComplexTest(unittest.TestCase):
             featured_cells = [FeaturedCell.build(indices=[1, 2], rank=1, features=np.array([2.0, 1.4])),
                               FeaturedCell.build(indices=[1, 3], rank=1, features=np.array([1.0, 0.4])),
                               FeaturedCell.build(indices=[3, 2], rank=1, features=np.array([0.8, 1.1]))]
-            featured_cell_complex = FeaturedCellComplex(featured_cells)
+            featured_cell_complex = FeaturedCellComplex(frozenset(featured_cells))
             logging.info(featured_cell_complex)
             self.assertTrue(True)
         except ValueError as e:
@@ -74,7 +74,7 @@ class FeaturedCellComplexTest(unittest.TestCase):
             featured_edges = [FeaturedCell.build(indices=edge, rank=1) for edge in edges]
             features_cells_2 = [FeaturedCell.build(indices=face, rank=2) for face in cells_2]
             featured_cells = featured_edges + features_cells_2
-            featured_cell_complex = FeaturedCellComplex(featured_cells)
+            featured_cell_complex = FeaturedCellComplex(frozenset(featured_cells))
             complex_laplacian = ComplexLaplacian[CellType](laplacian_type=LaplacianType.HodgeLaplacian,
                                                            rank=1,
                                                            signed=True)
@@ -93,7 +93,7 @@ class FeaturedCellComplexTest(unittest.TestCase):
         featured_edges = [FeaturedCell.build(indices=edge, rank=1) for edge in edges]
         features_cells_2 = [FeaturedCell.build(indices=face, rank=2) for face in cells_2]
         featured_cells = featured_edges + features_cells_2
-        return FeaturedCellComplex(featured_cells)
+        return FeaturedCellComplex(frozenset(featured_cells))
 
 
 

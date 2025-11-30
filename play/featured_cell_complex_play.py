@@ -50,6 +50,9 @@ class FeaturedCellComplexPlay(Play):
         logging.info(self.featured_cell_complex)
 
     def play(self) -> None:
+        """
+        Sequence of tests used in the substack article "Graphs Reimagined: The Power of Cell Complexes"
+        """
         FeaturedCellComplexPlay.play_attributes()
         self.play_laplacians()
         self.play_adjacency()
@@ -139,5 +142,9 @@ class FeaturedCellComplexPlay(Play):
 
 
 if __name__ == '__main__':
-    featured_cell_complex_play = FeaturedCellComplexPlay()
-    featured_cell_complex_play.play_attributes()
+    try:
+        featured_cell_complex_play = FeaturedCellComplexPlay()
+        featured_cell_complex_play.play()
+    except (ValueError, TypeError, TypeError) as e:
+        logging.error(e)
+

@@ -15,7 +15,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 
 # Standard Library imports
-from typing import AnyStr, List, Generic, TypeVar
+from typing import AnyStr, List, Generic, TypeVar, Tuple
 # 3rd Party imports
 import toponetx as tnx
 from toponetx.classes.cell import Cell
@@ -25,7 +25,7 @@ import numpy as np
 from topology import LaplacianType
 
 CellDescriptor = TypeVar('CellDescriptor')
-SimplexType = List
+SimplexType = List | Tuple
 CellType = Cell
 __all__ = ['SimplexType', 'CellType', 'ComplexLaplacian']
 
@@ -86,6 +86,8 @@ class ComplexLaplacian(Generic[CellDescriptor]):
             cplx = tnx.SimplicialComplex(complex_elements)
         elif isinstance(complex_elements[0], CellType):
             cplx = tnx.CellComplex(complex_elements)
+        elif isinstance(complex_elements[0], tnx.SimplicialComplex):
+            cplx = complex_elements[0]
         else:
             raise TypeError(f'Type of Complex elements {complex_elements[0]} is not supported')
         return cplx

@@ -28,7 +28,7 @@ class FeaturedCell:
     """
     Define a featured cell as a combination of a Cell (toponetx) and a features vector defined
     as a Numpy array
-    @param cell: Toponetx
+    @param cell: Toponetx cell
     @type cell: Cell
     @param features: Feature vector (dim=1)
     @type features: numpy.array
