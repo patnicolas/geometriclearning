@@ -32,11 +32,12 @@ class FeaturedHyperGraphPlay(Play):
     "Exploring Hypergraphs with TopoX Library"
 
     References:
-    - Article:
+    - Article: https://patricknicolas.substack.com/p/exploring-hypergraphs-with-topox
     - Implementation
-      FeaturedHyperEdge:
-      FeaturedHyperGraph
+      https://github.com/patnicolas/geometriclearning/blob/main/python/topology/hypergraph/featured_hyperedge.py
+      https://github.com/patnicolas/geometriclearning/blob/main/python/topology/hypergraph/featured_hypergraph.py
     - Evaluation
+      https://github.com/patnicolas/geometriclearning/blob/main/play/featured_hypergraph_play.py
 
     The features are implemented by the class FeaturedHypergraph in the source file
                        python/topology/hypergraph/featured_hypergraph.py
@@ -51,6 +52,7 @@ class FeaturedHyperGraphPlay(Play):
     def play(self) -> None:
         """
         Sequence of tests used in the substack article "Exploring Hypergraphs with TopoX Library"
+        https://patricknicolas.substack.com/p/exploring-hypergraphs-with-topox
         """
         self.play_adjacency()
         self.play_incidence()
