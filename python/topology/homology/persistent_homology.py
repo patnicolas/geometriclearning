@@ -14,91 +14,168 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from dataclasses import dataclass
-import logging
-from typing import List, Optional, AnyStr, Dict, AnyStr, Any
+from typing import Dict, AnyStr, Any
 from enum import Enum, unique
+import logging
+import python
 # 3rd Party imports
 import tadasets
 import numpy as np
 import matplotlib.pyplot as plt
-import python
+
+__all__ = ['ShapedDataGenerator', 'PersistentHomology']
 
 
 @unique
-class HomologyShape(Enum):
-    CIRCLE = lambda kwargs: ('CIRCLE', tadasets.dsphere(d=1, n=kwargs.get('n', 100), noise=kwargs.get('noise', 0.0)))
-    SPHERE = lambda kwargs: ('SPHERE', tadasets.sphere(n=kwargs.get('n', 100), noise=kwargs.get('noise', 0.0)))
-    TORUS = lambda kwargs: ('TORUS', tadasets.torus(n=kwargs.get('n', 100),
-                                                    c=kwargs.get('c', 10),
-                                                    a=kwargs.get('a', 0.2),
-                                                    noise=kwargs.get('noise', 0.0)))
+class ShapedDataGenerator(Enum):
+    """
+    Enumerator for generation of shaped data with default values.
+    The lambdas take a dictionary as input and output a tuple (Shape type, data generator)
+        { } -> (Shape_type, shaped data generator)
+
+    Example of input dictionary:
+        { 'n': 250, 'noise': 0.4, 'c': 8}
+    """
+    CIRCLE = lambda k: ('Circle', tadasets.dsphere(d=1, n=k.get('n', 100), noise=k.get('noise', 0.0)))
+    SPHERE = lambda k: ('Sphere', tadasets.sphere(n=k.get('n', 100), noise=k.get('noise', 0.0)))
+    TORUS = lambda k: ('Torus', tadasets.torus(n=k.get('n', 100),
+                                               c=k.get('c', 10),
+                                               a=k.get('a', 0.2),
+                                               noise=k.get('noise', 0.0)))
+    SWISS_ROLL = lambda k: ('Swiss Roll', tadasets.swiss_roll(n=k.get('n', 100),
+                                                              noise=k.get('noise', 0.0)))
 
     def __call__(self, *args, **kwargs) -> (AnyStr, np.array):
+        """
+        Method to return the lambda associated to a shape. The parameter values are validated prior execution of
+        lambda.
+
+        @param args: Arguments list
+        @type args: List[Any]
+        @param kwargs: Arguments dictionary
+        @type kwargs: Dict[AnyStr, Any]
+        @return: Tuple (Shape type, shaped data)
+        @rtype: Tuple
+        """
+        ShapedDataGenerator.__validate(kwargs)
         return self.value(*args, **kwargs)
 
+    @staticmethod
+    def __validate(props: Dict[AnyStr, Any]) -> None:
+        error = []
+        if props.get('n', 100) < 10 or props.get('n', 100) > 20000:
+            error.append(f"n {props.get('n', 100)} should be in [10, 20000]")
+        if props.get('noise', 0.1) < 0.0 or props.get('noise', 0.1) > 0.5:
+            error.append(f"noise {props.get('noise', 0.15)} should be in [0, 0.5]")
+        if props.get('c', 10) < 1 or props.get('c', 10) > 50:
+            error.append(f"c {props.get('c', 10)} should be in [1, 50]")
+
+        if len(error) > 0:
+            raise ValueError(' - '.join(error))
 
 
 class PersistentHomology(object):
-    def __init__(self, homology_shape: HomologyShape) -> None:
-        self.homology_shape = homology_shape
+    """
+    Wrapper to evaluate the Persistent Homology implementation in scikit-tda - Topological Data Analysis library.
+    scikit-tda leverage the Ripser library
+    Documentation reference: https://docs.scikit-tda.org/en/latest/
 
-    def create_data(self, kwargs: Dict[AnyStr, Any]) -> (AnyStr, np.array, np.array):
-        shape_type, raw_data = self.homology_shape(kwargs)
-        kwargs['noise'] = 0.0
-        kwargs['n'] = 8000
-        _, denoised_data = self.homology_shape(kwargs)
+    The data is synthetically generated from a shape (Torus, Sphere,) with additive noise.
+    """
+    num_shape_data_point = 48000
+    size_raw_data_point = 120
+    size_shaped_data_point = 36
+
+    def __init__(self, shaped_data_generator: ShapedDataGenerator) -> None:
+        """
+        Constructor for the persistent homology evaluator.
+
+        @param shaped_data_generator: Shape associated with the data to be used in the homology
+        @type shaped_data_generator: ShapedDataGenerator
+        """
+        self.shaped_data_generator = shaped_data_generator
+
+    def create_data(self, props: Dict[AnyStr, Any]) -> (AnyStr, np.array, np.array):
+        """
+        Create data using a dictionary descriptor for the shaped data generator. The generator is defined by the
+        enumerator ShapedDataGenerator
+
+        @param props: Configuration parameters for the shaped data generator
+        @type props: Dict[AnyStr, Any]
+        @return: Tuple (data shape type, shaped data, raw data with noise)
+        @rtype: Tuple[AnyStr, np.array, np.array]
+        """
+        shape_type, raw_data = self.shaped_data_generator(props)
+        props['noise'] = 0.0
+        props['n'] = PersistentHomology.num_shape_data_point
+        _, denoised_data = self.shaped_data_generator(props)
         return shape_type, denoised_data, raw_data
 
     def plot(self, kwargs: Dict[AnyStr, Any]) -> None:
-        shape_type, shape_data, raw_data = self.create_data(kwargs)
+        """
+        Generate a 2D or 3D scatter plot with raw (noisy) data and shaped data using the enumerator ShapedDataGenerator
+        @param kwargs:
+        @type kwargs:
+        """
+        shape_type, shaped_data, raw_data = self.create_data(kwargs)
         fig = plt.figure(figsize=(8, 8))
 
-        match self.homology_shape:
-            case HomologyShape.CIRCLE:
-                PersistentHomology.__plot2d(shape_type, shape_data, raw_data)
-            case HomologyShape.TORUS:
-                PersistentHomology.__plot3d(shape_data, raw_data, fig)
-            case HomologyShape.SPHERE:
-                PersistentHomology.__plot3d(shape_data, raw_data, fig)
+        match self.shaped_data_generator:
+            case ShapedDataGenerator.CIRCLE:
+                PersistentHomology.__plot2d(shape_type, shaped_data, raw_data)
+            case ShapedDataGenerator.TORUS | ShapedDataGenerator.SWISS_ROLL | ShapedDataGenerator.SPHERE:
+                PersistentHomology.__plot3d(shaped_data, raw_data, fig)
+
+        plt.title(shape_type)
         plt.show()
 
+    def persistence_diagram(self, props: Dict[AnyStr, Any]) -> None:
+        from ripser import Rips
+
+        shape_type, data = self.shaped_data_generator(props)
+        # Persistence diagrams are computation intensive so we need to limit the amount of data to be used.
+        if len(data):
+            logging.warn(f'Number of data points for persistence diagram {len(data)} truncated to 2048')
+            data = data[:2048]
+        # Instantiate the rips complex
+        rips = Rips()
+        rips.transform(data)
+        rips.plot(show=True, title=f'{shape_type} data')
+
+    """ ---------------------  Private supporting methods ------------------------- """
     @staticmethod
-    def __plot2d(shape_type: AnyStr, shape_data: np.array, raw_data: np.array) -> None:
-        plt.scatter(shape_data[:, 0], shape_data[:, 1], label='original shape', s=16)
-        plt.scatter(raw_data[:, 0], raw_data[:, 1], label='noisy shape', s=48)
-        plt.title(shape_type)
+    def __plot2d(shape_type: AnyStr, shaped_data: np.array, raw_data: np.array) -> None:
+        plt.scatter(x=shaped_data[:, 0],
+                    y=shaped_data[:, 1],
+                    label=f'{shape_type} shaped data',
+                    s=PersistentHomology.size_shaped_data_point)
+        plt.scatter(x=raw_data[:, 0],
+                    y=raw_data[:, 1],
+                    label=f'{shape_type} raw data',
+                    s=PersistentHomology.size_raw_data_point)
         plt.legend()
 
     @staticmethod
-    def __plot3d(shape_data: np.array, raw_data: np.array, fig) -> None:
+    def __plot3d(shaped_data: np.array, raw_data: np.array, fig) -> None:
         from mpl_toolkits.mplot3d import Axes3D
 
         ax = fig.add_subplot(111, projection='3d')
-        ax.scatter(shape_data[:, 0], shape_data[:, 1], shape_data[:, 2], color='grey', alpha=0.5, s=20, edgecolor='none')
-        ax.scatter(raw_data[:, 0], raw_data[:, 1], raw_data[:, 2], color='red', alpha=0.5, s=100,  edgecolor='none')
+        ax.scatter(xs=shaped_data[:, 0],
+                   ys=shaped_data[:, 1],
+                   zs=shaped_data[:, 2],
+                   color='grey',
+                   alpha=0.08,
+                   s=PersistentHomology.size_shaped_data_point,
+                   edgecolor='none')
+        ax.scatter(xs=raw_data[:, 0],
+                   ys=raw_data[:, 1],
+                   zs=raw_data[:, 2],
+                   color='red',
+                   alpha=1.0,
+                   s=PersistentHomology.size_raw_data_point,
+                   edgecolor='none')
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
         ax.set_box_aspect([1, 1, 1])
 
-
-
-
-
-
-
-if __name__ == '__main__':
-    num_raw_points = 260
-    kwargs = {'n': num_raw_points}
-    persistent_homology = PersistentHomology(HomologyShape.TORUS)
-    persistent_homology.plot(kwargs)
-    kwargs['n'] = num_raw_points
-    persistent_homology = PersistentHomology(HomologyShape.SPHERE)
-    persistent_homology.plot(kwargs)
-    """
-    persistent_homology.plot3d(kwargs_1)
-
-    persistent_homology = PersistentHomology(HomologyShape.TORUS)
-    persistent_homology.plot3d(kwargs_1)
-    """

@@ -28,8 +28,9 @@ pillow==11.1.0
 propcache==0.3.1
 psutil==7.0.0
 pyparsing==3.2.3
-ray~=2.47.1
+ray~=2.52.1
 requests==2.32.4
+ripser==0.6.12
 scikit-learn==1.7.0
 scikit-tda==1.1.1
 scipy==1.15.2
@@ -47,5 +48,6 @@ torchaudio==2.1.0
 torchvision==0.16.0
 tqdm==4.67.1
 typing_extensions==4.13.0
-urllib3~=2.3.0
+umap-learn==0.5.8
+urllib3~=2.5.0
 yarl==1.18.3
