@@ -207,7 +207,7 @@ def play_build_simplicial_complex(dataset_name: AnyStr) -> None:
                                                              num_simplex_2_eigenvectors=4)
 
     lifted_complex_elements = hodge_spectrum_config.get_complex_features(toponetx_play.complex)
-    logging.info(f'\n{lifted_complex_elements.dump(4)}')
+    logging.info(f'\n{lifted_complex_elements[:4]}')
     logging.info('\nSimplicial from random')
     toponetx_play = TopoNetXPlay[SimplicialComplex].build_from_random(dataset=dataset_name,
                                                                       complex_type='simplicial',
@@ -215,7 +215,7 @@ def play_build_simplicial_complex(dataset_name: AnyStr) -> None:
                                                                       prob_edge=0.44)
     logging.info(toponetx_play)
     lifted_complex_elements = hodge_spectrum_config.get_complex_features(toponetx_play.complex)
-    logging.info(f'\n{lifted_complex_elements.dump(4)}')
+    logging.info(f'\n{lifted_complex_elements[:4]}')
 
 
 def play_build_cell_complex(dataset_name: AnyStr) -> None:
@@ -229,7 +229,7 @@ def play_build_cell_complex(dataset_name: AnyStr) -> None:
                                                              num_simplex_2_eigenvectors=4)
 
     lifted_complex_elements = hodge_spectrum_config.get_complex_features(toponetx_play.complex)
-    logging.info(f'\n{lifted_complex_elements.dump(4)}')
+    logging.info(f'\n{lifted_complex_elements[:4]}')
     logging.info('\nSimplicial from random')
     toponetx_play = TopoNetXPlay[CellComplex].build_from_random(dataset=dataset_name,
                                                                 complex_type='cell',
@@ -237,11 +237,11 @@ def play_build_cell_complex(dataset_name: AnyStr) -> None:
                                                                 prob_edge=0.44)
     logging.info(toponetx_play)
     lifted_complex_elements = hodge_spectrum_config.get_complex_features(toponetx_play.complex)
-    logging.info(f'\n{lifted_complex_elements.dump(4)}')
+    logging.info(f'\n{lifted_complex_elements[:4]}')
 
 
 if __name__ == '__main__':
     # play_build_simplicial_complex('Cora')
     play_build_cell_complex('Cora')
-    #play_build_simplicial_complex('PubMed')
+    # play_build_simplicial_complex('PubMed')
     play_build_cell_complex('PubMed')
