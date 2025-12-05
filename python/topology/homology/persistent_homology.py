@@ -25,6 +25,8 @@ import matplotlib.pyplot as plt
 
 __all__ = ['ShapedDataGenerator', 'PersistentHomology']
 
+from topology.homology.persistence_diagrams import PersistenceDiagram
+
 
 @unique
 class ShapedDataGenerator(Enum):
@@ -36,14 +38,17 @@ class ShapedDataGenerator(Enum):
     Example of input dictionary:
         { 'n': 250, 'noise': 0.4, 'c': 8}
     """
-    CIRCLE = lambda k: ('Circle', tadasets.dsphere(d=1, n=k.get('n', 100), noise=k.get('noise', 0.0)))
-    SPHERE = lambda k: ('Sphere', tadasets.sphere(n=k.get('n', 100), noise=k.get('noise', 0.0)))
-    TORUS = lambda k: ('Torus', tadasets.torus(n=k.get('n', 100),
-                                               c=k.get('c', 10),
-                                               a=k.get('a', 0.2),
-                                               noise=k.get('noise', 0.0)))
-    SWISS_ROLL = lambda k: ('Swiss Roll', tadasets.swiss_roll(n=k.get('n', 100),
-                                                              noise=k.get('noise', 0.0)))
+    CIRCLE = lambda k: (f"Circle {ShapedDataGenerator.__noise_label(k)}",
+                        tadasets.dsphere(d=1, n=k.get('n', 100), noise=k.get('noise', 0.0)))
+    SPHERE = lambda k: (f"Sphere {ShapedDataGenerator.__noise_label(k)}",
+                        tadasets.sphere(n=k.get('n', 100), noise=k.get('noise', 0.0)))
+    TORUS = lambda k: (f"Torus {ShapedDataGenerator.__noise_label(k)}",
+                       tadasets.torus(n=k.get('n', 100),
+                                      c=k.get('c', 10),
+                                      a=k.get('a', 0.2),
+                                      noise=k.get('noise', 0.0)))
+    SWISS_ROLL = lambda k: (f"Swiss Roll {ShapedDataGenerator.__noise_label(k)}",
+                            tadasets.swiss_roll(n=k.get('n', 100), noise=k.get('noise', 0.0)))
 
     def __call__(self, *args, **kwargs) -> (AnyStr, np.array):
         """
@@ -59,6 +64,11 @@ class ShapedDataGenerator(Enum):
         """
         ShapedDataGenerator.__validate(kwargs)
         return self.value(*args, **kwargs)
+
+    @staticmethod
+    def __noise_label(k: Dict[AnyStr, Any]) -> AnyStr:
+        noise = k.get('noise', 0.0)
+        return f"with {k.get('noise', 0.0)*100}"% noise if noise > 0.0 else ""
 
     @staticmethod
     def __validate(props: Dict[AnyStr, Any]) -> None:
@@ -121,8 +131,10 @@ class PersistentHomology(object):
         fig = plt.figure(figsize=(8, 8))
 
         match self.shaped_data_generator:
+            # 2D scatter plot
             case ShapedDataGenerator.CIRCLE:
                 PersistentHomology.__plot2d(shape_type, shaped_data, raw_data)
+            # 3D scatter plot
             case ShapedDataGenerator.TORUS | ShapedDataGenerator.SWISS_ROLL | ShapedDataGenerator.SPHERE:
                 PersistentHomology.__plot3d(shaped_data, raw_data, fig)
 
@@ -130,19 +142,19 @@ class PersistentHomology(object):
         plt.show()
 
     def persistence_diagram(self, props: Dict[AnyStr, Any]) -> None:
-        from ripser import Rips
-
         shape_type, data = self.shaped_data_generator(props)
         # Persistence diagrams are computation intensive so we need to limit the amount of data to be used.
-        if len(data):
-            logging.warn(f'Number of data points for persistence diagram {len(data)} truncated to 2048')
+        if len(data) >= 2048:
+            logging.warning(f'Number of data points for persistence diagram {len(data)} truncated to 2048')
             data = data[:2048]
-        # Instantiate the rips complex
-        rips = Rips()
-        rips.transform(data)
-        rips.plot(show=True, title=f'{shape_type} data')
+
+        # Instantiate the persistence diagram of given type
+        persistence_diagram = PersistenceDiagram(data, shape_type)
+        # Display diagram
+        persistence_diagram.display()
 
     """ ---------------------  Private supporting methods ------------------------- """
+
     @staticmethod
     def __plot2d(shape_type: AnyStr, shaped_data: np.array, raw_data: np.array) -> None:
         plt.scatter(x=shaped_data[:, 0],
