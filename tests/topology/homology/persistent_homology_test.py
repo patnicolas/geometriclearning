@@ -41,7 +41,7 @@ class PersistentHomologyTest(unittest.TestCase):
             logging.error(e)
             self.assertFalse(False)
 
-    @unittest.skip('Ignore')
+    # @unittest.skip('Ignore')
     def test_create_plot_sphere(self):
         try:
             num_raw_points = 120
@@ -52,7 +52,7 @@ class PersistentHomologyTest(unittest.TestCase):
             logging.error(e)
             self.assertFalse(True)
 
-    @unittest.skip('Ignore')
+    # @unittest.skip('Ignore')
     def test_create_plot_torus(self):
         try:
             num_raw_points = 260
@@ -63,7 +63,7 @@ class PersistentHomologyTest(unittest.TestCase):
             logging.error(e)
             self.assertFalse(True)
 
-    @unittest.skip('Ignore')
+    # @unittest.skip('Ignore')
     def test_create_plot_swiss_roll(self):
         try:
             num_raw_points = 260
@@ -84,6 +84,7 @@ class PersistentHomologyTest(unittest.TestCase):
             logging.error(e)
             self.assertFalse(True)
 
+    @unittest.skip('Ignore')
     def test_persistence_diagrams_noisy_sphere(self):
         try:
             num_raw_points = 128

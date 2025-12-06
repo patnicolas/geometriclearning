@@ -14,19 +14,36 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import AnyStr
+from typing import AnyStr, Dict, Any, Self
 # 3rd Party imports
 import persim
 import numpy as np
 import matplotlib.pyplot as plt
+# Library imports
+from topology.homology.shaped_data_generator import ShapedDataGenerator
 
-
-
-class PersistenceDiagram(object):
+class PersistenceDiagrams(object):
+    num_shape_data_point = 48000
 
     def __init__(self, data: np.array, data_shape: AnyStr = None) -> None:
         self.data = data
         self.data_shape = data_shape
+
+    @classmethod
+    def build(cls, props: Dict[AnyStr, Any], shaped_data_generator: ShapedDataGenerator) -> Self:
+        """
+        Create data using a dictionary descriptor for the shaped data generator. The generator is defined by the
+        enumerator ShapedDataGenerator
+
+        @param props: Configuration parameters for the shaped data generator
+        @type props: Dict[AnyStr, Any]
+        @param shaped_data_generator: Shape associated with the data to be used in the homology
+        @type shaped_data_generator: ShapedDataGenerator
+        @return: Instance of Persistence Diagrams
+        @rtype: PersistenceDiagrams
+        """
+        shaped_data, shape_type = shaped_data_generator(props)
+        return cls(shaped_data, shape_type)
 
     def display(self) -> None:
         import ripser
@@ -35,11 +52,12 @@ class PersistenceDiagram(object):
         from persim.landscapes import plot_landscape_simple
 
         fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(8, 8))
+        fig.set_facecolor('#f0f9ff')
         data_shape = self.data_shape if self.data_shape is not None else 'Unidentified'
         fig.suptitle(f'Persistence Diagrams:  {data_shape}', fontsize=15, color='red')
 
         # Instantiate the rips complex
-        rips = Rips()
+        rips = Rips(maxdim=2)
         rips_data = rips.transform(self.data)
 
         # Second plot: Persistence Image
@@ -70,6 +88,23 @@ class PersistenceDiagram(object):
         # First plot: Persistence diagram (Birth - Death)
         self.__set_plot_env(axes[0][0], title='Persistent Diagram', x_label='Birth', y_label='Death')
         persim.plot_diagrams(show=True, diagrams=rips_data, ax=axes[0][0])
+
+    def show_shaped_data(self, shape_data: np.array) -> None:
+
+        shaped_data, shape_type = self.shaped_data_generator(props)
+        shape_type, shaped_data, raw_data = self.create_data(props)
+        fig = plt.figure(figsize=(8, 8))
+
+        match self.shaped_data_generator:
+            # 2D scatter plot
+            case ShapedDataGenerator.CIRCLE:
+                PersistentHomology.__plot2d(shape_type, shaped_data, raw_data)
+            # 3D scatter plot
+            case ShapedDataGenerator.TORUS | ShapedDataGenerator.SWISS_ROLL | ShapedDataGenerator.SPHERE:
+                PersistentHomology.__plot3d(shaped_data, raw_data, fig)
+
+        plt.title(label=shape_type, fontdict={'family': 'serif', 'size': 23, 'weight': 'bold', 'color': 'blue'})
+        plt.show()
 
     """ --------------------- Private supporting methods ------------------- """
 
