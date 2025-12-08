@@ -24,6 +24,7 @@ networkx==3.4.2
 numpy==1.26.4
 optuna==4.4.0
 pandas~=2.3.0
+persim==0.3.8
 pillow==11.1.0
 propcache==0.3.1
 psutil==7.0.0
