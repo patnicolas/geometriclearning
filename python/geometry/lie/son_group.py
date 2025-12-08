@@ -132,7 +132,7 @@ class SOnGroup(object):
 
         # If there is more than one basis matrices...
         if len(weights) > 1:
-            return sum([weights[idx]*torch.Tensor(mat) for idx, mat in enumerate(basis_matrices)])
+            return torch.tensor([weights[idx]*torch.Tensor(mat) for idx, mat in enumerate(basis_matrices)]).sum()
         else:
             _, basic_matrix = next(iter(basis_matrices))
             return weights[0]*torch.Tensor(basic_matrix)
@@ -282,7 +282,7 @@ class SOnGroup(object):
             case 4:
                 return point.T
             case _:
-                raise GeometricException(f'Dimension {self.__group.n} is not supported')
+                raise LieException(f'Dimension {self.__group.n} is not supported')
 
     def project(self, point: torch.Tensor) -> torch.Tensor:
         """
@@ -304,7 +304,7 @@ class SOnGroup(object):
             # Homegrown computation
             case 4: return SOnGroup.__projection_so4(point)
             case _:
-                raise GeometricException(f'Dimension {self.__group.n} is not supported')
+                raise LieException(f'Dimension {self.__group.n} is not supported')
 
     def equal(self, t1: torch.Tensor, t2: torch.Tensor, rtol: float = 1e-6) -> bool:
         """
@@ -359,8 +359,6 @@ class SOnGroup(object):
 
     @staticmethod
     def __projection_so4(point: torch.Tensor) -> torch.Tensor:
-        import numpy as np
-
         U, _, Vtrans = np.linalg.svd(point.numpy())
         V = [1, 1, 1, np.linalg.det(U @ Vtrans)]
         R = U @ np.diag(V) @ Vtrans

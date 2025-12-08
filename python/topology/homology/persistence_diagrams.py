@@ -19,6 +19,7 @@ from typing import AnyStr, Dict, Any, Self
 import persim
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
 # Library imports
 from topology.homology.shaped_data_generator import ShapedDataGenerator
 
@@ -86,25 +87,12 @@ class PersistenceDiagrams(object):
         plot_landscape_simple(pla, depth_range=range(6))
 
         # First plot: Persistence diagram (Birth - Death)
-        self.__set_plot_env(axes[0][0], title='Persistent Diagram', x_label='Birth', y_label='Death')
-        persim.plot_diagrams(show=True, diagrams=rips_data, ax=axes[0][0])
 
-    def show_shaped_data(self, shape_data: np.array) -> None:
+        # self.__set_plot_env(axes[0][0], title='Persistent Diagram', x_label='Birth', y_label='Death')
+        # persim.plot_diagrams(show=True, diagrams=rips_data, ax=axes[0][0])
 
-        shaped_data, shape_type = self.shaped_data_generator(props)
-        shape_type, shaped_data, raw_data = self.create_data(props)
-        fig = plt.figure(figsize=(8, 8))
-
-        match self.shaped_data_generator:
-            # 2D scatter plot
-            case ShapedDataGenerator.CIRCLE:
-                PersistentHomology.__plot2d(shape_type, shaped_data, raw_data)
-            # 3D scatter plot
-            case ShapedDataGenerator.TORUS | ShapedDataGenerator.SWISS_ROLL | ShapedDataGenerator.SPHERE:
-                PersistentHomology.__plot3d(shaped_data, raw_data, fig)
-
-        plt.title(label=shape_type, fontdict={'family': 'serif', 'size': 23, 'weight': 'bold', 'color': 'blue'})
-        plt.show()
+        birth_death_diagram = BirthDeathDiagram(axes[0][0], rips_data)
+        birth_death_diagram.display(title='Persistent Diagram', x_label='Birth', y_label='Death')
 
     """ --------------------- Private supporting methods ------------------- """
 
@@ -115,4 +103,49 @@ class PersistenceDiagrams(object):
         ax.get_xaxis().set_ticks([])
         ax.get_yaxis().set_ticks([])
         ax.set_title(label=title, fontdict={'family': 'serif', 'size': 14, 'color': 'blue'})
+
+
+from abc import ABC, abstractmethod
+
+class PersistenceDiagramType(ABC):
+    def __init__(self, ax: Axes) -> None:
+        self.ax = ax
+
+    @abstractmethod
+    def display(self, title: AnyStr, x_label: AnyStr, y_label: AnyStr) -> None:
+        pass
+
+    def _set_plot_env(self, title: AnyStr, x_label: AnyStr, y_label: AnyStr) -> None:
+        self.ax.set_xlabel(x_label, fontdict={'family': 'serif', 'size': 11,  'style': 'italic'})
+        self.ax.set_ylabel(y_label, fontdict={'family': 'serif', 'size': 11,  'style': 'italic'})
+        self.ax.get_xaxis().set_ticks([])
+        self.ax.get_yaxis().set_ticks([])
+        self.ax.set_title(label=title, fontdict={'family': 'serif', 'size': 14, 'color': 'blue'})
+
+class BirthDeathDiagram(PersistenceDiagramType):
+    def __init__(self, ax: Axes, diagram_data) -> None:
+        super(BirthDeathDiagram, self).__init__(ax)
+        self.diagram_data = diagram_data
+
+    def display(self, title: AnyStr, x_label: AnyStr, y_label: AnyStr) -> None:
+        self._set_plot_env(title=title, x_label=x_label, y_label=y_label)
+        persim.plot_diagrams(show=True, diagrams=self.diagram_data, ax=self.ax)
+
+class PersistenceImage(PersistenceDiagramType):
+    def __init__(self, ax: Axes, diagram_data) -> None:
+        super(PersistenceImage, self).__init__(ax)
+        self.diagram_data = diagram_data
+
+    def display(self, title: AnyStr, x_label: AnyStr, y_label: AnyStr) -> None:
+        import ripser
+        from persim import PersistenceImager
+
+        dgms = ripser.ripser(self.diagram_data)['dgms']
+        pimager = PersistenceImager(pixel_size=0.3)
+        input_data = dgms[1:3]
+        pimager.fit(input_data)
+        output_image = pimager.transform(input_data)
+        self.ax.matshow(output_image[0].T, **{"origin": "lower"})
+        self._set_plot_env(title=title, x_label=x_label, y_label=y_label)
+
 

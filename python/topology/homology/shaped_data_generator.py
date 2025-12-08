@@ -34,20 +34,26 @@ class ShapedDataGenerator(Enum):
         { 'n': 250, 'noise': 0.4, 'c': 8}
     """
     size_shaped_data_point = 64000
+    """ Normal Random distribution on 3D ambient space """
     NORMAL = lambda k: (np.random.randn(k.get('n', 100), 3), 'Normal Random Distribution')
+    """ Uniform Random distribution on 3D ambient space """
     UNIFORM = lambda k : (np.random.rand(k.get('n', 100), 3), 'Uniform Random Distribution')
+    """ Circle on 2D space """
     CIRCLE = lambda k: (tadasets.dsphere(d=1, n=k.get('n', 100), noise=k.get('noise', 0.0)),
                         ShapedDataGenerator.__title(k, 'Circle')
                         )
+    """ 3D sphere """
     SPHERE = lambda k: (tadasets.sphere(n=k.get('n', 100), noise=k.get('noise', 0.0)),
                         ShapedDataGenerator.__title(k, 'Sphere')
                         )
+    """  Torus """
     TORUS = lambda k: (tadasets.torus(n=k.get('n', 100),
                                       c=k.get('c', 10),
                                       a=k.get('a', 0.2),
                                       noise=k.get('noise', 0.0)),
                        ShapedDataGenerator.__title(k, 'Torus')
                        )
+    """ Swiss Roll"""
     SWISS_ROLL = lambda k: (tadasets.swiss_roll(n=k.get('n', 100), noise=k.get('noise', 0.0)),
                             ShapedDataGenerator.__title(k, 'Swiss Roll')
                             )
@@ -92,7 +98,7 @@ class ShapedDataDisplay(object):
     def __init__(self, shaped_data_generator: ShapedDataGenerator) -> None:
         self.shaped_data_generator = shaped_data_generator
 
-    def show(self, props: Dict[AnyStr, Any], noise: float) -> None:
+    def __call__(self, props: Dict[AnyStr, Any], noise: float) -> None:
         raw_data, shape_type = self.shaped_data_generator(props)
         props['noise'] = noise
         props['n'] = 96000
@@ -109,6 +115,8 @@ class ShapedDataDisplay(object):
 
         plt.title(label=shape_type, fontdict={'family': 'serif', 'size': 23, 'weight': 'bold', 'color': 'blue'})
         plt.show()
+
+    """ ------------------------  Private Supporting Methods ---------------------- """
 
     @staticmethod
     def __plot2d(shape_type: AnyStr, shaped_data: np.array, raw_data: np.array) -> None:
