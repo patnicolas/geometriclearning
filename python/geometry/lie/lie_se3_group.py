@@ -124,8 +124,6 @@ class LieSE3Group(object):
         algebra_element[:3, :3] = rot_matrix
         algebra_element[:3, 3] = trans_matrix.flatten()
 
-        # rotation_matrix, translation_matrix = LieSE3Group.reshape(rot_matrix, trans_matrix)
-        # algebra_element = np.concatenate([rotation_matrix, translation_matrix], axis=1)
         self.se3_element = SE3Element(algebra_element, self.lie_group.exp(algebra_element))
         # Convert the (3, 3) Rotation matrix and (1, 3) Translation matrix into a (6, ) vector
         self.tangent_vector = LieSE3Group.get_tangent_vector(rot_matrix, trans_matrix)
