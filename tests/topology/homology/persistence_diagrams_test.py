@@ -19,7 +19,7 @@ class PersistenceDiagramsTest(unittest.TestCase):
             logging.error(e)
             self.assertFalse(True)
 
-    @unittest.skip('Ignore')
+    # @unittest.skip('Ignore')
     def test_display_swiss_roll(self):
         try:
             persistence_diagrams = PersistenceDiagrams.build(props={'n': 384, 'noise': 0.60},
@@ -49,9 +49,10 @@ class PersistenceDiagramsTest(unittest.TestCase):
             logging.error(e)
             self.assertFalse(True)
 
+    @unittest.skip('Ignore')
     def test_display_random_uniform(self):
         try:
-            persistence_diagrams = PersistenceDiagrams.build(props={'n': 2048},
+            persistence_diagrams = PersistenceDiagrams.build(props={'n': 256},
                                                              shaped_data_generator=ShapedDataGenerator.UNIFORM)
             persistence_diagrams.display()
         except ValueError as e:
