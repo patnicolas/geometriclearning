@@ -1,10 +1,17 @@
 import unittest
 import logging
 import python
-
 from topology.homology.shaped_data_generator import ShapedDataGenerator, ShapedDataDisplay
 
 class ShapedDataGeneratorTest(unittest.TestCase):
+
+    def test_show_uniform_random(self):
+        try:
+            uniform_data_display = ShapedDataDisplay(ShapedDataGenerator.UNIFORM)
+            uniform_data_display.__call__({'n': 200})
+        except ValueError as e:
+            logging.error(e)
+            self.assertFalse(True)
 
     def test_show_swiss_roll(self):
         try:

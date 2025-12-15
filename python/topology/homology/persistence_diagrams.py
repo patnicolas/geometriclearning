@@ -71,7 +71,7 @@ class PersistenceDiagrams(object):
         3 Subplot Persistence image
         4 Subplot Approximate persistence landscape
         5 Subplot Exact persistence landscape
-        6 Subplot Birth - death 
+        6 Subplot Birth - death
         """
         from ripser import Rips
 
@@ -101,7 +101,7 @@ class PersistenceDiagrams(object):
         # Exact Landscape
         exact_landscape_diagram = PersistenceLandscape(ax=axes[1][1],
                                                        diagram_data=self.data,
-                                                       hom_degree=0,
+                                                       hom_degree=1,
                                                        depth=6,
                                                        is_exact=True)
         exact_landscape_diagram.display(title='True Landscape ',
