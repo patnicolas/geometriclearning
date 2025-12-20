@@ -16,8 +16,6 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # Python standard library imports
 import logging
 from typing import Dict, Any, AnyStr
-# 3rd party library imports
-
 # Library imports
 from play import Play
 from topology.homology.shaped_data_generator import ShapedDataGenerator, ShapedDataDisplay
