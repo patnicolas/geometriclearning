@@ -17,6 +17,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 import logging
 from typing import List
 import python
+# 3rd Party library import
 import torch
 import taichi as ti
 import torch.nn as nn
@@ -24,6 +25,8 @@ import torch.optim as optim
 from sklearn.datasets import fetch_covtype
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+# Library import
+from play import Play
 
 # Identify the type of processor following the sequence ti.cuda, ti.vulkan, ti.metal and ti.opengl
 # Fast math set to true using 32-bit floating point
@@ -31,6 +34,13 @@ ti.init(arch=ti.gpu, fast_math=True)
 
 @ti.kernel
 def transpose_kernel(src: ti.types.ndarray(), dst: ti.types.ndarray()):
+    """
+    Default implementation of kernel for transposition of matrices as Taichi arrays
+    :param src: Input matrix
+    :type src: Taichi array
+    :param dst: Output matrix
+    :type dst: Taichi array
+    """
     for i, j in ti.ndrange(src.shape[0], src.shape[1]):
         dst[j, i] = src[i, j]
 
@@ -38,6 +48,13 @@ def transpose_kernel(src: ti.types.ndarray(), dst: ti.types.ndarray()):
 block_size: int = 32
 @ti.kernel
 def transpose_kernel(src: ti.types.ndarray(), dst: ti.types.ndarray()):
+    """
+    Fast implementation of kernel for transposition of matrices as Taichi arrays using shared blocks
+    :param src: Input matrix
+    :type src: Taichi array
+    :param dst: Output matrix
+    :type dst: Taichi array
+    """
     # We initialize block with size (block_size, block_size)
     ti.loop_config(block_dim=block_size*block_size)
     for i, j in ti.ndrange(src.shape[0], src.shape[1]):
@@ -67,6 +84,17 @@ def transpose_kernel(src: ti.types.ndarray(), dst: ti.types.ndarray()):
 # Kernel annotation to force compile-time evaluation of the function.
 @ti.kernel
 def taichi_forward(x: ti.types.ndarray(), W_T: ti.types.ndarray(), b: ti.types.ndarray(), y: ti.types.ndarray()):
+    """
+    Implementation of the forward or inference pass of neural network layer
+    :param x: Input value
+    :type x: Taichi array
+    :param W_T: Transposed weight or parameters matrix
+    :type W_T: Taichi array
+    :param b: Bias vector
+    :type b: Taichi array
+    :param y: Output of the inference (prediction)
+    :type y: Taichi array
+    """
     for i, j in ti.ndrange(x.shape[0], W_T.shape[0]):
         # Define the size of the group of threads to be executed concurrently on the GPU.
         ti.loop_config(block_dim=64)
@@ -85,7 +113,21 @@ def taichi_backward(x: ti.types.ndarray(),   # Input values
                     dX: ti.types.ndarray(),   # Derivative input value
                     dW: ti.types.ndarray(),   # Derivative weight
                     db: ti.types.ndarray()):  # Derivative bias
-
+    """
+    Implementation of the back propagation through the Neural network layers using Taichi DSL
+    :param x:  Input values
+    :type x:  Taichi array
+    :param W: Tensor of weights or model parameters
+    :type W:  Taichi array
+    :param dy: Error or difference prediction - expected
+    :type dy:  Taichi array
+    :param dX:  Difference in input values
+    :type dX:   Taichi array
+    :param dW:  Difference of weights
+    :type dW:  Taichi array
+    :param db:  Difference of bias
+    :type db:  Taichi array
+    """
     # Step 1: Propagate the diff dy  dX = SUM(dy * W)
     for i, k in ti.ndrange(dX.shape[0], dX.shape[1]):
         acc = 0.0
@@ -113,7 +155,10 @@ def taichi_backward(x: ti.types.ndarray(),   # Input values
 # Annotation required to link object attributes with the Taichi kernel
 @ti.data_oriented
 class TaichiDenseFunction(torch.autograd.Function):
-
+    """
+    Class that override the Autograd function (Automatic differentiation) that reimplements the forward
+    and backpropagation to leverage Taichi arrays and kernels
+    """
     @staticmethod
     def forward(ctx, x, W, b):
         # Enforce contiguous memory allocation for input, weights and bias
@@ -150,6 +195,10 @@ class TaichiDenseFunction(torch.autograd.Function):
 
 # Bridging PyTorch module hierarchy with Taichi Kernel
 class TaichiLinear(torch.nn.Module):
+    """
+    Implementation of the linear module or layer using Taichi. The constructor initializes the
+    model parameters with random value (similar to Torch)
+    """
     def __init__(self, input_dim: int, output_dim: int, scale_factor: float = 0.25) -> None:
         super().__init__()
         # Initialization of model parameters
@@ -162,6 +211,9 @@ class TaichiLinear(torch.nn.Module):
 
 
 class MLPTaichiModel(torch.nn.Module):
+    """
+    Implementation of a neural network using Linear layer processed through Taichi DSL.
+    """
     def __init__(self, input_dim: int, hidden_1_dim: int, hidden_2_dim: int, output_dim: int) -> None:
         super().__init__()
         # Replicate the PyTorch sequential modules
@@ -174,30 +226,18 @@ class MLPTaichiModel(torch.nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.fc3(self.act2(self.fc2(self.act1(self.fc1(x)))))
 
-"""
-    Simple application using Pytorch
-"""
-
-class MLPTorchModel(nn.Module):
-    def __init__(self, input_dim: int, hidden_1_dim: int, hidden_2_dim: int, output_dim: int) -> None:
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.Linear(input_dim, hidden_1_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_1_dim, hidden_2_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_2_dim, output_dim)
-        )
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.net(x)
-
 
 class ForestCoverModelTraining(object):
-    def __init__(self, model: nn.Module, num_epochs: int, learning_rate: float, display_loss: bool = False) -> None:
+    """
+    Implementation of the Training for the Forest cover dataset. The 3 methods are
+    - load_data:  Loading dataset
+    - train: Training model using either PyTorch model or Taichi model
+    - eval:  Evaluation of model
+    """
+    def __init__(self, model: nn.Module, n_epochs: int, learning_rate: float, display_loss: bool = False) -> None:
         self.model = model
         self.X_train, self.y_train, self.X_test, self.y_test = ForestCoverModelTraining.load_data()
-        self.num_epochs = num_epochs
+        self.num_epochs = n_epochs
         self.learning_rate = learning_rate
         self.display_loss = display_loss
 
@@ -237,7 +277,7 @@ class ForestCoverModelTraining(object):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            durations.append(time.time()-start)
+            durations.append(time.time() - start)
             if self.display_loss and (epoch + 1) % 5 == 0:
                 logging.info(f"Epoch {epoch + 1:3d} | Loss: {loss.item():.4f}")
         return durations
@@ -250,29 +290,78 @@ class ForestCoverModelTraining(object):
         logging.info(f"Test accuracy: {accuracy:.3f}")
 
 
+class NeuralNetworkTaichiPlay(Play):
+    """
+      Wrapper to implement the evaluation of Taichi Domain Specific Language as defined in Substack article:
+      'Turbocharging Neural Networks with Taichi Language'
+
+      References:
+      - Article: 
+      """
+
+    def __init__(self,
+                 torch_model: nn.Sequential,
+                 taichi_model: MLPTaichiModel,
+                 lr: float,
+                 n_epochs: int) -> None:
+        super(NeuralNetworkTaichiPlay, self).__init__()
+        self.torch_model = torch_model
+        self.taichi_model = taichi_model
+        self.lr = lr
+        self.n_epochs = n_epochs
+
+    def play(self) -> None:
+        """
+        Execute evaluation related to Substack article
+        """
+        forest_cover_torch_model_training = ForestCoverModelTraining(model=self.torch_model,
+                                                                     n_epochs=self.n_epochs,
+                                                                     learning_rate=self.lr,
+                                                                     display_loss=True)
+        torch_durations = forest_cover_torch_model_training.train()
+        logging.info(torch_durations)
+        forest_cover_torch_model_training.eval()
+
+        forest_cover_torch_model_training = ForestCoverModelTraining(model=self.taichi_model,
+                                                                     n_epochs=self.n_epochs,
+                                                                     learning_rate=self.lr,
+                                                                     display_loss=True)
+        taichi_durations = forest_cover_torch_model_training.train()
+        logging.info(taichi_durations)
+        forest_cover_torch_model_training.eval()
+        NeuralNetworkTaichiPlay.__plot(torch_durations, taichi_durations)
+
+    @staticmethod
+    def __plot(torch_durations: List[float], taichi_durations: List[float]) -> None:
+        from plots.plotter import Plotter, PlotterParameters
+
+        plot_params_dict = {
+            'count': 0,
+            'x_label': 'Epochs',
+            'y_label': 'Duration (secs.)',
+            'title': 'Comparison execution time\nPyTorch & Taichi Lang - Cuda 54x196x48x7',
+            'fig_size': (9, 7)
+        }
+        plot_params = PlotterParameters.build(plot_params_dict)
+        Plotter.plot([torch_durations, taichi_durations], ['Torch', 'Taichi'], plot_params)
+
+
 if __name__ == '__main__':
     import time
+    import random
 
-    forest_cover_torch_model = MLPTorchModel(input_dim=54, hidden_1_dim=196, hidden_2_dim=48, output_dim=7)
+    forest_cover_torch_model = nn.Sequential(
+            nn.Linear(in_features=54, out_features=196),
+            nn.ReLU(),
+            nn.Linear(in_features=196, out_features=48),
+            nn.ReLU(),
+            nn.Linear(in_features=48, out_features=7))
     forest_cover_taichi_model = MLPTaichiModel(input_dim=54, hidden_1_dim=196, hidden_2_dim=48, output_dim=7)
 
-    forest_cover_torch_model_training = ForestCoverModelTraining(model=forest_cover_torch_model,
-                                                                 num_epochs=12,
-                                                                 learning_rate=1e-3,
-                                                                 display_loss=True)
-    # start = time.time()
-    durations = forest_cover_torch_model_training.train()
-    logging.info(durations)
-    forest_cover_torch_model_training.eval()
-    # duration = 'Torch wine model: {:.3f}'.format(time.time() - start)
-
-    forest_cover_taichi_model_training = ForestCoverModelTraining(model=forest_cover_taichi_model,
-                                                                  num_epochs=12,
-                                                                  learning_rate=8e-3,
-                                                                  display_loss=True)
-    start = time.time()
-    durations = forest_cover_taichi_model_training.train()
-    logging.info(durations)
-    forest_cover_taichi_model_training.eval()
+    neural_network_taichi_play = NeuralNetworkTaichiPlay(torch_model=forest_cover_torch_model,
+                                                         taichi_model=forest_cover_taichi_model,
+                                                         lr=1e-3,
+                                                         n_epochs=48)
+    neural_network_taichi_play.play()
 
 
