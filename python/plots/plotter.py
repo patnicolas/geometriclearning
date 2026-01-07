@@ -153,6 +153,7 @@ class Plotter(object):
         # If not blocked then pause between each display
         if not block:
             plt.pause(plotter_parameters.multi_plot_pause)
+        plt.close(fig)
 
     @staticmethod
     def time_str() -> str:
