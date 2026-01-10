@@ -20,24 +20,66 @@ import torch
 __all__ = ['OlliverRicci']
 
 
-
-
-
-
 class OlliverRicci(object):
-    def __init__(self) -> None:
-        print('Ctr')
+    fudge_factor = 1e-8
+    default_early_stop_threshold = 5e-9
 
-    @staticmethod
-    def floyd_warshall(edge_index: torch.Tensor, num_nodes):
-        # Initialize distance matrix with a large value
-        dist = torch.full((num_nodes, num_nodes), float('inf')).to(edge_index.device)
-        dist.fill_diagonal_(0)
+    def __init__(self,
+                 alpha: float,
+                 entropy_reg: float,
+                 n_iters: int,
+                 early_stop_threshold: float = default_early_stop_threshold) -> None:
+        self.alpha = alpha
+        self.entropy_reg = entropy_reg
+        self.n_iters = n_iters
+        self.early_stop_threshold = early_stop_threshold
 
-        # Fill in immediate neighbors from edge_index
-        dist[edge_index[0], edge_index[1]] = 1
+    def sinkhorn_knopp(self,
+                       r: torch.Tensor,
+                       c: torch.Tensor,
+                       cost_matrix: torch.Tensor,
+                       early_stop_threshold: float) -> (int, torch.Tensor):
+        """
+        Computes the Sinkhorn approximation of the Wasserstein-1 distance.
+        """
+        # K is the kernel matrix  K = exp(-M/epsilon)
+        K = torch.exp(-cost_matrix / self.entropy_reg)
+        u = torch.ones_like(r) / r.shape[0]
+        iters = self.n_iters
 
-        # Iterative update (Floyd-Warshall)
-        for k in range(num_nodes):
-            dist = torch.min(dist, dist[:, k].unsqueeze(1) + dist[k, :].unsqueeze(0))
-        return dist
+        # Normalization with a fudge factor to ensure convexity
+        for i in range(self.n_iters):
+            u_prev = u
+            v = c / (torch.matmul(K.t(), u) + OlliverRicci.fudge_factor)
+            u = r / (torch.matmul(K, v) + OlliverRicci.fudge_factor)
+            if torch.abs(u - u_prev).max() < early_stop_threshold:
+                iters = i
+                break
+
+        optimal_transport = torch.sum(u * torch.matmul(K * cost_matrix, v))
+        return iters, optimal_transport
+
+    def compute(self, adj_matrix: torch.Tensor, shortest_paths, ) -> torch.Tensor:
+        """
+        adj_matrix: (N, N) tensor
+        shortest_paths: (N, N) tensor of geodesic distances
+        alpha: mass to stay at the current node
+        """
+        n = adj_matrix.shape[0]
+        curvature = torch.zeros_like(adj_matrix)
+
+        # Define neighborhood distributions m_x
+        # m_x(v) = alpha if v=x, else (1-alpha)/degree if v is neighbor
+        degrees = adj_matrix.sum(dim=1)
+        eye = torch.eye(n, device=adj_matrix.device)
+
+        # Probability measures for all nodes: (N, N)
+        m = (self.alpha * eye) + ((1 - self.alpha) * adj_matrix / degrees.unsqueeze(1))
+
+        # Calculate curvature for each existing edge
+        edges = torch.nonzero(adj_matrix)
+        for u, v in edges:
+            w1 = self.sinkhorn_knopp(m[u], m[v], shortest_paths)
+            dist_uv = shortest_paths[u, v]
+            curvature[u, v] = 1 - (w1 / dist_uv)
+        return curvature
