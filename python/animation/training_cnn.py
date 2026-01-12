@@ -15,6 +15,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from manim import *
 import torch
+import logging
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms
@@ -68,7 +69,7 @@ class TrainingCNN(Scene):
             outputs = model(images)
             loss = criterion(outputs, labels)
 
-            optimizer.zero_grad()
+            optimizer.zero_grad(set_to_none=True)
             loss.backward()
             optimizer.step()
 
