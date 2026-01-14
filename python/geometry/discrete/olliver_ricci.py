@@ -14,72 +14,79 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
+from typing import List, Tuple, Optional, Callable
+import logging
+import python
 # 3rd Party imports
 import torch
 # Library imports
+from geometry.discrete.floyd_warshall import FloydWarshall
+from geometry.discrete.sinkhorn_knopp import SinkhornKnopp
+
 __all__ = ['OlliverRicci']
 
 
-class OlliverRicci(object):
-    fudge_factor = 1e-8
-    default_early_stop_threshold = 5e-9
+class OlliverRicci(FloydWarshall):
 
     def __init__(self,
-                 alpha: float,
-                 entropy_reg: float,
-                 n_iters: int,
-                 early_stop_threshold: float = default_early_stop_threshold) -> None:
-        self.alpha = alpha
-        self.entropy_reg = entropy_reg
-        self.n_iters = n_iters
-        self.early_stop_threshold = early_stop_threshold
+                 edge_index: List[Tuple[int, int]],
+                 weights: Optional[torch.Tensor],
+                 epsilon: float,
+                 rc: Tuple[torch.Tensor, torch.Tensor] = None) -> None:
+        super(OlliverRicci, self).__init__(edge_index=edge_index, is_undirected=True, weights=weights)
+        self.adjacency = FloydWarshall.create_adjacency(edge_index=edge_index, is_indirect=True)
+        (r, c) = rc if rc is not None else OlliverRicci.__get_marginal_distributions(self.adjacency)
+        self.wasserstein_1_approximation = SinkhornKnopp.build(r, c, self, epsilon)
 
-    def sinkhorn_knopp(self,
-                       r: torch.Tensor,
-                       c: torch.Tensor,
-                       cost_matrix: torch.Tensor,
-                       early_stop_threshold: float) -> (int, torch.Tensor):
-        """
-        Computes the Sinkhorn approximation of the Wasserstein-1 distance.
-        """
-        # K is the kernel matrix  K = exp(-M/epsilon)
-        K = torch.exp(-cost_matrix / self.entropy_reg)
-        u = torch.ones_like(r) / r.shape[0]
-        iters = self.n_iters
+    @classmethod
+    def build(cls,
+              edge_index: List[Tuple[int, int]],
+              geodesic_distance: Callable[[int], torch.Tensor],
+              epsilon: float,
+              rc: Tuple[torch.Tensor, torch.Tensor] = None):
+        weights = geodesic_distance(len(edge_index))
+        return cls(edge_index, weights, epsilon, rc)
 
-        # Normalization with a fudge factor to ensure convexity
-        for i in range(self.n_iters):
-            u_prev = u
-            v = c / (torch.matmul(K.t(), u) + OlliverRicci.fudge_factor)
-            u = r / (torch.matmul(K, v) + OlliverRicci.fudge_factor)
-            if torch.abs(u - u_prev).max() < early_stop_threshold:
-                iters = i
-                break
-
-        optimal_transport = torch.sum(u * torch.matmul(K * cost_matrix, v))
-        return iters, optimal_transport
-
-    def compute(self, adj_matrix: torch.Tensor, shortest_paths, ) -> torch.Tensor:
+    def curvature(self, n_iters: int, early_stop_threshold: float) -> torch.Tensor:
         """
         adj_matrix: (N, N) tensor
         shortest_paths: (N, N) tensor of geodesic distances
         alpha: mass to stay at the current node
         """
-        n = adj_matrix.shape[0]
-        curvature = torch.zeros_like(adj_matrix)
+        curvature = torch.zeros_like(self.adjacency)
+        # Load the shortest paths as the cost matrix in the Wasserstein distance
+        shortest_paths = self.wasserstein_1_approximation.cost_matrix
 
+        edges = torch.nonzero(self.adjacency)
+        for u, v in edges:
+            # Compute the approximate Wasserstein distance - Numerator
+            num_iters, w1 = self.wasserstein_1_approximation(n_iters, early_stop_threshold)
+            # Load the all-pairs shortest path between u and v nodes
+            shortest_path_uv = shortest_paths[u, v]
+            # Apply the Olliver-Ricci formula
+            curvature[u, v] = 1 - (w1 / shortest_path_uv)
+            if self.is_undirected:
+                curvature[v, u] = curvature[u, v]
+        return curvature
+
+    """ -------------------------  Private Helper Methods -------------------------  """
+
+    @staticmethod
+    def __get_marginal_distributions(adjacency: torch.Tensor) -> (torch.Tensor, torch.Tensor):
+        joint_probability_measures = OlliverRicci.__compute_prob_measures(adjacency)
+        # Extract the marginal distribution from the joint distribution
+        r = joint_probability_measures.sum(dim=1)
+        c = joint_probability_measures.sum(dim=0)
+        return r, c
+
+    @staticmethod
+    def __compute_prob_measures(adjacency: torch.Tensor, alpha: float = 0.4) -> torch.Tensor:
+        n = adjacency.shape[0]
         # Define neighborhood distributions m_x
         # m_x(v) = alpha if v=x, else (1-alpha)/degree if v is neighbor
-        degrees = adj_matrix.sum(dim=1)
-        eye = torch.eye(n, device=adj_matrix.device)
+        degrees = adjacency.sum(dim=1)
+        eye = torch.eye(n)
 
         # Probability measures for all nodes: (N, N)
-        m = (self.alpha * eye) + ((1 - self.alpha) * adj_matrix / degrees.unsqueeze(1))
-
-        # Calculate curvature for each existing edge
-        edges = torch.nonzero(adj_matrix)
-        for u, v in edges:
-            w1 = self.sinkhorn_knopp(m[u], m[v], shortest_paths)
-            dist_uv = shortest_paths[u, v]
-            curvature[u, v] = 1 - (w1 / dist_uv)
-        return curvature
+        probs = (alpha * eye) + ((1 - alpha) * adjacency / degrees.unsqueeze(1))
+        return probs

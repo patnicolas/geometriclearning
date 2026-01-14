@@ -19,23 +19,70 @@ from typing import AnyStr, List, Tuple, Optional
 
 
 class FloydWarshall(object):
+    """
+    The Floyd-Warshall (FW) algorithm is a commonly applied method to compute all-pairs shortest paths in a directed
+    graph. The algorithm assumes that the weights are all positive.
+
+    Let’s consider a subset S={1, 2, … k} subset of k vertices (or nodes) from a graph V = {1, 2, …, k, .., n}.
+    For any pair of nodes i, j in V,  FW considers all the paths whose intermediate vertices are all down from S.
+    Let p be a minimum weight path from among them. FW exploits the relationship between the path p and shortest
+    path i → j with all intermediate nodes in the set {1, 2, …, k-1}
+
+    .. math::
+        d_{i\to j}^{(k)}=\begin{matrix}
+        w_{ij}  & if \ k=0 \\
+        min_{i,j,k} \left( d_{i\to j}^{(k-1)} , d_{i\to k}^{(k-1)} + d_{k\to j}^{(k-1)}\right) & if \  k \ge 1
+        \end{matrix}y
+    """
     INF = float('inf')
 
-    def __init__(self, edge_index: List[Tuple[int, int]], weights: Optional[torch.Tensor] = None) -> None:
+    def __init__(self,
+                 edge_index: List[Tuple[int, int]],
+                 weights: Optional[torch.Tensor] = None,
+                 is_undirected: bool = True) -> None:
+        """
+        Default constructor for the Floyd-Warshall algorithm.
+        Layout:   Edge = (index source vertex, index destination vertex) -> Weight
+        Weight are set to 1.0 if not defined (default value None).
+        
+        @param edge_index: List of pairs (tuples) (index source node, index destination node)
+        @type edge_index: Tuple[int, int]
+        @param weights: Optional weights for each of the edge
+        @type weights: torch.Tensor
+        @param is_undirected Boolean flag to specify if this graph is undirected
+        @type is_undirected bool
+        """
         if weights is not None and len(edge_index) != len(weights):
             raise ValueError(f'Number of edges {len(edge_index)} differs from weights {len(weights.size())}')
 
         self.edge_index = edge_index
-        self.weights = torch.ones(len(edge_index)) if weights is None else weights
+        self.is_undirected = is_undirected
+        self.weights = torch.ones(len(edge_index))/len(edge_index) if weights is None else weights/weights.sum()
 
     def __str__(self) -> AnyStr:
         return f'\nEdge indices:\n{str(self.edge_index)}\nWeights:{self.weights}'
 
+    @staticmethod
+    def create_adjacency(edge_index: List[Tuple[int, int]], is_indirect: bool = True) -> torch.Tensor:
+        n_nodes = max(sum(edge_index, ())) + 1
+        adjacency = torch.zeros(n_nodes, n_nodes)
+        for i, j in edge_index:
+            adjacency[i][j] = 1
+            if is_indirect:
+                adjacency[j][i] = 1
+        return adjacency
+
     def __call__(self) -> torch.Tensor:
+        """
+        Computation of the all-pairs shortest parts across all the nodes
+        @return: Tensor of all pairs shortest distances
+        @rtype: torch.Tensor
+        """
         # Extract the number of nodes or vertices
         max_index = max(sum(self.edge_index, ()))
         num_nodes = max_index + 1
 
+        # Initialize the shortest distances
         shortest_distances = self.__init_shortest_distances()
 
         # Iterative update of the distances as
@@ -50,14 +97,15 @@ class FloydWarshall(object):
     """ -------------------  Private Helper Methods --------------------  """
 
     def __init_shortest_distances(self) -> torch.Tensor:
-        # Initialize the shortest distance tensor as infinite for non-diagonal values
-        # and 0 for diagonal values
-        num_edges = len(self.edge_index)
-        distances = torch.full(size=(num_edges, num_edges), fill_value=FloydWarshall.INF)
+        # Initialize the shortest distance tensor as infinite for non-diagonal values, 0 for diagonal values
+        num_nodes = max(sum(self.edge_index, ()))+1
+        distances = torch.full(size=(num_nodes, num_nodes), fill_value=FloydWarshall.INF)
         distances.fill_diagonal_(0)
         # Apply weights
         for idx, (i, j) in enumerate(self.edge_index):
             distances[i][j] = self.weights[idx]
+            if self.is_undirected:
+                distances[j][i] = distances[i][j]
         return distances
 
 

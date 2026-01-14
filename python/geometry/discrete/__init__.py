@@ -14,6 +14,7 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
+from abc import abstractmethod
 # 3rd Party imports
 import torch
 
@@ -23,6 +24,10 @@ class Wasserstein1Approximation(object):
     def __init__(self, r: torch.Tensor, c: torch.Tensor) -> None:
         self.r = r
         self.c = c
+
+    @abstractmethod
+    def __call__(self, n_iters: int, early_stop_threshold: float) -> (int, torch.Tensor):
+        pass
 
 
 class WassersteinException(Exception):
