@@ -29,6 +29,17 @@ class SinkhornKnopp(Wasserstein1Approximation):
     The Sinkhorn-Knopp algorithm provides an efficient way to compute the Sinkhorn distance by solving an
     entropic-regularized optimal transport problem.
 
+    Wasserstein distance:
+    .. math::
+    \begin{matrix}
+       W_{p}=\left(\inf_{\gamma \in \Gamma(r, c)}\int_{M\times M}^{} d(x,y)^{p}d\gamma(x, y)  \right) ^\frac{1}{p}   \\
+       r, c  \  \  \ \text{Probability distributions}  \\
+       \Gamma: \  \  \ \text{Set all joint distributions} \   \mu, \nu \ \text{marginals} \\
+       \gamma(x, y):   \text{Transport moving a mass from} \ x \to y   \\
+       d^{p}: \  \  \ \text{Cost moving one unit of mass} \ x \to y \  \\
+    \end{matrix}
+
+    Approximation Wasserstein distance:
     Given an optimal transport plan P, the cost matrix M,  the entropy regulation factor epsilon, a source distribution
     r and a destination distribution c.
     .. math::

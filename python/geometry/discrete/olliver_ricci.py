@@ -57,15 +57,15 @@ class OlliverRicci(FloydWarshall):
         """
         Constructor for the Olliver-Ricci curvature. It is assumed that the graph is undirected.
 
-        :param edge_index: List of pairs (tuples) (index source node, index destination node)
-        :type edge_index: Tuple[int, int]
-        :param weights: Optional weights associated with the weights
-        :type weights: torch.Tensor
-        :param epsilon: Entropy regularization scale factor
-        :type epsilon: float
-        :param rc: Pair of marginal distributions for rows (r) and columns (c) of the joint distribution matrix used
+        @param edge_index: List of pairs (tuples) (index source node, index destination node)
+        @type edge_index: Tuple[int, int]
+        @param weights: Optional weights associated with the weights
+        @type weights: torch.Tensor
+        @param epsilon: Entropy regularization scale factor
+        @type epsilon: float
+        @param rc: Pair of marginal distributions for rows (r) and columns (c) of the joint distribution matrix used
                     for the Wasserstein distance
-        :type rc: Tuple[Tensor, Tensor]
+        @type rc: Tuple[Tensor, Tensor]
         """
         super(OlliverRicci, self).__init__(edge_index=edge_index, is_undirected=True, weights=weights)
 
@@ -84,17 +84,17 @@ class OlliverRicci(FloydWarshall):
         to the default constructor, this method take a closed-form of the geodesic distance on the underlying
         manifold and generate the weights for each edge.
 
-        :param edge_index:  List of pairs (tuples) (index source node, index destination node)
-        :type edge_index: Tuple[int, int]
-        :param geodesic_distance: Closed formula for the geodesic distance of the underlying manifold
-        :type geodesic_distance: Callable[[int], torch.Tensor]
-        :param epsilon: Entropy regularization scale factor
-        :type epsilon: float
-        :param rc: Pair of marginal distributions for rows (r) and columns (c) of the joint distribution matrix used
+        @param edge_index:  List of pairs (tuples) (index source node, index destination node)
+        @type edge_index: Tuple[int, int]
+        @param geodesic_distance: Closed formula for the geodesic distance of the underlying manifold
+        @type geodesic_distance: Callable[[int], torch.Tensor]
+        @param epsilon: Entropy regularization scale factor
+        @type epsilon: float
+        @param rc: Pair of marginal distributions for rows (r) and columns (c) of the joint distribution matrix used
                     for the Wasserstein distance
-        :type rc: Tuple[Tensor, Tensor]
-        :return: Instance of this class
-        :rtype: OlliverRicci
+        @type rc: Tuple[Tensor, Tensor]
+        @return: Instance of this class
+        @rtype: OlliverRicci
         """
         weights = geodesic_distance(len(edge_index))
         return cls(edge_index, weights, epsilon, rc)
@@ -106,12 +106,12 @@ class OlliverRicci(FloydWarshall):
         W; Approximate 1-dimensional Wasserstein distance using the iterative Sinkhorn-Knopp algorithm
         d: Distance of the shortest path between any given nodes using the Floyd_Warshall formula
 
-        :param n_iters: Maximum number of iterations allowed
-        :type n_iters: int
-        :param early_stop_threshold: Early stopping condition
-        :type early_stop_threshold: float
-        :return: Discrete curvature
-        :rtype: torch.Tensor
+        @param n_iters: Maximum number of iterations allowed
+        @type n_iters: int
+        @param early_stop_threshold: Early stopping condition
+        @type early_stop_threshold: float
+        @return: Discrete curvature
+        @rtype: torch.Tensor
         """
         curvature = torch.zeros_like(self.adjacency)
         # Load the shortest paths as the cost matrix in the Wasserstein distance
