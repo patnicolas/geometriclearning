@@ -67,7 +67,8 @@ class SinkhornKnopp(Wasserstein1Approximation):
 
         if epsilon < 0.001 or epsilon > 0.5:
             raise ValueError(f'Entropy regularization {epsilon} should be [0.001, 0.5]')
-        if epsilon >= torch.sum(cost_matrix):
+        a = torch.mean(cost_matrix)
+        if epsilon >= torch.mean(cost_matrix):
             raise WassersteinException(f"Entropy regularization {epsilon} inadequate for Earth Mover's distance")
 
         self.cost_matrix = SinkhornKnopp.__normalize_cost_matrix(cost_matrix)

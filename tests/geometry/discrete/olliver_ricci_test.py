@@ -7,7 +7,6 @@ import torch
 
 
 class OlliverRicciTest(unittest.TestCase):
-
     @unittest.skip('Ignored')
     def test_create_adjacency(self):
         try:
@@ -50,31 +49,37 @@ class OlliverRicciTest(unittest.TestCase):
             logging.error(e)
             self.assertFalse(True)
 
+    # @unittest.skip('Ignored')
     def test_curvature_5(self):
-        def sphere_geodesic(n_edges: int) -> torch.Tensor:
+        def sphere_geodesics(n_edges: int) -> torch.Tensor:
             import math
 
             weights = []
-            delta = math.pi / (8 * n_edges)
-            start_geodesic = 0.0
+            delta = math.pi / (6 * n_edges)
+            geo_x = 3*math.pi/16
+            geo_y = math.pi/6
             for i in range(n_edges):
-                lat1, lon1 = map(math.radians, [0.0, 0.0])
-                lat2, lon2 = map(math.radians, [start_geodesic, start_geodesic + delta])
+                lat1, lon1 = map(math.radians, [geo_x, geo_y])
+                lat2, lon2 = map(math.radians, [geo_x - delta, geo_y + delta])
 
                 dlat = lat2 - lat1
                 dlon = lon2 - lon1
-                a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+                a = math.sin(0.5*dlat) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(0.5*dlon) ** 2
                 weights.append(2.0 * math.asin(math.sqrt(a)))
-                start_geodesic += delta
+                if i % 2 == 0:
+                    geo_y -= delta
+                else:
+                    geo_x -= delta
+                    geo_y += delta
             return torch.Tensor(weights)
 
         try:
             edge_index = [(0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)]
-            r = torch.tensor([0.1, 0.1, 0.2, 0.3, 0.1], dtype=torch.float32)
-            c = torch.tensor([0.1, 0.1, 0.4, 0.2, 0.2], dtype=torch.float32)
+            r = torch.tensor([0.1, 0.1, 0.2, 0.4, 0.0], dtype=torch.float32)
+            c = torch.tensor([0.1, 0.5, 0.0, 0.2, 0.2], dtype=torch.float32)
 
             olliver_ricci = OlliverRicci.build(edge_index=edge_index,
-                                               geodesic_distance=sphere_geodesic,
+                                               geodesic_distance=sphere_geodesics,
                                                epsilon=0.05,
                                                rc=(r, c))
             curvature = olliver_ricci.curvature(n_iters=100, early_stop_threshold=0.0001)
@@ -101,7 +106,8 @@ class OlliverRicciTest(unittest.TestCase):
     def test_curvature_4(self):
         try:
             edge_index = [(0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)]
-            olliver_ricci = OlliverRicci(edge_index=edge_index, weights=None, epsilon=0.05, rc=None)
+            edge_weights = torch.Tensor([0.8, 1.5, 2.6, 4.8, 2.2, 2.5, 6.1, 0.1, 3.8, 3.5])
+            olliver_ricci = OlliverRicci(edge_index=edge_index, weights=edge_weights, epsilon=0.02, rc=None)
 
             curvature = olliver_ricci.curvature(n_iters=100, early_stop_threshold=0.01)
             logging.info(f'\nCurvature from joint large:\n{curvature}')
