@@ -1,5 +1,5 @@
 __author__ = "Patrick R. Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 
 # Licensed under the Apache License, Version 2.0 (the "License");
