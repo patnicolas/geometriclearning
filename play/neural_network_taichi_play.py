@@ -36,10 +36,10 @@ ti.init(arch=ti.gpu, fast_math=True)
 def transpose_kernel(src: ti.types.ndarray(), dst: ti.types.ndarray()):
     """
     Default implementation of kernel for transposition of matrices as Taichi arrays
-    :param src: Input matrix
-    :type src: Taichi array
-    :param dst: Output matrix
-    :type dst: Taichi array
+    @param src: Input matrix
+    @type src: Taichi array
+    @param dst: Output matrix
+    @type dst: Taichi array
     """
     for i, j in ti.ndrange(src.shape[0], src.shape[1]):
         dst[j, i] = src[i, j]
@@ -50,10 +50,10 @@ block_size: int = 32
 def transpose_kernel(src: ti.types.ndarray(), dst: ti.types.ndarray()):
     """
     Fast implementation of kernel for transposition of matrices as Taichi arrays using shared blocks
-    :param src: Input matrix
-    :type src: Taichi array
-    :param dst: Output matrix
-    :type dst: Taichi array
+    @param src: Input matrix
+    @type src: Taichi array
+    @param dst: Output matrix
+    @type dst: Taichi array
     """
     # We initialize block with size (block_size, block_size)
     ti.loop_config(block_dim=block_size*block_size)
@@ -85,14 +85,14 @@ def transpose_kernel(src: ti.types.ndarray(), dst: ti.types.ndarray()):
 def taichi_forward(x: ti.types.ndarray(), W_T: ti.types.ndarray(), b: ti.types.ndarray(), y: ti.types.ndarray()):
     """
     Implementation of the forward or inference pass of neural network layer
-    :param x: Input value
-    :type x: Taichi array
-    :param W_T: Transposed weight or parameters matrix
-    :type W_T: Taichi array
-    :param b: Bias vector
-    :type b: Taichi array
-    :param y: Output of the inference (prediction)
-    :type y: Taichi array
+    @param x: Input value
+    @type x: Taichi array
+    @param W_T: Transposed weight or parameters matrix
+    @type W_T: Taichi array
+    @param b: Bias vector
+    @type b: Taichi array
+    @param y: Output of the inference (prediction)
+    @type y: Taichi array
     """
     for i, j in ti.ndrange(x.shape[0], W_T.shape[0]):
         # Define the size of the group of threads to be executed concurrently on the GPU.
@@ -115,18 +115,18 @@ def taichi_backward(x: ti.types.ndarray(),   # Input values
                     db: ti.types.ndarray()):  # Derivative bias
     """
     Implementation of the back propagation through the Neural network layers using Taichi DSL
-    :param x:  Input values
-    :type x:  Taichi array
-    :param W: Tensor of weights or model parameters
-    :type W:  Taichi array
-    :param dy: Error or difference prediction - expected
-    :type dy:  Taichi array
-    :param dX:  Difference in input values
-    :type dX:   Taichi array
-    :param dW:  Difference of weights
-    :type dW:  Taichi array
-    :param db:  Difference of bias
-    :type db:  Taichi array
+    @param x:  Input values
+    @type x:  Taichi array
+    @param W: Tensor of weights or model parameters
+    @type W:  Taichi array
+    @param dy: Error or difference prediction - expected
+    @type dy:  Taichi array
+    @param dX:  Difference in input values
+    @type dX:   Taichi array
+    @param dW:  Difference of weights
+    @type dW:  Taichi array
+    @param db:  Difference of bias
+    @type db:  Taichi array
     """
     # Step 1: Propagate the diff dy  dX = SUM(dy * W)
     for i, k in ti.ndrange(dX.shape[0], dX.shape[1]):
