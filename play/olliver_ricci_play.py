@@ -13,19 +13,34 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Python imports
 from typing import List, Tuple, Callable
 import logging
-import python
-
+# 3rd Party Library import
 import torch
 # Library import
 from play import Play
 from geometry.discrete.olliver_ricci import OlliverRicci
 from geometry.discrete import WassersteinException
+import python
 
 
 class OlliverRicciPlay(Play):
+    """
+    Source code related to the Substack article 'Curvature-informed Graph Learning'. A brief description of the
+    algorithm is available on the comments of classes in Python directory geometry/discrete
 
+    References:
+    - Substack: https://patricknicolas.substack.com/p/curvature-informed-graph-learning
+
+    The features are implemented by the class OlliverRicci in the source files
+        - python/geometry/discrete/olliver_ricci.py
+        - python/geometry/discrete/sinkhorn-knopp.py
+        - python/geometry/discrete/floyd-warshall.py
+
+    The class OlliverRicciPlay is a wrapper of the class OlliverRicci
+    The execution of the tests follows the same order as in the Substack article
+    """
     def __init__(self,
                  edge_index: List[Tuple[int, int]],
                  edge_weights: torch.Tensor | Callable[[int], float],

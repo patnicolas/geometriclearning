@@ -23,6 +23,7 @@ class FloydWarshall(object):
     The Floyd-Warshall (FW) algorithm is a commonly applied method to compute all-pairs shortest paths in a directed
     graph. The algorithm assumes that the weights are all positive.
 
+    Algorithm:
     Let’s consider a subset S={1, 2, … k} subset of k vertices (or nodes) from a graph V = {1, 2, …, k, .., n}.
     For any pair of nodes i, j in V,  FW considers all the paths whose intermediate vertices are all down from S.
     Let p be a minimum weight path from among them. FW exploits the relationship between the path p and shortest

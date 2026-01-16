@@ -17,11 +17,29 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 from abc import abstractmethod
 # 3rd Party imports
 import torch
-
 __all__ = ['Wasserstein1Approximation', 'WassersteinException']
 
+"""
+Python package dedicated to Discrete Differential Geometry as element of Geometric Deep Learning
+"""
+
 class Wasserstein1Approximation(object):
+    """
+    Base class for Approximation of the Wasserstein distance.
+    @see python/geometry/discrete/floyd_warshall.py
+    """
     def __init__(self, r: torch.Tensor, c: torch.Tensor) -> None:
+        """
+        Constructor for any approximation of the Wasserstein distance using the Marginal Distribution for the
+        edges of a graph.
+        Note: Approximation of the Wasserstein distance can be also computed using directly the Joint distribution
+            on nodes - SinkhornKnopp.build
+
+        @param r: Marginal probability distribution for rows of the Joint Distribution node - node
+        @type r: torch.Tensor
+        @param c: Marginal probability distribution for cols of the Joint Distribution node - node
+        @type c: torch.Tensor
+        """
         self.r = r
         self.c = c
 
