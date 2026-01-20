@@ -1,11 +1,11 @@
 aiohappyeyeballs==2.6.1
-aiohttp==3.12.14
+aiohttp==3.13.3
 aiosignal==1.3.2
 attrs==25.3.0
 boto3==1.39.1
 certifi==2025.1.31
 charset-normalizer==3.4.1
-filelock==3.18.0
+filelock==3.20.3
 fire==0.7.0
 frozenlist==1.5.0
 fsspec==2025.3.2
@@ -29,6 +29,7 @@ pillow==11.1.0
 propcache==0.3.1
 psutil==7.0.0
 pyparsing==3.2.3
+pygwalker==0.5.0.0
 ray~=2.52.1
 requests==2.32.4
 ripser==0.6.12
@@ -50,5 +51,5 @@ torchvision==0.16.0
 tqdm==4.67.1
 typing_extensions==4.13.0
 umap-learn==0.5.8
-urllib3~=2.5.0
+urllib3~=2.6.3
 yarl==1.18.3

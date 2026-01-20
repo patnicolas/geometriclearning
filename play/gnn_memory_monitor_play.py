@@ -184,7 +184,7 @@ class GNNMemoryMonitor(Play):
             'fig_size': (8, 8),
             'multi_plot_pause': 0
         }
-        plot_parameters = PlotterParameters.build(plot_parameters_dict)
+        plot_parameters = PlotterParameters.build_from_dict(plot_parameters_dict)
         Plotter.plot(all_values, all_labels, plot_parameters)
 
     @staticmethod

@@ -109,7 +109,7 @@ class PlotterTest(unittest.TestCase):
             'title': 'Accuracy plot',
             'fig_size': (10, 10)
         }
-        plot_parameters = PlotterParameters.build(plot_parameters_dict)
+        plot_parameters = PlotterParameters.build_from_dict(plot_parameters_dict)
         y1 = [0.5, 0.7, 0.9, 1.0]
         y2 = [0.0, 0.6, 0.1, 0.4]
         Plotter.plot([y1, y2], ['y1', 'y2'], plot_parameters)

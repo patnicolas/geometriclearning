@@ -81,7 +81,7 @@ class ModelComparisonTest(unittest.TestCase):
             'fig_size': (8, 8),
             'multi_plot_pause': 0
         }
-        plot_parameters = PlotterParameters.build(plot_parameters_dict)
+        plot_parameters = PlotterParameters.build_from_dict(plot_parameters_dict)
         model_ids = [
             f'GraphSAGE_{dataset_name}_Neighbors{neighbors}_{num_blocks[0]}layers',
             f'GraphConv_{dataset_name}_Neighbors{neighbors}_{num_blocks[0]}layers',
@@ -128,7 +128,7 @@ class ModelComparisonTest(unittest.TestCase):
             'fig_size': (8, 8),
             'multi_plot_pause': 0
         }
-        plot_parameters = PlotterParameters.build(plot_parameters_dict)
+        plot_parameters = PlotterParameters.build_from_dict(plot_parameters_dict)
         model_comparison.load_and_plot(plot_parameters)
 
     @staticmethod

@@ -349,7 +349,7 @@ class NeuralNetworkTaichiPlay(Play):
             'fig_size': (9, 7),
             'multi_plot_pause': 5.0
         }
-        plot_params = PlotterParameters.build(plot_params_dict)
+        plot_params = PlotterParameters.build_from_dict(plot_params_dict)
         Plotter.plot([torch_durations, taichi_durations], ['Torch', 'Taichi'], plot_params)
 
 

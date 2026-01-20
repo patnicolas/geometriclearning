@@ -64,8 +64,11 @@ class PlotterParameters:
     def __str__(self) -> AnyStr:
         return f'   Title:   {self.title}\n   X label: {self.x_label}\n   Y label: {self.y_label}'
 
+
+
+
     @classmethod
-    def build(cls, attributes: Dict[AnyStr, Any]) -> Self:
+    def build_from_dict(cls, attributes: Dict[AnyStr, Any]) -> Self:
         assert attributes.__contains__('count'), 'count is undefined as plot attributes'
         
         count = attributes['count']
