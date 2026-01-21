@@ -14,26 +14,37 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # limitations under the License.
 
 from abc import ABC, abstractmethod
-from typing import AnyStr, Self
+from typing import AnyStr, Self, Dict, Any
 import numpy as np
 import torch
 from plots.plotting_config import PlottingConfig
 
 
 class PlottingEngine(ABC):
-    def __init__(self, data: np.array, plotting_config: PlottingConfig) -> None:
-        self.data = data
-        self.plotting_config = plotting_config
+    def __init__(self, data_dict: Dict[AnyStr, np.array], plotting_config: PlottingConfig | AnyStr) -> None:
+        self.data_dict = data_dict
+        self.plotting_config = plotting_config if isinstance(plotting_config, PlottingConfig) \
+            else PlottingConfig.build(plotting_config)
+
 
     @classmethod
-    def build(cls, data: torch.Tensor, plotting_config_str: AnyStr) -> Self:
-        plotting_config = PlottingConfig.build(plotting_config_str)
-        return cls(data.numpy(), plotting_config)
+    def build_single(cls, label: AnyStr, data: np.array, plotting_config: PlottingConfig | AnyStr) -> Self:
+        return cls(data_dict={label: data}, plotting_config=plotting_config)
+
+    @classmethod
+    def build_from_torch(cls,
+                         data_dict_torch: Dict[AnyStr, torch.Tensor],
+                         plotting_config: PlottingConfig | AnyStr) -> Self:
+
+        plotting_config = plotting_config if isinstance(plotting_config, PlottingConfig) \
+            else PlottingConfig.build(plotting_config)
+        data_dict = {k: v.numpy() for k,v in data_dict_torch.items()}
+        return cls(data_dict=data_dict, plotting_config=plotting_config)
 
     @abstractmethod
     def render(self) -> None:
         pass
 
     @abstractmethod
-    def save(self, filename: AnyStr) -> None:
+    def save(self, filename: AnyStr, ctx: Any) -> None:
         pass

@@ -93,7 +93,9 @@ class PlottingConfig:
     x_label_config: PlottingTextConfig
     y_label_config: PlottingTextConfig
     comment_config: PlottingTextConfig
-    filename: AnyStr
+    legend_font_size: int = None
+    filename: AnyStr = None
+    grid: bool = True
     color_palette: AnyStr = 'deep'
     fig_size: Optional[Tuple[int, int]] = None
     multi_plot_pause: float = 0.0
@@ -114,6 +116,12 @@ class PlottingConfig:
 
     def to_json(self) -> AnyStr:
         return json.dumps(asdict(self), indent=2)
+
+    def get_legend_font_size(self) -> int:
+        return self.x_label_config.font_size if self.legend_font_size is None else self.legend_font_size
+
+    def get_fig_size(self) -> (int, int):
+        return self.fig_size if self.fig_size is not None else (10, 8)
 
     def __str__(self) -> AnyStr:
         return (f'\nType: {self.plot_type}\nTitle: {self.title_config}\nX-label: {self.x_label_config}'

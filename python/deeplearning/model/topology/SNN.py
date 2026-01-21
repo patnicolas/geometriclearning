@@ -9,7 +9,7 @@ from torch_geometric.utils import to_undirected
 import networkx as nx
 
 # ---------- dataset loader ----------
-def load_pyg(name: str, root: str = "data") -> Tuple[torch_geometric.data.Data, str]:
+def load_pyg(name: str, root: str = "data") -> Tuple[torch_geometric.data_dict.Data, str]:
     name = name.lower()
     if name in {"cora", "citeseer", "pubmed"}:
         ds = Planetoid(root=f"{root}/Planetoid", name=name.capitalize())
@@ -114,7 +114,7 @@ def build_B1_B2(edge_index: torch.Tensor,
 def scipy_to_torch(mat: sp.csr_matrix) -> torch.Tensor:
     coo = mat.tocoo()
     idx = torch.tensor(np.vstack([coo.row, coo.col]), dtype=torch.long)
-    val = torch.tensor(coo.data, dtype=torch.float32)
+    val = torch.tensor(coo.data_dict, dtype=torch.float32)
     return torch.sparse_coo_tensor(idx, val, torch.Size(coo.shape)).coalesce()
 
 # ---------- full pipeline ----------
