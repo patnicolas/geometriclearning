@@ -19,7 +19,7 @@ from dataclasses import dataclass
 Item = TypeVar("Item")
 
 @dataclass
-class TechRegion(frozen=True):
+class TechRegion(slots=True, frozen=True):
     city: AnyStr
     num_companies: float
     longitude: float

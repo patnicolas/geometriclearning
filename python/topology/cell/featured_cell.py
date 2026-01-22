@@ -24,7 +24,7 @@ __all__ = ['FeaturedCell']
 
 
 @dataclass
-class FeaturedCell:
+class FeaturedCell(slots=True):
     """
     Define a featured cell as a combination of a Cell (toponetx) and a features vector defined
     as a Numpy array

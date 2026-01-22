@@ -19,7 +19,7 @@ import json
 
 
 @dataclass
-class PlottingTextConfig:
+class PlottingTextConfig(slots=True):
     """
     Configuration of the display and content of text for any given plot
     @param text: Content for text
@@ -67,7 +67,7 @@ class PlottingTextConfig:
 
 
 @dataclass
-class PlottingConfig:
+class PlottingConfig(slots=True):
     """
     Generic data class for configuration any plot, independently of the plotting library or engine.
     

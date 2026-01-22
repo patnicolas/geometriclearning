@@ -27,7 +27,7 @@ from geometry import GeometricException
 __all__ = ['VisualizationParams', 'SpaceVisualization']
 
 
-@dataclass(frozen=True)
+@dataclass(slots=True, frozen=True)
 class VisualizationParams:
     label: AnyStr
     title: AnyStr

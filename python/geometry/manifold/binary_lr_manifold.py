@@ -27,7 +27,7 @@ __all__ = ['SPDTestData', 'BinaryLRManifold']
 
 
 @dataclass
-class SPDTestData:
+class SPDTestData(slots=True):
     """
     Wrapper for the test data for the Symmetric Positive Define matrices
     X- Features data

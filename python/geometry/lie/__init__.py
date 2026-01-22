@@ -26,7 +26,7 @@ class LieException(Exception):
         super(LieException, self).__init__(args, kwargs)
 
 
-@dataclass(frozen=True)
+@dataclass(slots=True, frozen=True)
 class LieElement:
     """
     Wrapper for Point or Matrix on SO3 manifold that leverages the Geomstats library.

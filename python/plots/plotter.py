@@ -26,7 +26,7 @@ __all__ = ['PlotterParameters', 'Plotter']
 
 
 @dataclass
-class PlotterParameters:
+class PlotterParameters(slots=True):
     """
         Wraps the parameters for plots. The static methods generated a '.png' file which name is time stamped.
     """
