@@ -18,8 +18,8 @@ from dataclasses import dataclass, asdict
 import json
 
 
-@dataclass
-class PlottingTextConfig(slots=True):
+@dataclass(slots=True)
+class PlottingTextConfig:
     """
     Configuration of the display and content of text for any given plot
     @param text: Content for text
@@ -32,12 +32,15 @@ class PlottingTextConfig(slots=True):
     @type font_color: str
     @param font_type: Type of the font (default sans-serif)
     @type font_type: str
+    @param position: Position for the text if defined (e.g., comments)
+    @type position : Tuple[float, float]
     """
     text: AnyStr
     font_size: int
     font_weight: AnyStr
     font_color: AnyStr = 'black'
     font_type: AnyStr = 'sans-serif'
+    position: Tuple[float, float] = None
 
     @classmethod
     def build(cls, json_config_str: AnyStr) -> Self:
@@ -62,17 +65,23 @@ class PlottingTextConfig(slots=True):
         """
         return json.dumps(asdict(self))
 
+    def __call__(self) -> (AnyStr, AnyStr):
+        return self.text, {'family': self.font_type, 'size': self.font_size, 'weight': self.font_weight}
+
     def __str__(self) -> AnyStr:
         return f'{self.text} - Font: {self.font_type}, {self.font_size}, {self.font_color}, {self.font_weight}'
 
 
-@dataclass
-class PlottingConfig(slots=True):
+@dataclass(slots=True)
+class PlottingConfig:
     """
-    Generic data class for configuration any plot, independently of the plotting library or engine.
+    Generic data class for configuration any plot, independently of the plotting library or engine. The plot is
+    automatically saved if the variable, filename is defined.
     
-    @param plot_type: Type of the plot (scatter, line plot, bar chart,..).
+    @param plot_type: Type of the plot (scatter, line plot, bar chart ...).
     @type plot_type: str
+    @param background_color: Background color
+    @type background_color: str
     @param title_config: Configuration for the title of the plot
     @type title_config: PlottingTextConfig
     @param x_label_config: Configuration for the X-label of the plot
@@ -81,6 +90,10 @@ class PlottingConfig(slots=True):
     @type y_label_config: PlottingTextConfig
     @param comment_config: Configuration for comment the plot
     @type comment_config: PlottingTextConfig
+    @param legend_font_size: Size of font for legend
+    @type legend_font_size: int
+    @param filename: Name of the file to save the plot. The plot is automatically saved in defined,
+    @type filename: str
     @param color_palette: Color palette (default dee[)
     @type color_palette: str
     @param fig_size: Size of the plot
@@ -92,7 +105,8 @@ class PlottingConfig(slots=True):
     title_config: PlottingTextConfig
     x_label_config: PlottingTextConfig
     y_label_config: PlottingTextConfig
-    comment_config: PlottingTextConfig
+    comment_config: PlottingTextConfig = None
+    background_color: AnyStr = 'white'
     legend_font_size: int = None
     filename: AnyStr = None
     grid: bool = True

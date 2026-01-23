@@ -43,6 +43,9 @@ class MatplotlibEngine(PlottingEngine):
             fig.savefig(f'{self.plotting_config.filename}.png')
 
     def __render_line_plots(self) -> None:
+        fig = plt.figure(self.plotting_config.fig_size)
+        fig.set_facecolor(self.plotting_config.background_color)
+
         iterator = iter(self.data_dict.items())
         _, x_values = next(iterator)
         count = 0
@@ -53,18 +56,24 @@ class MatplotlibEngine(PlottingEngine):
                      color=MatplotlibEngine.colors[count],
                      linestyle=MatplotlibEngine.markers[count])
             count += 1
-        plt.xlabel(xlabel=self.plotting_config.x_label_config.text,
-                   fontdict={'family': self.plotting_config.x_label_config.font_type,
-                             'size': self.plotting_config.x_label_config.font_size,
-                             'weight': self.plotting_config.x_label_config.font_weight})
-        plt.ylabel(ylabel=self.plotting_config.y_label_config.text,
-                   fontdict={'family': self.plotting_config.y_label_config.font_type,
-                             'size': self.plotting_config.y_label_config.font_size,
-                             'weight': self.plotting_config.y_label_config.font_weight})
-        plt.title(label=self.plotting_config.title_config.text,
-                  fontdict={'family': self.plotting_config.title_config.font_type,
-                            'size': self.plotting_config.title_config.font_size,
-                            'weight': self.plotting_config.title_config.font_weight})
+        text, font_dict = self.plotting_config.title_config()
+        plt.title(label=text, fontdict=font_dict)
+        text, font_dict = self.plotting_config.x_label_config()
+        plt.xlabel(xlabel=text, fontdict=font_dict)
+        text, font_dict = self.plotting_config.y_label_config()
+        plt.ylabel(ylabel=text, fontdict=font_dict)
+
+        if self.plotting_config.comment_config is not None:
+            text, font_dict = self.plotting_config.comment_config()
+            x, y = self.plotting_config.comment_config.position
+            plt.text(x=x,
+                     y=y,
+                     s=text,
+                     c=self.plotting_config.comment_config.font_color,
+                     fontsize=self.plotting_config.comment_config.font_size,
+                     fontweight=self.plotting_config.comment_config.font_weight,
+                     transform=plt.gca().transAxes)
+
         plt.legend(prop={'family': self.plotting_config.x_label_config.font_type,
                          'size': self.plotting_config.get_legend_font_size()})
         plt.grid(True)
