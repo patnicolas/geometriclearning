@@ -18,7 +18,7 @@ from dataclasses import dataclass, asdict
 import json
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class PlottingTextConfig:
     """
     Configuration of the display and content of text for any given plot
@@ -72,7 +72,7 @@ class PlottingTextConfig:
         return f'{self.text} - Font: {self.font_type}, {self.font_size}, {self.font_color}, {self.font_weight}'
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class PlottingConfig:
     """
     Generic data class for configuration any plot, independently of the plotting library or engine. The plot is
@@ -94,6 +94,8 @@ class PlottingConfig:
     @type legend_font_size: int
     @param filename: Name of the file to save the plot. The plot is automatically saved in defined,
     @type filename: str
+    @param grid: Boolean flag to specify if a grid has to be drawn
+    @type grid: bool
     @param color_palette: Color palette (default dee[)
     @type color_palette: str
     @param fig_size: Size of the plot

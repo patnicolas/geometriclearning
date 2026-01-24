@@ -66,6 +66,8 @@ class MessagePassingBlock(NeuralBlock, ABC):
         @param dropout_module: Drop out for training
         @type dropout_module: nn.Module subclass
         """
+        __slots__ = ['modules_list']
+
         super(MessagePassingBlock, self).__init__(block_id)
         self.modules_list = MessagePassingBlock.__build_modules_list(message_passing_module,
                                                                      batch_norm_module,

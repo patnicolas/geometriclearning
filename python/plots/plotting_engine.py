@@ -21,11 +21,12 @@ from plots.plotting_config import PlottingConfig
 
 
 class PlottingEngine(ABC):
+    __slots__ = ['data_dict', 'plotting_config']
+
     def __init__(self, data_dict: Dict[AnyStr, np.array], plotting_config: PlottingConfig | AnyStr) -> None:
         self.data_dict = data_dict
         self.plotting_config = plotting_config if isinstance(plotting_config, PlottingConfig) \
             else PlottingConfig.build(plotting_config)
-
 
     @classmethod
     def build_single(cls, label: AnyStr, data: np.array, plotting_config: PlottingConfig | AnyStr) -> Self:

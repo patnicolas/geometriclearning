@@ -51,6 +51,8 @@ class FeaturedSimplicialComplex(FeaturedComplex[T]):
     Note: The implementation of the adjacency matrix is specific to graph. The TopoNetX library has a generic
     adjacency matrix to support edges - edges and faces -faces.
     """
+    __slots__ = ['featured_simplices', 'simplicial_indices', 'simplicial_complex']
+
     def __init__(self, featured_simplices: frozenset[FeaturedSimplex]) -> None:
         """
         Constructor for the Simplicial Complex Model. Shape of Numpy array for the edge and face sets

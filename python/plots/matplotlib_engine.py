@@ -48,6 +48,8 @@ class MatplotlibEngine(PlottingEngine):
 
         iterator = iter(self.data_dict.items())
         _, x_values = next(iterator)
+
+        # Draws the multiple plots
         count = 0
         for y_label, y_value in iterator:
             plt.plot(x_values,
@@ -76,7 +78,8 @@ class MatplotlibEngine(PlottingEngine):
 
         plt.legend(prop={'family': self.plotting_config.x_label_config.font_type,
                          'size': self.plotting_config.get_legend_font_size()})
-        plt.grid(True)
+        # Draw a grid only if defined in the specified in configuration
+        plt.grid(self.plotting_config.grid)
         plt.show()
 
 

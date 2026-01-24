@@ -90,6 +90,8 @@ class LieSE3Group(object):
         - lie_algebra: lie algebra as the tangent vector at identity
         - bracket: Implement lie commutator for so3 algebra
     """
+    __slots__ = ['point_type', 'lie_group', 'se3_element', 'tangent_vector']
+
     def __init__(self,
                  rot_matrix: np.array,
                  trans_matrix: np.array,

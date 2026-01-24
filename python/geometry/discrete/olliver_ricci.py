@@ -48,6 +48,7 @@ class OlliverRicci(FloydWarshall):
     build: Alternative constructor that generate the edge weights from the closed form geodesic distance between two
         nodes laying into the underlying manifold.
     """
+    __slots__ = ['adjacency', 'wasserstein_1_approximation']
 
     def __init__(self,
                  edge_index: List[Tuple[int, int]],

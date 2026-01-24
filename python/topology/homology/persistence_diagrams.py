@@ -34,6 +34,7 @@ class PersistenceDiagrams(object):
     - Exact persistence landscape - class PersistenceLandscape
     - Approximation persistence landscape
     """
+    __slots__ = ['data', 'data_shape']
     num_shape_data_point = 48000
 
     def __init__(self, data: np.array, data_shape: AnyStr = None) -> None:

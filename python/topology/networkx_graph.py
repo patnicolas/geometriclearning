@@ -25,6 +25,8 @@ class NetworkxGraph(object):
         __init__:  Data => NetworkX graph
         build: Dataset name => NetworkX graph
     """
+    __slots__ = ['G']
+
     def __init__(self, data: Data) -> None:
         """
         Constructor for the generation of graph from data

@@ -35,6 +35,7 @@ class FloydWarshall(object):
         min_{i,j,k} \left( d_{i\to j}^{(k-1)} , d_{i\to k}^{(k-1)} + d_{k\to j}^{(k-1)}\right) & if \  k \ge 1
         \end{matrix}y
     """
+    __slots__ = ['edge_index', 'is_undirected', 'weights']
     INF = float('inf')
 
     def __init__(self,

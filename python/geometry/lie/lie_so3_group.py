@@ -40,6 +40,8 @@ class LieSO3Group(object):
         - lie_algebra: lie algebra as the tangent vector at identity
         - bracket: Implement lie commutator for so3 algebra
        """
+    __slots__ = ['algebra_element', 'group_element', 'identity_element']
+
     # lie group as defined in Geomstats library
     lie_group = SpecialOrthogonal(n=3, point_type='vector', equip=False)
     identity_matrix = np.eye(3)

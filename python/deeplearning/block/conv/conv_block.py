@@ -34,6 +34,7 @@ class ConvBlock(NeuralBlock):
 
     Reference: https://patricknicolas.substack.com/p/reusable-neural-blocks-in-pytorch
     """
+    __slots__ = ['attributes']
 
     def __init__(self, block_id: Optional[AnyStr]) -> None:
         """
