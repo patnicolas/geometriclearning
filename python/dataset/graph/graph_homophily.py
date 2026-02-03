@@ -65,6 +65,7 @@ class GraphHomophily(object):
         math::
             \frac{1}{C-1} \sum_{k=1}^{C} \max \left(0, h_k - \frac{|\mathcal{C}_k|} {|\mathcal{V}|} \right)
     """
+    __slots__ = ['data', 'homophily_type']
 
     def __init__(self, data: Data, homophily_type: GraphHomophilyType) -> None:
         """

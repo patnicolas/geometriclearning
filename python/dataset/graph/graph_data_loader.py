@@ -54,6 +54,8 @@ class GraphDataLoader(object):
     https://pytorch-geometric.readthedocs.io/en/latest/modules/datasets.html
     https://pytorch-geometric.readthedocs.io/en/latest/modules/loader.html
     """
+    __slots__ = ['data', 'subgraph_ratio', 'num_classes', 'attributes_map', 'dataset']
+
     # Static definition of the sampling method dictionary
     loader_sampler_dict = {
         'NeighborLoader': lambda loader: loader.__neighbors_loader(),

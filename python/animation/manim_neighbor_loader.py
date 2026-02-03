@@ -24,38 +24,41 @@ from dataset.graph.graph_data_loader import GraphDataLoader
 
 class ManimNeighborLoader(ThreeDScene):
     def construct(self):
+        # 1- Load the data for the Flickr dataset using PyTorch Geometric Graph Loader
         batch = self.get_batch('Flickr')
         neighbor_ids = batch.n_id.tolist()
         hop_1 = set(neighbor_ids)
         hop_1.discard(0)
 
+        # 2- Create a group that contains the entire scene with origin
         entire_scene = VGroup()
         center_dot = Dot(ORIGIN, radius=0.15, color=YELLOW)
+
+        # 3- Create the graph nodes with labels
         node_objs = self.create_nodes(hop_1, entire_scene, center_dot)
-
         title = self.display_title(font_sz=36, rt=0.7)
-
-        nodes_creation_label = self.gcn_step(
-            r'Sample \ Flickr \ graph \ nodes \ by \ index',
+        nodes_creation_label = self.step_description(
+            text=r'Sample \ Flickr \ graph \ nodes \ by \ index',
             prev_vm_object=title,
             first=True)
-        # Step 1: Show input graph node
+        # 4- Display the first node
         self.play(FadeIn(node_objs[0]))
         self.wait(0.2)
 
-        # Step 2: Show 1-hop neighbors
+        # 5- Display 1-hop neighbors
         for nid in hop_1:
             self.play(FadeIn(node_objs[nid]), run_time=0.1)
         self.wait(0.2)
 
-        # Create and display edges
+        # 6- Create and display edges
         edge_objs = self.create_edges(node_objs, hop_1, entire_scene)
-        edges_creation_label = self.gcn_step(text=r'Load \ graph \ edges', prev_vm_object=nodes_creation_label)
+        edges_creation_label = self.step_description(text=r'Load \ graph \ edges', prev_vm_object=nodes_creation_label)
         self.play(*[Create(e) for e in edge_objs])
 
-        matmul = self.gcn_step(text=r"Message \ passing: \ \  W \cdot h_u^{(l)}", prev_vm_object=edges_creation_label)
+        # 7- Dynamic update of label and latex equation
+        matmul = self.step_description(text=r"Message \ passing: \ \  W \cdot h_u^{(l)}", prev_vm_object=edges_creation_label)
 
-        # Step 4: Simulate aggregation (e.g., GCN layer)
+        # 8- Simulate and display aggregation process (e.g., GCN layer) using colored arrows
         aggregate_arrows = [
             Arrow(
                 start=node_objs[nid][0].get_center(),
@@ -70,17 +73,23 @@ class ManimNeighborLoader(ThreeDScene):
         self.play(*[GrowArrow(a) for a in aggregate_arrows])
         self.wait(0.2)
 
-        sum_symbol = self.gcn_step(
+        # 9- Latex representation of the aggregation of messages
+        sum_symbol = self.step_description(
             text=r"Aggregation: \ s= \sum_{u \in \mathcal{N}(v)} W \cdot h_u^{(l)}",
             prev_vm_object=matmul
         )
 
+        # 10- Trigger the rotation of the entire graph
         self.play(Rotate(entire_scene, angle=2*PI, axis=UP, about_point=ORIGIN, run_time=3))
 
-        sum_sigma_symbol = self.gcn_step(text="Activation: \ \ \sigma (s)", prev_vm_object=sum_symbol)
-        # Step 5: Show updated feature at center node (e.g., color change)
+        # 11- Latex representation of Activation function
+        sum_sigma_symbol = self.step_description(text="Activation: \ \ \sigma (s)", prev_vm_object=sum_symbol)
+
+        # 12- Show updated feature at center node (e.g., color change)
         self.play(center_dot.animate.set_color(RED).scale(2.5))
-        self.gcn_step(
+
+        # 13- Latex representation of the update of node embedding from the aggregated messages
+        self.step_description(
             text=r"h_v^{(l+1)} = \sigma \left( \sum_{u \in \mathcal{N}(v)} W \cdot h_u^{(l)} \right)",
             prev_vm_object=sum_sigma_symbol
         )
@@ -89,7 +98,7 @@ class ManimNeighborLoader(ThreeDScene):
     # ----------------------------  Helper functions -------------------------------
 
     # Manage step by step information
-    def gcn_step(self, text: AnyStr, prev_vm_object: SVGMobject, first: bool = False) -> SVGMobject:
+    def step_description(self, text: AnyStr, prev_vm_object: SVGMobject, first: bool = False) -> SVGMobject:
         vm_object = MathTex(text, font_size=30)
         vm_object.set_color("YELLOW")
         offset = 0.7 if first else 0.2
@@ -111,8 +120,7 @@ class ManimNeighborLoader(ThreeDScene):
                 'num_workers': 1
             },
             dataset_name=dataset_name,
-            num_subgraph_nodes=2048,
-            start_index=70429
+            num_subgraph_nodes=2048
         )
         train_data_loader, test_data_loader = graph_data_loader()
         return next(iter(train_data_loader))

@@ -18,8 +18,11 @@ from dataclasses import dataclass, asdict
 import json
 import matplotlib.pyplot as plt
 
+from plots.renderer import Renderer
+
+
 @dataclass(slots=True, frozen=True)
-class PlotFontDict:
+class PlotFontDict(Renderer):
     """
     @param font_size: Size of the font
     @type font_size: int
@@ -36,7 +39,11 @@ class PlotFontDict:
     font_family: AnyStr
 
     def to_dict(self) -> Dict[AnyStr, Any]:
-        return {'family': self.font_family, 'size': self.font_size, 'weight': self.font_weight, 'color': self.font_color}
+        return {'family': self.font_family, 'size': self.font_size, 'weight': self.font_weight,
+                'color': self.font_color}
+
+    def __call__(self, arg: Any) -> None:
+        pass
 
     def to_json(self) -> AnyStr:
         """
@@ -46,6 +53,15 @@ class PlotFontDict:
         @rtype: str
         """
         return json.dumps(self.to_dict())
+
+@dataclass(slots=True, frozen=True)
+class LegendRenderer(PlotFontDict):
+    def __call__(self, arg: Any) -> None:
+        plt.legend(prop={'family': self.font_family,
+                         'size': self.font_size,
+                         'weight': self.font_weight}
+                   )
+
 
 @dataclass(slots=True, frozen=True)
 class TextRenderer(PlotFontDict):
@@ -69,7 +85,7 @@ class TextRenderer(PlotFontDict):
         """
         Alternative constructor taking a JSON string as input to deserialize
         Raise a JSONDecodeError exception if case the JSON string is malformed
-        
+
         @param json_config_str: Input JSON string
         @type json_config_str: str
         @return: Instance of the plotting text configuration
@@ -78,20 +94,22 @@ class TextRenderer(PlotFontDict):
         config_dict = json.loads(json_config_str)
         return TextRenderer(**config_dict)
 
-    def to_dict(self) -> (AnyStr, Dict[AnyStr, Any]):
+    def to_dict(self) -> Dict[AnyStr, Any]:
         attributes = PlotFontDict.to_dict(self)
         attributes['text'] = self.text
         return attributes
 
     def __call__(self, arg: Any = None) -> None:
         text, font_dict = self.text, PlotFontDict.to_dict(self)
-        match any:
+        match arg:
             case 'title':
                 plt.title(label=text, fontdict=font_dict)
             case 'xlabel':
                 plt.xlabel(label=text, fontdict=font_dict)
             case 'ylabel':
                 plt.ylabel(label=text, fontdict=font_dict)
+            case _:
+                raise NotImplementedError(f'{any} component is not supported')
 
     def __str__(self) -> AnyStr:
         return f'{self.text} - Font: {self.font_family}, {self.font_size}, {self.font_color}, {self.font_weight}'
@@ -105,13 +123,15 @@ class CommentRenderer(TextRenderer):
     """
     position: Tuple[float, float] = None
 
-    def to_json(self) -> (AnyStr, AnyStr):
-        return self.text, json.dumps(asdict(self))
+    def to_dict(self) -> Dict[AnyStr, Any]:
+        attributes = super().to_dict()
+        attributes['position'] = position
+        return attributes
 
     def __str__(self) -> AnyStr:
         return f'{super.__str__(self)} - Position: {self.position}'
 
-    def draw(self, arg: Any = None) -> None:
+    def __call__(self, arg: Any = None) -> None:
         x, y = self.position
         plt.text(x=x,
                  y=y,
@@ -121,8 +141,9 @@ class CommentRenderer(TextRenderer):
                  fontweight=self.font_weight,
                  transform=plt.gca().transAxes)
 
+
 @dataclass(slots=True, frozen=True)
-class PlotContext:
+class PlotContext(Renderer):
     """
     @param background_color: Background color
     @type background_color: str
@@ -151,8 +172,9 @@ class PlotContext:
         if self.filename is not None:
             fig.savefig(f'{self.filename}.png')
 
+
 @dataclass(slots=True, frozen=True)
-class AnnotationRenderer:
+class AnnotationRenderer(Renderer):
     text: AnyStr
     xy: Tuple[int, int]
     xytext: Tuple[int, int]
@@ -179,8 +201,11 @@ class PlottingDefaults(object):
 
 
 @dataclass(slots=True, frozen=True)
-class PlotsRenderer:
+class PlotsRenderer(Renderer):
     data_dict: Dict[AnyStr, Any]
+
+    def to_dict(self) -> Dict[AnyStr, Any]:
+        return self.data_dict
 
     def __call__(self, arg: Any = None) -> None:
         iterator = iter(self.data_dict.items())
@@ -196,67 +221,3 @@ class PlotsRenderer:
                      linestyle=PlottingDefaults.markers[count])
             count += 1
 
-
-@dataclass(slots=True, frozen=True)
-class PlottingConfig:
-    """
-    Generic data class for configuration any plot, independently of the plotting library or engine. The plot is
-    automatically saved if the variable, filename is defined.
-    
-    @param plot_type: Type of the plot (scatter, line plot, bar chart ...).
-    @type plot_type: str
-    @param title_config: Configuration for the title of the plot
-    @type title_config: TextRenderer
-    @param x_label_config: Configuration for the X-label of the plot
-    @type x_label_config: TextRenderer
-    @param y_label_config: Configuration for the y-label of the plot
-    @type y_label_config: CommentRenderer
-    @param comment_config: Configuration for comment the plot
-    @type comment_config: CommentRenderer
-    @param multi_plot_pause: Pause in millis between display of plots
-    @type multi_plot_pause: float
-    """
-    plot_type: AnyStr
-    plot_context: PlotContext
-    plot_renderer: PlotsRenderer
-    title_config: TextRenderer
-    x_label_config: TextRenderer
-    y_label_config: TextRenderer
-    legend_config: PlotFontDict
-    comment_config: CommentRenderer = None
-    annotate_config: AnnotationRenderer = None
-    multi_plot_pause: float = 0.0
-
-    @classmethod
-    def build(cls, json_config_str: AnyStr) -> Self:
-        """
-        Alternative constructor taking a JSON string as input to deserialize
-        Raise a JSONDecodeError exception if case the JSON string is malformed
-
-        @param json_config_str: Input JSON string
-        @type json_config_str: str
-        @return: Instance of the plotting tconfiguration
-        @rtype: PlottingConfig
-        """
-        config_dict = json.loads(json_config_str)
-        return PlottingConfig(**config_dict)
-
-    def to_json(self) -> AnyStr:
-        return json.dumps(asdict(self), indent=2)
-
-    def draw(self, arg: Any) -> None:
-        self.plot_context.__call__()
-        self.plot_renderer()
-        self.title_config()
-        self.x_label_config()
-        self.y_label_config()
-        if self.comment_config is not None:
-            self.comment_config()
-        if self.annotate_config is not None:
-            self.annotate_config()
-        plt.show()
-
-    def __str__(self) -> AnyStr:
-        return (f'\nType: {self.plot_type}\nTitle: {self.title_config}\nX-label: {self.x_label_config}'
-                f'\nY-Label: {self.y_label_config}\nLegend: {self.legend_config}\nContext: {self.plot_context}'
-                f'\nCommment: {self.comment_config}')

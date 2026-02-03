@@ -21,12 +21,12 @@ import torch
 from geometry.discrete.floyd_warshall import FloydWarshall
 from geometry.discrete.sinkhorn_knopp import SinkhornKnopp
 
-__all__ = ['OlliverRicci']
+__all__ = ['OllivierRicci']
 
 
-class OlliverRicci(FloydWarshall):
+class OllivierRicci(FloydWarshall):
     """
-    Implementation of the computation of the Olliver-Ricci Curvature
+    Implementation of the computation of the Ollivier-Ricci Curvature
 
     Over-squashing and over-smoothing represent the primary obstacles in training Graph Neural Networks (GNNs). While
     over-squashing generates critical information bottlenecks, over-smoothing leads to the excessive generalization of
@@ -68,10 +68,10 @@ class OlliverRicci(FloydWarshall):
                     for the Wasserstein distance
         @type rc: Tuple[Tensor, Tensor]
         """
-        super(OlliverRicci, self).__init__(edge_index=edge_index, is_undirected=True, weights=weights)
+        super(OllivierRicci, self).__init__(edge_index=edge_index, is_undirected=True, weights=weights)
 
         self.adjacency = FloydWarshall.create_adjacency(edge_index=edge_index, is_indirect=True)
-        (r, c) = rc if rc is not None else OlliverRicci.__get_marginal_distributions(self.adjacency)
+        (r, c) = rc if rc is not None else OllivierRicci.__get_marginal_distributions(self.adjacency)
         self.wasserstein_1_approximation = SinkhornKnopp.build(r, c, self, epsilon)
 
     @classmethod
@@ -95,7 +95,7 @@ class OlliverRicci(FloydWarshall):
                     for the Wasserstein distance
         @type rc: Tuple[Tensor, Tensor]
         @return: Instance of this class
-        @rtype: OlliverRicci
+        @rtype: OllivierRicci
         """
         weights = geodesic_distance(len(edge_index))
         return cls(edge_index, weights, epsilon, rc)
@@ -134,7 +134,7 @@ class OlliverRicci(FloydWarshall):
 
     @staticmethod
     def __get_marginal_distributions(adjacency: torch.Tensor) -> (torch.Tensor, torch.Tensor):
-        joint_probability_measures = OlliverRicci.__compute_prob_measures(adjacency)
+        joint_probability_measures = OllivierRicci.__compute_prob_measures(adjacency)
         # Extract the marginal distribution from the joint distribution
         r = joint_probability_measures.sum(dim=1)
         c = joint_probability_measures.sum(dim=0)
