@@ -32,6 +32,7 @@ The block is composed of a list of nn.Module instances
 
 
 class MLPBlock(NeuralBlock):
+    __slots__ = ['modules_list', 'activation_module']
     def __init__(self,
                  block_id: AnyStr,
                  layer_module: nn.Linear,
@@ -61,7 +62,6 @@ class MLPBlock(NeuralBlock):
             modules_list.append(dropout_module)
 
         self.modules_list = modules_list
-        self.block_id = block_id
         self.activation_module = activation_module
 
     @classmethod

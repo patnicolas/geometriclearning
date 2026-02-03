@@ -30,7 +30,7 @@ from deeplearning.model.graph.graph_conv_model import GraphConvBuilder
 import python
 
 
-@dataclass(frozen=True)
+@dataclass(slots=True, frozen=True)
 class GraphSAGEvsGCNConfig:
     model_id: AnyStr
     num_layers: int

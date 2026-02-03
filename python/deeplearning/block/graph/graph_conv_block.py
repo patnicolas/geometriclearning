@@ -33,6 +33,8 @@ P = TypeVar('P')
 
 
 class GraphConvBlock(MessagePassingBlock, Generic[CL, P]):
+    __slots__ = ['has_pooling', 'pooling_edge_index']
+
     def __init__(self,
                  block_id: AnyStr,
                  graph_conv_layer: CL,

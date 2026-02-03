@@ -23,7 +23,7 @@ from dataclasses import dataclass
 import geomstats.backend as gs
 __all__ = ['KMeansCluster', 'KMeansOnManifold']
 
-@dataclass(frozen=True)
+@dataclass(slots=True, frozen=True)
 class KMeansCluster:
     """
     Data class to collect result associated with a cluster extracted with k-means unsupervised training

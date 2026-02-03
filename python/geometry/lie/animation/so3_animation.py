@@ -25,6 +25,11 @@ from util.base_animation import BaseAnimation
 __all__ = ['SO3Animation', 'default_so3_transform']
 
 
+colors = ['#cffa0d', '#8bfa0d', '#1ffa0d', '#0dfa9d', '#0dfae4', '#0ddafa', '#9cb1fe', '#bb9cfe', '#e59cfe',
+          '#fe9cd6', '#fc9e93', '#fe9cd6', '#e59cfe', '#bb9cfe', '#9cb1fe', '#0ddafa', '#0dfae4', '#0dfa9d',
+          '#1ffa0d', '#8bfa0d'] * 4
+
+
 def default_so3_transform(args: List[np.array]) -> np.array:
     theta = args[0]
     T = np.eye(4)
@@ -39,7 +44,7 @@ def default_so3_transform(args: List[np.array]) -> np.array:
 class SO3Animation(BaseAnimation):
     """
     Wrapper for simulation or animation of SO3 lie group transformation defined as
-    math::
+    .. math::
         \begin{matrix}
         cos(\theta) & -sin(\theta)  & 0 \\
         sin(\theta) &  cos(\theta) & 0  \\
@@ -64,6 +69,8 @@ class SO3Animation(BaseAnimation):
     formula_pos: Tuple[float, float]  Position of formula if any
     title_pos: Tuple[float, float]  Position of title
     """
+    __slots__ = ['transform', 'next_step', 'fig', 'ax', 'coordinates']
+
     def __init__(self,
                  transform: Callable[[np.array], np.array] = default_so3_transform,
                  **kwargs: Dict[AnyStr, Any]) -> None:
@@ -104,10 +111,6 @@ class SO3Animation(BaseAnimation):
         @param mp4_file: Flag to specify if the mp4 file is to be generated (False plot are displayed but not saved)
         @type mp4_file: boolean
         """
-        colors = ['#cffa0d', '#8bfa0d', '#1ffa0d', '#0dfa9d', '#0dfae4', '#0ddafa', '#9cb1fe', '#bb9cfe', '#e59cfe',
-                  '#fe9cd6', '#fc9e93', '#fe9cd6', '#e59cfe', '#bb9cfe', '#9cb1fe', '#0ddafa', '#0dfae4', '#0dfa9d',
-                  '#1ffa0d', '#8bfa0d']
-        colors = colors + colors + colors + colors
         trajectory_pts = np.linspace(0, np.pi, len(colors)+1)
         next_pts = [SO3Animation.__trajectory(t) for pt_index, t in enumerate(trajectory_pts)]
 
@@ -115,10 +118,11 @@ class SO3Animation(BaseAnimation):
                            self.coordinates[1].ravel(),
                            self.coordinates[2].ravel(),
                            np.ones(self.coordinates[0].size)])
+        # To look nice background with logo and formula if needed
         self.fig.patch.set_facecolor('#f0f9ff')
         self.ax.set_facecolor('#f0f9ff')
-        self._draw_logo(fig=self.fig)
-        self.__draw_formula()
+        # self._draw_logo(fig=self.fig)
+        # self.__draw_formula()
 
         geo_lines = self.__sphere_geo_lines()
 
@@ -128,8 +132,10 @@ class SO3Animation(BaseAnimation):
             @param frame: Number of the frame (index) used in the simulation
             @type frame: int
             """
+            # Rsset the axis data
             self.ax.clear()
             self.__reset_axis()
+            # Execute the next step
             self.__animation_step(next_pts[frame], frame)
             self._draw_trajectory(next_pts, frame)
             T = self.transform(self.next_step)
@@ -241,6 +247,7 @@ class SO3Animation(BaseAnimation):
         longitudes = np.linspace(0, 2 * np.pi, 18)
 
         geo_lines = []
+        # Draws the geodesics
         for lat in latitudes:
             phi = np.linspace(0, 2 * np.pi, 100)
             x_lat = self.config['sphere_radius'] * np.cos(phi) * np.cos(lat)

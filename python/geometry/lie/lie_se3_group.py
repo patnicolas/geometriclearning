@@ -26,7 +26,7 @@ from geomstats.geometry.special_euclidean import SpecialEuclidean
 __all__ = ['SE3Element', 'LieSE3Group', 'SE3ElementDescriptor']
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class SE3ElementDescriptor:
     """
     Visualization of Algebra matrix with description in a given location for display
@@ -57,7 +57,7 @@ class SE3ElementDescriptor:
                 bbox=dict(facecolor='white', edgecolor='black'))
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class SE3Element:
     """
     Wrapper for Point or Matrix on SE3 manifold that leverages the Geomstats library.
@@ -90,6 +90,8 @@ class LieSE3Group(object):
         - lie_algebra: lie algebra as the tangent vector at identity
         - bracket: Implement lie commutator for so3 algebra
     """
+    __slots__ = ['point_type', 'lie_group', 'se3_element', 'tangent_vector']
+
     def __init__(self,
                  rot_matrix: np.array,
                  trans_matrix: np.array,

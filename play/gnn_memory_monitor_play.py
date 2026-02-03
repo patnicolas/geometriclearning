@@ -31,7 +31,7 @@ __all__ = ['GNNMemoryMonitorConfig', 'GNNMemoryMonitor']
 
 
 @dataclass
-class GNNMemoryMonitorConfig:
+class GNNMemoryMonitorConfig(slots=True):
     """
     Configuration data class for the training and model parameters used in the optimization of memory.
     Note: The following parameters are a subset of training and model configuration that have an impact on the

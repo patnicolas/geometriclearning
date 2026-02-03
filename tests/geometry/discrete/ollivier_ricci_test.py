@@ -2,16 +2,16 @@ import unittest
 import logging
 import python
 from geometry.discrete import WassersteinException
-from geometry.discrete.olliver_ricci import OlliverRicci
+from geometry.discrete.ollivier_ricci import OllivierRicci
 import torch
 
 
-class OlliverRicciTest(unittest.TestCase):
+class OllivierRicciTest(unittest.TestCase):
     @unittest.skip('Ignored')
     def test_create_adjacency(self):
         try:
             edge_index = [(0, 1), (0, 2), (1, 3), (1, 4), (2, 3), (4, 0), (1, 4), (2, 5), (4, 5)]
-            adjacency = OlliverRicci.create_adjacency(edge_index)
+            adjacency = OllivierRicci.create_adjacency(edge_index)
             logging.info(f'Adjacency:\n{adjacency}')
             self.assertTrue(True)
         except (ValueError, WassersteinException) as e:
@@ -25,8 +25,8 @@ class OlliverRicciTest(unittest.TestCase):
 
             r = torch.tensor([0.1, 0.1, 0.2, 0.4], dtype=torch.float32)
             c = torch.tensor([0.1, 0.3, 0.4, 0.2], dtype=torch.float32)
-            olliver_ricci = OlliverRicci(edge_index=edge_index, weights=None, epsilon=0.05, rc=(r, c))
-            curvature = olliver_ricci.curvature(n_iters=100, early_stop_threshold=0.01)
+            ollivier_ricci = OllivierRicci(edge_index=edge_index, weights=None, epsilon=0.05, rc=(r, c))
+            curvature = ollivier_ricci.curvature(n_iters=100, early_stop_threshold=0.01)
             logging.info(f'\nCurvature with r, c:\n{curvature}')
             self.assertTrue(True)
         except (ValueError, WassersteinException) as e:
@@ -41,8 +41,8 @@ class OlliverRicciTest(unittest.TestCase):
             r = torch.tensor([0.1, 0.1, 0.2, 0.4], dtype=torch.float32)
             c = torch.tensor([0.1, 0.3, 0.4, 0.2], dtype=torch.float32)
 
-            olliver_ricci = OlliverRicci(edge_index=edge_index, weights=weights, epsilon=0.05, rc=(r, c))
-            curvature = olliver_ricci.curvature(n_iters=100, early_stop_threshold=0.0001)
+            ollivier_ricci = OllivierRicci(edge_index=edge_index, weights=weights, epsilon=0.05, rc=(r, c))
+            curvature = ollivier_ricci.curvature(n_iters=100, early_stop_threshold=0.0001)
             logging.info(f'\nCurvature with r, c and weights:\n{curvature}')
             self.assertTrue(True)
         except (ValueError, WassersteinException) as e:
@@ -78,11 +78,11 @@ class OlliverRicciTest(unittest.TestCase):
             r = torch.tensor([0.1, 0.1, 0.2, 0.4, 0.0], dtype=torch.float32)
             c = torch.tensor([0.1, 0.5, 0.0, 0.2, 0.2], dtype=torch.float32)
 
-            olliver_ricci = OlliverRicci.build(edge_index=edge_index,
-                                               geodesic_distance=sphere_geodesics,
-                                               epsilon=0.05,
-                                               rc=(r, c))
-            curvature = olliver_ricci.curvature(n_iters=100, early_stop_threshold=0.0001)
+            ollivier_ricci = OllivierRicci.build(edge_index=edge_index,
+                                                 geodesic_distance=sphere_geodesics,
+                                                 epsilon=0.05,
+                                                 rc=(r, c))
+            curvature = ollivier_ricci.curvature(n_iters=100, early_stop_threshold=0.0001)
             logging.info(f'\nCurvature:\n{curvature}')
             self.assertTrue(True)
         except (ValueError, WassersteinException) as e:
@@ -93,9 +93,9 @@ class OlliverRicciTest(unittest.TestCase):
     def test_curvature_2(self):
         try:
             edge_index = [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)]
-            olliver_ricci = OlliverRicci(edge_index=edge_index, weights=None, epsilon=0.05, rc=None)
+            ollivier_ricci = OllivierRicci(edge_index=edge_index, weights=None, epsilon=0.05, rc=None)
 
-            curvature = olliver_ricci.curvature(n_iters=100, early_stop_threshold=0.01)
+            curvature = ollivier_ricci.curvature(n_iters=100, early_stop_threshold=0.01)
             logging.info(f'\nCurvature from joint:\n{curvature}')
             self.assertTrue(True)
         except (ValueError, WassersteinException) as e:
@@ -107,9 +107,9 @@ class OlliverRicciTest(unittest.TestCase):
         try:
             edge_index = [(0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)]
             edge_weights = torch.Tensor([0.8, 1.5, 2.6, 4.8, 2.2, 2.5, 6.1, 0.1, 3.8, 3.5])
-            olliver_ricci = OlliverRicci(edge_index=edge_index, weights=edge_weights, epsilon=0.02, rc=None)
+            ollivier_ricci = OllivierRicci(edge_index=edge_index, weights=edge_weights, epsilon=0.02, rc=None)
 
-            curvature = olliver_ricci.curvature(n_iters=100, early_stop_threshold=0.01)
+            curvature = ollivier_ricci.curvature(n_iters=100, early_stop_threshold=0.01)
             logging.info(f'\nCurvature from joint large:\n{curvature}')
             self.assertTrue(True)
         except (ValueError, WassersteinException) as e:

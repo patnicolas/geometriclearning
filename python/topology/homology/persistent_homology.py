@@ -34,6 +34,8 @@ class PersistentHomology(object):
 
     The data is synthetically generated from a shape (Torus, Sphere,) with additive noise.
     """
+    __slots__ = ['shaped_data_generator']
+
     num_shape_data_point = 96000
     size_raw_data_point = 140
     size_shaped_data_point = 36

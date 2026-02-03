@@ -26,8 +26,10 @@ Python package dedicated to Discrete Differential Geometry as element of Geometr
 class Wasserstein1Approximation(object):
     """
     Base class for Approximation of the Wasserstein distance.
-    @see python/geometry/discrete/floyd_warshall.py
+    @see python/geometry/discrete/sinkhornknopp.py
     """
+    __slots__ = ['r', 'c']
+
     def __init__(self, r: torch.Tensor, c: torch.Tensor) -> None:
         """
         Constructor for any approximation of the Wasserstein distance using the Marginal Distribution for the

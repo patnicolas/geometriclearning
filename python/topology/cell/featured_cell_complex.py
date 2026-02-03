@@ -50,6 +50,8 @@ class FeaturedCellComplex(FeaturedComplex[T]):
     Note: The implementation of the adjacency matrix is specific to graph. The TopoNetX library has a generic
     adjacency matrix to support edges - edges and faces -faces.
     """
+    __slots__ = ['featured_cells']
+
     def __init__(self, featured_cells: frozenset[FeaturedCell]) -> None:
         """
         Constructor for a Featured Cell complex defined as a list of Featured cell {cell + feature vector}

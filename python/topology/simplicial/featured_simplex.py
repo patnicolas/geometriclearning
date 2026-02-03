@@ -24,7 +24,7 @@ __all__ = ['FeaturedSimplex']
 
 
 @dataclass
-class FeaturedSimplex:
+class FeaturedSimplex(slots=True):
     """
     Definition of the basic element of a Simplicial Complex {Node, Edge, Face} composed of
       - Feature vector

@@ -26,6 +26,8 @@ class PersistenceDiagramType(ABC):
     """
     Abstract base class to generate any kind of persistence diagrams as supported by the scikit-learn TDA library
     """
+    __slots__ = ['ax']
+
     def __init__(self, ax: Axes) -> None:
         """
         Constructor for the abstract base class to any current or future Persistence diagrams

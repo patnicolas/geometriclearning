@@ -20,12 +20,12 @@ import logging
 import torch
 # Library import
 from play import Play
-from geometry.discrete.olliver_ricci import OlliverRicci
+from geometry.discrete.ollivier_ricci import OllivierRicci
 from geometry.discrete import WassersteinException
 import python
 
 
-class OlliverRicciPlay(Play):
+class OllivierRicciPlay(Play):
     """
     Source code related to the Substack article 'Curvature-informed Graph Learning'. A brief description of the
     algorithm is available on the comments of classes in Python directory geometry/discrete
@@ -33,12 +33,12 @@ class OlliverRicciPlay(Play):
     References:
     - Substack: https://patricknicolas.substack.com/p/curvature-informed-graph-learning
 
-    The features are implemented by the class OlliverRicci in the source files
-        - python/geometry/discrete/olliver_ricci.py
+    The features are implemented by the class OllivierRicci in the source files
+        - python/geometry/discrete/ollivier_ricci.py
         - python/geometry/discrete/sinkhorn-knopp.py
         - python/geometry/discrete/floyd-warshall.py
 
-    The class OlliverRicciPlay is a wrapper of the class OlliverRicci
+    The class OllivierRicciPlay is a wrapper of the class OllivierRicci
     The execution of the tests follows the same order as in the Substack article
     """
     def __init__(self,
@@ -46,15 +46,15 @@ class OlliverRicciPlay(Play):
                  edge_weights: torch.Tensor | Callable[[int], float],
                  epsilon: float,
                  rc: Tuple[torch.Tensor, torch.Tensor] = None):
-        super(OlliverRicciPlay, self).__init__()
+        super(OllivierRicciPlay, self).__init__()
 
-        self.olliver_ricci = OlliverRicci(edge_index, edge_weights, epsilon, rc) \
+        self.ollivier_ricci = OllivierRicci(edge_index, edge_weights, epsilon, rc) \
             if isinstance(edge_weights, torch.Tensor) \
-            else OlliverRicci.build(edge_index, edge_weights, epsilon, rc)
+            else OllivierRicci.build(edge_index, edge_weights, epsilon, rc)
 
     def play(self):
         try:
-            curvature = self.olliver_ricci.curvature(n_iters=100, early_stop_threshold=0.01)
+            curvature = self.ollivier_ricci.curvature(n_iters=100, early_stop_threshold=0.01)
             logging.info(f'\nCurvature:\n{curvature}')
         except (ValueError, WassersteinException) as e:
             logging.error(e)
@@ -86,11 +86,11 @@ if __name__ == '__main__':
     edge_index = [(0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)]
     edge_weights = torch.Tensor([0.8, 1.5, 2.6, 4.8, 2.2, 2.5, 6.1, 0.1, 3.8, 3.5])
 
-    olliver_ricci_play = OlliverRicciPlay(edge_index, edge_weights, epsilon=0.02, rc=None)
+    olliver_ricci_play = OllivierRicciPlay(edge_index, edge_weights, epsilon=0.02, rc=None)
     olliver_ricci_play.play()
 
     r = torch.tensor([0.1, 0.1, 0.2, 0.4], dtype=torch.float32)
     c = torch.tensor([0.1, 0.3, 0.4, 0.2], dtype=torch.float32)
-    olliver_ricci_play = OlliverRicciPlay(edge_index, sphere_geodesics, epsilon=0.05, rc=(r, c))
+    olliver_ricci_play = OllivierRicciPlay(edge_index, sphere_geodesics, epsilon=0.05, rc=(r, c))
     olliver_ricci_play.play()
 

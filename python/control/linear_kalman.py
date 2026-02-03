@@ -32,6 +32,7 @@ class LinearKalmanFilter(object):
     build: Alternative or simplified constructor for the Kalman filter with non control and null covariance
            values for the Process and Measurement noises
     """
+    __slots__ = ['x', 'P', 'A', 'H', 'Q', 'R', 'u', 'B']
 
     def __init__(self,
                  _x0: np.array,

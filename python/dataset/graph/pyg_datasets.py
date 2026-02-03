@@ -36,6 +36,8 @@ class PyGDatasets(object):
             _dataset = pyg_dataset()
             data = _dataset[0]
     """
+    __slots__ = ['name']
+
     base_dir = '../../data'
     valid_dataset_dict = {
         'Cora': lambda pyg: pyg.__load_planetoid(),

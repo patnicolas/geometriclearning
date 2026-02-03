@@ -26,6 +26,7 @@ __all__ = ['SOnGroup']
 
 
 class SOnGroup(object):
+    __slots__ = ['__atol', '__group']
 
     def __init__(self, dim: int, equip: bool, atol: float = 1e-5) -> None:
         """

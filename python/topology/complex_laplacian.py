@@ -31,6 +31,8 @@ __all__ = ['SimplexType', 'CellType', 'ComplexLaplacian']
 
 
 class ComplexLaplacian(Generic[CellDescriptor]):
+    __slots__ = ['laplacian_type', 'rank', 'rank']
+
     def __init__(self, laplacian_type:  LaplacianType, rank: int, signed: bool) -> None:
         """
         Constructor that defines the components of the Laplacian for Simplicial Complexes

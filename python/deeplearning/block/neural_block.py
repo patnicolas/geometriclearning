@@ -27,6 +27,7 @@ class NeuralBlock(nn.Module, ABC):
     """
     Basic Neural block for all deep learning architectures
     """
+    __slots__ = ['block_id ']
     supported_activations = ('Sigmoid', 'ReLU', 'Softmax', 'Tanh', 'ELU', 'LeakyReLU')
 
     def __init__(self, block_id: AnyStr):

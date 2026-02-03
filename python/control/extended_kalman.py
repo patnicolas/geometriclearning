@@ -27,6 +27,7 @@ import python
 
 class ExtendedKalmanFilter(object):
     dt = 1e-3
+    __slots__ = ['x', 'P', 'h', 'Q', 'R', 'f']
 
     def __init__(self,
                  _x0: np.array,

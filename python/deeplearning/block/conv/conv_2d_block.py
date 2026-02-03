@@ -54,6 +54,7 @@ class Conv2dBlock(ConvBlock):
 
     Reference: https://patricknicolas.substack.com/p/reusable-neural-blocks-in-pytorch
     """
+    __slots__ = ['modules_list']
     valid_modules = ('Conv2d', 'MaxPool2d', 'BatchNorm2d', 'Dropout2d')
 
     def __init__(self,

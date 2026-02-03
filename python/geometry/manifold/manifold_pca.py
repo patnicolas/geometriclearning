@@ -26,7 +26,7 @@ from geometry import GeometricException
 __all__ = ['PrincipalComponents', 'ManifoldPCA']
 
 
-@dataclass(frozen=True)
+@dataclass(slots=True, frozen=True)
 class PrincipalComponents:
     base_point: np.array
     components: np.array

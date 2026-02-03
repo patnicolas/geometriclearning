@@ -26,7 +26,7 @@ __all__ = ['PlotterParameters', 'Plotter']
 
 
 @dataclass
-class PlotterParameters:
+class PlotterParameters(slots=True):
     """
         Wraps the parameters for plots. The static methods generated a '.png' file which name is time stamped.
     """
@@ -63,9 +63,6 @@ class PlotterParameters:
 
     def __str__(self) -> AnyStr:
         return f'   Title:   {self.title}\n   X label: {self.x_label}\n   Y label: {self.y_label}'
-
-
-
 
     @classmethod
     def build_from_dict(cls, attributes: Dict[AnyStr, Any]) -> Self:

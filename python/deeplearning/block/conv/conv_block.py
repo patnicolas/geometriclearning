@@ -34,6 +34,7 @@ class ConvBlock(NeuralBlock):
 
     Reference: https://patricknicolas.substack.com/p/reusable-neural-blocks-in-pytorch
     """
+    __slots__ = ['attributes']
 
     def __init__(self, block_id: Optional[AnyStr]) -> None:
         """
@@ -72,5 +73,5 @@ class ConvBlock(NeuralBlock):
         @returns: weight of convolutional neural_blocks
         @rtype: tuple
         """
-        return [module.weight.data for module in self.modules_list
+        return [module.weight.data_dict for module in self.modules_list
                 if type(module) is nn.Linear or type(module) is nn.Conv2d or type(module) is nn.Conv1d]

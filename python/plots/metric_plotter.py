@@ -26,7 +26,7 @@ import python
 __all__ = ['MetricPlotterParameters', 'MetricPlotter']
 
 
-@dataclass(frozen=True)
+@dataclass(slots=True, frozen=True)
 class MetricPlotterParameters:
     """
     Wraps the parameters for plots. The static methods generated a '.png' file which name is time stamped.

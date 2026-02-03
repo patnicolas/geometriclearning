@@ -21,7 +21,7 @@ import numpy as np
 from toponetx.classes.hyperedge import HyperEdge
 
 @dataclass
-class FeaturedHyperEdge:
+class FeaturedHyperEdge(slots=True):
     """
     Define a featured hyperedge or cell of a hypergraph as a combination of a TopoNetX hyperedge and a features vector
     defined as a Numpy array.

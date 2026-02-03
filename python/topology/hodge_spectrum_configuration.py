@@ -28,7 +28,7 @@ __all__ = ['HodgeSpectrumConfiguration']
 
 
 @dataclass
-class HodgeSpectrumConfiguration:
+class HodgeSpectrumConfiguration(slots=True):
     """
     Class to generate a set of complex elements from a graph using the Hodge Laplacian
 

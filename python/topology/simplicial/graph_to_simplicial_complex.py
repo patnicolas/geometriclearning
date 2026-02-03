@@ -30,7 +30,6 @@ T = TypeVar('T')
 
 
 class GraphToSimplicialComplex(Generic[T]):
-    types_map = {1: 'nodes', 2: 'edges', 3: 'triangles', 4: 'tetrahedrons'}
     """
     This class wraps the mechanism to convert a Graph into a Simplicial complex by adding faces and features for
     edges and faces in 5 steps:
@@ -40,6 +39,9 @@ class GraphToSimplicialComplex(Generic[T]):
             4: Add features with values from eigen decomposition to each edge
             5: Add features with values from eigen decomposition to each face
     """
+    __slots__ = ['dataset_name']
+    types_map = {1: 'nodes', 2: 'edges', 3: 'triangles', 4: 'tetrahedrons'}
+
     def __init__(self,
                  nx_graph: nx.Graph | None,
                  dataset: T,
