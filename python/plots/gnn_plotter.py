@@ -1,5 +1,5 @@
 _author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,10 +13,12 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
+from typing import Tuple, AnyStr, Callable, Dict, Any, Self
+# 3rd Party imports
 import networkx as nx
 from networkx import Graph
 from torch_geometric.data import Data
-from typing import Tuple, AnyStr, Callable, Dict, Any, Self
 import matplotlib.pyplot as plt
 __all__ = ['GNNPlotter']
 
@@ -36,8 +38,8 @@ class GNNPlotter(object):
         @param sampled_node_index_range: Low and high bound of the indices of sampled nodes
         @type sampled_node_index_range: Tuple
         """
-        assert GNNPlotter.__validate(sampled_node_index_range), \
-            f'Incorrect indices for sampling graph nodes'
+        if not GNNPlotter.__validate(sampled_node_index_range):
+            raise ValueError(f'Incorrect indices for sampling graph nodes')
         self.graph = graph
         self.data = data
         self.sampled_node_index_range = sampled_node_index_range
@@ -81,7 +83,7 @@ class GNNPlotter(object):
 
         # Create NetworkX graph from edge index
         edge_index = self.data.edge_index.numpy()
-        transposed = edge_index.T
+        transposed = edge_index.CellDescriptor
         # Sample the edges of the graph
         if self.sampled_node_index_range is not None:
             last_node_index = len(self.data.y) if self.sampled_node_index_range[1] >= len(self.data.y) \

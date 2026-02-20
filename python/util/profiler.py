@@ -1,6 +1,8 @@
 __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2020, 2023  All rights reserved."
 
+
+# 3rd Party imports
 import cProfile
 import pstats
 from pstats import SortKey
@@ -23,7 +25,8 @@ class Profiler(object):
         self.python_script = python_script
 
     def run(self, num_records: int, stats_file_name: str) -> None:
-        assert num_records > 1, f'Number of records for Profiler {num_records} should be  > 1'
+        if num_records <= 1:
+            raise ValueError(f'Number of records for Profiler {num_records} should be  > 1')
         """
             Use C-Profiler to compute the time duration of a function and inner calls. The
             methods are sorted by decreasing order of cumulative time
@@ -54,7 +57,8 @@ class Profiler(object):
         usage = memory_profiler.memory_usage(self.python_script)
         logging.info(f'Memory {usage=}')
 
-    def run_memory_profiler(self) -> None:
+    @staticmethod
+    def run_memory_profiler() -> None:
         """
         Execute the memory line profiler on a script or Python function defined in the constructor
         """
@@ -65,7 +69,7 @@ class Profiler(object):
 @profile
 def test_func():
     import math
-    arr=[]
+    arr = []
     for i in range(0, 100000):
         arr.append(math.sin(i*0.001) + math.log(1.0 + i*0.0002))
     del arr

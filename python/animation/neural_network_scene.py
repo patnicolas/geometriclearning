@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -100,10 +100,14 @@ class NeuralNetworkScene(ThreeDScene):
                 line.set_color(state)
                 line.set_opacity(1)
 
-        status_text_forward = Tex(r'\textbf{Forward Weights Propagation}', font_size=32, color=GREEN).to_edge(DOWN)
+        status_text_forward = Tex(r'\textbf{Forward Weights Propagation}',
+                                  font_size=32,
+                                  color=GREEN).to_edge(DOWN)
         self.add(status_text_forward)
         mlp_group.add_updater(mlp_color_updater)
-        status_text_backward = Tex(r'\textbf{Backward Loss Gradient Propagation}', font_size=32, color=RED).to_edge(DOWN)
+        status_text_backward = Tex(r'\textbf{Backward Loss Gradient Propagation}',
+                                   font_size=32,
+                                   color=RED).to_edge(DOWN)
         # self.add(status_text_backward)
         self.play(
             mlp_tracker.animate.set_value(16),

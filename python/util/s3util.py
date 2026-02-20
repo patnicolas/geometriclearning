@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,20 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+# Standard Library imports
+from collections import OrderedDict
+from typing import Optional
 import io
 import json
-from typing import Optional
+import pickle
+import logging
+# 3rd Party imports
 import boto3
 import pandas as pd
 from pandas import json_normalize
-import pickle
-from collections import OrderedDict
+
+import python
 AWS_SHARED_CREDENTIALS_FILE = "~/.aws/credentials2"
 
 
@@ -94,7 +100,6 @@ class S3Util(object):
         obj_summaries = list(my_bucket.objects.filter(Prefix=self.s3_folder_name))
         object_summaries = obj_summaries[0: self.num_files] if self.num_files > 0 else obj_summaries
         sampled_object_summaries = [obj for obj in object_summaries if len(obj.key) > len(self.s3_folder_name)]
-        constants.log_info(f'Retrieve {len(sampled_object_summaries)} object summaries')
         assert len(sampled_object_summaries) > 0, 'S3 to DataFrame is empty'
 
         def gen_fields(data_list: str, cols: list) -> list:
@@ -137,7 +142,7 @@ class S3Util(object):
         obj_summaries = list(my_bucket.objects.filter(Prefix=self.s3_folder_name))
         object_summaries = obj_summaries[0: self.num_files] if self.num_files > 0 else obj_summaries
         sampled_object_summaries = [obj for obj in object_summaries if len(obj.key) > len(self.s3_folder_name)]
-        constants.log_info(f'Retrieve {len(sampled_object_summaries)} object summaries')
+        logging.info(f'Retrieve {len(sampled_object_summaries)} object summaries')
         assert len(sampled_object_summaries) > 0, 'S3 to DataFrame is empty'
 
         def gen_fields(data_list: str, cols: list) -> list:

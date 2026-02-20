@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,16 +13,18 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
 from typing import List
+# 3rd Party imports
 import matplotlib.pyplot as plt
 from matplotlib.collections import PathCollection
 import matplotlib.animation as animation
 from networkx import Graph
 import networkx as nx
 from networkx.classes.reportviews import NodeView
+# Library imports
 from util.base_animation import BaseAnimation
 __all__ = ['GraphHomophilyAnimation']
-
 
 class GraphHomophilyAnimation(BaseAnimation):
     def __init__(self,
@@ -70,7 +72,7 @@ class GraphHomophilyAnimation(BaseAnimation):
                         s=f"1st Hop: {len(highlighted_nodes)} neighbors",
                         fontdict={'fontsize': 14, 'fontname': 'Helvetica', 'fontweight': 'bold', 'color': 'orange'},
                         bbox=dict(facecolor='black', edgecolor='black'))
-                new_colors = ['orange' if n in highlighted_nodes else 'lightgray' for n in self.G.nodes()]
+                new_colors = ['orange' if n in highlighted_nodes else 'lightgray' for n in self.G.featured_nodes()]
                 new_colors[self.central_node] = 'red'
             else:
                 if frame - len(hop1_neighbors) < len(hop2_neighbors):
@@ -81,7 +83,7 @@ class GraphHomophilyAnimation(BaseAnimation):
                         fontdict={'fontsize': 14, 'fontname': 'Helvetica', 'color': 'yellow'},
                         bbox=dict(facecolor='black', edgecolor='black'))
 
-                for n in self.G.nodes():
+                for n in self.G.featured_nodes():
                     if n in highlighted_nodes:
                         new_colors.append('orange')
                     elif n in highlighted_nodes_2:
@@ -122,7 +124,7 @@ class GraphHomophilyAnimation(BaseAnimation):
         node_artists = nx.draw_networkx_nodes(self.G, pos, node_color='darkgray', ax=ax)
         nx.draw_networkx_labels(self.G, pos, ax=ax)
         # Highlight central node
-        node_colors = ['red' if n == self.central_node else 'lightgray' for n in self.G.nodes()]
+        node_colors = ['red' if n == self.central_node else 'lightgray' for n in self.G.featured_nodes()]
         node_artists.set_color(node_colors)
         return node_artists
 

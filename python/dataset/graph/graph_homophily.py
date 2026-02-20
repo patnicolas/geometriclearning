@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,10 +13,13 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
 from typing import AnyStr, Self
-from dataset.graph.pyg_datasets import PyGDatasets
-from torch_geometric.data import Data
 from enum import StrEnum, verify, UNIQUE
+# 3rd Party imports
+from torch_geometric.data import Data
+# Library imports
+from dataset.graph.pyg_datasets import PyGDatasets
 __all__ = ['GraphHomophily', 'GraphHomophilyType']
 
 
@@ -34,7 +37,7 @@ class GraphHomophilyType(StrEnum):
 
 
 class GraphHomophily(object):
-    r"""
+    """
         Implementation of the computation of the homophily of a graph using two methods
         - torch_geometric (__call__)
         - homegrown (compute) includes for reference...
@@ -62,6 +65,7 @@ class GraphHomophily(object):
         math::
             \frac{1}{C-1} \sum_{k=1}^{C} \max \left(0, h_k - \frac{|\mathcal{C}_k|} {|\mathcal{V}|} \right)
     """
+    __slots__ = ['data', 'homophily_type']
 
     def __init__(self, data: Data, homophily_type: GraphHomophilyType) -> None:
         """

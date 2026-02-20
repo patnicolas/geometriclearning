@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from typing import AnyStr, TypeVar, List
 from dataclasses import dataclass
-
 Item = TypeVar("Item")
 
 @dataclass
-class TechRegion:
+class TechRegion(slots=True, frozen=True):
     city: AnyStr
     num_companies: float
     longitude: float

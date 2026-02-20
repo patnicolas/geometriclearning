@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +13,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy as np
+# Standard Library imports
 from typing import Self, Callable, List, Tuple, AnyStr
+import logging
+# 3rd Party imports
+import numpy as np
+# Library imports
 from control import ControlException
+import python
 
 
 class LinearKalmanFilter(object):
@@ -27,6 +32,7 @@ class LinearKalmanFilter(object):
     build: Alternative or simplified constructor for the Kalman filter with non control and null covariance
            values for the Process and Measurement noises
     """
+    __slots__ = ['x', 'P', 'A', 'H', 'Q', 'R', 'u', 'B']
 
     def __init__(self,
                  _x0: np.array,
@@ -39,7 +45,6 @@ class LinearKalmanFilter(object):
                  _B: np.array = None) -> None:
         """
         Default and fully specified constructor for the standard, linear Kalman filter
-        Parameters:
 
         @param _x0 : Initial values for the estimated state
         @type _x0: Numpy array
@@ -76,7 +81,6 @@ class LinearKalmanFilter(object):
         - No control input
         - Process and Measurement noise matrices have non-diagonal elements null (variance only)
 
-        Parameters
         @param _x0 :  Initial values for the estimated state
         @type _x0: Numpy array
         @param _P0 : Initial values for the error covariance matrix
@@ -99,32 +103,43 @@ class LinearKalmanFilter(object):
 
     def predict(self, v: np.array) -> None:
         """
-        Implements the Prediction phase of the predict-update cycle of the Kalman filter
-        Parameters
-        v : Noise for the process
+        Implements the Prediction phase of the predict-update cycle of the Kalman filter. A Control exception
+        is raised in case of under-flowing, overflowing or divide by zero operations.
+
+        @param v: Noise for the process
+        @type v: Numpy array
         """
-        # State:  x[n] = A.x~[n-1] + B.u[n-1] + v
-        self.x = self.A @ self.x + v if self.B is None else self.A @ self.x + self.B @ self.u + v
-        # Error covariance:  P[n] = A[n].P[n-1].A[n]^T + Q[n]
-        self.P = self.A @ self.P @ self.A.T + self.Q
+        try:
+            # State:  x[n] = A.x~[n-1] + B.u[n-1] + v
+            self.x = self.A @ self.x + v if self.B is None else self.A @ self.x + self.B @ self.u + v
+            # Error covariance:  P[n] = A[n].P[n-1].A[n]^T + Q[n]
+            self.P = self.A @ self.P @ self.A.CellDescriptor + self.Q
+        except (RuntimeWarning, RuntimeError) as trw:
+            logging.warning(trw)
+            raise ControlException(f'Linear Kalman Filter: {trw}')
 
     def update(self, z: np.array) -> None:
         """
         Implement the update phase of the predict-update cycle of the Kalman filter. Each equation
-        is commented
-        Parameters:
-        z : Explicitly measured (or observed) values
-        """
-        # Innovation:  S[n] = H.P[n-1].H^T + R[n]
-        S = self.H @ self.P @ self.H.T + self.R
-        # Gain: G[n] = P[n-1].H^T/S[n]
-        G = self.P @ self.H.T @ np.linalg.inv(S)
+        is commented. A Control exception is raised in case of under-flowing, overflowing or divide by zero operation
 
-        # State estimate y[n] = z[n] - H.x
-        y = z - self.H @ self.x
-        self.x = self.x + G @ y
-        g = np.eye(self.P.shape[0]) - G @ self.H
-        self.P = g @ self.P
+        @param z : Explicitly measured (or observed) values
+        @type z: Numpy array
+        """
+        try:
+            # Innovation:  S[n] = H.P[n-1].H^T + R[n]
+            S = self.H @ self.P @ self.H.CellDescriptor + self.R
+            # Gain: G[n] = P[n-1].H^T/S[n]
+            G = self.P @ self.H.CellDescriptor @ np.linalg.inv(S)
+
+            # State estimate y[n] = z[n] - H.x
+            y = z - self.H @ self.x
+            self.x = self.x + G @ y
+            g = np.eye(self.P.shape[0]) - G @ self.H
+            self.P = g @ self.P
+        except (RuntimeWarning, RuntimeError) as trw:
+            logging.warning(trw)
+            raise ControlException(f'Linear Kalman Filter: {trw}')
 
     def simulate(self,
                  num_measurements: int,
@@ -156,19 +171,13 @@ class LinearKalmanFilter(object):
                    _P0: np.array,
                    _A: np.array,
                    _H: np.array) -> None:
-        import logging
-        import python
-
-        try:
-            assert _A.shape[0] == _x0.shape[0], \
-                f'Shape A {_A.shape} is inconsistent with x0 shape {_x0.shape}'
-            assert _A.shape[0] == _A.shape[1], f'A shape {_A.shape} should be square'
-            assert _A.shape[0] == _H.shape[0], \
-                f'Shape A {_A.shape} is inconsistent with H shape {_H.shape}'
-            assert _A.shape[0] == _P0.shape[1], \
-                f'Shape A {_A.shape} is inconsistent with P0 shape {_P0.shape}'
-        except AssertionError as e:
-            logging.error(e)
-            raise ControlException(e)
+        if _A.shape[0] != _x0.shape[0]:
+            raise ValueError(f'Shape A {_A.shape} is inconsistent with x0 shape {_x0.shape}')
+        if _A.shape[0] != _A.shape[1]:
+            raise ValueError(f'A shape {_A.shape} should be square')
+        if _A.shape[0] != _H.shape[0]:
+            raise ValueError(f'Shape A {_A.shape} is inconsistent with H shape {_H.shape}')
+        if _A.shape[0] == _P0.shape[1]:
+             raise ValueError(f'Shape A {_A.shape} is inconsistent with P0 shape {_P0.shape}')
 
 

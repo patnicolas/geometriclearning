@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ def min_max_scaler(x: torch.Tensor) -> torch.Tensor:
         y = MinMaxScaler().fit_transform(x)
         z = torch.tensor(y, dtype=x.dtype)
         return z
-    except ValueError | NotFittedError | TypeError as e:
+    except (ValueError, NotFittedError, TypeError) as e:
         traceback.print_exc()
         raise DatasetException(f'MinMaxScaler failed {e}')
 

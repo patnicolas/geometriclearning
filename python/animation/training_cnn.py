@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from manim import *
 import torch
+import logging
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms
@@ -68,13 +69,14 @@ class TrainingCNN(Scene):
             outputs = model(images)
             loss = criterion(outputs, labels)
 
-            optimizer.zero_grad()
+            optimizer.zero_grad(set_to_none=True)
             loss.backward()
             optimizer.step()
 
             self.play(loss_tracker.animate.set_value(loss.item()), run_time=0.1)
 
         self.wait(2)
+
 
 if __name__ == '__main__':
     scene = SimpleCNN()

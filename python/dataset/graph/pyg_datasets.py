@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,8 +13,11 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from torch.utils.data import Dataset
+# Standard Library imports
 from typing import AnyStr, Optional
+# 3rd Party imports
+from torch.utils.data import Dataset
+# Library imports
 from dataset import DatasetException
 __all__ = ['PyGDatasets']
 
@@ -33,8 +36,10 @@ class PyGDatasets(object):
             _dataset = pyg_dataset()
             data = _dataset[0]
     """
+    __slots__ = ['name']
+
     base_dir = '../../data'
-    dataset_dict = {
+    valid_dataset_dict = {
         'Cora': lambda pyg: pyg.__load_planetoid(),
         'PubMed': lambda pyg: pyg.__load_planetoid(),
         'CiteSeer': lambda pyg: pyg.__load_planetoid(),
@@ -58,10 +63,14 @@ class PyGDatasets(object):
 
     def __init__(self, dataset_name: AnyStr) -> None:
         """
-        Constructor for the interface to PyTorch Geometric dataset
+        Constructor for the interface to PyTorch Geometric dataset.
+
         @param dataset_name: Name of the dataset loaded from PyTorch Geometric
         @type dataset_name: AnyStr
         """
+        if dataset_name not in PyGDatasets.valid_dataset_dict:
+            raise ValueError(f'Data set {dataset_name} is not supported for Graph Neural Networks')
+
         self.name = dataset_name
 
     def __call__(self) -> Optional[Dataset]:
@@ -71,24 +80,25 @@ class PyGDatasets(object):
         @rtype torch.util.Dataset
         """
         try:
-            func = PyGDatasets.dataset_dict[self.name]
+            func = PyGDatasets.valid_dataset_dict[self.name]
             return func(self)
         except KeyError as err:
             raise DatasetException(f'Dataset {self.name} not supported {err}')
 
     """ ------------------   Private helper methods --------------------- """
+    from torch_geometric.data.dataset import Dataset
 
-    def __load_molecule_net(self):
+    def __load_molecule_net(self) -> Dataset:
         from torch_geometric.datasets import MoleculeNet
         molecule_net = MoleculeNet(root=PyGDatasets.base_dir, name=self.name)
         return molecule_net
 
-    def __load_amazon(self):
+    def __load_amazon(self) -> Dataset:
         from torch_geometric.datasets import Amazon
         amazon_dataset = Amazon(root=PyGDatasets.base_dir, name=self.name)
         return amazon_dataset
 
-    def __load_yelp(self):
+    def __load_yelp(self) -> Dataset:
         from torch_geometric.datasets import Yelp
         yelp_dataset = Yelp(PyGDatasets.base_dir)
         return yelp_dataset

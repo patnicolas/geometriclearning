@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# 3rd Party imports
 from PIL import Image
 import torch
 from torchvision import datasets, transforms
@@ -29,7 +30,6 @@ class ImageTensor(object):
         to_images Generate images from a list of input_tensors
         to_image Generate an image from a single input_tensor
         to_dataset Generate a data loader from a list of images
-
     """
     def __init__(self, images_dir: str, img_scale_factor: int = None) -> None:
         """
@@ -83,7 +83,7 @@ class ImageTensor(object):
     def __show_image(self, img: Image, img_name: str):
         resize_h = img.size[0] * self.img_scale_factor
         resize_b = img.size[1] * self.img_scale_factor
-        img.resize((resize_h, resize_b)).show(img_name)
+        img.resize((resize_h, resize_b)).dump(img_name)
 
 
     @staticmethod
@@ -94,13 +94,13 @@ class ImageTensor(object):
             2 Height of the image
             3 Number of channels (1 for shades of greay, 3 for RGB)
             @param input: Input input_tensor
-            @param file_name: Name of the images
+            @param img_name: Name of the images
             @param n_channels: Number of channels should be either 1 or 3
-            @param to_show: Specify that the image has to be shown.
         """
         from PIL import Image
+        if n_channels not in [1, 3]:
+            raise ValueError( f'Number of channels {n_channels} should be {1, 3}')
 
-        assert n_channels in [1, 3], f'Number of channels {n_channels} should be {1, 3}'
         shapes = list(input.size())
         assert len(shapes) == n_channels, f'ImageTensor.to_image: Num shapes {len(shapes)} should be 3'
         assert shapes[2] == n_channels, f'ImageTensor.to_image: 3rd dimension {shapes[2]} should be {n_channels}'
@@ -115,25 +115,24 @@ class ImageTensor(object):
         data = t.numpy()
         return Image.fromarray(data)
 
-
     @staticmethod
     def show_image(input_data: list, target_data: list, title: str, num_items: int):
         """
             Display image input_tensors for debugging purpose. The total number of images displayed are num_cols by 6 rows
             @param input_data: List of torch input_tensor for images
-            :type input_data: lst
+            @type input_data: lst
             @param target_data: List of torch input_tensor for labels
-            :type target_data: lst
+            @type target_data: lst
             @param num_items: Number of items to display
-            :type num_items: int
+            @type num_items: int
             @param title: Title of the graph
-            :type title: str
+            @type title: str
         """
         import matplotlib.pyplot as plt
 
         fig = plt.figure()
         for i in range(num_items):
-            plt.subplot(3, num_items / 2, i + 1)
+            plt.subplot(3, num_items // 2, i + 1)
             plt.tight_layout()
             plt.imshow(input_data[i][0], cmap='gray', interpolation='none')
             plt.title(f'{title}: {target_data[i]}')
@@ -141,15 +140,14 @@ class ImageTensor(object):
             plt.yticks([])
         fig.show()
 
-
     @staticmethod
     def show_tensor_images(image_tensor: torch.Tensor, num_images: int, num_row: int):
         """
-            Function for visualizing images: Given a input_tensor of images, number of images, and
-            size per image, plots and prints the images in an uniform grid.
-            @param image_tensor: Tensor representing num_images
-            @param num_images: Number of images
-            @param num_row: Number of row to be displayed in the grid
+        Function for visualizing images: Given a input_tensor of images, number of images, and
+        size per image, plots and prints the images in an uniform grid.
+        @param image_tensor: Tensor representing num_images
+        @param num_images: Number of images
+        @param num_row: Number of row to be displayed in the grid
         """
         from torchvision.utils import make_grid
         import matplotlib.pyplot as plt

@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,11 +13,15 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
+import logging
+from typing import Dict, AnyStr
+# 3rd Party imports
 import requests
 import time
 import urllib3
-import logging
-from util.decorators import timeit
+# Library imports
+from util.timeit import timeit
 __all__ = ['HttpPost']
 
 
@@ -32,17 +36,17 @@ class HttpPost(object):
         python stage_predicted True input_file
         python http://ip-10-5-47-158.us-east-2.compute.internal:8087/geminiml/predict False input_file
     """
-    def __init__(self, target: str, headers: list, is_predefined_target: bool = False) -> None:
+    def __init__(self, target: str, headers: list, predefined_targets: Dict[AnyStr, AnyStr] = False) -> None:
         """
         Constructor for HttpPost
         @param target: URL (if is_predefined_target == True) or a pre-defined
         @param headers: Header of the HTTP Post
-        @param is_predefined_target: Specify if this is a predefined target (True) or a vision URL (False)
+        @param predefined_targets: Specify if this is a predefined target (True) or a vision URL (False)
         @exception KeyError: Predefined URL is not found
         """
         self.headers = headers
         # If this is a predefined target.
-        if is_predefined_target:
+        if len(predefined_targets) > 0:
             try:
                 self.target = predefined_targets[target]
             except KeyError as e:
@@ -73,9 +77,6 @@ class HttpPost(object):
                 logging.error(str(e))
                 return False
             except Exception as e:
-                logging.error(str(e))
-                return False
-            except TypeError as e:
                 logging.error(str(e))
                 return False
         else:
@@ -115,24 +116,6 @@ class HttpPost(object):
                         logging.info(f'{success_count=}, {total_count=}')
                         time.sleep(sleep_time)
         return success_count, total_count
-
-
-predefined_targets = {
-    'predict_local': 'http://127.0.0.1:8080/geminiml/predict',
-    'predict_test': 'http://ip-10-5-58-7.us-east-2.compute.internal:8087/geminiml/predict',
-    'predict_stage': 'http://ip-10-5-45-112.us-east-2.compute.internal:8087/geminiml/predict',
-    'predict_production': 'http://ip-10-5-59-20.us-east-2.compute.internal:8087/geminiml/predict',
-    'predict_training': 'http://ip-10-5-38-237.us-east-2.compute.internal:8087/geminiml/predict',
-    'predict_demo': 'http://ip-10-5-53-143.us-east-2.compute.internal:8087/geminiml/predict',
-    'predict_new_api': 'http://ip-10-5-33-98.us-east-2.compute.internal:8087/geminiml/predict',
-    'feedback_local': 'http://localhost:8080/geminiml/feedback',
-    'feedback_test': 'http://ip-10-5-58-7.us-east-2.compute.internal:8087/geminiml/feedback',
-    'feedback_stage': 'http://ip-10-5-45-112.us-east-2.compute.internal:8087/geminiml/feedback',
-    'feedback_production': 'http://ip-10-5-59-20.us-east-2.compute.internal:8087/geminiml/feedback',
-    'feedback_training': 'http://ip-10-5-38-237.us-east-2.compute.internal:8087/geminiml/feedback',
-    'virtual_coder_stage': 'http://vc-stage.private.aideo-tech.com/api',
-    'virtual_coder_production': 'https://virtual-coder.aideo-tech.com/api'
-}
 
 
 def main(args: list):

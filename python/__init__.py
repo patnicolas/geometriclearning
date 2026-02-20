@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 import torch
 torch.set_default_dtype(torch.float32)
-from typing import AnyStr, List
+from typing import AnyStr
 
 """
 Environment variable to enable/disable unit test for execution
@@ -41,6 +41,12 @@ logger.setLevel(logging.INFO)
 logger.handlers = []  # Clear existing handlers
 logger.addHandler(handler)
 
+memory_monitor_enabled = True
+identity = lambda f: f
+
+def is_logging_debug() -> bool:
+    return logging.getLogger().level == logging.DEBUG
+
 
 """
 Evaluate if two tensors is almost identical, element-wize
@@ -58,7 +64,8 @@ def are_tensors_close(t1: torch.Tensor, t2: torch.Tensor, rtol: float = 1e-6) ->
     @return: True if the two tensors are almost identical, False otherwise
     @rtype: boolean
     """
-    assert 1e-15 < rtol < 0.01, f'Error tolerance {rtol} is out of range'
+    if rtol <= 1e-15 or rtol >= 0.01:
+        raise ValueError(f'Error tolerance {rtol} is out of range')
 
     is_match = t1.shape == t2.shape
     if is_match:
