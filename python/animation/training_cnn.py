@@ -77,6 +77,7 @@ class TrainingCNN(Scene):
 
         self.wait(2)
 
+
 if __name__ == '__main__':
     scene = SimpleCNN()
     scene.construct()
