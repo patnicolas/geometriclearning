@@ -14,16 +14,16 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # limitations under the License.
 
 from manim import *
-from typing import List, Optional
+from typing import Self, Optional
 from neural_config import NeuralConfig
-from enum import Enum
+from enum import StrEnum
 
 
-
-class LayerType(Enum):
+class LayerType(StrEnum):
     INPUT = 'Input'
     HIDDEN = 'Hidden'
     OUTPUT = 'Output'
+
 
 """
 Class/VGroup that defines a layer of neurons/units.

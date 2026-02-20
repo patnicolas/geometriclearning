@@ -56,7 +56,8 @@ class ManimNeighborLoader(ThreeDScene):
         self.play(*[Create(e) for e in edge_objs])
 
         # 7- Dynamic update of label and latex equation
-        matmul = self.step_description(text=r"Message \ passing: \ \  W \cdot h_u^{(l)}", prev_vm_object=edges_creation_label)
+        matmul = self.step_description(text=r"Message \ passing: \ \  W \cdot h_u^{(l)}",
+                                       prev_vm_object=edges_creation_label)
 
         # 8- Simulate and display aggregation process (e.g., GCN layer) using colored arrows
         aggregate_arrows = [

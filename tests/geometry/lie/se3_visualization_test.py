@@ -1,7 +1,7 @@
 
 import unittest
-from geometry.lie import SE3ElementDescriptor
 from geometry.lie import u3d
+from geometry.lie.lie_se3_group import SE3ElementDescriptor
 from geometry.lie.se3_visualization import SE3Visualization
 import numpy as np
 from typing import List
