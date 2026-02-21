@@ -14,45 +14,43 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import List, AnyStr, Optional, Any, Dict, Generic, TypeVar
+from typing import AnyStr, Optional, Generic, TypeVar, Dict, Any
 import logging
 # 3rd Party imports
 import torch
 from torch_geometric.data import Data
 from torch.utils.data import DataLoader
 # Library imports
-from deeplearning.block.mlp.mlp_block import MLPBlock
-from deeplearning.block.graph.graph_conv_block import GraphConvBlock
-from deeplearning.model.neural_model import NeuralBuilder
 from deeplearning.model.graph.graph_base_model import GraphBaseModel
+from deeplearning.block.graph.graph_attention_block import GraphAttentionBlock
+from deeplearning.block.mlp.mlp_block import MLPBlock
 from deeplearning.training.gnn_training import GNNTraining
+from deeplearning.model.neural_model import NeuralBuilder
 import python
-__all__ = ['GraphConvModel', 'GraphConvBuilder']
+__all__ = ['GraphAttentionModel']
 
-# CL for type of torch geometric convolutional layer module, P for Pooling module
-CONV = TypeVar('CONVL')
-P = TypeVar('P')
+GATL = TypeVar("GATL")
 
-class GraphConvModel(GraphBaseModel, Generic[CONV, P]):
+class GraphAttentionModel(GraphBaseModel, Generic[GATL]):
     """
-    A Graph Convolution Network may require one output multi-layer perceptron for classification purpose using
-    SoftMax activation. We do not restrict a model from have multiple linear layers for output
+        A Graph Attention Network may require one output multi-layer perceptron for classification purpose using
+        SoftMax activation. We do not restrict a model from have multiple linear layers for output
     """
     def __init__(self,
                  model_id: AnyStr,
-                 graph_conv_blocks: frozenset[GraphConvBlock[CONV, P]],
+                 graph_attention_blocks: frozenset[GraphAttentionBlock[GATL]],
                  mlp_blocks: Optional[frozenset[MLPBlock]] = None) -> None:
         """
-        Constructor for this simple Graph convolutional neural network
+           Constructor for this simple Graph Attention neural network
 
-        @param model_id: Identifier for this model
-        @type model_id: Str
-        @param graph_conv_blocks: List of Graph convolutional neural blocks
-        @type graph_conv_blocks: List[ConvBlock]
-        @param mlp_blocks: List of Feed-Forward Neural Blocks
-        @type mlp_blocks: List[MLPBlock]
+           @param model_id: Identifier for this model
+           @type model_id: Str
+           @param graph_conv_blocks: List of Graph Attention neural blocks
+           @type graph_conv_blocks: List[GraphAttentionBlock]
+           @param mlp_blocks: List of Feed-Forward Neural Blocks
+           @type mlp_blocks: List[MLPBlock]
         """
-        super(GraphConvModel, self).__init__(model_id, graph_conv_blocks, mlp_blocks)
+        super(GraphAttentionModel, self).__init__(model_id, graph_attention_blocks, mlp_blocks)
 
     def forward(self, data: Data) -> torch.Tensor:
         """
@@ -68,15 +66,13 @@ class GraphConvModel(GraphBaseModel, Generic[CONV, P]):
 
         # Step 2: Process forward the convolutional layers
         # Create and collect the output of each GNN layer
-        for graph_conv_block in self.graph_blocks:
+        for graph_attention_block in self.graph_attension_blocks:
             # Implicit invoke forward method for the block
             logging.debug(f'Before Conv shape {x.shape} & index {edge_index}')
-            x = graph_conv_block(x, edge_index, data.batch)
-            if graph_conv_block.has_pooling:
-                edge_index = graph_conv_block.pooling_edge_index
+            x = graph_attention_block(x, edge_index, data.batch)
             logging.debug(f'After Conv shape {x.shape} & index {edge_index}')
 
-        # Step 4: Process the fully connected, MLP layers
+        # Step 3: Process the fully connected, MLP layers
         for mlp_block in self.mlp_blocks:
             # Invoke the forward method for the MLP block
             x = mlp_block(x)
@@ -95,33 +91,32 @@ class GraphConvModel(GraphBaseModel, Generic[CONV, P]):
         training.train(neural_model=self, train_loader=train_loader, val_loader=val_loader)
 
 
-class GraphConvBuilder(NeuralBuilder):
+
+class GraphAttentionBuilder(NeuralBuilder):
     """
-    Builder for a Graph Convolutional Model
-    The graph convolutional model is built from a dictionary of configuration parameters
+    Builder for a Graph Attention Model
+    The graph attention model is built from a dictionary of configuration parameters
     for which  the keys are predefined. The model is iteratively created by call to method set
     defined in the base class NeuralBuilder
 
     The constructor define defaults value for activation (nn.ReLU()), stride, padding,
     enabling batch normalization and drop_out (no dropout).
-
-    Reference: https://patricknicolas.substack.com/p/modular-deep-learning-models-with
     """
     def __init__(self, model_attributes: Dict[AnyStr, Any]) -> None:
         """
-        Constructor for Graph Convolutional Model using default
+        Constructor for Graph Attention Model using default
         set of keys (name of configuration parameters) and default value for activation
         module, stride, padding, enabling batch normalization and no dropout
         @param model_attributes: Dictionary of model attributes
         @type model_attributes: Dict[AnyStr, Any]
         """
-        super(GraphConvBuilder, self).__init__(model_attributes)
+        super(GraphAttentionBuilder, self).__init__(model_attributes)
 
-    def build(self) -> GraphConvModel:
+    def build(self) -> GraphAttentionModel:
         """
-        Build Graph Convolutional Model from a dictionary of configuration
+        Build Graph attention Model from a dictionary of configuration
         parameters in three steps:
-        1- Generate the convolutional neural block from the configuration parameters
+        1- Generate the attention neural block from the configuration parameters
         2- Generate the MLP neural blocks from the configuration if defined
         3- Validate the model
         @return: 2-dimensional convolutional model instance
@@ -129,7 +124,7 @@ class GraphConvBuilder(NeuralBuilder):
         """
         graph_conv_blocks_attribute = self.model_attributes['graph_conv_blocks']
         mlp_blocks_attribute = self.model_attributes['mlp_blocks']
-        graph_conv_blocks = frozenset([GraphConvBlock.build(graph_conv_block_attribute)
-                                       for graph_conv_block_attribute in graph_conv_blocks_attribute])
+        graph_attention_blocks = frozenset([GraphAttentionBlock.build(graph_conv_block_attribute)
+                                            for graph_conv_block_attribute in graph_conv_blocks_attribute])
         mlp_blocks = frozenset([MLPBlock.build(mlp_block_attribute) for mlp_block_attribute in mlp_blocks_attribute])
-        return GraphConvModel(self.model_attributes['model_id'], graph_conv_blocks, mlp_blocks)
+        return GraphAttentionModel(self.model_attributes['model_id'], graph_attention_blocks, mlp_blocks)

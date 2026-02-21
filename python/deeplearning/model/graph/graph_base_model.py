@@ -14,11 +14,10 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import List, AnyStr, Optional, Self, Any
+from typing import List, AnyStr, Optional, Self
 from abc import ABC, abstractmethod
 # 3rd Party imports
 import torch
-from torch_geometric.loader import GraphSAINTRandomWalkSampler
 from torch_geometric.data import Data
 from torch.utils.data import DataLoader, Dataset
 import torch.nn as nn
@@ -34,8 +33,8 @@ class GraphBaseModel(NeuralModel, ABC):
 
     def __init__(self,
                  model_id: AnyStr,
-                 graph_blocks: List[MessagePassingBlock],
-                 mlp_blocks: Optional[List[MLPBlock]] = None) -> None:
+                 graph_blocks: frozenset[MessagePassingBlock],
+                 mlp_blocks: Optional[frozenset[MLPBlock]] = None) -> None:
         """
         Constructor for this simple generic Graph neural network
 

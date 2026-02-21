@@ -27,14 +27,14 @@ from deeplearning.model.graph.graph_base_model import GraphBaseModel
 from deeplearning.training.gnn_training import GNNTraining
 __all__ = ['GraphSAGEModel', 'GraphSAGEBuilder']
 
-CL = TypeVar("CL")
+SAGEL = TypeVar("SAGEL")
 
-class GraphSAGEModel(GraphBaseModel, Generic[CL]):
+class GraphSAGEModel(GraphBaseModel, Generic[SAGEL]):
 
     def __init__(self,
                  model_id: AnyStr,
-                 graph_SAGE_blocks: List[GraphSAGEBlock[CL]],
-                 mlp_blocks: Optional[List[MLPBlock]] = None) -> None:
+                 graph_SAGE_blocks: frozenset[GraphSAGEBlock[SAGEL]],
+                 mlp_blocks: Optional[frozenset[MLPBlock]] = None) -> None:
         """
         Constructor for the SAGE Graph Model
 
@@ -119,7 +119,7 @@ class GraphSAGEBuilder(NeuralBuilder):
         """
         graph_SAGE_blocks_attribute = self.model_attributes['graph_SAGE_blocks']
         mlp_blocks_attribute = self.model_attributes['mlp_blocks']
-        graph_SAGE_blocks = [GraphSAGEBlock.build(graph_SAGE_block_attribute)
-                             for graph_SAGE_block_attribute in graph_SAGE_blocks_attribute]
-        mlp_blocks = [MLPBlock.build(mlp_block_attribute) for mlp_block_attribute in mlp_blocks_attribute]
+        graph_SAGE_blocks = frozenset([GraphSAGEBlock.build(graph_SAGE_block_attribute)
+                                       for graph_SAGE_block_attribute in graph_SAGE_blocks_attribute])
+        mlp_blocks = frozenset([MLPBlock.build(mlp_block_attribute) for mlp_block_attribute in mlp_blocks_attribute])
         return GraphSAGEModel(self.model_attributes['model_id'], graph_SAGE_blocks, mlp_blocks)

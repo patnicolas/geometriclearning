@@ -78,7 +78,7 @@ class MessagePassingBlock(NeuralBlock, ABC):
     def forward(self,
                 x: torch.Tensor,
                 edge_index: Adj,
-                batch: torch.Tensor) -> torch.Tensor:
+                batch: torch.Tensor = None) -> torch.Tensor:
         """
         Forward propagation along the network with an input x  an adjacency, edge_index and a batch. This method
         is abstract and needs to be overridden by subclasses
