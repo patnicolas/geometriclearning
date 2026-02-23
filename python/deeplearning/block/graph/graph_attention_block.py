@@ -19,8 +19,7 @@ from typing import AnyStr, Optional, Dict, Any, Self, Generic, TypeVar
 # 3rd Party Library Import
 import torch
 import torch.nn as nn
-from torch_geometric.nn import GATConv, GATv2Conv, TransformerConv, RGATConv, AGNNConv, FusedGATConv, GPSConv
-from torch_geometric.nn import BatchNorm
+from torch_geometric.nn import GATConv, GATv2Conv, TransformerConv, RGATConv, AGNNConv, FusedGATConv, GPSConv, BatchNorm
 from torch_geometric.typing import Adj
 # Library imports
 from deeplearning.block.graph.message_passing_block import MessagePassingBlock
@@ -55,11 +54,11 @@ class GraphAttentionBlock(MessagePassingBlock, Generic[GATL]):
             @type dropout_module: nn.Module subclass
         """
         GraphAttentionBlock.__validate(graph_attention_layer, batch_norm_module)
-        self.super(GraphAttentionBlock, self).__init__(block_id,
-                                                       graph_attention_layer,
-                                                       batch_norm_module,
-                                                       activation_module,
-                                                       dropout_module)
+        super(GraphAttentionBlock, self).__init__(block_id,
+                                                  graph_attention_layer,
+                                                  batch_norm_module,
+                                                  activation_module,
+                                                  dropout_module)
 
     @classmethod
     def build(cls, block_attributes: Dict[AnyStr, Any]) -> Self:
@@ -108,15 +107,23 @@ class GraphAttentionBlock(MessagePassingBlock, Generic[GATL]):
                 x = module(x)
         return x
 
-    """ --------------------------  Private Helper Methods ---------------------- """
+    def __str__(self) -> AnyStr:
+        """
+        Display the identifier and the list of Torch modules in this block
+        """
+        return f'\nId: {self.block_id}\nModules: {str(self.modules_list)}'
+
+    """ --------------------------  Private Helper Methods ---------------------- 
+        Validation of the input to the constructor
+    """
 
     @staticmethod
     def __validate(graph_attention_layer: GATL, batch_norm_module: Optional[BatchNorm] = None) -> None:
         if not isinstance(graph_attention_layer,
                           (GATConv, GATv2Conv, TransformerConv, RGATConv, AGNNConv, FusedGATConv, GPSConv)):
             raise TypeError(f'Type of graph attention layer {type(graph_attention_layer)} is not supported')
-        if batch_norm_module is not None and isinstance(batch_norm_module, BatchNorm):
-            raise ValueError(f'batch norm type {batch_norm_module} should be BatchNorm')
+        if batch_norm_module is not None and isinstance(type(batch_norm_module), BatchNorm):
+            raise ValueError(f'batch norm type {type(batch_norm_module)} should be BatchNorm')
 
     @staticmethod
     def __validate_build(block_attributes: Dict[AnyStr, Any]) -> None:

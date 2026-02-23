@@ -40,9 +40,9 @@ class MessagePassingBlock(NeuralBlock, ABC):
                                         |
                                 MessagePassingBlock
                                         |
-                      ----------------------------------
-                      |           |                   |
-                  GCNBlock    GraphConvBlock     GraphSAGEBlock
+                      -------------------------------------------------------
+                      |           |                   |                     |
+                  GCNBlock    GraphConvBlock     GraphSAGEBlock      GraphAttentionBlock
     """
     def __init__(self,
                  block_id: AnyStr,

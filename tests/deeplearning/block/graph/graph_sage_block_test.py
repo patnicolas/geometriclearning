@@ -69,6 +69,7 @@ class GraphSAGEBlockTest(unittest.TestCase):
                 'dropout': 0.3
             }
             graph_SAGE_block = GraphSAGEBlock.build(block_attributes)
+            logging.info(graph_SAGE_block)
             self.assertTrue(False)
         except TypeError as e:
             logging.error(e)

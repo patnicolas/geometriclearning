@@ -34,7 +34,7 @@ GATL = TypeVar("GATL")
 class GraphAttentionModel(GraphBaseModel, Generic[GATL]):
     """
         A Graph Attention Network may require one output multi-layer perceptron for classification purpose using
-        SoftMax activation. We do not restrict a model from have multiple linear layers for output
+        SoftMax activation. We do not restrict a model from have multiple linear layers for output.
     """
     def __init__(self,
                  model_id: AnyStr,
@@ -89,7 +89,6 @@ class GraphAttentionModel(GraphBaseModel, Generic[GATL]):
         @type val_loader: torch.utils.data.DataLoader
         """
         training.train(neural_model=self, train_loader=train_loader, val_loader=val_loader)
-
 
 
 class GraphAttentionBuilder(NeuralBuilder):

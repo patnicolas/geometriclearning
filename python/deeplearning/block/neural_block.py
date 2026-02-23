@@ -27,7 +27,7 @@ class NeuralBlock(nn.Module, ABC):
     """
     Basic Neural block for all deep learning architectures
     """
-    __slots__ = ['block_id ']
+    __slots__ = ['_block_id']
     supported_activations = ('Sigmoid', 'ReLU', 'Softmax', 'Tanh', 'ELU', 'LeakyReLU')
 
     def __init__(self, block_id: AnyStr):
@@ -37,7 +37,11 @@ class NeuralBlock(nn.Module, ABC):
         @type block_id: str
         """
         super(NeuralBlock, self).__init__()
-        self.block_id = block_id
+        self._block_id = block_id
+
+    @property
+    def block_id(self) -> AnyStr:
+        return self._block_id
 
     def transpose(self, extra: Optional[nn.Module] = None) -> Self:
         raise MLPException('Cannot invert abstract Neural block')

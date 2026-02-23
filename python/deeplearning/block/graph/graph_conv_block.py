@@ -91,7 +91,7 @@ class GraphConvBlock(MessagePassingBlock, Generic[CONVL, P]):
         @rtype: GraphConvBlock
         """
         GraphConvBlock.__validate_build(block_attributes)
-        return cls(block_attributes['block_id'],
+        return cls(block_attributes['_block_id'],
                    block_attributes['conv_layer'],
                    block_attributes['batch_norm'],
                    block_attributes['activation'],
