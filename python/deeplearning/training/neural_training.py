@@ -74,7 +74,7 @@ class NeuralTraining(object):
         self.early_stopping = early_stopping
         self.plot_parameters = plot_parameters
         self.exec_config = exec_config
-        self.performance_metrics = PerformanceMetrics(metrics_attributes)
+        self.performance_metrics = PerformanceMetrics(registered_perf_metrics=metrics_attributes, is_display_plot=True)
 
     def reset_perf_metrics(self) -> None:
         self.performance_metrics.reset()

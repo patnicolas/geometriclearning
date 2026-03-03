@@ -14,7 +14,7 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import List, AnyStr, Optional, Any, Dict, Generic, TypeVar
+from typing import Tuple, AnyStr, Optional, Any, Dict, Generic, TypeVar
 import logging
 # 3rd Party imports
 import torch
@@ -30,7 +30,7 @@ import python
 __all__ = ['GraphConvModel', 'GraphConvBuilder']
 
 # CL for type of torch geometric convolutional layer module, P for Pooling module
-CONV = TypeVar('CONVL')
+CONV = TypeVar('CONV')
 P = TypeVar('P')
 
 class GraphConvModel(GraphBaseModel, Generic[CONV, P]):
@@ -40,8 +40,8 @@ class GraphConvModel(GraphBaseModel, Generic[CONV, P]):
     """
     def __init__(self,
                  model_id: AnyStr,
-                 graph_conv_blocks: frozenset[GraphConvBlock[CONV, P]],
-                 mlp_blocks: Optional[frozenset[MLPBlock]] = None) -> None:
+                 graph_conv_blocks: Tuple[GraphConvBlock[CONV, P]],
+                 mlp_blocks: Optional[Tuple[MLPBlock]] = None) -> None:
         """
         Constructor for this simple Graph convolutional neural network
 
@@ -129,7 +129,7 @@ class GraphConvBuilder(NeuralBuilder):
         """
         graph_conv_blocks_attribute = self.model_attributes['graph_conv_blocks']
         mlp_blocks_attribute = self.model_attributes['mlp_blocks']
-        graph_conv_blocks = frozenset([GraphConvBlock.build(graph_conv_block_attribute)
-                                       for graph_conv_block_attribute in graph_conv_blocks_attribute])
-        mlp_blocks = frozenset([MLPBlock.build(mlp_block_attribute) for mlp_block_attribute in mlp_blocks_attribute])
-        return GraphConvModel(self.model_attributes['model_id'], graph_conv_blocks, mlp_blocks)
+        graph_conv_blocks = [GraphConvBlock.build(graph_conv_block_attribute)
+                             for graph_conv_block_attribute in graph_conv_blocks_attribute]
+        mlp_blocks = [MLPBlock.build(mlp_block_attribute) for mlp_block_attribute in mlp_blocks_attribute]
+        return GraphConvModel(self.model_attributes['model_id'], tuple(graph_conv_blocks), tuple(mlp_blocks))

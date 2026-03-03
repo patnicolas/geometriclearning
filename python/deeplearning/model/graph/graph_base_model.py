@@ -14,7 +14,7 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import List, AnyStr, Optional, Self
+from typing import List, AnyStr, Tuple, Self, Optional
 from abc import ABC, abstractmethod
 # 3rd Party imports
 import torch
@@ -33,8 +33,8 @@ class GraphBaseModel(NeuralModel, ABC):
 
     def __init__(self,
                  model_id: AnyStr,
-                 graph_blocks: frozenset[MessagePassingBlock],
-                 mlp_blocks: Optional[frozenset[MLPBlock]] = None) -> None:
+                 graph_blocks: Tuple[MessagePassingBlock],
+                 mlp_blocks: Optional[Tuple[MLPBlock]] = None) -> None:
         """
         Constructor for this simple generic Graph neural network
 
@@ -54,7 +54,7 @@ class GraphBaseModel(NeuralModel, ABC):
         super(GraphBaseModel, self).__init__(model_id)
 
     @classmethod
-    def build(cls, model_id: AnyStr, gnn_blocks: List[MessagePassingBlock]) -> Self:
+    def build(cls, model_id: AnyStr, gnn_blocks: tuple[MessagePassingBlock]) -> Self:
         """
         Create a pure graph neural network
         @param model_id: Identifier for the model
@@ -189,19 +189,3 @@ class GraphBaseModel(NeuralModel, ABC):
     @staticmethod
     def convert_dataset_to_data(dataset: TUDataset) -> Data:
         return dataset.data
-
-    """ ----------------------  Private helper methods ------------------  """
-
-    def __load_data(self, data: Data) -> (DataLoader, DataLoader):
-        train_loader = GraphSAINTRandomWalkSampler(data=data,
-                                                   batch_size=self.batch_size,
-                                                   walk_length=self.walk_length,
-                                                   num_steps=3,
-                                                   is_train=True)
-        test_loader = GraphSAINTRandomWalkSampler(data=data,
-                                                  batch_size=self.batch_size,
-                                                  walk_length=self.walk_length,
-                                                  num_steps=3,
-                                                  is_train=False)
-        return train_loader, test_loader
-

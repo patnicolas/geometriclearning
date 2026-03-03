@@ -19,7 +19,7 @@ from typing import AnyStr, Optional, Dict, Any, Self, Generic, TypeVar
 # 3rd Party imports
 import torch
 import torch.nn as nn
-from torch_geometric.nn import BatchNorm, GraphConv, GCNConv, GCN2Conv
+from torch_geometric.nn import GraphConv, GCNConv, GCN2Conv, BatchNorm
 from torch_geometric.nn.pool import TopKPooling, SAGPooling
 from torch_geometric.typing import Adj
 # Library imports
@@ -137,18 +137,11 @@ class GraphConvBlock(MessagePassingBlock, Generic[CONVL, P]):
         # Validate the PyTorch Geometric pooling module
         if pooling_module is not None and not isinstance(pooling_module, (SAGPooling, TopKPooling)):
             raise TypeError(f'Type of pooling {type(pooling_module)} is not supported')
-        if batch_norm_module is not None and isinstance(batch_norm_module, BatchNorm):
-            raise ValueError(f'batch norm type {batch_norm_module} should be BatchNorm')
+        if batch_norm_module is not None and not isinstance(batch_norm_module, BatchNorm):
+            raise ValueError(f'batch norm type {type(batch_norm_module)} should be BatchNorm')
 
     @staticmethod
     def __validate_build(block_attributes: Dict[AnyStr, Any]) -> None:
-        if block_attributes['conv_layer'] is None or not isinstance(block_attributes['conv_layer'], GraphConv):
-            raise ValueError(f'SAGE layer type {block_attributes["conv_layer"]} should be GraphConv')
-        if block_attributes['batch_norm'] is not None and not isinstance(block_attributes['batch_norm'], BatchNorm):
-            raise ValueError(f'batch norm type {block_attributes["batch_norm"]} should be BatchNorm')
-        if block_attributes['pooling'] is not None and not (isinstance(block_attributes['pooling'], SAGPooling)
-                                                            or isinstance(block_attributes['pooling'], TopKPooling)):
-            raise ValueError(f'pooling {block_attributes["pooling"]} should be SAGPooling | TopKPooling')
         if (block_attributes['dropout'] is not None and
                 (block_attributes['dropout'] < 0.0 or block_attributes['dropout'] > 0.5)):
             raise ValueError(f'dropout {block_attributes["dropout"]} should be [0., 0.5]')

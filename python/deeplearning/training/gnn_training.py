@@ -73,7 +73,7 @@ class GNNTraining(NeuralTraining):
                                           plot_parameters)
 
     @classmethod
-    def build(cls, training_attributes: Dict[AnyStr, Any], exec_config: ExecConfig=ExecConfig.default()) -> Self:
+    def build(cls, training_attributes: Dict[AnyStr, Any], exec_config: ExecConfig = ExecConfig.default()) -> Self:
         # Instantiate the Hyper parameters from the training attributes
         hyper_params = HyperParams.build(training_attributes)
 

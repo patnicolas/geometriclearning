@@ -34,7 +34,7 @@ class GraphAttentionBlock(MessagePassingBlock, Generic[GATL]):
 
     def __init__(self,
                  block_id: AnyStr,
-                 graph_attention_layer: GATL,
+                 attention_layer: GATL = None,
                  batch_norm_module: Optional[BatchNorm] = None,
                  activation_module: Optional[nn.Module] = None,
                  dropout_module: Optional[nn.Dropout] = None) -> None:
@@ -53,9 +53,9 @@ class GraphAttentionBlock(MessagePassingBlock, Generic[GATL]):
             @param dropout_module: Drop out for training
             @type dropout_module: nn.Module subclass
         """
-        GraphAttentionBlock.__validate(graph_attention_layer, batch_norm_module)
+        GraphAttentionBlock.__validate(attention_layer, activation_module, batch_norm_module)
         super(GraphAttentionBlock, self).__init__(block_id,
-                                                  graph_attention_layer,
+                                                  attention_layer,
                                                   batch_norm_module,
                                                   activation_module,
                                                   dropout_module)
@@ -118,10 +118,14 @@ class GraphAttentionBlock(MessagePassingBlock, Generic[GATL]):
     """
 
     @staticmethod
-    def __validate(graph_attention_layer: GATL, batch_norm_module: Optional[BatchNorm] = None) -> None:
+    def __validate(graph_attention_layer: GATL, activation_module: nn.Module, batch_norm_module: BatchNorm) -> None:
         if not isinstance(graph_attention_layer,
                           (GATConv, GATv2Conv, TransformerConv, RGATConv, AGNNConv, FusedGATConv, GPSConv)):
             raise TypeError(f'Type of graph attention layer {type(graph_attention_layer)} is not supported')
+        if (isinstance(graph_attention_layer, (GATConv, GATv2Conv, RGATConv, FusedGATConv))
+                and activation_module is not None):
+            raise ValueError(f'Activation function {type(activation_module)} should not be defined')
+
         if batch_norm_module is not None and isinstance(type(batch_norm_module), BatchNorm):
             raise ValueError(f'batch norm type {type(batch_norm_module)} should be BatchNorm')
 

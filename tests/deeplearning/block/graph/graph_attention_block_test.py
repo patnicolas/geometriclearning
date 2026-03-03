@@ -14,7 +14,7 @@ class GraphAttentionBlockTest(unittest.TestCase):
             hidden_channels = 256
             graph_attention_layer = GATConv(in_channels=num_node_features, out_channels=hidden_channels)
             graph_attention_block = GraphAttentionBlock[GATConv](block_id='Attention-Block',
-                                                                 graph_attention_layer=graph_attention_layer,
+                                                                 attention_layer=graph_attention_layer,
                                                                  batch_norm_module=BatchNorm(hidden_channels),
                                                                  activation_module=nn.ReLU(),
                                                                  dropout_module=nn.Dropout(0.2))
@@ -33,24 +33,45 @@ class GraphAttentionBlockTest(unittest.TestCase):
         try:
             num_node_features = 24
             hidden_channels = 256
-            graph_attention_layer = RGATConv(in_channels=num_node_features,
-                                             out_channels=hidden_channels,
-                                             num_relations=4)
-            graph_attention_block = GraphAttentionBlock[RGATConv](block_id='Attention-Block',
-                                                                  graph_attention_layer=graph_attention_layer,
-                                                                  batch_norm_module=BatchNorm(hidden_channels),
-                                                                  activation_module=nn.ReLU(),
-                                                                  dropout_module=nn.Dropout(0.2))
+            graph_attention_layer = GATConv(in_channels=num_node_features, out_channels=hidden_channels)
+            graph_attention_block = GraphAttentionBlock[GATConv](block_id='Attention-Block',
+                                                                 attention_layer=graph_attention_layer,
+                                                                 batch_norm_module=BatchNorm(hidden_channels),
+                                                                 activation_module=None,
+                                                                 dropout_module=nn.Dropout(0.2))
             modules = list(graph_attention_block.modules_list)
-            self.assertEqual(len(modules), 4)
+            self.assertEqual(len(modules), 3)
             self.assertTrue(isinstance(modules[-1], nn.Dropout))
             logging.info(f'\n{graph_attention_block}')
         except KeyError as e:
             logging.error(e)
-            self.assertTrue(True)
+            self.assertTrue(False)
         except ValueError as e:
             logging.error(e)
-            self.assertTrue(True)
+            self.assertTrue(False)
+
+    def test_init_default_3(self):
+        try:
+            num_node_features = 24
+            hidden_channels = 256
+            graph_attention_layer = RGATConv(in_channels=num_node_features,
+                                             out_channels=hidden_channels,
+                                             num_relations=4)
+            graph_attention_block = GraphAttentionBlock[RGATConv](block_id='Attention-Block',
+                                                                  attention_layer=graph_attention_layer,
+                                                                  batch_norm_module=BatchNorm(hidden_channels),
+                                                                  activation_module=None,
+                                                                  dropout_module=nn.Dropout(0.2))
+            modules = list(graph_attention_block.modules_list)
+            self.assertEqual(len(modules), 3)
+            self.assertTrue(isinstance(modules[-1], nn.Dropout))
+            logging.info(f'\n{graph_attention_block}')
+        except KeyError as e:
+            logging.error(e)
+            self.assertTrue(False)
+        except ValueError as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     def test_build(self):
         try:
@@ -61,17 +82,17 @@ class GraphAttentionBlockTest(unittest.TestCase):
                                                             out_channels=hidden_channels,
                                                             num_relations=4),
                                 'batch_norm': BatchNorm(hidden_channels),
-                                'activation': nn.LeakyReLU(),
+                                'activation': None,
                                 'dropout': 0.3
                                 }
             graph_attention_block = GraphAttentionBlock.build(block_descriptor)
             modules = list(graph_attention_block.modules_list)
-            self.assertEqual(len(modules), 4)
+            self.assertEqual(len(modules), 3)
             self.assertTrue(isinstance(modules[-1], nn.Dropout))
             logging.info(f'\n{graph_attention_block}')
         except KeyError as e:
             logging.error(e)
-            self.assertTrue(True)
+            self.assertTrue(False)
         except ValueError as e:
             logging.error(e)
-            self.assertTrue(True)
+            self.assertTrue(False)

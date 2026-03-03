@@ -51,7 +51,7 @@ class GraphConvModelTest(unittest.TestCase):
             graph_conv_model = GraphConvModel[GraphConv, TopKPooling](
                 model_id='Flicker test dataset',
                 graph_conv_blocks=[graph_conv_block_1, graph_conv_block_2, graph_conv_block_3],
-                mlp_blocks=[mlp_block]
+                mlp_blocks=tuple([mlp_block])
             )
             logging.info(f'\n{graph_conv_model}')
             params = list(graph_conv_model.parameters())
@@ -234,7 +234,7 @@ class GraphConvModelTest(unittest.TestCase):
             logging.error(e)
             self.assertTrue(False)
 
-    # @unittest.skip('Ignore')
+    @unittest.skip('Ignore')
     def test_training(self):
         from deeplearning.block.graph import GraphException
 

@@ -14,7 +14,7 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import AnyStr, Optional, Generic, TypeVar, Dict, Any
+from typing import AnyStr, Optional, Generic, TypeVar, Dict, Any, Tuple
 import logging
 # 3rd Party imports
 import torch
@@ -27,19 +27,19 @@ from deeplearning.block.mlp.mlp_block import MLPBlock
 from deeplearning.training.gnn_training import GNNTraining
 from deeplearning.model.neural_model import NeuralBuilder
 import python
-__all__ = ['GraphAttentionModel']
+__all__ = ['GraphAttentionModel', 'GraphAttentionBuilder']
 
-GATL = TypeVar("GATL")
+GAT = TypeVar("GAT")
 
-class GraphAttentionModel(GraphBaseModel, Generic[GATL]):
+class GraphAttentionModel(GraphBaseModel, Generic[GAT]):
     """
         A Graph Attention Network may require one output multi-layer perceptron for classification purpose using
         SoftMax activation. We do not restrict a model from have multiple linear layers for output.
     """
     def __init__(self,
                  model_id: AnyStr,
-                 graph_attention_blocks: frozenset[GraphAttentionBlock[GATL]],
-                 mlp_blocks: Optional[frozenset[MLPBlock]] = None) -> None:
+                 graph_attention_blocks: Tuple[GraphAttentionBlock[GAT]],
+                 mlp_blocks: Optional[Tuple[MLPBlock]] = None) -> None:
         """
            Constructor for this simple Graph Attention neural network
 
@@ -66,7 +66,7 @@ class GraphAttentionModel(GraphBaseModel, Generic[GATL]):
 
         # Step 2: Process forward the convolutional layers
         # Create and collect the output of each GNN layer
-        for graph_attention_block in self.graph_attension_blocks:
+        for graph_attention_block in self.graph_blocks:
             # Implicit invoke forward method for the block
             logging.debug(f'Before Conv shape {x.shape} & index {edge_index}')
             x = graph_attention_block(x, edge_index, data.batch)
@@ -113,7 +113,7 @@ class GraphAttentionBuilder(NeuralBuilder):
 
     def build(self) -> GraphAttentionModel:
         """
-        Build Graph attention Model from a dictionary of configuration
+        Build Graph Attention Model from a dictionary of configuration
         parameters in three steps:
         1- Generate the attention neural block from the configuration parameters
         2- Generate the MLP neural blocks from the configuration if defined
@@ -121,9 +121,9 @@ class GraphAttentionBuilder(NeuralBuilder):
         @return: 2-dimensional convolutional model instance
         @rtype: Conv2dModel
         """
-        graph_conv_blocks_attribute = self.model_attributes['graph_conv_blocks']
+        graph_attention_blocks_attribute = self.model_attributes['graph_attention_blocks']
         mlp_blocks_attribute = self.model_attributes['mlp_blocks']
-        graph_attention_blocks = frozenset([GraphAttentionBlock.build(graph_conv_block_attribute)
-                                            for graph_conv_block_attribute in graph_conv_blocks_attribute])
-        mlp_blocks = frozenset([MLPBlock.build(mlp_block_attribute) for mlp_block_attribute in mlp_blocks_attribute])
-        return GraphAttentionModel(self.model_attributes['model_id'], graph_attention_blocks, mlp_blocks)
+        graph_attention_blocks = [GraphAttentionBlock.build(graph_conv_block_attribute)
+                                  for graph_conv_block_attribute in graph_attention_blocks_attribute]
+        mlp_blocks = [MLPBlock.build(mlp_block_attribute) for mlp_block_attribute in mlp_blocks_attribute]
+        return GraphAttentionModel(self.model_attributes['model_id'], tuple(graph_attention_blocks), tuple(mlp_blocks))
