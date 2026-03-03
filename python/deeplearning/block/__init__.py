@@ -24,3 +24,4 @@ def checkpoint_enable(enable: bool = True) -> None:
     print(f'Checkpoint {"enabled" if enable else "disabled"}')
     checkpoint = enable
 
+

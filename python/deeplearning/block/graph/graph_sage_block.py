@@ -50,8 +50,7 @@ class GraphSAGEBlock(MessagePassingBlock, Generic[CL]):
         @param dropout_module: Optional PyTorch Geometric module for regularization 
         @type dropout_module: Optional[Dropout]
         """
-        if not isinstance(graph_SAGE_layer, (SAGEConv, CuGraphSAGEConv)):
-            raise TypeError(f'Type of graph_SAGE_layer {type(graph_SAGE_layer )} is incorrect')
+        GraphSAGEBlock.__validate(graph_SAGE_layer, batch_norm_module)
 
         super(GraphSAGEBlock, self).__init__(block_id,
                                              graph_SAGE_layer,
@@ -89,7 +88,7 @@ class GraphSAGEBlock(MessagePassingBlock, Generic[CL]):
     def forward(self,
                 x: torch.Tensor,
                 edge_index: Adj,
-                batch: torch.Tensor) -> torch.Tensor:
+                batch: torch.Tensor = None) -> torch.Tensor:
         """
         Forward propagation along the network with an input x  an adjacency, edge_index and a batch
         @param x: Input tensor
@@ -106,12 +105,17 @@ class GraphSAGEBlock(MessagePassingBlock, Generic[CL]):
             x = module(x, edge_index) if isinstance(module, (SAGEConv, CuGraphSAGEConv)) else module(x)
         return x
 
+    """ --------------------------  Private Helper Methods -------------------------- """
+
     @staticmethod
-    def __validate(block_attributes: Dict[AnyStr, Any]) -> None:
-        if block_attributes['SAGE_layer'] is None or not isinstance(block_attributes['SAGE_layer'], SAGEConv):
-            raise ValueError(f'SAGE layer type {block_attributes["SAGE_layer"]} should be SAGEConv')
-        if block_attributes['batch_norm'] is not None and not isinstance(block_attributes['batch_norm'], BatchNorm):
-            raise ValueError(f'batch norm type { block_attributes["batch_norm"] } should be BatchNorm')
+    def __validate(graph_SAGE_layer: CL, batch_norm_module: Optional[BatchNorm] = None) -> None:
+        if not isinstance(graph_SAGE_layer, (SAGEConv, CuGraphSAGEConv)):
+            raise TypeError(f'Type of graph_SAGE_layer {type(graph_SAGE_layer )} is incorrect')
+        if batch_norm_module is not None and isinstance(batch_norm_module, BatchNorm):
+            raise ValueError(f'batch norm type {batch_norm_module} should be BatchNorm')
+
+    @staticmethod
+    def __validate_build(block_attributes: Dict[AnyStr, Any]) -> None:
         if (block_attributes['dropout'] is not None and
                 (block_attributes['dropout'] < 0.0 or block_attributes['dropout'] > 0.5)):
             raise ValueError(f'dropout {block_attributes["dropout"]} should be [0., 0.5]')

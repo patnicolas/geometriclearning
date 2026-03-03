@@ -96,9 +96,9 @@ class NeuralModel(torch.nn.Module, ABC):
         logging.debug(f'Output {self.model_id=}\n{x.shape=}')
         return x
 
-    def _register_modules(self, conv_blocks: List[NeuralBlock], fully_connected: List[NeuralBlock]) -> None:
+    def _register_modules(self, neural_blocks: tuple[NeuralBlock], fully_connected: tuple[NeuralBlock]) -> None:
         if self.modules_seq is None:
-            modules_list = [module for block in conv_blocks for module in block.modules_list]
+            modules_list = [module for block in neural_blocks for module in block.modules_list]
             # If fully connected are provided
             if fully_connected is not None:
                 # Flatten the output of the last convolution block/layer

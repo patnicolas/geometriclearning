@@ -14,7 +14,7 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import List, AnyStr, Optional, Any, Dict, Generic, TypeVar
+from typing import Tuple, AnyStr, Optional, Any, Dict, Generic, TypeVar
 import logging
 # 3rd Party imports
 import torch
@@ -30,19 +30,18 @@ import python
 __all__ = ['GraphConvModel', 'GraphConvBuilder']
 
 # CL for type of torch geometric convolutional layer module, P for Pooling module
-CL = TypeVar('CL')
+CONV = TypeVar('CONV')
 P = TypeVar('P')
 
-class GraphConvModel(GraphBaseModel, Generic[CL, P]):
+class GraphConvModel(GraphBaseModel, Generic[CONV, P]):
     """
     A Graph Convolution Network may require one output multi-layer perceptron for classification purpose using
     SoftMax activation. We do not restrict a model from have multiple linear layers for output
-
     """
     def __init__(self,
                  model_id: AnyStr,
-                 graph_conv_blocks: List[GraphConvBlock[CL, P]],
-                 mlp_blocks: Optional[List[MLPBlock]] = None) -> None:
+                 graph_conv_blocks: Tuple[GraphConvBlock[CONV, P]],
+                 mlp_blocks: Optional[Tuple[MLPBlock]] = None) -> None:
         """
         Constructor for this simple Graph convolutional neural network
 
@@ -133,4 +132,4 @@ class GraphConvBuilder(NeuralBuilder):
         graph_conv_blocks = [GraphConvBlock.build(graph_conv_block_attribute)
                              for graph_conv_block_attribute in graph_conv_blocks_attribute]
         mlp_blocks = [MLPBlock.build(mlp_block_attribute) for mlp_block_attribute in mlp_blocks_attribute]
-        return GraphConvModel(self.model_attributes['model_id'], graph_conv_blocks, mlp_blocks)
+        return GraphConvModel(self.model_attributes['model_id'], tuple(graph_conv_blocks), tuple(mlp_blocks))

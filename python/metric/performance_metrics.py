@@ -249,8 +249,10 @@ class PerformanceMetrics(object):
     def __save_summary(self, model_id: AnyStr) -> None:
         import json
 
-        collected_values = { k: [float(v) for v in values] for k, values in self.collected_metrics.items()}
-        with open(PerformanceMetrics.get_perf_metrics_filename(model_id), 'w') as f:
+        collected_values = {k: [float(v) for v in values] for k, values in self.collected_metrics.items()}
+        perf_filename = PerformanceMetrics.get_perf_metrics_filename(model_id)
+        logging.info(f"Save performance in {perf_filename}")
+        with open(perf_filename, 'w') as f:
             json.dump(collected_values, f)
 
 

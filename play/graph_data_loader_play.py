@@ -57,6 +57,7 @@ class GraphDataLoaderPlay(Play):
         logging.info('\nTrain data')
         logging.info('\n'.join(result))
 
+
 if __name__ == "__main__":
     try:
         # Test 1 -------

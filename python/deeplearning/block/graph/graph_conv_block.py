@@ -19,7 +19,7 @@ from typing import AnyStr, Optional, Dict, Any, Self, Generic, TypeVar
 # 3rd Party imports
 import torch
 import torch.nn as nn
-from torch_geometric.nn import BatchNorm, GraphConv, GCNConv, GCN2Conv
+from torch_geometric.nn import GraphConv, GCNConv, GCN2Conv, BatchNorm
 from torch_geometric.nn.pool import TopKPooling, SAGPooling
 from torch_geometric.typing import Adj
 # Library imports
@@ -27,17 +27,17 @@ from deeplearning.block.graph.message_passing_block import MessagePassingBlock
 __all__ = ['GraphConvBlock']
 
 # Class types
-# CL for type of torch geometric convolutional layer module, P for Pooling module
-CL = TypeVar('CL')
+# CONVL for type of torch geometric convolutional layer module, P for Pooling module
+CONVL = TypeVar('CONVL')
 P = TypeVar('P')
 
 
-class GraphConvBlock(MessagePassingBlock, Generic[CL, P]):
+class GraphConvBlock(MessagePassingBlock, Generic[CONVL, P]):
     __slots__ = ['has_pooling', 'pooling_edge_index']
 
     def __init__(self,
                  block_id: AnyStr,
-                 graph_conv_layer: CL,
+                 graph_conv_layer: CONVL,
                  batch_norm_module: Optional[BatchNorm] = None,
                  activation_module: Optional[nn.Module] = None,
                  pooling_module: Optional[P] = None,
@@ -55,14 +55,8 @@ class GraphConvBlock(MessagePassingBlock, Generic[CL, P]):
             @type activation_module: nn.Module subclass
             @param dropout_module: Drop out for training
             @type dropout_module: nn.Module subclass
-            """
-        # Validate the PyTorch Geometric convolutional modules
-        if not isinstance(graph_conv_layer, (GraphConv, GCNConv, GCN2Conv)):
-            raise TypeError(f'Type of graph convolutional layer {type(graph_conv_layer)} is not supported')
-        # Validate the PyTorch Geometric pooling module
-        if pooling_module is not None and not isinstance(pooling_module, (SAGPooling, TopKPooling)):
-            raise TypeError(f'Type of pooling {type(pooling_module)} is not supported')
-
+        """
+        GraphConvBlock.__validate(graph_conv_layer, pooling_module, batch_norm_module)
         super(GraphConvBlock, self).__init__(block_id,
                                              graph_conv_layer,
                                              batch_norm_module,
@@ -86,7 +80,6 @@ class GraphConvBlock(MessagePassingBlock, Generic[CL, P]):
         block_attributes = {
             'block_id': 'MyBlock',
             'conv_layer': GraphConv(in_channels=num_node_features, out_channels=num_channels),
-            'num_channels': num_channels,
             'activation': nn.ReLU(),
             'batch_norm': BatchNorm(num_channels),
             'pooling': None,
@@ -97,8 +90,8 @@ class GraphConvBlock(MessagePassingBlock, Generic[CL, P]):
         @return: Instance of GConvBlock
         @rtype: GraphConvBlock
         """
-        GraphConvBlock.__validate(block_attributes)
-        return cls(block_attributes['block_id'],
+        GraphConvBlock.__validate_build(block_attributes)
+        return cls(block_attributes['_block_id'],
                    block_attributes['conv_layer'],
                    block_attributes['batch_norm'],
                    block_attributes['activation'],
@@ -108,7 +101,7 @@ class GraphConvBlock(MessagePassingBlock, Generic[CL, P]):
     def forward(self,
                 x: torch.Tensor,
                 edge_index: Adj,
-                batch: torch.Tensor) -> torch.Tensor:
+                batch: torch.Tensor = None) -> torch.Tensor:
         """
         Forward propagation along the network with an input x  an adjacency, edge_index and a batch
         @param x: Input tensor
@@ -135,15 +128,20 @@ class GraphConvBlock(MessagePassingBlock, Generic[CL, P]):
     def __str__(self) -> AnyStr:
         return '\n'.join([str(module) for module in self.modules_list])
 
+    """ ------------------------  Private Helper Methods ---------------------------- """
     @staticmethod
-    def __validate(block_attributes: Dict[AnyStr, Any]) -> None:
-        if block_attributes['conv_layer'] is None or not isinstance(block_attributes['conv_layer'], GraphConv):
-            raise ValueError(f'SAGE layer type {block_attributes["conv_layer"]} should be GraphConv')
-        if block_attributes['batch_norm'] is not None and not isinstance(block_attributes['batch_norm'], BatchNorm):
-            raise ValueError(f'batch norm type {block_attributes["batch_norm"]} should be BatchNorm')
-        if block_attributes['pooling'] is not None and not (isinstance(block_attributes['pooling'], SAGPooling)
-                                                            or isinstance(block_attributes['pooling'], TopKPooling)):
-            raise ValueError(f'pooling {block_attributes["pooling"]} should be SAGPooling | TopKPooling')
+    def __validate(graph_conv_layer: CONVL, pooling_module: P, batch_norm_module: Optional[BatchNorm] = None) -> None:
+        # Validate the PyTorch Geometric convolutional modules
+        if not isinstance(graph_conv_layer, (GraphConv, GCNConv, GCN2Conv)):
+            raise TypeError(f'Type of graph convolutional layer {type(graph_conv_layer)} is not supported')
+        # Validate the PyTorch Geometric pooling module
+        if pooling_module is not None and not isinstance(pooling_module, (SAGPooling, TopKPooling)):
+            raise TypeError(f'Type of pooling {type(pooling_module)} is not supported')
+        if batch_norm_module is not None and not isinstance(batch_norm_module, BatchNorm):
+            raise ValueError(f'batch norm type {type(batch_norm_module)} should be BatchNorm')
+
+    @staticmethod
+    def __validate_build(block_attributes: Dict[AnyStr, Any]) -> None:
         if (block_attributes['dropout'] is not None and
                 (block_attributes['dropout'] < 0.0 or block_attributes['dropout'] > 0.5)):
             raise ValueError(f'dropout {block_attributes["dropout"]} should be [0., 0.5]')
