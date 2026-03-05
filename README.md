@@ -2,7 +2,7 @@
 ![Banner](images/ReadMeBanner.png)
 
 #### Classes and methods for Geometric Deep Learning and related topics to support 💬 [Substack - Newsletter](https://patricknicolas.substack.com)  and 💬 [LinkedIn Articles](https://www.linkedin.com/newsletters/geometric-learning-in-python-7175924072638263296/)     
-#### _Patrick Nicolas - Last update 07.12.2025_
+#### _Patrick Nicolas - Last update 02.27.2026_
 .  
 ![Disclaimer](images/ReadMe_disclaimer.png)
 .   
@@ -163,6 +163,32 @@ The Fisher Information Matrix plays a crucial role in various aspects of machine
 The Fisher information matrix is a type of __Riemannian metric__ that can be applied to a __smooth statistical manifold__. It serves to quantify the informational difference between measurements. The points on this manifold represent probability measures defined within a Euclidean probability space, such as the Normal distribution. Mathematically, it is represented by the Hessian of the __Kullback-Leibler__ divergence.
 
 ![Statistical Manifold](images/Statistical_Manifold.png)
+
+## Topology    
+
+### Topological Complexes
+This package introduces the topological domains used in Topological Data Analysis and Topological Deep Learning.   
+   
+✅ Simplicial complexes   
+A simplicial complex is a graph with faces. It generalizes graphs that model higher-order relationships among data elements—not just pairwise (edges), but also triplets, quadruplets, and beyond
+![Simplicial Complex](images/Simplicial_complex.png)   
+   
+✅ Cell complexes   
+A cell complex is a broad, intuitive concept describing a space built from basic building blocks called cells (points, line segments, polygons, disks, etc.) that are glued together along their boundaries.    
+    
+![Cell Complex](images/Cell_complex.png)    
+    
+✅ Hypergraph   
+A hypergraph is a generalization of a graph where a hyperedge can connect any number of nodes or vertices. Similarly to Cell and Simplicial Complexes, a node and a hyperedge are said to be incident if the vertex is a member of the hyperedge.
+   
+![Hypergraph](images/Hypergraphs.png) 
+    
+### Persistence Diagrams    
+A persistence diagram maps the “birth” (appearance) and “death” (disappearance) times/scales of topological features such as cavities, holes or connected components in a dataset as a collection of points in a 2D plot.    
+   
+![Persistence Diagrams](images/Persistence_diagrams.png) 
+   
+  
 
 
 ## Deep Learning Models

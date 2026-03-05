@@ -10,6 +10,7 @@ from python import SKIP_REASON
 
 
 class TestVectorizer(TestCase):
+
     @unittest.skipIf(os.getenv('SKIP_TESTS_IN_PROGRESS', '0') == '1', reason=SKIP_REASON)
     def test_dict_vectorizer(self):
         from sklearn.feature_extraction import DictVectorizer
@@ -28,7 +29,7 @@ class TestVectorizer(TestCase):
 
     def test_numexpr(self):
         import numexpr as ne
-        from util.decorators import timeit
+        from timeit import timeit
 
         @timeit
         def f(args: AnyStr) -> bool:
