@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +13,13 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+import logging
+# 3rd Party imports
 import asyncio
 import requests
 import urllib3
+import python
 __all__ = ['AsyncHttpPost']
 
 
@@ -34,7 +38,9 @@ class AsyncHttpPost(object):
             @param input_file: Input file containing the requests, one request per line
             @param num_clients: Number of concurrent clients
         """
-        assert 0 < num_clients < 50, f'AsyncHttpPost: num clients ${num_clients} should be ]0, 50['
+        if num_clients <= 0 or num_clients >= 50:
+            raise ValueError(f'AsyncHttpPost: num clients ${num_clients} should be ]0, 50[')
+
         self.url = url
         self.headers = headers
         with open(input_file) as input:
@@ -59,7 +65,6 @@ class AsyncHttpPost(object):
             f'Number of responses {len(responses)} != number of requests {self.num_requests}'
         return responses
 
-
     async def post_iter(self, requests_iter: iter, client_id: int) -> list:
         """
             Process an iterator of requests. The iterator is associated to a given client, 'client_id'
@@ -67,7 +72,7 @@ class AsyncHttpPost(object):
             @param client_id: Simple identifier for this client
             @return: List of responses
         """
-        constants.log_info(f'Enter {client_id}')
+        logging.info(f'Enter {client_id}')
         responses = []
         while True:
             next_request = next(requests_iter, None)
@@ -78,10 +83,9 @@ class AsyncHttpPost(object):
             if not response:
                 responses.append(response)
             else:
-                constants.log_error(f'Empty response')
-        constants.log_info(f'Exit {client_id}')
+                logging.error('Empty response')
+        logging.info(f'Exit {client_id}')
         return responses
-
 
     def post_single(self, request: str) -> str:
         """
@@ -91,32 +95,27 @@ class AsyncHttpPost(object):
         """
         try:
             response = requests.post(self.url, data=request, headers=self.headers)
-            constants.log_info("Received ML Response: {}".format(response.status_code))
+            logging.info("Received ML Response: {}".format(response.status_code))
             if response.status_code == 200:
                 output = response.json()
             else:
-                constants.log_error(f'Error: {request}')
+                logging.error(f'Error: {request}')
                 output = ""
-        except urllib3.exceptions.ProtocolError as e:
-            constants.log_error(str(e))
+        except (urllib3.exceptions.ProtocolError, Exception) as e:
+            logging.error(str(e))
             output = ""
-        except Exception as e:
-            constants.log_error(str(e))
-            output =  ""
         return output
 
     def __create_tasks(self):
         for idx, request_iter in enumerate(self.requests_iters):
             yield asyncio.create_task(self.post_iter(request_iter, idx))
 
-
-
 async def execute_request(url: str, new_headers: dict, in_file: str, num_clients: int) -> list:
     """
         Wrapper around the processing of requests using concurrent client threads.
         @param url: URL for the target service to process the requests
-        @param headers: Dictionary of requests header parameters
-        @param input_file: Input file containing the requests, one request per line
+        @param new_headers: Dictionary of requests header parameters
+        @param in_file: Input file containing the requests, one request per line
         @param num_clients: Number of concurrent clients
         @return: List of responses should be same as number of requests
     """

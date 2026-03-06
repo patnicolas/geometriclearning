@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,11 +13,12 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# 3rd Party imports
 import numpy as np
 __all__ = ['EinSum']
 
 class EinSum(object):
-    def __init__(self, first: np.array, second: np.array= None) -> None:
+    def __init__(self, first: np.array, second: np.array = None) -> None:
         self.first = first
         self.second = second
 
@@ -28,13 +29,13 @@ class EinSum(object):
         return np.einsum('i,i->', self.first, self.second)
 
     def matrix_mul(self) -> np.array:
-        assert  self.second is not None and \
+        assert self.second is not None and \
                 len(self.first.shape) == 2 \
                 and self.first.shape == self.second.shape
         return np.einsum('ij,jk->ik', self.first, self.second)
 
     def matrix_el_sum(self) -> np.array:
-        assert  self.second is not None and \
+        assert self.second is not None and \
                 len(self.first.shape) == 2 \
                 and self.first.shape == self.second.shape
         return np.einsum('ij,ij->', self.first, self.second)

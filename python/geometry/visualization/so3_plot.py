@@ -1,5 +1,5 @@
-__author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__author__ = "Patrick R. Nicolas"
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ class SO3Plot(ManifoldPlot):
         for i, rotation in enumerate(self.manifold_points):
             # Apply the rotation to the sphere points
             points = np.stack(arrays=[x.ravel(), y.ravel(), z.ravel()], axis=1)
-            r_points = gs.matmul(rotation, points.T).T  # Apply rotation
+            r_points = gs.matmul(rotation, points.T).CellDescriptor  # Apply rotation
 
             # Reshape rotated points for plotting
             x_r = r_points[:, 0].reshape(num_points, num_points)
