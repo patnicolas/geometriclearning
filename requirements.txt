@@ -53,3 +53,6 @@ typing_extensions==4.13.0
 umap-learn==0.5.8
 urllib3~=2.6.3
 yarl==1.18.3
+
+omegaconf
+lightning
