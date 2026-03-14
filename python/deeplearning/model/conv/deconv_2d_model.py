@@ -102,7 +102,7 @@ class DeConv2dModel(NeuralModel, ABC):
     def _state_params(self) -> Dict[AnyStr, Any]:
         return {
             "model_id": self.model_id,
-            "input_size": self.deconv_blocks[0].conv_block_config.in_channels,
+            "input_size": self.deconv_blocks[0].conv_block_config.input_channels,
             "output_size": self.ffnn_blocks[-1].out_features if self.ffnn_blocks is not None else -1,
             "dff_model_input_size": self.ffnn_blocks[0].in_features if self.ffnn_blocks is not None else -1
         }

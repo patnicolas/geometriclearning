@@ -32,16 +32,25 @@ class TestGraphNetwork(nn.Module):
 class TopoBenchWrapperTest(unittest.TestCase):
 
     def test_init(self):
-        dim_hidden = 24
-        k = 2
-        model = TestGraphNetwork(hidden_size=dim_hidden, in_channels=7, out_channels=2)
-        topo_bench_wrapper = TopoBenchWrapper.build(graph_network=model, k=k)
-        logging.info(topo_bench_wrapper)
+        try:
+            dim_hidden = 24
+            k = 2
+            model = TestGraphNetwork(hidden_size=dim_hidden, in_channels=7, out_channels=2)
+            topo_bench_wrapper = TopoBenchWrapper.build(graph_network=model, k_value=k)
+            logging.info(topo_bench_wrapper)
+            self.assertTrue(True)
+        except (KeyError, ValueError) as e:
+            logging.error(e)
+            self.assertTrue(False)
 
     @unittest.skip('Ignored')
     def test_train(self):
-        dim_hidden = 24
-        k = 2
-        model = TestGraphNetwork(hidden_size=dim_hidden, in_channels=7, out_channels=2)
-        topo_bench_wrapper = TopoBenchWrapper.build(graph_network=model, k=k)
-        topo_bench_wrapper.train(max_epochs=24, float_precision=32)
+        try:
+            dim_hidden = 24
+            k = 2
+            model = TestGraphNetwork(hidden_size=dim_hidden, in_channels=7, out_channels=2)
+            topo_bench_wrapper = TopoBenchWrapper.build(graph_network=model, k_value=k)
+            topo_bench_wrapper.train(max_epochs=24, float_precision=32)
+        except (KeyError, ValueError) as e:
+            logging.error(e)
+            self.assertTrue(False)

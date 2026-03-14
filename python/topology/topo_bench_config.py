@@ -24,14 +24,14 @@ from topobench.optimizer import TBOptimizer
 
 class TopoBenchConfig(object):
     config_keywords = {
-            'data_domain': 'loader',
-            'transform_type': 'transform',
-            'learning_setting': 'split',
-            'readout_name': 'readout',
-            'dataset_loss': 'loss',
-            'task': 'evaluator',
-            'optimizer_id': 'optimizer'
-        }
+        'data_domain': 'loader',
+        'transform_type': 'transform',
+        'learning_setting': 'split',
+        'readout_name': 'readout',
+        'dataset_loss': 'loss',
+        'task': 'evaluator',
+        'optimizer_id': 'optimizer'
+    }
 
     def __init__(self, descriptors: Tuple[Dict[AnyStr, DictConfig]]) -> None:
         self._configs = {config_type: config for d in descriptors

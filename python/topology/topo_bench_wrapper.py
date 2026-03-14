@@ -61,6 +61,8 @@ class TopoBenchWrapper(object):
     Notes:
         - TopoBench library relies on Torch Lightning modules so any model inheriting from nn.Module has to be converted
           to a LightningModule though a simple Adapter pattern
+        - The method 'build' is an alternative constructor and an example of a parameterized the TopoBench
+          configuration to make evaluation more flexible.
 
     References:
         Paper: "TopoBench: A Framework for Benchmarking Topological Deep Learning" (https://arxiv.org/pdf/2406.06642)
@@ -69,10 +71,10 @@ class TopoBenchWrapper(object):
     def __init__(self, graph_network: nn.Module, topo_bench_descriptors: Tuple[Dict[str, DictConfig]]) -> None:
         """
         Constructor for the wrapper around TopoBench library
-        :param graph_network: Multi-perceptron model to process graph
-        :type graph_network: Inherited from nn.Module
-        :param topo_bench_descriptors: JSON formatted descriptors for TopoBench configuration
-        :type topo_bench_descriptors: Tuple[Dict[str, DictConfig]]
+        @param graph_network: Multi-perceptron model to process graph
+        @type graph_network: Inherited from nn.Module
+        @param topo_bench_descriptors: JSON formatted descriptors for TopoBench configuration
+        @type topo_bench_descriptors: Tuple[Dict[str, DictConfig]]
         """
         self.graph_network = graph_network
         self.topo_bench_config = TopoBenchConfig(topo_bench_descriptors)
@@ -87,35 +89,55 @@ class TopoBenchWrapper(object):
                 f'\n{self.collected_metrics}')
 
     @classmethod
-    def build(cls, graph_network: nn.Module, k: int) -> Self:
+    def build(cls, graph_network: nn.Module, k_value: int, data_name: AnyStr, lr: float) -> Self:
         """
-        Alternative constructor for predefined TopoBench configuration using descriptor
-        :param graph_network: Graph Neural Network
-        :type graph_network:
-        :param k: K-value for the Khop lifting
-        :type k: int
-        :return: Instance of TopoBenchWrapper
-        :rtype: TopoBenchWrapper
+        Alternative constructor for a predefined TopoBench configuration using a predefined, parameterized descriptors.
+        This implementation is an example of parameterization of the configuration for TopoBench using k_value for
+        k-hop lifting, data set name and the learning rate used by the optimizer
+
+        @param graph_network: Graph Neural Network
+        @type graph_network:
+        @param k-value: K-value for the k-hop lifting
+        @type k-value: int
+        @param data_name: Name of the data set
+        @type data_name: str
+        @param lr: Learning rate for optimizer used in training
+        @type lr: float
+        @return: Instance of TopoBenchWrapper
+        @rtype: TopoBenchWrapper
         """
+        if lr < 1e-6 or lr > 0.05:
+            raise ValueError(f'Learning rate {lr} should be a value between 1e-6 and 0.05')
+        if k_value < 1 or k_value > 8:
+            raise ValueError(f'k_value {k_value} should be a number between 1 and 8')
+
         # Retrieve the size of the hidden layer from the Torch model
         dim_hidden = graph_network.get_dim_hidden()
         # Loads the pre-defined configuration descriptor
-        descriptors = TopoBenchWrapper.__get_descriptors(dim_hidden, k)
+        descriptors = TopoBenchWrapper.__get_config_descriptors(dim_hidden, k_value, data_name, lr)
         return cls(graph_network, descriptors)
 
-    def train(self, max_epochs: int, float_precision: Literal[64, 32, 16], device_name: AnyStr = "cpu") -> None:
+    def train(self,
+              max_epochs: int,
+              float_precision: Literal[64, 32, 16],
+              device_name: Literal['auto', 'cpu', 'cuda'] = "cpu") -> None:
         """
         Trigger training & evaluation using PyTorch Lightning library. TopoBench relies on Torch Lightning library,
         and therefore we need to convert our model to a Lightning module.
 
-        :param max_epochs: Maximum number of epochs used in training
-        :type max_epochs: int
-        :param float_precision: Floating point precision
-        :type float_precision: Literal
-        :param device_name: Supported devices 'auto, 'cpuy', 'cuda' ...
-        :type device_name: str
+        @param max_epochs: Maximum number of epochs used in training
+        @type max_epochs: int
+        @param float_precision: Floating point precision
+        @type float_precision: Literal
+        @param device_name: Supported devices 'auto, 'cpuy', 'cuda' ...
+        @type device_name: str
         """
+        if max_epochs < 2 or max_epochs > 512:
+            raise ValueError(f'max_epochs {max_epochs} should be a number between 2 and 512')
+
+        # Convert the torch module into a torch lightning module
         lightning_graph_model = self.__get_lightning_graph_model()
+        # Initialize the lightning trainer
         trainer = pl.Trainer(max_epochs=max_epochs,
                              min_epochs=1,
                              accelerator=device_name,
@@ -123,11 +145,16 @@ class TopoBenchWrapper(object):
                              enable_progress_bar=False,
                              log_every_n_steps=1,
                              num_nodes=1)
+        # Train the lightning model
         trainer.fit(lightning_graph_model, self.data_loader)
+        # Collect the metric related to training
         train_metrics = trainer.callback_metrics
 
+        # Test and collect metrics related to the test
         trainer.test(lightning_graph_model, self.data_loader)
         test_metrics = trainer.callback_metrics
+
+        # Prepare metrics for plotting
         self.__update_metrics(train_metrics, test_metrics)
 
     """ -----------------------  Private Supporting Methods -------------------- """
@@ -164,7 +191,7 @@ class TopoBenchWrapper(object):
             def forward(self, batch):
                 return self.model(batch)
 
-        all_in_channels = [self.graph_network.linear_0.in_features]
+        all_in_channels = [self.graph_network.get_in_channels()]
         return TBModel(backbone=LightningModelAdapter(self.graph_network),
                        readout=self.topo_bench_config.get_tb_propagate_signal_down(),
                        loss=self.topo_bench_config.get_tb_loss(),
@@ -184,12 +211,15 @@ class TopoBenchWrapper(object):
         return TBDataloader(dataset_train, dataset_val, dataset_test, batch_size=32)
 
     @staticmethod
-    def __get_descriptors(dim_hidden: int, k: int) -> Tuple[Dict[str, DictConfig]]:
+    def __get_config_descriptors(dim_hidden: int, k: int, data_name: AnyStr, lr: float) -> Tuple[Dict[str, DictConfig]]:
+        """
+        This is an example of a pre-defined, parameterized parameters for configuration of TopoBench
+        """
         loader_desc = {
             "data_domain": "graph",
             "data_type": "TUDataset",
-            "data_name": "PROTEINS",
-            "data_dir": "./data/PROTEINS/"
+            "data_name": data_name,
+            "data_dir": f"./data/{data_name}/"
         }
         transform_desc = {
             "khop_lifting": {
@@ -202,7 +232,7 @@ class TopoBenchWrapper(object):
             "learning_setting": "inductive",
             "split_type": "random",
             "data_seed": 0,
-            "data_split_dir": "./data/PROTEINS/splits/",
+            "data_split_dir": f"./data/{data_name}/splits/",
             "train_prop": 0.5,
         }
         readout_desc = {
@@ -227,7 +257,7 @@ class TopoBenchWrapper(object):
         optimizer_desc = {
             "optimizer_id": "Adam",
             "parameters": {
-                "lr": 0.0005,
+                "lr": lr,
                 "weight_decay": 0.0012}
         }
         return (
