@@ -258,7 +258,8 @@ class TopoBenchWrapper(object):
             "optimizer_id": "Adam",
             "parameters": {
                 "lr": lr,
-                "weight_decay": 0.0012}
+                "weight_decay": 0.0012
+            }
         }
         return (
             loader_desc, transform_desc, split_desc, readout_desc, loss_desc, evaluator_desc, optimizer_desc

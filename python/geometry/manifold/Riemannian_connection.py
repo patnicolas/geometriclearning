@@ -44,9 +44,9 @@ class RiemannianConnection(object):
         """
         self.riemannian_metric = RiemannianConnection.__get_metric(space)
         self.manifold_descriptor = f'{manifold_type}\nDimension: {space.dim}\nShape: {space.shape}' \
-                                   f'\nCoordinates type: {space.default_coords_type}'
+                                   f'\nIs intrinsic: {space.intrinsic}'
         # Add 1 dimension for extrinsic coordinates
-        self.ndim = space.dim + 1 if space.default_coords_type == "extrinsic" else space.dim
+        self.ndim = space.dim if space.intrinsic else space.dim + 1
 
     def __str__(self):
         return f'Riemannian Connection for {self.manifold_descriptor}'
@@ -56,12 +56,12 @@ class RiemannianConnection(object):
         Compute the inner product of two tangent vector at a given base point on a manifold.
         A GeometricException is thrown if the vector have different sizes
 
-        :param tgt_vec1: First tangent vector
-        :type tgt_vec1: Numpy array
-        :param tgt_vec2: Second tangent vector
-        :type tgt_vec2:  Numpy array
-        :param base_pt: Base point on the Manifold
-        :type base_pt:  Numpy array
+        @param tgt_vec1: First tangent vector
+        @type tgt_vec1: Numpy array
+        @param tgt_vec2: Second tangent vector
+        @type tgt_vec2:  Numpy array
+        @param base_pt: Base point on the Manifold
+        @type base_pt:  Numpy array
         :return: inner product in a range [-1, 1] if both vector are not null, 0 otherwise
         :rtype:  Numpy array
         """
@@ -72,13 +72,43 @@ class RiemannianConnection(object):
             else self.riemannian_metric.inner_product(tgt_vec1, tgt_vec2, base_pt)
 
     @staticmethod
+    def wedge_product(vector1: np.array, vector2: np.array) -> np.array:
+        # Compute the outer product u * v^T
+        outer = np.outer(vector1, vector2)
+        # The wedge product is the antisymmetric matrix
+        return outer - outer.T
+
+    @staticmethod
+    def orthogonal_vector_3d(vector: np.array) -> np.array:
+        # Check if x or y is the dominant direction
+        return np.array([-vector[2], 0, vector[0]]) if abs(vector[0]) > abs(vector[1]) \
+            else np.array([0, vector[2], -vector[1]])
+
+    @staticmethod
+    def hodge_star_2d(vector: np.array) -> np.array:
+        z = vector
+        return np.array([
+            [0, -vector],
+            [vector,  0]
+        ])
+
+    @staticmethod
+    def hodge_star_3d(vector: np.array) -> np.array:
+        x, y, z = vector
+        return np.array([
+            [0, -z,  y],
+            [z,  0, -x],
+            [-y,  x,  0]
+        ])
+
+    @staticmethod
     def euclidean_inner_product(vector1: np.array, vector2: np.array) -> np.array:
         """
         Compute the Euclidean inner product of two vectors using Numpy function
-        :param vector1: First vector of the Euclidean inner product
-        :type vector1: Numpy array
-        :param vector2: Second vector of the Euclidean inner product
-        :type vector2: Numpy array
+        @param vector1: First vector of the Euclidean inner product
+        @type vector1: Numpy array
+        @param vector2: Second vector of the Euclidean inner product
+        @type vector2: Numpy array
         :return: Numpy inner product in range [-1, 1] if none of the vectors are 0, 0 otherwise
         :rtype: Numpy array
         """
@@ -93,10 +123,10 @@ class RiemannianConnection(object):
             manifold_pt: ManifoldPoint) -> np.array:
         """
         Compute the inner product of two instance of ManifoldPoint
-        :param manifold_base_pt: Base manifold point structure
-        :type manifold_base_pt: ManifoldPoint
-        :param manifold_pt: Second manifold point structure
-        :type manifold_pt: ManifoldPoint
+        @param manifold_base_pt: Base manifold point structure
+        @type manifold_base_pt: ManifoldPoint
+        @param manifold_pt: Second manifold point structure
+        @type manifold_pt: ManifoldPoint
         :return: inner product in a range [0, 1] if both tangent vectors are not null, 0 otherwise
         :rtype: Numpy/float value
         """
@@ -105,10 +135,10 @@ class RiemannianConnection(object):
     def norm(self, vector: np.array, base_pt: np.array) -> np.array:
         """
         Compute the norm of a vector on a manifold (extrinsic coordinates) given a base point on the manifold
-        :param vector: Vector for which the norm has to be computed
-        :type vector: Numpy array
-        :param base_pt: Base point on the manifold
-        :type base_pt: Numpy array
+        @param vector: Vector for which the norm has to be computed
+        @type vector: Numpy array
+        @param base_pt: Base point on the manifold
+        @type base_pt: Numpy array
         :return: Norm of the vector at the given base point
         :rtype: Numpy array
         """
@@ -127,12 +157,12 @@ class RiemannianConnection(object):
             direction: Optional[np.array] = None) -> np.array:
         """
         Compute the parallel transport of a tangent vector from a base point in a Manifold point instance.
-        :param manifold_base_pt: Manifold base point (defined as ManifoldPoint instance)
-        :type manifold_base_pt:  ManifoldPoint
-        :param manifold_end_pt: Optional end point for parallel transport from the manifold base point
-        :type manifold_end_pt:  ManifoldPoint
-        :param direction: Direction for the vector fields associated with the parallel transport
-        :type direction: Numpy array
+        @param manifold_base_pt: Manifold base point (defined as ManifoldPoint instance)
+        @type manifold_base_pt:  ManifoldPoint
+        @param manifold_end_pt: Optional end point for parallel transport from the manifold base point
+        @type manifold_end_pt:  ManifoldPoint
+        @param direction: Direction for the vector fields associated with the parallel transport
+        @type direction: Numpy array
         :return: Parallel transport
         :rtype: Numpy array
         """
@@ -149,8 +179,8 @@ class RiemannianConnection(object):
         """
         Compute the coefficients of the Levi-Civita connection (or Christoffel symbols) on a Riemann manifold
         which metric is extracted from the hypersphere
-        :param base_pt:
-        :type base_pt: Numpy array
+        @param base_pt:
+        @type base_pt: Numpy array
         :return: The intrinsic metric for the Christoffel symbols
         :rtype: Numpy array
         """
@@ -164,12 +194,12 @@ class RiemannianConnection(object):
         The computation of the curvature tensor relies on 3 indices tensor or tangent vectors.
         A Geometric exception is raised if the tangent vectors are not properly defined.
 
-        :param tgt_vectors: List of 3 tangent vectors along the curve on the manifold
-        :type tgt_vectors: List of Numpy array
-        :param base_pt: Base point on the manifold
-        :type base_pt: Numpy array
-        :return: Curvature tensor
-        :rtype: Numpy array
+        @param tgt_vectors: List of 3 tangent vectors along the curve on the manifold
+        @type tgt_vectors: List of Numpy array
+        @param base_pt: Base point on the manifold
+        @type base_pt: Numpy array
+        @return: Curvature tensor
+        @rtype: Numpy array
         """
         if len(tgt_vectors) != 3 or any(vec is None for vec in tgt_vectors):
             raise GeometricException(f'Tangent vectors for the curvature {str(tgt_vectors)} is not properly defined')
@@ -180,12 +210,12 @@ class RiemannianConnection(object):
         """
         Compute the derivative of the curvature tensor on a Riemann manifold equipped with a tensor metric
         and Levi-Civita connection.
-        :param tgt_vectors: List of 4 tangent vector with dimension ndim and dimension of base point
-        :type tgt_vectors: List of Numpy Array
-        :param base_pt: Base point on the Riemann manifold
-        :type base_pt: Numpy array
-        :return: Curvature derivative tensor
-        :rtype:Numpy array
+        @param tgt_vectors: List of 4 tangent vector with dimension ndim and dimension of base point
+        @type tgt_vectors: List of Numpy Array
+        @param base_pt: Base point on the Riemann manifold
+        @type base_pt: Numpy array
+        @return: Curvature derivative tensor
+        @rtype:Numpy array
         """
         if len(tgt_vectors) != 4 or any(vec is None or len(vec) != len(tgt_vectors[0]) for vec in tgt_vectors):
             raise GeometricException(f'Tangent vectors for curvature derivative are undefined')
@@ -206,14 +236,14 @@ class RiemannianConnection(object):
                                    base_pt: Optional[np.array] = None) -> np.array:
         """
 
-        :param tgt_vec1:
-        :type tgt_vec1:
-        :param tgt_vec2:
-        :type tgt_vec2:
-        :param base_pt:
-        :type base_pt:
-        :return:
-        :rtype:
+        @param tgt_vec1:
+        @type tgt_vec1:
+        @param tgt_vec2:
+        @type tgt_vec2:
+        @param base_pt:
+        @type base_pt:
+        @return:
+        @rtype:
         """
         if len(tgt_vec1) != len(tgt_vec2):
             raise GeometricException(f'Dimension of tangent vectors for sectional curvature {len(tgt_vec1)} '
@@ -230,14 +260,14 @@ class RiemannianConnection(object):
     def __get_metric(space: LevelSet) -> RiemannianMetric:
         from geomstats.geometry.hypersphere import Hypersphere, HypersphereMetric
         from geomstats.geometry.poincare_ball import PoincareBall, PoincareBallMetric
-        from geomstats.geometry.hyperboloid import Hyperboloid
+        from geomstats.geometry.hyperboloid import Hyperboloid, HyperboloidMetric
 
-        match space:
-            case Hypersphere():
-                return HypersphereMetric(space)
-            case PoincareBall(space.dim):
-                return PoincareBallMetric(space)
-            case Hyperboloid(space.dim):
-                return Hypberboloid(space)
-            case _:
-                raise NotImplementedError(f'Manifold {str(space)} not supported')
+        metrics_dict = {
+            Hypersphere(space.dim): HypersphereMetric(space),
+            PoincareBall(space.dim): PoincareBallMetric(space),
+            Hyperboloid(space.dim): HyperboloidMetric(space)
+        }
+        for k, v in metrics_dict.items():
+            if k:
+                return v
+        raise NotImplementedError(f'Manifold {str(space)} not supported')
