@@ -46,7 +46,7 @@ class ConvBlock(NeuralBlock):
         super(ConvBlock, self).__init__(block_id)
 
     def get_in_channels(self) -> int:
-        return self.modules_list[0].in_channels
+        return self.modules_list[0].input_channels
 
     def get_out_channels(self) -> int:
         return self.modules_list[0].out_channels

@@ -61,6 +61,9 @@ class TopoNetXPlay(Play, Generic[T]):
     Cell complexes provide a flexible way to represent diverse mathematical entities, including graphs, manifolds,
     and other discrete geometric forms. They play a central role in algebraic topology and geometric analysis, where
     they are used to investigate the shape, connectivity, and higher-order properties of these objects.
+
+    Substack article on Topological Lifting of Graph Neural Networks
+            https://patricknicolas.substack.com/p/topological-lifting-of-graph-neural
     """
     def __init__(self, dataset: T, this_complex: Complex) -> None:
         """

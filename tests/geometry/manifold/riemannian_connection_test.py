@@ -23,6 +23,40 @@ class TestRiemannianConnection(unittest.TestCase):
         riemannian_connection = RiemannianConnection(hypersphere, manifold_type='HyperSphere')
         logging.info(str(riemannian_connection))
 
+    def test_wedge_product_2d(self):
+        import scipy
+        v1 = np.array([1.0, -2.0])
+        v2 = np.array([3.0, -0.5])
+        logging.info(f'Wedge product {v1} x {v2} =\n{RiemannianConnection.wedge_product(v1, v2)}')
+        mat = np.stack([v1, v2], axis=0)
+        logging.info(f'Determinant\n{mat} =\n{scipy.linalg.det(mat)}')
+
+    def test_wedge_product_3d(self):
+        v1 = np.array([1.0, -2.0, 0.0])
+        v2 = np.array([3.0, -0.5, 1.0])
+        logging.info(f'Wedge product {v1} x {v2} =\n{RiemannianConnection.wedge_product(v1, v2)}')
+
+        v1 = np.array([1.0, 1.0, 1.0])
+        v2 = np.array([2.0, 2.0, 2.0])
+        logging.info(f'Wedge product {v1} x {v2} =\n{RiemannianConnection.wedge_product(v1, v2)}')
+        v1 = np.array([1.0, 0.0, 1.0])
+        v2 = v1.T
+        logging.info(f'Wedge product {v1} x {v2} =\n{RiemannianConnection.wedge_product(v1, v2)}')
+
+    def test_orthogonal_vector_3d(self):
+        v = np.array([1.0, -2.0, 0.0])
+        logging.info(f'Vector orthogonal of {v} = {RiemannianConnection.orthogonal_vector_3d(v)}')
+
+    def test_hodge_star_3d(self):
+        v = np.array([1.0, -2.0, 0.0])
+        logging.info(f'Hodge star of {v} = \n{RiemannianConnection.hodge_star_3d(v)}')
+        v = np.array([1.0, 1.0, 1.0])
+        logging.info(f'Hodge star of {v} = \n{RiemannianConnection.hodge_star_3d(v)}')
+        v = np.array([1.0, 1.0, 0.0])
+        logging.info(f'Hodge star of {v} = \n{RiemannianConnection.hodge_star_3d(v)}')
+        v = np.array([1.0, 0.0, 0.0])
+        logging.info(f'Hodge star of {v} = \n{RiemannianConnection.hodge_star_3d(v)}')
+
     def test_inner_product_identity(self):
         dim = 2
         # Instantiate the Hypersphere
@@ -82,7 +116,6 @@ class TestRiemannianConnection(unittest.TestCase):
         logging.info(f'V:{v}')
         levi_civita_coefficients = riemann_connection.levi_civita_coefficients(base_pt)
         logging.info(f'{levi_civita_coefficients=}')
-
 
     def test_curvature_tensor(self):
         hypersphere = Hypersphere(dim=2, equip=True, intrinsic=True)
