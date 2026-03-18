@@ -23,17 +23,25 @@ class TestRiemannianConnection(unittest.TestCase):
         riemannian_connection = RiemannianConnection(hypersphere, manifold_type='HyperSphere')
         logging.info(str(riemannian_connection))
 
-    def test_wedge_product(self):
+    def test_wedge_product_2d(self):
+        import scipy
+        v1 = np.array([1.0, -2.0])
+        v2 = np.array([3.0, -0.5])
+        logging.info(f'Wedge product {v1} x {v2} =\n{RiemannianConnection.wedge_product(v1, v2)}')
+        mat = np.stack([v1, v2], axis=0)
+        logging.info(f'Determinant\n{mat} =\n{scipy.linalg.det(mat)}')
+
+    def test_wedge_product_3d(self):
         v1 = np.array([1.0, -2.0, 0.0])
         v2 = np.array([3.0, -0.5, 1.0])
-        logging.info(f'Wedge production {v1} x {v2} =\n{RiemannianConnection.wedge_product(v1, v2)}')
+        logging.info(f'Wedge product {v1} x {v2} =\n{RiemannianConnection.wedge_product(v1, v2)}')
 
         v1 = np.array([1.0, 1.0, 1.0])
         v2 = np.array([2.0, 2.0, 2.0])
-        logging.info(f'Wedge production {v1} x {v2} =\n{RiemannianConnection.wedge_product(v1, v2)}')
+        logging.info(f'Wedge product {v1} x {v2} =\n{RiemannianConnection.wedge_product(v1, v2)}')
         v1 = np.array([1.0, 0.0, 1.0])
         v2 = v1.T
-        logging.info(f'Wedge production {v1} x {v2} =\n{RiemannianConnection.wedge_product(v1, v2)}')
+        logging.info(f'Wedge product {v1} x {v2} =\n{RiemannianConnection.wedge_product(v1, v2)}')
 
     def test_orthogonal_vector_3d(self):
         v = np.array([1.0, -2.0, 0.0])

@@ -34,7 +34,7 @@ from deeplearning.block.graph import GraphException
 class GraphAttentionModelPlay(Play):
     """
     Source code related to the Substack article 'Graphs Deserve Some Attention'.
-    Reference:
+    Reference: https://patricknicolas.substack.com/p/graphs-deserve-some-attention
 
     Source code for Graph Attention Network
     https://github.com/patnicolas/geometriclearning/blob/main/python/dataset/graph/graph_data_loader.py

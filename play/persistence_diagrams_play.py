@@ -29,7 +29,7 @@ class PersistenceDiagramPlay(Play):
     "Understanding Data Through Persistence Diagrams"
 
     References:
-    - Article:
+    - Article: https://patricknicolas.substack.com/p/understanding-data-through-persistence
     - Implementation
       https://github.com/patnicolas/geometriclearning/blob/main/python/topology/homology/persistence_diagrams.py
       https://github.com/patnicolas/geometriclearning/blob/main/python/topology/homology/shaped_data_generator.py

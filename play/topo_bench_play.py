@@ -24,6 +24,9 @@ from play import Play
 
 
 class HypergraphModel(nn.Module):
+    """
+    Simple two layer perceptron to process the graph nodes and edges for evaluation with TUDataset graph data
+    """
     def __init__(self, in_channels: int, dimension_hidden: int, out_channels: int) -> None:
         super().__init__()
         # Linear + Activation modules for the Hypergraph nodes
@@ -55,6 +58,22 @@ class HypergraphModel(nn.Module):
 
 
 class TopoBenchPlay(Play):
+    """
+     This class evaluates the basic functionality of TopoBench framework through a parameterized and componentized
+     wrapper, TopoBenchWrapper.
+
+     TopoBench is a modular Python framework built to standardize benchmarks and streamline research within
+     Topological Deep Learning (TDL). It enables the seamless training and comparative analysis of various Topological
+     Neural Networks (TNNs) across multiple domains, including graphs, simplicial complexes, cellular complexes, and
+     hypergraphs.
+
+    The main method, play,  implements the evaluation code of the substack article "Benchmarking Topological Deep
+    Learning".
+
+    The features are implemented by the classes TopoBenchWrapper and TopoBenchConfig in the source file
+                    python/topology/Topo_bench_config.py and python/topology/Topo_bench_wrapper.py
+    The class TopoBenchPlay is a wrapper of the class TopoBenchWrapper
+    """
     def __init__(self, lr: float, float_precision: Literal[16, 32, 64]) -> None:
         super(TopoBenchPlay, self).__init__()
         self.lr = lr

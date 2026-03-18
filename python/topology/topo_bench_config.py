@@ -23,6 +23,42 @@ from topobench.nn.readouts.propagate_signal_down import PropagateSignalDown
 from topobench.optimizer import TBOptimizer
 
 class TopoBenchConfig(object):
+    """
+    This class automates the configuration of TopoBench consolidated into a tuple of dictionaries.
+    TopoBench configuration is implemented through 7 specialized descriptors formatted as JSON
+    Examples:
+        evaluator_desc = {
+            "task": "classification",
+            "num_classes": 2,
+            "metrics": ["accuracy", "precision", "recall", "f1"]
+        }
+        optimizer_desc = {
+            "optimizer_id": "Adam",
+            "parameters": {
+                "lr": lr,
+                "weight_decay": 0.0012
+            }
+        }
+
+    The objective is to detect an attribute unique to each descriptor (e.g.,  evaluator_desc -> 'Tasks',
+    optimizer_desc -> 'optimizer_id) defined in config_keywords then load the corresponding JSON descriptor into
+    a tuple of dictionaries
+    (
+        'loader':  {
+            "data_domain": "graph",
+            "data_type": "TUDataset",
+            "data_name": ENZYMES,
+            "data_dir": "./data/ENZYMES/"
+        },
+         'loss':   {
+            "dataset_loss": {
+                "task": "classification",
+                "loss_type": "cross_entropy"
+            }
+        }
+        ...
+    )
+    """
     config_keywords = {
         'data_domain': 'loader',
         'transform_type': 'transform',
@@ -33,7 +69,12 @@ class TopoBenchConfig(object):
         'optimizer_id': 'optimizer'
     }
 
-    def __init__(self, descriptors: Tuple[Dict[AnyStr, DictConfig]]) -> None:
+    def __init__(self, descriptors: Tuple[Dict[AnyStr, Any]]) -> None:
+        """
+        Constructor for the Configuration of TopoBench
+        @param descriptors: Tuple of 7 TopoBench descriptors
+        @type descriptors: Tuple[Dict[AnyStr, Any]]
+        """
         self._configs = {config_type: config for d in descriptors
                          for config_type, config in [TopoBenchConfig.__select_descriptor(d)]}
 
