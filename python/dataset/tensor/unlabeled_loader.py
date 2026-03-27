@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,13 +13,19 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
+from typing import Tuple, AnyStr, Callable
+import logging
+# 3rd Party imports
 import torch
 from torch.utils.data import DataLoader, Dataset
-from dataset.default_loader_generator import DefaultLoaderGenerator
 from torchvision import transforms
-from typing import Tuple, AnyStr, Callable
 from torchvision.transforms import Compose
+# Library imports
 from dataset.base_loader import BaseLoader
+from dataset.default_loader_generator import DefaultLoaderGenerator
+import python
+from dataset import DatasetException
 
 __all__ = ['UnlabeledLoader']
 
@@ -46,9 +52,12 @@ class UnlabeledLoader(BaseLoader):
         @param split_ratio: Training-validation random split ratio
         @type split_ratio: float
         """
-        assert 0 < batch_size <= 8192, f'Batch size {batch_size} should be [1, 8192]'
-        assert 0.5 <= split_ratio <= 0.95, f'Training-validation split ratio {split_ratio} should be [0.5, 0.95]'
-        assert -2 < num_samples <= 1e+6 and num_samples != 0, f'Number of samples {num_samples} should be [1, 1e+6]'
+        if batch_size <= 0 or batch_size > 8192:
+            raise ValueError(f'Batch size {batch_size} should be [1, 8192]')
+        if split_ratio < 0.5 or split_ratio > 0.98:
+            raise ValueError(f'Training-validation split ratio {split_ratio} should be [0.5, 0.95]')
+        if num_samples < -1 or num_samples > 1e+6 or num_samples ==0:
+            raise ValueError(f'Number of samples {num_samples} should be [1, 1e+6]')
 
         super(UnlabeledLoader, self).__init__(batch_size, num_samples)
         self.split_ratio = split_ratio
@@ -66,15 +75,19 @@ class UnlabeledLoader(BaseLoader):
             @return: Pair of Data loader for training data and validation data
             @rtype: Tuple of data loader
         """
-        transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((norm_factors[0],), (norm_factors[1],)),
-        ])
-        dataset: Dataset = self.create_dataset(data, transform)
-        return DefaultLoaderGenerator.generate_loader(dataset=dataset,
-                                                      num_samples=self.num_samples,
-                                                      batch_size=self.batch_size,
-                                                      split_ratio=self.split_ratio)
+        try:
+            transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize((norm_factors[0],), (norm_factors[1],)),
+            ])
+            dataset: Dataset = self.create_dataset(data, transform)
+            return DefaultLoaderGenerator.generate_loader(dataset=dataset,
+                                                          num_samples=self.num_samples,
+                                                          batch_size=self.batch_size,
+                                                          split_ratio=self.split_ratio)
+        except (RuntimeError, ValueError, TypeError) as e:
+            logging.error(str(e))
+            raise DatasetException(str(e))
 
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):
         raise NotImplementedError(f'Failed to load data from path {root_path}')
