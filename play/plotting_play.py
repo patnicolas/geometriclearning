@@ -1,17 +1,81 @@
-import unittest
+__author__ = "Patrick R. Nicolas"
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Python standard library imports
 from typing import AnyStr
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib import cm
+from play import Play
 
-
-class PlottingPlay(object):
+class PlottingPlay(Play):
     def __init__(self, plotting_engine: AnyStr) -> None:
+        super(PlottingPlay, self).__init__()
         self.plotting_engine = plotting_engine
 
-    @unittest.skip('Ignored')
-    def normal_distribution_3d_plot_play(self)-> None:
+    def play(self) -> None:
+        self.normal_distribution_3d_plot_play()
+        self.violin_plot_play()
+        self.scatter_3d_plot_play()
+
+    def normal_distributions_3d_plot_play(self) -> None:
+        # 1. Create a grid of x and y coordinates
+        x = np.linspace(-3, 3, 100)
+        y = np.linspace(0, 6, 100)
+        X, Y = np.meshgrid(x, y)
+        mu = 0.2
+        sigma = 0.8
+
+        Z = (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((X - mu) / sigma) ** 2)
+        fig = plt.figure(figsize=(10, 7))
+        ax = fig.add_subplot(111, projection='3d')
+
+        curves = ax.plot_surface(X, Y, Z, cmap=cm.viridis, linewidth=0, alpha=0.8)
+        ax.set_title("Concept drift")
+        ax.set_xlabel('Features')
+        ax.set_ylabel('Time')
+        ax.set_zlabel('Probability Density')
+        fig.colorbar(curves, shrink=0.5, aspect=8)  # Add a color bar for scale
+        plt.show()
+
+    def normal_covariate_3d_plot_play(self) -> None:
+        # 1. Create a grid of x and y coordinates
+        x = np.linspace(-3, 3, 100)
+        y = np.linspace(-3, 3, 100)
+        X, Y = np.meshgrid(x, y)
+
+        mu1 = Y * 0.1
+        sigma1 = 0.7
+        z1 = (1 / (sigma1 * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((X - mu1) / sigma1) ** 2)
+        mu2 = 1.0 + Y
+        sigma2 = 1.1  # Slightly wider
+        z2 = (1 / (sigma2 * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((X - mu2) / sigma2) ** 2)
+        Z = z1 + z2
+        fig = plt.figure(figsize=(10, 7))
+        ax = fig.add_subplot(111, projection='3d')
+
+        curves = ax.plot_surface(X, Y, Z, cmap=cm.viridis, linewidth=0, alpha=0.8)
+        ax.set_title("Covariate Drift")
+        ax.set_xlabel('Features')
+        ax.set_ylabel('Time')
+        ax.set_zlabel('Probability Density')
+        fig.colorbar(curves, shrink=0.5, aspect=8)  # Add a color bar for scale
+        plt.show()
+
+    def normal_distribution_3d_plot_play(self) -> None:
         title = f'3D Visualization of a 2D Normal Distribution - {self.plotting_engine}'
         if self.plotting_engine == 'seaborn':
             sns.set_theme(style="whitegrid")
@@ -66,7 +130,7 @@ class PlottingPlay(object):
         ax.set_title(f"Violin Plot in {self.plotting_engine}")
         plt.show()
 
-    @unittest.skip('Ignored')
+
     def scatter_3d_plot_play(self) -> None:
         def get_palette():
             if self.plotting_engine == 'seaborn':
@@ -109,5 +173,7 @@ class PlottingPlay(object):
 
 
 if __name__ == '__main__':
-    plotting_play = PlottingPlay('seaborn')
-    plotting_play.violin_plot_play()
+    plotting_play = PlottingPlay('matplotlib')
+    plotting_play.normal_distributions_3d_plot_play()
+   #  plotting_play.normal_covariate_3d_plot_play()
+    # plotting_play.violin_plot_play()
