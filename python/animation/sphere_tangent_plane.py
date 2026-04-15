@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,8 +19,10 @@ class SphereTangentPlane(ThreeDScene):
     def construct(self):
         self.set_camera_orientation(phi=75 * DEGREES, theta=45 * DEGREES)
 
-        geodesic_label = MathTex(r"\begin{matrix} Geodesic & \\ x(t)= & cos(t).sin(t) \\ y(t)= & sin(t)^{2} \\ z(t)= & cos(t) \end{matrix}")
-        tangent_label = MathTex(r"\begin{matrix}  Tangent & Vector \\ x'(t)= & cos(2t) \\ y'(t)= & sin(2t) \\ z'(t)= & -sin(t) \end{matrix}")
+        l1 = r"\begin{matrix} Geodesic & \\ x(t)= & cos(t).sin(t) \\ y(t)= & sin(t)^{2} \\ z(t)= & cos(t) \end{matrix}"
+        geodesic_label = MathTex(l1)
+        l2 = r"\begin{matrix} Tangent & Vector \\ x'(t)= & cos(2t) \\ y'(t)= & sin(2t) \\ z'(t)= & -sin(t) \end{matrix}"
+        tangent_label = MathTex(l2)
         title = MathTex(r"Manifold \ and \ Tangent \ Space")
         title_2 = MathTex(r"SO3 \ Rotation")
         geodesic_label.to_corner(UL).scale(0.6)
