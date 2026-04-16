@@ -18,7 +18,7 @@ from typing import Any, List
 from animation.library import colors
 
 class LegendGroup(VGroup):
-    def __init__(self, legend_labels: List[MathTex], corner: Any, shift: Any) -> None:
+    def __init__(self, legend_labels: List[MathTex]) -> None:
         super(LegendGroup, self).__init__()
 
         entries = [VGroup(Line(LEFT, RIGHT, color=colors[idx]), legend_label)
@@ -26,6 +26,5 @@ class LegendGroup(VGroup):
         for entry in entries:
             entry.arrange(RIGHT, buff=0.2)
         self.legend = VGroup(entries).arrange(DOWN, aligned_edge=LEFT, buff=0.2)
-        self.legend.to_corner(corner).shift(shift)
         box = SurroundingRectangle(self.legend, color=DARK_GREY, buff=0.2, fill_opacity=0.2, fill_color=BLACK)
         self.add(self.legend, box)

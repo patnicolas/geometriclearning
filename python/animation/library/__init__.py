@@ -15,6 +15,7 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 from typing import Tuple, List
 from manim import *
+import math
 
 Rnge = Tuple[int, int] | Tuple[int, int, int]
 
@@ -22,3 +23,9 @@ colors = (BLUE, RED, YELLOW, WHITE)
 
 def get_num_ticks(range: List[float]) -> int:
     return int((range[1]-range[0])/range[2])
+
+def extract_num_digits(x: float) -> int:
+    return len(str(abs(int(x))))
+
+def next_multiple(x: float, n: int) -> int:
+    return math.ceil(x/n)*n

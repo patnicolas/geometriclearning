@@ -1,3 +1,18 @@
+__author__ = "Patrick Nicolas"
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from manim import *
 from typing import Callable, Tuple, List, AnyStr, Any
 import numpy as np
@@ -39,7 +54,7 @@ class SingleAxesPlotsGroup(VGroup):
         self.legends_group = legend_group
         self.add(title, self.legends_group, self.ax, self.labels, self.curves)
 
-    def get_attributes(self) -> Tuple[Any, ...]:
+    def get_attributes(self) -> Tuple[Write | Create, ...]:
         return ((Write(self.title), Write(self.legends_group), Write(self.labels), Create(self.ax))
                 + tuple([Create(curve) for curve in self.curves]))
 
@@ -60,7 +75,11 @@ class SingleAxesPlotsScene(Scene):
                                                        title=MathTex(r" \text{Single axes plot}",
                                                                      font_size=44).to_edge(UP),
                                                        funcs=funcs)
-        box = SurroundingRectangle(single_axes_plots_group, color=DARK_GREY, buff=-0.8, fill_opacity=0.2, fill_color=BLACK)
+        box = SurroundingRectangle(single_axes_plots_group,
+                                   color=DARK_GREY,
+                                   buff=-0.8,
+                                   fill_opacity=0.2,
+                                   fill_color=BLACK)
         title, legend, labels, axes, *plts = single_axes_plots_group.get_attributes()
         # self.add(single_axes_multi_plots)
         self.add(box)
