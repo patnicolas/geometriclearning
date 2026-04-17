@@ -14,17 +14,29 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # limitations under the License.
 
 from manim import *
-from typing import Any, List
+from typing import List, Any
 from animation.library import colors
+from enum import IntEnum
+
+class LegendType(IntEnum):
+    DOT = 0
+    LINE = 1
+    SURROUND = 2
 
 class LegendGroup(VGroup):
-    def __init__(self, legend_labels: List[MathTex]) -> None:
+    def __init__(self,
+                 legend_labels: List[MathTex],
+                 legend_type: LegendType,
+                 radius: float,
+                 arrange: Any,
+                 buff: float) -> None:
         super(LegendGroup, self).__init__()
 
-        entries = [VGroup(Line(LEFT, RIGHT, color=colors[idx]), legend_label)
+        entries = [VGroup(Line(LEFT, RIGHT, color=colors[idx]) if legend_type == LegendType.LINE
+                          else Dot(color=colors[idx], radius=radius), legend_label)
                    for idx, legend_label in enumerate(legend_labels)]
         for entry in entries:
             entry.arrange(RIGHT, buff=0.2)
-        self.legend = VGroup(entries).arrange(DOWN, aligned_edge=LEFT, buff=0.2)
+        self.legend = VGroup(entries).arrange(arrange, aligned_edge=LEFT, buff=buff)
         box = SurroundingRectangle(self.legend, color=DARK_GREY, buff=0.2, fill_opacity=0.2, fill_color=BLACK)
         self.add(self.legend, box)

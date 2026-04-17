@@ -31,21 +31,16 @@ def extract_scale_factor(x: float) -> float:
     return scale*0.1
 
 
-def get_2d_ranges(data: List[Tuple[float, ...]]) -> Tuple[List[float], List[float]]:
+def get_2d_ranges(data: List[Tuple[float, ...]], num_lines: int) -> Tuple[List[float], List[float]]:
     all_x, all_y = data
-    """
-    r = [item for sublist in data[1:] for item in sublist]
-    x_min, x_max = min(data[0]), max(data[0])
-    y_min, y_max = min(r), max(r)
-    """
     x_max = max(all_x)
     y_max = max(all_y)
     x_min = min(all_x)
     y_min = min(all_y)
 
-    scale = max(extract_scale_factor(x_max), extract_scale_factor(x_min))
+    scale = (x_max - x_min)/num_lines
     x_range = [x_min, x_max*1.01, scale]
-    scale = max(extract_scale_factor(y_max), extract_scale_factor(y_min))
+    scale = (y_max - y_min)/num_lines
     y_range = [y_min, y_max*1.01, scale]
     return x_range, y_range
 
