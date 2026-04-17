@@ -24,8 +24,28 @@ colors = (BLUE, RED, YELLOW, WHITE)
 def get_num_ticks(range: List[float]) -> int:
     return int((range[1]-range[0])/range[2])
 
-def extract_num_digits(x: float) -> int:
-    return len(str(abs(int(x))))
+def extract_scale_factor(x: float) -> float:
+    scale = 1e-4
+    while x > scale:
+        scale *= 10
+    return scale*0.1
 
-def next_multiple(x: float, n: int) -> int:
-    return math.ceil(x/n)*n
+
+def get_2d_ranges(data: List[Tuple[float, ...]]) -> Tuple[List[float], List[float]]:
+    all_x, all_y = data
+    """
+    r = [item for sublist in data[1:] for item in sublist]
+    x_min, x_max = min(data[0]), max(data[0])
+    y_min, y_max = min(r), max(r)
+    """
+    x_max = max(all_x)
+    y_max = max(all_y)
+    x_min = min(all_x)
+    y_min = min(all_y)
+
+    scale = max(extract_scale_factor(x_max), extract_scale_factor(x_min))
+    x_range = [x_min, x_max*1.01, scale]
+    scale = max(extract_scale_factor(y_max), extract_scale_factor(y_min))
+    y_range = [y_min, y_max*1.01, scale]
+    return x_range, y_range
+

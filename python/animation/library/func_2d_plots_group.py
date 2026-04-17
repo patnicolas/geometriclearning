@@ -20,7 +20,7 @@ from animation.library import colors, get_num_ticks
 from legend_group import LegendGroup
 
 
-class SingleAxesPlotsGroup(VGroup):
+class Func2DPlotsGroup(VGroup):
 
     def __init__(self,
                  x_range: List[float],
@@ -31,7 +31,7 @@ class SingleAxesPlotsGroup(VGroup):
                  legend_group: LegendGroup,
                  funcs: Tuple[Callable[[float], np.array]],
                  **kwargs) -> None:
-        super(SingleAxesPlotsGroup, self).__init__(**kwargs)
+        super(Func2DPlotsGroup, self).__init__(**kwargs)
 
         self.ax = NumberPlane(x_range=x_range,
                               y_range=y_range,
@@ -59,22 +59,20 @@ class SingleAxesPlotsGroup(VGroup):
                 + tuple([Create(curve) for curve in self.curves]))
 
 
-class SingleAxesPlotsScene(Scene):
+class Func2DPlotsScene(Scene):
     def construct(self) -> None:
         funcs = [lambda x: np.exp(-x), lambda x: np.exp(-0.1 * x), lambda x: np.exp(-0.5 * x)]
         legend_group = LegendGroup(legend_labels=[MathTex(r"exp(-x)", font_size=28),
                                                   MathTex(r"exp(-0.1x)", font_size=28),
-                                                  MathTex(r"exp(-0.5x)", font_size=28)],
-                                   corner=UR+1,
-                                   shift=LEFT*0.4)
-        single_axes_plots_group = SingleAxesPlotsGroup(x_range=[0, 8, 1],
-                                                       y_range=[0, 1, 0.5],
-                                                       x_label="x",
-                                                       y_label="y",
-                                                       legend_group=legend_group,
-                                                       title=MathTex(r" \text{Single axes plot}",
-                                                                     font_size=44).to_edge(UP),
-                                                       funcs=funcs)
+                                                  MathTex(r"exp(-0.5x)", font_size=28)])
+        single_axes_plots_group = Func2DPlotsGroup(x_range=[0, 8, 1],
+                                                   y_range=[0, 1, 0.5],
+                                                   x_label="x",
+                                                   y_label="y",
+                                                   legend_group=legend_group,
+                                                   title=MathTex(r" \text{Single axes plot}", 
+                                                                   font_size=44).to_edge(UP),
+                                                   funcs=funcs)
         box = SurroundingRectangle(single_axes_plots_group,
                                    color=DARK_GREY,
                                    buff=-0.8,
@@ -84,10 +82,11 @@ class SingleAxesPlotsScene(Scene):
         # self.add(single_axes_multi_plots)
         self.add(box)
         single_axes_plots_group.scale(scale_factor=0.7)
+        legend_group.next_to(single_axes_plots_group, DOWN, buff=0.2)
         self.play(title, legend, labels, axes, plts, run_time=3)
 
 
 if __name__ == '__main__':
-    single_axes_multi_plots_scene = SingleAxesPlotsScene()
-    single_axes_multi_plots_scene.construct()
+    single_2d_plots_scene = Func2DPlotsScene()
+    single_2d_plots_scene.construct()
 

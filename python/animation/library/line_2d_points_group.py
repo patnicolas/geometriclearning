@@ -17,23 +17,25 @@ from manim import *
 from typing import Tuple, List, AnyStr
 from animation.library import colors
 from legend_group import LegendGroup
-from animation.library import next_multiple, extract_num_digits
+from animation.library import get_2d_ranges
 import math
 
 
-class SingleAxesPointsGroup(VGroup):
+class Line2DPointsGroup(VGroup):
 
     def __init__(self,
                  x_label: AnyStr,
                  y_label: AnyStr,
+                 num_grid_lines: Tuple[int, int],
                  title: MathTex,
                  legend_group: LegendGroup,
-                 points: List[Tuple[float, ...]]) -> None:
-        super(SingleAxesPointsGroup, self).__init__()
+                 points: List[Tuple[float, ...]],
+                 **kwargs) -> None:
+        super(Line2DPointsGroup, self).__init__(**kwargs)
 
         transposed = zip(*points)
         data = list(transposed)
-        x_range, y_range = SingleAxesPointsGroup.__get_ranges(data)
+        x_range, y_range = get_2d_ranges(data, num_grid_lines)
 
         self.ax = NumberPlane(x_range=x_range,
                               y_range=y_range,
@@ -66,27 +68,8 @@ class SingleAxesPointsGroup(VGroup):
         return ((Write(self.title), Write(self.legends_group), Write(self.labels), Create(self.ax)) +
                 tuple([Create(graph) for graph in self.graphs]))
 
-    """ ---------------  Private Helper Methods -------------------  """
-    @staticmethod
-    def __get_ranges(data: List[Tuple[float, ...]]) -> Tuple[List[float], List[float]]:
-        r = [item for sublist in data[1:] for item in sublist]
-        x_min, x_max = min(data[0]), max(data[0])
-        y_min, y_max = min(r), max(r)
 
-        x_range = SingleAxesPointsGroup.__adjust_range(x_min, x_max, 5)
-        y_range = SingleAxesPointsGroup.__adjust_range(y_min, y_max, 10)
-        return x_range, y_range
-
-    @staticmethod
-    def __adjust_range(t_min: float, t_max: float, num_grid_lines) -> List[float]:
-        t_digits = extract_num_digits(t_max)
-        factor = 0.1 if t_digits <= 1 else 1.0
-        n_max = next_multiple(t_max - t_min, num_grid_lines)
-        n_min = int(t_min)
-        return  [n_min*factor, n_max*1.01*factor, factor*(n_max - n_min)/num_grid_lines]
-
-
-class SingleAxesPointsScene(Scene):
+class Line2DPointsScene(Scene):
 
     def construct(self) -> None:
         import random
@@ -94,19 +77,20 @@ class SingleAxesPointsScene(Scene):
                        for n in range(30)]
         legend_group = LegendGroup(legend_labels=[MathTex(r"Set 1", font_size=22),
                                                   MathTex(r"Set 2", font_size=22)])
-        single_axes_points_group = SingleAxesPointsGroup(x_label="x",
-                                                         y_label="y",
-                                                         legend_group=legend_group,
-                                                         title=MathTex(r" \text{Single axes plot}",
-                                                                       font_size=44).to_edge(UP),
-                                                         points=data_points)
+        single_axes_points_group = Line2DPointsGroup(x_label="x",
+                                                     y_label="y",
+                                                     num_grid_lines=(5, 10),
+                                                     legend_group=legend_group,
+                                                     title=MathTex(r" \text{Single axes plot}",
+                                                                   font_size=44).to_edge(UP),
+                                                     points=data_points)
         legend_group.next_to(single_axes_points_group, DOWN, buff=0.2)
-        title, legend, labels, axes, *plts = single_axes_points_group.get_attributes()
-        self.play(title, legend, labels, axes, plts, run_time=2)
+        title, legend, labels, axes, *graphs = single_axes_points_group.get_attributes()
+        self.play(title, legend, labels, axes, graphs, run_time=2)
 
 
 if __name__ == '__main__':
-    scene = SingleAxesPointsScene()
+    scene = Line2DPointsScene()
     scene.construct()
 
 
