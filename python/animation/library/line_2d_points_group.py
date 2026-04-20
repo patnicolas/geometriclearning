@@ -24,8 +24,7 @@ import math
 class Line2DPointsGroup(VGroup):
 
     def __init__(self,
-                 x_label: AnyStr,
-                 y_label: AnyStr,
+                 xy_labels: Tuple[AnyStr, AnyStr],
                  num_grid_lines: Tuple[int, int],
                  title: MathTex,
                  legend_group: LegendGroup,
@@ -59,14 +58,13 @@ class Line2DPointsGroup(VGroup):
                                                line_color=colors[n],
                                                vertex_dot_style={"color": colors[n]},
                                                name=f"Set {n}") for n in range(len(data)-1)]
-        self.labels = self.ax.get_axis_labels(x_label=x_label, y_label=y_label)
+        self.labels = self.ax.get_axis_labels(x_label=xy_labels[0], y_label=xy_labels[1])
         self.title = title.next_to(self.graphs[0], UP, buff=0.3)
         self.legends_group = legend_group
         self.add(title, self.legends_group, self.ax, self.labels, self.graphs)
 
-    def get_attributes(self) -> Tuple[Write | Create, ...]:
-        return ((Write(self.title), Write(self.legends_group), Write(self.labels), Create(self.ax)) +
-                tuple([Create(graph) for graph in self.graphs]))
+    def get_dynamic(self) -> Tuple[Write | Create, ...]:
+        return tuple([Create(graph) for graph in self.graphs])
 
 
 class Line2DPointsScene(Scene):
@@ -77,16 +75,15 @@ class Line2DPointsScene(Scene):
                        for n in range(30)]
         legend_group = LegendGroup(legend_labels=[MathTex(r"Set 1", font_size=22),
                                                   MathTex(r"Set 2", font_size=22)])
-        single_axes_points_group = Line2DPointsGroup(x_label="x",
-                                                     y_label="y",
+        single_axes_points_group = Line2DPointsGroup(xy_labels=("x", "y"),
                                                      num_grid_lines=(5, 10),
                                                      legend_group=legend_group,
                                                      title=MathTex(r" \text{Single axes plot}",
                                                                    font_size=44).to_edge(UP),
                                                      points=data_points)
         legend_group.next_to(single_axes_points_group, DOWN, buff=0.2)
-        title, legend, labels, axes, *graphs = single_axes_points_group.get_attributes()
-        self.play(title, legend, labels, axes, graphs, run_time=2)
+        graphs = single_axes_points_group.get_dynamic()
+        self.play(graphs, run_time=2)
 
 
 if __name__ == '__main__':

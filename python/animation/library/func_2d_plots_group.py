@@ -60,6 +60,7 @@ class Func2DPlotsGroup(VGroup):
 
 
 class Func2DPlotsScene(Scene):
+
     def construct(self) -> None:
         funcs = [lambda x: np.exp(-x), lambda x: np.exp(-0.1 * x), lambda x: np.exp(-0.5 * x)]
         legend_group = LegendGroup(legend_labels=[MathTex(r"exp(-x)", font_size=28),
