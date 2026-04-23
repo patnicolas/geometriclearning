@@ -15,22 +15,21 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 from manim import *
 from typing import Tuple, List, AnyStr
-from animation.library import colors
-from legend_group import LegendGroup
-from animation.library import get_2d_ranges
+from animation.library.plots import colors, get_2d_ranges
+from legend_vgrp import LegendVGrp
 import math
 
 
-class Line2DPointsGroup(VGroup):
+class Line2DPointsVGrp(VGroup):
 
     def __init__(self,
                  xy_labels: Tuple[AnyStr, AnyStr],
                  num_grid_lines: Tuple[int, int],
                  title: MathTex,
-                 legend_group: LegendGroup,
+                 legend_group: LegendVGrp,
                  points: List[Tuple[float, ...]],
                  **kwargs) -> None:
-        super(Line2DPointsGroup, self).__init__(**kwargs)
+        super(Line2DPointsVGrp, self).__init__(**kwargs)
 
         transposed = zip(*points)
         data = list(transposed)
@@ -73,14 +72,14 @@ class Line2DPointsScene(Scene):
         import random
         data_points = [(n, math.exp(-0.1*n) + 0.1*random.random(), math.sin(0.03*n) + 0.15*random.random())
                        for n in range(30)]
-        legend_group = LegendGroup(legend_labels=[MathTex(r"Set 1", font_size=22),
-                                                  MathTex(r"Set 2", font_size=22)])
-        single_axes_points_group = Line2DPointsGroup(xy_labels=("x", "y"),
-                                                     num_grid_lines=(5, 10),
-                                                     legend_group=legend_group,
-                                                     title=MathTex(r" \text{Single axes plot}",
+        legend_group = LegendVGrp(legend_labels=[MathTex(r"Set 1", font_size=22),
+                                                 MathTex(r"Set 2", font_size=22)])
+        single_axes_points_group = Line2DPointsVGrp(xy_labels=("x", "y"),
+                                                    num_grid_lines=(5, 10),
+                                                    legend_group=legend_group,
+                                                    title=MathTex(r" \text{Single axes plot}",
                                                                    font_size=44).to_edge(UP),
-                                                     points=data_points)
+                                                    points=data_points)
         legend_group.next_to(single_axes_points_group, DOWN, buff=0.2)
         graphs = single_axes_points_group.get_dynamic()
         self.play(graphs, run_time=2)

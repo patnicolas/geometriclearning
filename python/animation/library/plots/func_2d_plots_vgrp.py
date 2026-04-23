@@ -14,13 +14,13 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # limitations under the License.
 
 from manim import *
-from typing import Callable, Tuple, List, AnyStr, Any
+from typing import Callable, Tuple, List, AnyStr
 import numpy as np
-from animation.library import colors, get_num_ticks
-from legend_group import LegendGroup
+from animation.library.plots import colors
+from legend_vgrp import LegendVGrp
 
 
-class Func2DPlotsGroup(VGroup):
+class Func2DPlotsVGrp(VGroup):
 
     def __init__(self,
                  x_range: List[float],
@@ -28,10 +28,10 @@ class Func2DPlotsGroup(VGroup):
                  x_label: AnyStr,
                  y_label: AnyStr,
                  title: MathTex,
-                 legend_group: LegendGroup,
+                 legend_group: LegendVGrp,
                  funcs: Tuple[Callable[[float], np.array]],
                  **kwargs) -> None:
-        super(Func2DPlotsGroup, self).__init__(**kwargs)
+        super(Func2DPlotsVGrp, self).__init__(**kwargs)
 
         self.ax = NumberPlane(x_range=x_range,
                               y_range=y_range,
@@ -63,17 +63,17 @@ class Func2DPlotsScene(Scene):
 
     def construct(self) -> None:
         funcs = [lambda x: np.exp(-x), lambda x: np.exp(-0.1 * x), lambda x: np.exp(-0.5 * x)]
-        legend_group = LegendGroup(legend_labels=[MathTex(r"exp(-x)", font_size=28),
-                                                  MathTex(r"exp(-0.1x)", font_size=28),
-                                                  MathTex(r"exp(-0.5x)", font_size=28)])
-        single_axes_plots_group = Func2DPlotsGroup(x_range=[0, 8, 1],
-                                                   y_range=[0, 1, 0.5],
-                                                   x_label="x",
-                                                   y_label="y",
-                                                   legend_group=legend_group,
-                                                   title=MathTex(r" \text{Single axes plot}", 
+        legend_group = LegendVGrp(legend_labels=[MathTex(r"exp(-x)", font_size=28),
+                                                 MathTex(r"exp(-0.1x)", font_size=28),
+                                                 MathTex(r"exp(-0.5x)", font_size=28)])
+        single_axes_plots_group = Func2DPlotsVGrp(x_range=[0, 8, 1],
+                                                  y_range=[0, 1, 0.5],
+                                                  x_label="x",
+                                                  y_label="y",
+                                                  legend_group=legend_group,
+                                                  title=MathTex(r" \text{Single axes plot}",
                                                                    font_size=44).to_edge(UP),
-                                                   funcs=funcs)
+                                                  funcs=funcs)
         box = SurroundingRectangle(single_axes_plots_group,
                                    color=DARK_GREY,
                                    buff=-0.8,

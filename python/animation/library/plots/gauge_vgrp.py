@@ -25,14 +25,14 @@ class GaugeConfig:
     font_size: int
 
 
-class GaugeGroup(VGroup):
+class GaugeVGrp(VGroup):
 
     def __init__(self,
                  vt: ValueTracker,
                  gauge_config: GaugeConfig,
                  data_points: List[float],
                  **kwargs) -> None:
-        super(GaugeGroup, self).__init__(**kwargs)
+        super(GaugeVGrp, self).__init__(**kwargs)
 
         self.vt = vt
         self.radius = gauge_config.radius  # 2.5
@@ -40,7 +40,7 @@ class GaugeGroup(VGroup):
         self.data_points = data_points
 
         self.limit_values = (min(data_points), max(data_points))
-        ticks, labels = GaugeGroup.create_ticks(gauge_config, self.limit_values)
+        ticks, labels = GaugeVGrp.create_ticks(gauge_config, self.limit_values)
 
         gradient_background = AnnularSector(
             inner_radius=0.5,
@@ -115,7 +115,7 @@ class GaugeScene(Scene):
         gauge_config = GaugeConfig(radius=2.5, num_ticks=11, font_size=16)
 
 
-        gauge_group = GaugeGroup(vt, gauge_config, [math.sin(0.01*x) for x in range(0, 25)])
+        gauge_group = GaugeVGrp(vt, gauge_config, [math.sin(0.01 * x) for x in range(0, 25)])
         self.add(gauge_group)
 
         self.play(gauge_group.vt.animate.set_value(75), run_time=2, rate_func=bezier([0, 0, 1, 1]))

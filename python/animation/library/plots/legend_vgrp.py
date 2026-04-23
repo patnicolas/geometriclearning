@@ -15,7 +15,7 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 from manim import *
 from typing import List, Any
-from animation.library import colors
+from animation.library.plots import colors
 from enum import IntEnum
 
 class LegendType(IntEnum):
@@ -23,14 +23,14 @@ class LegendType(IntEnum):
     LINE = 1
     SURROUND = 2
 
-class LegendGroup(VGroup):
+class LegendVGrp(VGroup):
     def __init__(self,
                  legend_labels: List[MathTex],
                  legend_type: LegendType,
                  radius: float,
                  arrange: Any,
                  buff: float) -> None:
-        super(LegendGroup, self).__init__()
+        super(LegendVGrp, self).__init__()
 
         entries = [VGroup(Line(LEFT, RIGHT, color=colors[idx]) if legend_type == LegendType.LINE
                           else Dot(color=colors[idx], radius=radius), legend_label)

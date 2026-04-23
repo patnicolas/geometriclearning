@@ -1,8 +1,8 @@
 
 from manim import *
-from typing import List, Tuple, AnyStr, Callable, Any, Self
-from animation.library import get_2d_ranges, colors
-from legend_group import LegendGroup, LegendType
+from typing import List, Tuple, AnyStr, Callable, Any
+from animation.library.plots import get_2d_ranges
+from animation.library.plots.legend_vgrp import LegendVGrp, LegendType
 from dataclasses import dataclass
 
 @dataclass
@@ -16,22 +16,22 @@ class Scatter2DConfig:
     axis_font_size: int
     legend_texts: Tuple[AnyStr, ...]
 
-    def get_legend_group(self) -> LegendGroup:
+    def get_legend_group(self) -> LegendVGrp:
         legend_labels = [MathTex(rf"{legend}", font_size=22) for legend in self.legend_texts]
-        return LegendGroup(legend_labels=legend_labels,
-                           legend_type=LegendType.DOT,
-                           radius=self.radius,
-                           arrange=LEFT,
-                           buff=0.4)
+        return LegendVGrp(legend_labels=legend_labels,
+                          legend_type=LegendType.DOT,
+                          radius=self.radius,
+                          arrange=LEFT,
+                          buff=0.4)
 
 
-class Scatter2DDynamicGroup(VGroup):
+class Scatter2DVGrp(VGroup):
 
     def __init__(self,
                  scatter_2d_config: Scatter2DConfig,
                  data_points: List[Tuple[float, ...]],
                  **kwargs) -> None:
-        super(Scatter2DDynamicGroup, self).__init__(**kwargs)
+        super(Scatter2DVGrp, self).__init__(**kwargs)
 
         xy_ranges = get_2d_ranges(list(zip(*data_points)), scatter_2d_config.num_lines)
         self.data_points = data_points
@@ -91,8 +91,8 @@ class Scatter2DDynamicScene(Scene):
         vt = ValueTracker(0)
 
         legend_group, scatter_2d_config = Scatter2DDynamicScene.get_config()
-        scatter_2d_group = Scatter2DDynamicGroup(scatter_2d_config=scatter_2d_config,
-                                                 data_points=Scatter2DDynamicScene.data_points).to_edge(LEFT)
+        scatter_2d_group = Scatter2DVGrp(scatter_2d_config=scatter_2d_config,
+                                         data_points=Scatter2DDynamicScene.data_points).to_edge(LEFT)
         legend_group.next_to(scatter_2d_group, DOWN, buff=0.2)
         scatter_2d_group.add_updater(scatter_2d_group.get_updater(vt))
         self.add(scatter_2d_group)

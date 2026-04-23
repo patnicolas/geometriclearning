@@ -17,7 +17,6 @@ from manim import *
 from typing import Callable, AnyStr
 
 
-
 class LossFunctionPlot(object):
     def __init__(self,
                  f: Callable[[float], float],

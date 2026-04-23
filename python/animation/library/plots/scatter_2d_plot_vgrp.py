@@ -15,22 +15,22 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 from manim import *
 from typing import List, Tuple, AnyStr
-from animation.library import get_2d_ranges, colors
-from legend_group import LegendGroup, LegendType
+from animation.library.plots import get_2d_ranges, colors
+from animation.library.plots.legend_vgrp import LegendVGrp, LegendType
 
 
-class Scatter2DGroup(VGroup):
+class Scatter2DPlotVGrp(VGroup):
 
     def __init__(self,
                  xy_labels: Tuple[AnyStr, AnyStr],
                  lengths: Tuple[int, int],
                  title: MathTex,
-                 legend_group: LegendGroup,
+                 legend_group: LegendVGrp,
                  radius: float,
                  num_lines: int,
                  all_points: List[List[Tuple[float, ...]]],
                  **kwargs) -> None:
-        super(Scatter2DGroup, self).__init__(**kwargs)
+        super(Scatter2DPlotVGrp, self).__init__(**kwargs)
 
         data = [item for sublist in all_points for item in sublist]
         xy_ranges = get_2d_ranges(list(zip(*data)), num_lines)
@@ -81,19 +81,19 @@ class Scatter2DScene(Scene):
     def construct(self) -> None:
         vt = ValueTracker(0)
         legend_labels = [MathTex(rf"{legend}", font_size=18) for legend in Scatter2DScene.legend_texts]
-        legend_group = LegendGroup(legend_labels=legend_labels,
-                                   legend_type=LegendType.DOT,
-                                   radius=Scatter2DScene.radius,
-                                   arrange=Scatter2DScene.legend_arrange,
-                                   buff=Scatter2DScene.legend_buff)
-        scatter_2d_group = Scatter2DGroup(vt=vt,
-                                          xy_labels=("x", "y"),
-                                          lengths=Scatter2DScene.lengths,
-                                          legend_group=legend_group,
-                                          title=MathTex(rf"{Scatter2DScene.title}", font_size=36).to_edge(UP),
-                                          radius=Scatter2DScene.radius,
-                                          num_lines=Scatter2DScene.num_lines,
-                                          xy_ranges=([0.0, 1.0, 10], [0.0, 10.0, 5])).to_edge(LEFT)
+        legend_group = LegendVGrp(legend_labels=legend_labels,
+                                  legend_type=LegendType.DOT,
+                                  radius=Scatter2DScene.radius,
+                                  arrange=Scatter2DScene.legend_arrange,
+                                  buff=Scatter2DScene.legend_buff)
+        scatter_2d_group = Scatter2DPlotVGrp(vt=vt,
+                                             xy_labels=("x", "y"),
+                                             lengths=Scatter2DScene.lengths,
+                                             legend_group=legend_group,
+                                             title=MathTex(rf"{Scatter2DScene.title}", font_size=36).to_edge(UP),
+                                             radius=Scatter2DScene.radius,
+                                             num_lines=Scatter2DScene.num_lines,
+                                             xy_ranges=([0.0, 1.0, 10], [0.0, 10.0, 5])).to_edge(LEFT)
         legend_group.next_to(scatter_2d_group, DOWN, buff=0.2)
         box = SurroundingRectangle(scatter_2d_group,
                                    color=DARK_GREY,
