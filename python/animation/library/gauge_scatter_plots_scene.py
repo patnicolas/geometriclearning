@@ -18,7 +18,7 @@ import math
 from animation.library.plots.gauge_vgrp import GaugeVGrp, GaugeConfig
 from animation.library.plots.scatter_2d_vgrp import Scatter2DConfig, Scatter2DVGrp
 from dataclasses import dataclass
-from typing import AnyStr, Tuple
+from typing import AnyStr, Tuple, Self
 
 
 @dataclass
@@ -30,6 +30,28 @@ class GaugeScatterPlotsConfig:
     scatter_2d_config: Scatter2DConfig
     gauge_config: GaugeConfig
 
+    @staticmethod
+    def build() -> Self:
+        title = r'Widget \ Composer'
+        axis_font_size = 14
+        display_scale = (0.8, 0.8)
+
+        scatter_2d_config = Scatter2DConfig(xy_labels=("X", "Y"),
+                                            lengths=(4, 4),
+                                            title=MathTex(title, font_size=32),
+                                            num_lines=5,
+                                            radius=0.1,
+                                            label_font_size=28,
+                                            axis_font_size=axis_font_size + 4,
+                                            legend_texts=('Value',))
+        gauge_config = GaugeConfig(radius=2.5, num_ticks=11, font_size=axis_font_size)
+        return GaugeScatterPlotsConfig(title=title,
+                                       axis_font_size=axis_font_size,
+                                       display_scale=display_scale,
+                                       run_time=4,
+                                       scatter_2d_config=scatter_2d_config,
+                                       gauge_config=gauge_config)
+
 
 class GaugeScatterPlotsScene(Scene):
     data_points = [(x, math.exp(0.5*x)) for x in range(20)]
@@ -38,7 +60,7 @@ class GaugeScatterPlotsScene(Scene):
         # Setup Value tracker
         vt = ValueTracker(0)
         # Retrieve the configuration
-        composer_config = GaugeScatterPlotsScene.__get_config()
+        composer_config = GaugeScatterPlotsScene.get_config()
         # Add Gauge
         gauge_group = self.__add_gauge(vt, composer_config)
         # Add Scatter 2D group located
@@ -52,8 +74,7 @@ class GaugeScatterPlotsScene(Scene):
 
     def __add_gauge(self, vt: ValueTracker, composer_config: GaugeScatterPlotsConfig) -> GaugeVGrp:
         y = [item[1] for item in GaugeScatterPlotsScene.data_points]
-        gauge_group = GaugeVGrp(vt=vt,
-                                gauge_config=composer_config.gauge_config,
+        gauge_group = GaugeVGrp(gauge_config=composer_config.gauge_config,
                                 data_points=y).to_edge(UR)
         gauge_group.add_updater(gauge_group.get_updater(vt))
         gauge_group.scale(composer_config.display_scale[0])
@@ -72,8 +93,9 @@ class GaugeScatterPlotsScene(Scene):
         scatter_2d_group.next_to(gauge_group, DOWN, buff=0.5)
         return scatter_2d_group
 
+    """
     @staticmethod
-    def __get_config() -> GaugeScatterPlotsConfig:
+    def get_config() -> GaugeScatterPlotsConfig:
         title = r'Widget \ Composer'
         axis_font_size = 14
         display_scale = (0.8, 0.8)
@@ -93,6 +115,7 @@ class GaugeScatterPlotsScene(Scene):
                                        run_time=4,
                                        scatter_2d_config=scatter_2d_config,
                                        gauge_config=gauge_config)
+    """
 
 
 if __name__ == '__main__':

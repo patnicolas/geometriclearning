@@ -18,7 +18,6 @@ from typing import List, Tuple, AnyStr
 from animation.library.plots import get_2d_ranges, colors
 from animation.library.plots.legend_vgrp import LegendVGrp, LegendType
 
-
 class Scatter2DPlotVGrp(VGroup):
 
     def __init__(self,

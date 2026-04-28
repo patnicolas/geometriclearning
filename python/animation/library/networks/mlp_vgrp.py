@@ -14,12 +14,14 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # limitations under the License.
 
 from manim import *
-from typing import List, Self
+from typing import Callable, List, Self, Any
 from animation.library.networks.neural_config import NeuralConfig
 from animation.library.networks.mlp_layer_vgrp import MLPLayerVGrp, LayerType
 
 
 class MLPVGrp(VGroup):
+    network_edges = []
+
     def __init__(self,
                  layers: List[MLPLayerVGrp],
                  *args,
@@ -28,14 +30,19 @@ class MLPVGrp(VGroup):
         layers_group = VGroup(*[layers])
         layers_group.arrange_submobjects(RIGHT, buff=NeuralConfig['layer_to_layer_buff'])
         self.add(layers_group)
-        edges = MLPVGrp.__add_edges(layers)
-        self.add_to_back(edges)
+        self.edges = MLPVGrp.__add_edges(layers)
+        self.add_to_back(self.edges)
 
     @classmethod
     def build(cls, layer_sizes: List[int]) -> Self:
         num_layers = len(layer_sizes)
-        return cls([MLPLayerVGrp(layer_size, MLPVGrp.__get_nn_fill_color(idx, num_layers))
+        return cls([MLPLayerVGrp(layer_size, MLPVGrp.__get_node_color(idx, num_layers))
                     for idx, layer_size in enumerate(layer_sizes)])
+
+    @staticmethod
+    def set_edges_color(new_color: ManimColor) -> None:
+        for edge in MLPVGrp.network_edges:
+            edge.set_color(new_color)
 
     """ ------------------------------  Private Helper Methods ---------------  """
 
@@ -61,6 +68,7 @@ class MLPVGrp(VGroup):
 
         for n1, n2 in product(in_neurons, out_neurons):
             edge = MLPVGrp.__get_edge(n1, n2)
+            MLPVGrp.network_edges.append(edge)
             edge_group.add(edge)
             n1.edges_out.add(edge)
             n2.edges_in.add(edge)
@@ -86,7 +94,7 @@ class MLPVGrp(VGroup):
         )
 
     @staticmethod
-    def __get_nn_fill_color(index: int, num_layers: int) -> LayerType:
+    def __get_node_color(index: int, num_layers: int) -> LayerType:
         if index >= num_layers - 1:
             index = -1
         match index:

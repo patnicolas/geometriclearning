@@ -1,6 +1,8 @@
 
 from manim import *
 from typing import List, Tuple, AnyStr, Callable, Any
+
+from animation.library.data_observer import DataObserver
 from animation.library.plots import get_2d_ranges
 from animation.library.plots.legend_vgrp import LegendVGrp, LegendType
 from dataclasses import dataclass
@@ -25,16 +27,17 @@ class Scatter2DConfig:
                           buff=0.4)
 
 
-class Scatter2DVGrp(VGroup):
+class Scatter2DVGrp(VGroup, DataObserver):
 
     def __init__(self,
-                 scatter_2d_config: Scatter2DConfig,
                  data_points: List[Tuple[float, ...]],
+                 scatter_2d_config: Scatter2DConfig,
                  **kwargs) -> None:
-        super(Scatter2DVGrp, self).__init__(**kwargs)
+        VGroup.__init__(self, **kwargs)
+        DataObserver.__init__(self, data_points)
 
-        xy_ranges = get_2d_ranges(list(zip(*data_points)), scatter_2d_config.num_lines)
-        self.data_points = data_points
+        xy_ranges = get_2d_ranges(list(zip(*self.data_points)), scatter_2d_config.num_lines)
+        self.data_points = self.data_points
 
         self.ax = NumberPlane(x_range=xy_ranges[0],
                               y_range=xy_ranges[1],
@@ -101,8 +104,6 @@ class Scatter2DDynamicScene(Scene):
                   run_time=Scatter2DDynamicScene.run_time,
                   rate_func=linear)
         self.wait()
-
-
 
 
 if __name__ == '__main__':

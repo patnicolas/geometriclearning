@@ -17,6 +17,7 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 from manim import *
 from typing import Tuple, Callable, Any, List
 from dataclasses import dataclass
+from animation.library.data_observer import DataObserver
 
 @dataclass
 class GaugeConfig:
@@ -25,20 +26,17 @@ class GaugeConfig:
     font_size: int
 
 
-class GaugeVGrp(VGroup):
+class GaugeVGrp(VGroup, DataObserver):
 
     def __init__(self,
-                 vt: ValueTracker,
-                 gauge_config: GaugeConfig,
                  data_points: List[float],
+                 gauge_config: GaugeConfig,
                  **kwargs) -> None:
-        super(GaugeVGrp, self).__init__(**kwargs)
+        VGroup.__init__(self, **kwargs)
+        DataObserver.__init__(self, data_points)
 
-        self.vt = vt
         self.radius = gauge_config.radius  # 2.5
         self.num_ticks = gauge_config.num_ticks  # 0 to 10
-        self.data_points = data_points
-
         self.limit_values = (min(data_points), max(data_points))
         ticks, labels = GaugeVGrp.create_ticks(gauge_config, self.limit_values)
 
@@ -68,6 +66,7 @@ class GaugeVGrp(VGroup):
     def get_updater(self, vt) -> Callable[[Any], Any]:
         def updater(obj):
             idx = int(vt.get_value())
+            print(f'idx: {idx}')
             value = self.data_points[idx]/self.limit_values[1]
             angle = interpolate(PI, 0, value/self.limit_values[0])
             obj.needle.set_angle(angle)
@@ -113,14 +112,12 @@ class GaugeScene(Scene):
         import math
         vt = ValueTracker(0)
         gauge_config = GaugeConfig(radius=2.5, num_ticks=11, font_size=16)
-
-
-        gauge_group = GaugeVGrp(vt, gauge_config, [math.sin(0.01 * x) for x in range(0, 25)])
+        gauge_group = GaugeVGrp([math.sin(0.01 * x) for x in range(0, 25)], gauge_config)
         self.add(gauge_group)
 
-        self.play(gauge_group.vt.animate.set_value(75), run_time=2, rate_func=bezier([0, 0, 1, 1]))
+        self.play(vt.animate.set_value(75), run_time=2, rate_func=bezier([0, 0, 1, 1]))
         self.wait()
-        self.play(gauge_group.vt.animate.set_value(20), run_time=1.5)
+        self.play(vt.animate.set_value(20), run_time=1.5)
         self.wait()
 
 
