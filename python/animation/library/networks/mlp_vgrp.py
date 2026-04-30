@@ -14,43 +14,50 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # limitations under the License.
 
 from manim import *
-from typing import List, Self
-from neural_config import NeuralConfig
-from mlp_layer_vgroup import MLPLayerVGroup, LayerType
+from typing import Callable, List, Self, Any
+from animation.library.networks.neural_config import NeuralConfig
+from animation.library.networks.mlp_layer_vgrp import MLPLayerVGrp, LayerType
 
 
-class MLPLayersVGroup(VGroup):
+class MLPVGrp(VGroup):
+    network_edges = []
+
     def __init__(self,
-                 layers: List[MLPLayerVGroup],
+                 layers: List[MLPLayerVGrp],
                  *args,
                  **kwargs) -> None:
         VGroup.__init__(self, *args, **kwargs)
         layers_group = VGroup(*[layers])
         layers_group.arrange_submobjects(RIGHT, buff=NeuralConfig['layer_to_layer_buff'])
         self.add(layers_group)
-        edges = MLPLayersVGroup.__add_edges(layers)
-        self.add_to_back(edges)
+        self.edges = MLPVGrp.__add_edges(layers)
+        self.add_to_back(self.edges)
 
     @classmethod
     def build(cls, layer_sizes: List[int]) -> Self:
         num_layers = len(layer_sizes)
-        return cls([MLPLayerVGroup(layer_size, MLPLayersVGroup.__get_nn_fill_color(idx, num_layers))
+        return cls([MLPLayerVGrp(layer_size, MLPVGrp.__get_node_color(idx, num_layers))
                     for idx, layer_size in enumerate(layer_sizes)])
+
+    @staticmethod
+    def set_edges_color(new_color: ManimColor) -> None:
+        for edge in MLPVGrp.network_edges:
+            edge.set_color(new_color)
 
     """ ------------------------------  Private Helper Methods ---------------  """
 
     @staticmethod
-    def __add_edges(layers: List[MLPLayerVGroup]) -> VGroup:
+    def __add_edges(layers: List[MLPLayerVGrp]) -> VGroup:
         edges_group = VGroup()
         source_layers = layers[:-1]
         target_layers = layers[1:]
         for l1, l2 in zip(source_layers, target_layers):
-            edge_group = MLPLayersVGroup.__add_edge_group(l1, l2)
+            edge_group = MLPVGrp.__add_edge_group(l1, l2)
             edges_group.add(edge_group)
         return edges_group
 
     @staticmethod
-    def __add_edge_group(in_layer: MLPLayerVGroup, out_layer: MLPLayerVGroup) -> VGroup:
+    def __add_edge_group(in_layer: MLPLayerVGrp, out_layer: MLPLayerVGrp) -> VGroup:
         from itertools import product
 
         all_in_children = in_layer.get_family()
@@ -60,7 +67,8 @@ class MLPLayersVGroup(VGroup):
         out_neurons = [m for m in all_out_children if isinstance(m, Sphere)]
 
         for n1, n2 in product(in_neurons, out_neurons):
-            edge = MLPLayersVGroup.__get_edge(n1, n2)
+            edge = MLPVGrp.__get_edge(n1, n2)
+            MLPVGrp.network_edges.append(edge)
             edge_group.add(edge)
             n1.edges_out.add(edge)
             n2.edges_in.add(edge)
@@ -86,7 +94,7 @@ class MLPLayersVGroup(VGroup):
         )
 
     @staticmethod
-    def __get_nn_fill_color(index: int, num_layers: int) -> LayerType:
+    def __get_node_color(index: int, num_layers: int) -> LayerType:
         if index >= num_layers - 1:
             index = -1
         match index:

@@ -1,4 +1,4 @@
-_author__ = "Patrick Nicolas"
+__author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,3 +12,12 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from typing import List, Tuple
+from abc import ABC
+
+class DataObserver(ABC):
+    def __init__(self, data_points: List[float] | List[Tuple[float, ...]]) -> None:
+        self.data_points = data_points
+
+

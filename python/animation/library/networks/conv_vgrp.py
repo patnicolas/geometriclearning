@@ -13,20 +13,18 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from manim import *
 import numpy as np
 
 
-
-class ConvVGroup(VGroup):
+class ConvVGrp(VGroup):
     def __init__(self, shift: float, scale: float, opacity: float, *args, **kwargs):
         VGroup.__init__(self, *args, **kwargs)
 
-        grid_lines = ConvVGroup.__add_grid(self)
+        grid_lines = ConvVGrp.__add_grid(self)
         self.add(grid_lines)
 
-        receptive_fields = ConvVGroup.__add_receptive_fields(self, grid_lines)
+        receptive_fields = ConvVGrp.__add_receptive_fields(self, grid_lines)
         self.add(receptive_fields)
         self.shift(LEFT*shift)
         self.scale(scale)
@@ -50,7 +48,6 @@ class ConvVGroup(VGroup):
         fields = fields.next_to(grid, OUT, buff=0.3)
         fields.z_index = len(conf_vgroup) + 1
         return fields
-
 
     @staticmethod
     def __add_grid(conf_vgroup: VGroup) -> VGroup:

@@ -14,8 +14,8 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # limitations under the License.
 
 from manim import *
-from typing import Self, Optional
-from neural_config import NeuralConfig
+from typing import Optional
+from animation.library.networks.neural_config import NeuralConfig
 from enum import StrEnum
 
 
@@ -35,22 +35,23 @@ It contains
 - Labels for variables for only input and output layers
 """
 
-class MLPLayerVGroup(VGroup):
+class MLPLayerVGrp(VGroup):
     def __init__(self,
                  layer_size: int,
                  layer_type: LayerType,
                  *args,
                  **kwargs) -> None:
-        VGroup.__init__(self, *args, **kwargs)
+        super(MLPLayerVGrp, self).__init__(*args, **kwargs)
+
         self.tracker = ValueTracker(0)
         self.layer_type = layer_type
-        neurons, math_text, dots = MLPLayerVGroup.__get_layer(layer_size, layer_type)
+        neurons, math_text, dots = MLPLayerVGrp.__get_layer(layer_size, layer_type)
         self.neurons = neurons
         self.add(neurons)
         self.add(math_text)
         if dots is not None:
             self.add(dots)
-        labels = MLPLayerVGroup.__add_labels(neurons, layer_type)
+        labels = MLPLayerVGrp.__add_labels(neurons, layer_type)
         if labels is not None:
             self.add(labels)
 
@@ -58,9 +59,9 @@ class MLPLayerVGroup(VGroup):
     def __add_labels(neurons: VGroup, layer_type: LayerType) -> Optional[VGroup]:
         match layer_type:
             case LayerType.INPUT:
-                return MLPLayerVGroup.__label_inputs(neurons)
+                return MLPLayerVGrp.__label_inputs(neurons)
             case LayerType.OUTPUT:
-                return MLPLayerVGroup.__label_outputs(neurons)
+                return MLPLayerVGrp.__label_outputs(neurons)
             case _:
                 return None
 
@@ -96,7 +97,7 @@ class MLPLayerVGroup(VGroup):
         if n_neurons > NeuralConfig['max_shown_neurons']:
             n_neurons = NeuralConfig['max_shown_neurons']
 
-        neuron_color = MLPLayerVGroup.__get_nn_fill_color(layer_type)
+        neuron_color = MLPLayerVGrp.__get_nn_fill_color(layer_type)
         neurons = VGroup(*[
             Sphere(radius=NeuralConfig['neuron_radius'])
             for _ in range(n_neurons)

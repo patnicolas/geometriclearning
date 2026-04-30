@@ -1,6 +1,6 @@
 from manim import *
-from library.parametric_curve_group import ParametricCurveGroup
-from library.parametric_surface_group import ParametricSurfaceGroup
+from animation.library.plots.parametric_curve_vgrp import ParametricCurveVGrp
+from animation.library.plots.parametric_surface_vgrp import ParametricSurfaceVGrp
 import numpy as np
 
 
@@ -12,10 +12,10 @@ class ParametricCurveScene(ThreeDScene):
                 np.cos(k * t) * np.sin(t),
                 t
             ])
-        math_pattern = ParametricCurveGroup(func=this_func,
-                                            t_range=(0, TAU),
-                                            scale=2.0,
-                                            title=MathTex(r"r = \cos(", str(k), r"\theta)").to_edge(UP))
+        math_pattern = ParametricCurveVGrp(func=this_func,
+                                           t_range=(0, TAU),
+                                           scale=2.0,
+                                           title=MathTex(r"r = \cos(", str(k), r"\theta)").to_edge(UP))
         title, param_curve = math_pattern.get_attributes()
         self.play(title, param_curve)
         self.wait(2)
@@ -28,12 +28,12 @@ class ParametricSurfaceScene(ThreeDScene):
             (R + r * np.cos(v)) * np.sin(u),
             r * np.sin(v)
             ])
-        math_pattern = ParametricSurfaceGroup(func=this_func,
-                                              u_range=(0, TAU),
-                                              v_range=(0, TAU),
-                                              scale=0.5,
-                                              resolution=(32, 32),
-                                              title=MathTex(r"r = \cos(", str(r), r"\theta)").to_edge(UP))
+        math_pattern = ParametricSurfaceVGrp(func=this_func,
+                                             u_range=(0, TAU),
+                                             v_range=(0, TAU),
+                                             scale=0.5,
+                                             resolution=(32, 32),
+                                             title=MathTex(r"r = \cos(", str(r), r"\theta)").to_edge(UP))
         title, param_surface = math_pattern.get_attributes()
         self.play(title, param_surface)
         self.wait(2)

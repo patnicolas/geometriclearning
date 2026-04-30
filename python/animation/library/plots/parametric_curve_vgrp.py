@@ -14,22 +14,23 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # limitations under the License.
 
 from manim import *
-from typing import List
-from mlp_layers_vgroup import MLPLayersVGroup
+from typing import Callable, Tuple
+from animation.library import Rnge
+import numpy as np
 
-
-class MLPVGroup(VGroup):
+class ParametricCurveVGrp(VGroup):
     def __init__(self,
-                 layer_sizes: List[int],
-                 shift: float,
+                 func: Callable[[float], np.array],
+                 t_range: Rnge,
                  scale: float,
-                 *args,
+                 title: MathTex,
                  **kwargs) -> None:
-        VGroup.__init__(self, *args, **kwargs)
+        super(ParametricCurveVGrp, self).__init__(**kwargs)
 
-        # Create the layers of neurons with their edges
-        layers_group = MLPLayersVGroup.build(layer_sizes)
-        self.add_to_back(layers_group)
-        # Position the layers
-        self.shift(RIGHT*shift)
-        self.scale(scale)
+        self.param_func = ParametricFunction(func, t_range, color=BLUE).scale(scale)
+        self.title = title
+        self.add(title, self.param_func)
+
+    def get_attributes(self) -> Tuple[Write, Create]:
+        return Write(self.title, run_time=1), Create(self.param_func, run_time=4)
+

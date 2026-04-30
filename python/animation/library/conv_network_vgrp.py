@@ -14,15 +14,28 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # limitations under the License.
 
 from manim import *
-from mlp_vgroup import MLPVGroup
 from typing import List
-from conv_vgroup import ConvVGroup
+from networks.mlp_vgrp import MLPVGrp
+from networks.conv_vgrp import ConvVGrp
 
-"""
-"""
+class ConvNetworkVGrp(VGroup):
+    def __init__(self,
+                 layer_sizes: List[int],
+                 shift: float,
+                 scale: float,
+                 *args,
+                 **kwargs) -> None:
+        VGroup.__init__(self, *args, **kwargs)
+
+        # Create the layers of neurons with their edges
+        layers_group = MLPVGrp.build(layer_sizes)
+        self.add_to_back(layers_group)
+        # Position the layers
+        self.shift(RIGHT*shift)
+        self.scale(scale)
 
 
-class NeuralNetworkScene(ThreeDScene):
+class ConvNetworkScene(ThreeDScene):
     def construct(self):
         mlp_tracker = ValueTracker(0.0)
         title = Tex(r'\textbf{Hands-on Geometric Deep Learning}', font_size=42, color=WHITE).to_edge(UP)
@@ -49,9 +62,9 @@ class NeuralNetworkScene(ThreeDScene):
             self.play(Write(conv_layer_text), Write(line), Write(receptive_fields), run_time=0.4)
 
         # -------------  Convolution layers ------------------
-        conv_group1 = ConvVGroup(shift=3.2, scale=0.85, opacity=0.2)
-        conv_group2 = ConvVGroup(shift=2.2, scale=0.70, opacity=0.2)
-        conv_group3 = ConvVGroup(shift=1.5, scale=0.50, opacity=0.2)
+        conv_group1 = ConvVGrp(shift=3.2, scale=0.85, opacity=0.2)
+        conv_group2 = ConvVGrp(shift=2.2, scale=0.70, opacity=0.2)
+        conv_group3 = ConvVGrp(shift=1.5, scale=0.50, opacity=0.2)
 
         self.play(Rotate(conv_group1, angle=0.5 * PI, axis=UP),
                   Rotate(conv_group2, angle=0.5 * PI, axis=UP),
@@ -64,8 +77,8 @@ class NeuralNetworkScene(ThreeDScene):
 
         layer_sizes = [1764, 128, 32, 8]
         num_edge_groups = len(layer_sizes) - 1
-        num_edges_per_layer = NeuralNetworkScene.get_num_edges_per_layer(layer_sizes)
-        mlp_group = MLPVGroup(layer_sizes, shift=2.0, scale=0.45)
+        num_edges_per_layer = ConvNetworkScene.get_num_edges_per_layer(layer_sizes)
+        mlp_group = ConvNetworkVGrp(layer_sizes, shift=2.0, scale=0.45)
         self.play(Write(mlp_group, run_time=0.1))
         lines = [line for line in mlp_group.get_family() if isinstance(line, Line)]
 
@@ -129,7 +142,3 @@ class NeuralNetworkScene(ThreeDScene):
         num_edges = [0] + [src * tgt for src, tgt in zip(source_layer_sizes, target_layer_sizes)]
         return list(accumulate(num_edges))
 
-
-if __name__ == '__main__':
-    neural_network_scene = NeuralNetworkScene()
-    neural_network_scene.construct()
