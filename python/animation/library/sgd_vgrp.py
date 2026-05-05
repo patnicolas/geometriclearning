@@ -3,7 +3,7 @@ from typing import Callable, List, Tuple
 
 from manim import *
 import numpy as np
-from math import sin, cos, pi, exp, sqrt
+from math import sin, cos, exp, sqrt
 from animation.library.plots.gauge_vgrp import GaugeVGrp, GaugeConfig
 
 class SGDVGRP(VGroup):
@@ -57,8 +57,8 @@ class SGDVGRP(VGroup):
         self.title = Text("SGD in Latent Space (3D)", color=YELLOW, font_size=32).to_edge(UP, buff=0.4)
 
         self.noisy_path.set_opacity(0.0)
-        # self.add(axes, labels, self.noisy_path, true_surface)
-        self.add(axes, true_surface)
+        self.add(axes, labels, self.noisy_path, true_surface)
+
 
     @staticmethod
     def get_data(loss_function: Callable[[float, float], List[float]],
@@ -144,9 +144,9 @@ class SGD3DScene(ThreeDScene):
         # self.begin_ambient_camera_rotation(rate=0.04)  # Rotate for depth perspective
 
         # We animate the path segments one by one
-        # sgd_vgrp.noisy_path.set_opacity(1.0)
-        # self.play(Create(sgd_vgrp.noisy_path.scale(0.7)), run_time=8)
-        # self.stop_ambient_camera_rotation()
+        sgd_vgrp.noisy_path.set_opacity(1.0)
+        self.play(Create(sgd_vgrp.noisy_path.scale(0.7)), run_time=8)
+        self.stop_ambient_camera_rotation()
         self.wait(2)
 
     """
