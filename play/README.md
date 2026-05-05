@@ -2,7 +2,7 @@
 ### Tutorials
 
 Source code to support Substack newsletter: [Hands-on Geometric Deep Learning](https://patricknicolas.substack.com)     
-Patrick Nicolas - Last update 10.28.2025    
+Patrick Nicolas - Last update 05.02.2026    
 
 ![Under](../images/Under_construction.png)
 
@@ -28,11 +28,11 @@ Patrick Nicolas - Last update 10.28.2025
 | olliver_ricci_play.py               | [Curvature-informed Graph Learning](https://patricknicolas.substack.com/p/curvature-informed-graph-learning)                                                                                                                                   |
 | persistence_diagrams_play.py        | [Understanding Data Through Persistence Diagrams](https://patricknicolas.substack.com/p/understanding-data-through-persistence)                                                                                                                |
 | plotting_play.py                    | [Visualization Tools for Geometric Deep Learning](https://patricknicolas.substack.com/p/visualization-tools-for-geometric)                                                                                                                     |
+| sgld_eval_play.py                   | [Stochastic Gradient Langevin Dynamics](...)                                                                                                                                                                                                   |
 | son_group_play.py                   | [A Journey into the Lie Group SO(4)](https://patricknicolas.substack.com/p/a-journey-into-the-lie-group-so4)    [Mastering Special Orthogonal Groups With Practice](https://patricknicolas.substack.com/p/mastering-special-orthogonal-groups) |
-| topo_bench_play.py                  | [Benchmarking Topological Deep Learning](https://patricknicolas.substack.com/p/benchmarking_topological_deep_learn)                                                                                                                                                                  |
+| topo_bench_play.py                  | [Benchmarking Topological Deep Learning](https://patricknicolas.substack.com/p/benchmarking_topological_deep_learn)                                                                                                                            |
 | toponetx_play.py                    | [Graphs Reimagined: The Power of Cell Complexes](https://patricknicolas.substack.com/p/graphs-reimagined-the-power-of-cell)                                                                                                                    |                                                                                                                                                                                                                                               |                                                                                                                                                                                                                                                 |
-| umap_play.py                        | [Uniform Manifold Approximation & Projection](https://patricknicolas.substack.com/p/uniform-manifold-approximation-and)                                                                                                                        |                                                                                                                                                                                                                                               |
-|                                     |                                                                                                                                                                                                                                                |
+| umap_play.py                        | [Uniform Manifold Approximation & Projection](https://patricknicolas.substack.com/p/uniform-manifold-approximation-and)                                                                                                                        |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 ## Description   
 ✅ cf_statistical_manifold_.py    
@@ -85,6 +85,10 @@ Comparison of relative performance of GraphSAGE and GCN over PyTorch Geometric d
 
 ✅ persistence_diagrams_play.py 
 - Evaluation of various persistence diagrams, persistence image and persistence landscape with Scikit-TDA library
+
+✅ sgld_eval_play.py  
+- Evaluation of the Stochastic Gradient Langevin Dynamics (SGLD) optimizer with Torch implementation
+- Comparative analysis of SGLD with SGD and Adam optimizers
 
 ✅ son_group_play.py      
 - Introduction, implementation of SO(4) Lie group with evaluation of generation of random rotation, composition of rotation, inverse rotation and project.    

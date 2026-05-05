@@ -52,8 +52,8 @@ class SGLDEvalPlay(Play):
 
     References:
     - Article:
-    - Implementation:
-    - Evaluation:
+    - Implementation: https://github.com/patnicolas/geometriclearning/blob/main/python/deeplearning/loss/sgld.py
+    - Evaluation:  https://github.com/patnicolas/geometriclearning/blob/main/play/sgld_eval_play.py
 
     The features are implemented by the class SGLD in the source file
                        python/deeplearning/loss/sgld.py
