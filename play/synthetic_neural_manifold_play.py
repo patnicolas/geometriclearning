@@ -13,13 +13,33 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# 3rd library imports
 import numpy as np
 import matplotlib.pyplot as plt
+# Framework imports
 from deeplearning.model.synthetic_neural_manifold import SyntheticNeuralManifold, NeuralActivityGenerator
+from play import Play
+
+class SyntheticNeuralManifoldPlay(Play):
+    """
+      This class wraps the exploration of Neural manifold using synthetic neural activity.
+      Substack article:
+      @see deeplearning.model.synthetic_neural_manifold.NeuralActivityGenerator
+
+      Methods:
+          play to run the example defined in the substack article
+          show_spike_trains Visualization of the synthetic neural activity
+          show_latent_path Visualization of the underlying manifold using Isometric features map.
 
 
-class SyntheticNeuralManifoldPlay(object):
+    The features are implemented in the classes NeuralActivityGenerator and SyntheticNeuralManifoldPlay.
+    python/deeplearning/model/synthetic_neural_manifold.py
+    The class SyntheticNeuralManifoldPlay is a wrapper of the class SyntheticNeuralManifold
+    The execution of the tests (main) follows the same order as in the Substack article
+    """
+
     def __init__(self, synthetic_neural_manifold: SyntheticNeuralManifold) -> None:
+        super(SyntheticNeuralManifoldPlay, self).__init__()
         self.synthetic_neural_manifold = synthetic_neural_manifold
 
     def show_spike_trains(self, spikes: np.ndarray) -> None:

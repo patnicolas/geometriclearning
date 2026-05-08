@@ -59,13 +59,13 @@ class HypergraphModel(nn.Module):
 
 class TopoBenchPlay(Play):
     """
-     This class evaluates the basic functionality of TopoBench framework through a parameterized and componentized
+    This class evaluates the basic functionality of TopoBench framework through a parameterized and componentized
      wrapper, TopoBenchWrapper.
 
-     TopoBench is a modular Python framework built to standardize benchmarks and streamline research within
-     Topological Deep Learning (TDL). It enables the seamless training and comparative analysis of various Topological
-     Neural Networks (TNNs) across multiple domains, including graphs, simplicial complexes, cellular complexes, and
-     hypergraphs.
+    TopoBench is a modular Python framework built to standardize benchmarks and streamline research within
+    Topological Deep Learning (TDL). It enables the seamless training and comparative analysis of various Topological
+    Neural Networks (TNNs) across multiple domains, including graphs, simplicial complexes, cellular complexes, and
+    hypergraphs.
 
     The main method, play,  implements the evaluation code of the substack article "Benchmarking Topological Deep
     Learning".
