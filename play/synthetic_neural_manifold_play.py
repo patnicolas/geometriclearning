@@ -23,14 +23,13 @@ from play import Play
 class SyntheticNeuralManifoldPlay(Play):
     """
       This class wraps the exploration of Neural manifold using synthetic neural activity.
-      Substack article:
+      Substack article: "Decoding Neural Manifolds"
       @see deeplearning.model.synthetic_neural_manifold.NeuralActivityGenerator
 
       Methods:
           play to run the example defined in the substack article
-          show_spike_trains Visualization of the synthetic neural activity
-          show_latent_path Visualization of the underlying manifold using Isometric features map.
-
+          __show_spike_trains Visualization of the synthetic neural activity
+          __show_latent_path Visualization of the underlying manifold using Isometric features map.
 
     The features are implemented in the classes NeuralActivityGenerator and SyntheticNeuralManifoldPlay.
     python/deeplearning/model/synthetic_neural_manifold.py
@@ -42,18 +41,27 @@ class SyntheticNeuralManifoldPlay(Play):
         super(SyntheticNeuralManifoldPlay, self).__init__()
         self.synthetic_neural_manifold = synthetic_neural_manifold
 
-    def show_spike_trains(self, spikes: np.ndarray) -> None:
+    def play(self) -> None:
+        sigma = 1.6
+        n_neighbors = 32
+        spikes, manifold_path = self.synthetic_neural_manifold(sigma=sigma, n_neighbors=n_neighbors)
+        SyntheticNeuralManifoldPlay.__show_latent_path(manifold_path, sigma=sigma, n_neighbors=n_neighbors)
+        self.__show_spike_trains(spikes)
+
+    """ ------------------------  Private visualization helper methods -------------------------- """
+
+    def __show_spike_trains(self, spikes: np.ndarray) -> None:
         plt.figure(figsize=(10, 4))
         plt.imshow(spikes.T, aspect='auto', cmap='hot', interpolation='nearest')
         for i in range(self.synthetic_neural_manifold.get_num_neurons() + 1):
             plt.axhline(y=i - 0.5, color='gray', linestyle='-', linewidth=0.5, alpha=0.3)
         plt.title(self.synthetic_neural_manifold.get_descriptor())
-        plt.xlabel("Time")
-        plt.ylabel("Neuron")
+        plt.xlabel("Timesteps")
+        plt.ylabel("Neurons")
         plt.show()
 
     @staticmethod
-    def show_latent_path(manifold_path: np.ndarray, sigma: float, n_neighbors: int) -> None:
+    def __show_latent_path(manifold_path: np.ndarray, sigma: float, n_neighbors: int) -> None:
         plt.style.use(['ggplot', 'dark_background'])
 
         fig = plt.figure(figsize=(8, 8))
@@ -69,18 +77,20 @@ class SyntheticNeuralManifoldPlay(Play):
         plt.show()
         # plt.savefig('manifold_projection.png')
 
-    def play(self) -> None:
-        sigma = 1.6
-        n_neighbors = 32
-        spikes, manifold_path = self.synthetic_neural_manifold(sigma=sigma, n_neighbors=n_neighbors)
-        SyntheticNeuralManifoldPlay.show_latent_path(manifold_path, sigma=sigma, n_neighbors=n_neighbors)
-        self.show_spike_trains(spikes)
 
-
-if __name__ == '__main__':
-    neural_activity_generator = NeuralActivityGenerator(n_neurons=512, n_timesteps=100, firing_rate_factor=96, velocity=0.05)
+def execute_test(num_neurons: int, firing_rate_factor: int) -> None:
+    neural_activity_generator = NeuralActivityGenerator(n_neurons=num_neurons,
+                                                        n_timesteps=100,
+                                                        firing_rate_factor=firing_rate_factor,
+                                                        velocity=0.05)
     synthetic_neural_manifold = SyntheticNeuralManifold(neural_activity_generator)
     play = SyntheticNeuralManifoldPlay(synthetic_neural_manifold)
     play.play()
 
+
+if __name__ == '__main__':
+    # Execution of tests related to the substack article
+    execute_test(num_neurons=64, firing_rate_factor=12)
+    execute_test(num_neurons=64, firing_rate_factor=96)
+    execute_test(num_neurons=784, firing_rate_factor=96)
 

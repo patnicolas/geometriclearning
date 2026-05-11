@@ -87,8 +87,8 @@ class NeuralActivityGenerator(object):
         @return: Basic, minimum configuration of the Spikes generator
         @rtype: str
         """
-        return (f"Synthetic Spike Train - {self.n_neurons} Neurons, {self.n_timesteps} "
-                f"steps, Firing rate factor: {self.firing_rate_factor}")
+        return (f"Synthetic Neural Activity - {self.n_neurons} Neurons, {self.n_timesteps} "
+                f"steps, Firing Rate Factor: {self.firing_rate_factor}")
 
 
 class SyntheticNeuralManifold(object):
