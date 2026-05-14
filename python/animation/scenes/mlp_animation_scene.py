@@ -1,11 +1,11 @@
 
 
-from animation.library.gauge_scatter_plots_scene import GaugeScatterPlotsScene
+from animation.scenes.gauge_scatter_plots_scene import GaugeScatterPlotsScene
 
 from manim import *
 from animation.library.plots.gauge_vgrp import GaugeVGrp
 from animation.library.plots.scatter_2d_vgrp import Scatter2DVGrp
-from animation.library.gauge_scatter_plots_scene import GaugeScatterPlotsConfig
+from animation.scenes.gauge_scatter_plots_scene import GaugeScatterPlotsConfig
 
 class MLPAnimationScene(Scene):
     def construct(self) -> None:

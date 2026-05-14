@@ -27,7 +27,7 @@ class MLPNetworkVGrp(VGroup):
         VGroup.__init__(self, *args, **kwargs)
 
         # Create the layers of neurons with their edges
-        self.layers_group = MLPVGrp.build(layer_sizes)
+        self.layers_group = MLPVGrp.__call__(layer_sizes)
         self.add_to_back(self.layers_group)
         # Position the layers
         self.shift(RIGHT*shift)

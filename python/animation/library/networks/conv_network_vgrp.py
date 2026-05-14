@@ -28,7 +28,7 @@ class ConvNetworkVGrp(VGroup):
         VGroup.__init__(self, *args, **kwargs)
 
         # Create the layers of neurons with their edges
-        layers_group = MLPVGrp.build(layer_sizes)
+        layers_group = MLPVGrp.__call__(layer_sizes)
         self.add_to_back(layers_group)
         # Position the layers
         self.shift(RIGHT*shift)
