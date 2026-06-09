@@ -9,7 +9,7 @@ from geomstats.information_geometry.exponential import ExponentialDistributions
 from geomstats.information_geometry.base import InformationManifoldMixin
 from geomstats.information_geometry.geometric import GeometricDistributions
 from geomstats.information_geometry.poisson import PoissonDistributions
-from geometry.information_geometry import CFStatisticalManifold
+from geometry.information_geometry.cf_statistical_manifold import CFStatisticalManifold
 from typing import Tuple, AnyStr
 import logging
 
@@ -204,7 +204,7 @@ class CFStatisticalManifoldTest(unittest.TestCase):
                 sigma = SIGMA[0:frame]
                 surf = ax.plot_surface(mu, sigma, Z[0:frame], cmap='viridis', edgecolor='none')
 
-        ax.set_title('PDF of Normal Distribution at origin')
+        ax.set_title('Normal Distribution')
         ax.set_xlabel('Mean (μ)')
         ax.set_ylabel('Standard Deviation (σ)')
         ax.set_zlabel('PDF value')

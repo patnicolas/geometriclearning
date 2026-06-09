@@ -14,7 +14,7 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # limitations under the License.
 
 # Standard Library imports
-from typing import Dict, AnyStr, Any
+from typing import Dict, AnyStr, Any, Tuple
 from enum import Enum, unique
 # 3rd Party imports
 import tadasets
@@ -58,7 +58,7 @@ class ShapedDataGenerator(Enum):
                             ShapedDataGenerator.__title(k, 'Swiss Roll')
                             )
 
-    def __call__(self, *args, **kwargs) -> (np.array, AnyStr):
+    def __call__(self, *args, **kwargs) -> Tuple[np.ndarray, AnyStr]:
         """
         Method to return the lambda associated to a shape. The parameter values are validated prior execution of
         lambda.
@@ -98,11 +98,21 @@ class ShapedDataDisplay(object):
     def __init__(self, shaped_data_generator: ShapedDataGenerator) -> None:
         self.shaped_data_generator = shaped_data_generator
 
-    def __call__(self, props: Dict[AnyStr, Any], noise: float) -> None:
+    def get_data(self,  props: Dict[AnyStr, Any], noise: float, limit: int = -1) -> Tuple[np.ndarray, np.ndarray, AnyStr]:
+        # Synthetic data from the shape (noise null)
         raw_data, shape_type = self.shaped_data_generator(props)
+        # No need to display all shape data
+        if limit != -1:
+            raw_data = raw_data[:limit]
+        # Add noise to the shape data
         props['noise'] = noise
-        props['n'] = 96000
+        props['n'] = 10
+        # shaped data
         shaped_data, _ = self.shaped_data_generator(props)
+        return raw_data, shaped_data, shape_type
+
+    def __call__(self, props: Dict[AnyStr, Any], noise: float) -> None:
+        raw_data, shaped_data, shape_type = self.get_data(props, noise)
 
         fig = plt.figure(figsize=(8, 8))
         match shape_type:
@@ -113,25 +123,26 @@ class ShapedDataDisplay(object):
             case 'Torus' | 'Swiss Roll' | 'Sphere':
                 ShapedDataDisplay.__plot3d(shaped_data, raw_data, fig)
 
-        plt.title(label=shape_type, fontdict={'family': 'serif', 'size': 23, 'weight': 'bold', 'color': 'blue'})
+        plt.title(label=f"{shape_type} {props['n']} points with {props['noise']} noise",
+                  fontdict={'family': 'serif', 'size': 14, 'weight': 'regular', 'color': 'blue'})
         plt.show()
 
     """ ------------------------  Private Supporting Methods ---------------------- """
 
     @staticmethod
-    def __plot2d(shape_type: AnyStr, shaped_data: np.array, raw_data: np.array) -> None:
+    def __plot2d(shape_type: AnyStr, shaped_data: np.ndarray, raw_data: np.ndarray) -> None:
         plt.scatter(x=shaped_data[:, 0],
                     y=shaped_data[:, 1],
                     label=f'{shape_type} shaped data',
-                    s=36)
+                    s=120)
         plt.scatter(x=raw_data[:, 0],
                     y=raw_data[:, 1],
                     label=f'{shape_type} raw data',
-                    s=180)
+                    s=40)
         plt.legend()
 
     @staticmethod
-    def __plot3d(shaped_data: np.array, raw_data: np.array, fig) -> None:
+    def __plot3d(shaped_data: np.ndarray, raw_data: np.ndarray, fig) -> None:
         from mpl_toolkits.mplot3d import Axes3D
 
         ax = fig.add_subplot(111, projection='3d')

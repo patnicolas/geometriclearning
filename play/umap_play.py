@@ -156,28 +156,17 @@ class UMAPEval(NDLREval):
 
 
 class UMAPPlay(Play):
-    def __init__(self, tnse_eval: TSneEval, umap_eval: UMAPEval) -> None:
+    def __init__(self, ndlr_eval: NDLREval) -> None:
         super(UMAPPlay, self).__init__()
-        self.tnse_eval = tnse_eval
-        self.umap_eval = umap_eval
+        self.ndlr_eval = ndlr_eval
 
-    def play_tsne(self) -> None:
-        tsne_eval = TSneEval(dataset_src=DataSrc.MNIST, n_components=3)
-        tsne_eval(cmap='Spectral')
+    def play(self) -> None:
+        self.ndlr_eval(cmap='Spectral')
 
-        tsne_eval = TSneEval(dataset_src=DataSrc.IRIS, n_components=3)
-        tsne_eval('Spectral')
 
-    def play_umap(self) -> None:
-        n_neighbors = 4
-        min_dist = 0.8
-        umap_eval = UMAPEval(dataset_src=DataSrc.MNIST, n_neighbors=n_neighbors, min_dist=min_dist)
-        umap_eval(cmap='Spectral')
-
-        n_neighbors = 40
-        min_dist = 0.001
+if __name__ == '__main__':
+    min_dist = 0.001
+    for n_neighbors in (4, 20, 48, 96):
         umap_eval = UMAPEval(dataset_src=DataSrc.IRIS, n_neighbors=n_neighbors, min_dist=min_dist)
-        umap_eval(cmap='Set1')
-
-
-
+        umap_play = UMAPPlay(umap_eval)
+        umap_play.play()

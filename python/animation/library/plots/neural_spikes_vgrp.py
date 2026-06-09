@@ -15,7 +15,7 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 from manim import *
 import numpy as np
-from typing import Tuple, List
+from typing import Tuple, List, AnyStr
 
 
 class SpikeTrainVGrp(VGroup):
@@ -23,25 +23,38 @@ class SpikeTrainVGrp(VGroup):
                  duration: float,
                  num_neurons: int,
                  spike_probability: float,
-                 gauss_sigma: float) -> None:
+                 gauss_sigma: float,
+                 title: AnyStr,
+                 background_image_filename: AnyStr = None) -> None:
         super(SpikeTrainVGrp, self).__init__()
         self.duration = duration
         self.num_neurons = num_neurons
         self.spike_probability = spike_probability
         self.gauss_sigma = gauss_sigma
+        self.title = Text(text=title, font_size=36).to_edge(UP, buff=0.7)
+        self.background_image = ImageMobject(background_image_filename) \
+            if background_image_filename is not None else None
 
     def __call__(self) -> Tuple[VGroup, ...]:
-        axes, labels = self.__create_axes_labels()
+        self.__add_background_image()
+        axes, labels = self.__add_axes_labels()
         self.add(axes, labels)
-        return self.__create_spikes(axes)
+        spikes, smoothed_curves = self.__add_spikes(axes)
+        return spikes, smoothed_curves
 
     """  ---------------------  Private Supporting Methods  ---------------------  """
 
-    def __create_axes_labels(self) -> Tuple[ThreeDAxes, VGroup]:
+    def __add_background_image(self) -> None:
+        if self.background_image is not None:
+            # Use scale_to_fit_width(config.frame_width) to cover the whole screen
+            self.background_image.scale_to_fit_width(config.frame_width)
+            self.background_image.set_opacity(0.18)  # Dim it so the spikes are visible
+
+    def __add_axes_labels(self) -> Tuple[ThreeDAxes, VGroup]:
         axes = ThreeDAxes(
             x_range=[0, 12, 1],   # x_range: Time (0 to 12 seconds)
             y_range=[0, 9, 1],    # y_range: Neuron Index (1 to 6)
-            z_range=[0, 2, 1],           # z_range: Spike Height
+            z_range=[0, 2, 1],    # z_range: Spike Height
             x_length=10,
             y_length=8,
             z_length=2,
@@ -54,11 +67,11 @@ class SpikeTrainVGrp(VGroup):
         )
         return axes, labels
 
-    def __create_spikes(self, axes: ThreeDAxes) -> Tuple[VGroup, VGroup]:
+    def __add_spikes(self, axes: ThreeDAxes) -> Tuple[VGroup, VGroup]:
         spikes = VGroup()
         smoothed_curves = VGroup()
 
-        for n in range(1, self.num_neurons + 1):
+        for n in range(0, self.num_neurons + 1):
             space = n * 1.5
             # Create a "line" for each neuron to sit on
             neuron_line = Line(
@@ -101,10 +114,18 @@ class SpikeTrainVGrp(VGroup):
 
 class SpikeTrainScene(ThreeDScene):
     def construct(self):
-        spike_train_vgrp = SpikeTrainVGrp(duration=12, num_neurons=6,spike_probability=0.4, gauss_sigma=0.19)
+        spike_train_vgrp = SpikeTrainVGrp(duration=12,
+                                          num_neurons=6,
+                                          spike_probability=0.4,
+                                          gauss_sigma=0.19,
+                                          title="Neural Activity with Poisson/Gauss Spike density",
+                                          background_image_filename='animation/library/images/Neural_Activity_Background.png')
         self.add(spike_train_vgrp)
         self.set_camera_orientation(phi=75 * DEGREES, theta=-45 * DEGREES)
         spikes, smoothed_curves = spike_train_vgrp()
+        self.add_fixed_in_frame_mobjects(spike_train_vgrp.title)
+        if spike_train_vgrp.background_image is  not None:
+            self.add_fixed_in_frame_mobjects(spike_train_vgrp.background_image)
 
         self.play(Create(spikes), Create(smoothed_curves), run_time=4, rate_func=linear)
         self.wait(2)

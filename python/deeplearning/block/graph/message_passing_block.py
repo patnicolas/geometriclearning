@@ -29,7 +29,7 @@ __all__ = ['MessagePassingBlock']
 
 class MessagePassingBlock(NeuralBlock, ABC):
     """
-    Implementation of a very simple Graph Convolutional Neural block which consists of
+    Implementation of a very simple Graph Neural block which consists of
     - Message passing operator
     - Optional activation function
     - Optional batch norm 1-dimension
