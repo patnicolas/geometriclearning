@@ -37,7 +37,7 @@ class PersistenceDiagrams(object):
     __slots__ = ['data', 'data_shape']
     num_shape_data_point = 48000
 
-    def __init__(self, data: np.array, data_shape: AnyStr = None) -> None:
+    def __init__(self, data: np.ndarray, data_shape: AnyStr = None) -> None:
         """
         Default constructor for the generation and visualization of persistence diagrams.
         :param data: Input data to be represented

@@ -13,9 +13,8 @@ __copyright__ = "Copyright 2023, 2026  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from manim import *
-from typing import Tuple, Callable, Any, List
+from typing import Tuple, Callable, Any, List, AnyStr
 from dataclasses import dataclass
 from animation.library.data_observer import DataObserver
 
@@ -29,6 +28,7 @@ class GaugeConfig:
 class GaugeVGrp(VGroup, DataObserver):
 
     def __init__(self,
+                 title_str: AnyStr,
                  data_points: List[float],
                  gauge_config: GaugeConfig,
                  **kwargs) -> None:
@@ -37,7 +37,9 @@ class GaugeVGrp(VGroup, DataObserver):
 
         self.radius = gauge_config.radius  # 2.5
         self.num_ticks = gauge_config.num_ticks  # 0 to 10
-        self.limit_values = (min(data_points), max(data_points))
+        min_value = min(data_points)
+        max_value = max(data_points)
+        self.limit_values = (min_value, max_value) if min_value < max_value else (max_value, min_value)
         ticks, labels = GaugeVGrp.create_ticks(gauge_config, self.limit_values)
 
         gradient_background = AnnularSector(
@@ -61,16 +63,22 @@ class GaugeVGrp(VGroup, DataObserver):
 
         # 4. Add a pivot point at the center
         center_dot = Dot(radius=0.1, color=BLUE)
-        self.add(gauge_arc, gradient_background, self.needle, center_dot, ticks, labels)
+        title = Text(title_str, font_size=28).next_to(center_dot, UP, 1.0)
+        self.add(gauge_arc, gradient_background, self.needle, center_dot, title, ticks, labels)
 
     def get_updater(self, vt) -> Callable[[Any], Any]:
         def updater(obj):
             idx = int(vt.get_value())
-            print(f'idx: {idx}')
-            value = self.data_points[idx]/self.limit_values[1]
-            angle = interpolate(PI, 0, value/self.limit_values[0])
-            obj.needle.set_angle(angle)
+            if idx < len(self.data_points):
+                value = self.data_points[idx] # /self.limit_values[1]
+                # angle = interpolate(PI, 0, value/self.limit_values[0])
+                angle = interpolate(PI, 0, value/self.limit_values[1])
+                print(f'idx: {idx}, value: {value}, angle: {angle}')
+                obj.needle.set_angle(angle)
         return updater
+
+    def get_dynamics(self) -> Create:
+        return Create(self.needle)
 
     @staticmethod
     def create_ticks(gauge_config: GaugeConfig,
@@ -112,12 +120,14 @@ class GaugeScene(Scene):
         import math
         vt = ValueTracker(0)
         gauge_config = GaugeConfig(radius=2.5, num_ticks=11, font_size=16)
-        gauge_group = GaugeVGrp([math.sin(0.01 * x) for x in range(0, 25)], gauge_config)
+        gauge_group = GaugeVGrp(title_str="Loss",
+                                data_points=[650-x*x for x in range(1, 24)],
+                                gauge_config=gauge_config)
         self.add(gauge_group)
-
-        self.play(vt.animate.set_value(75), run_time=2, rate_func=bezier([0, 0, 1, 1]))
+        gauge_group.add_updater(gauge_group.get_updater(vt))
+        self.play(vt.animate.set_value(20), run_time=2, rate_func=bezier([0, 0, 1, 1]))
         self.wait()
-        self.play(vt.animate.set_value(20), run_time=1.5)
+        self.play(vt.animate.set_value(10), run_time=1.5)
         self.wait()
 
 

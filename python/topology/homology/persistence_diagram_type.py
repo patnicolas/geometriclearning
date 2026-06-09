@@ -50,8 +50,9 @@ class PersistenceDiagramType(ABC):
         pass
 
     def _set_plot_env(self, title: AnyStr, x_label: AnyStr, y_label: AnyStr) -> None:
-        self.ax.set_xlabel(x_label, fontdict={'family': 'serif', 'size': 11, 'style': 'italic'})
-        self.ax.set_ylabel(y_label, fontdict={'family': 'serif', 'size': 11, 'style': 'italic'})
+        label_str = {'family': 'serif', 'size': 11, 'style': 'italic'}
+        self.ax.set_xlabel(x_label, fontdict=label_str)
+        self.ax.set_ylabel(y_label, fontdict=label_str)
         self.ax.get_xaxis().set_ticks([])
         self.ax.get_yaxis().set_ticks([])
         self.ax.set_title(label=title, fontdict={'family': 'serif', 'size': 14, 'color': 'blue'})
