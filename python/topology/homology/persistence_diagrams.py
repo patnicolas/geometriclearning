@@ -40,10 +40,10 @@ class PersistenceDiagrams(object):
     def __init__(self, data: np.ndarray, data_shape: AnyStr = None) -> None:
         """
         Default constructor for the generation and visualization of persistence diagrams.
-        :param data: Input data to be represented
-        :type data: Numpy array
-        :param data_shape: Descriptor for the shape of the data
-        :type data_shape: AnyStr
+        @paramdata: Input data to be represented
+        @type data: Numpy array
+        @paramdata_shape: Descriptor for the shape of the data
+        @type data_shape: AnyStr
         """
         self.data = data
         self.data_shape = data_shape
@@ -111,7 +111,7 @@ class PersistenceDiagrams(object):
 
         # Persistence diagram (Birth - Death)
         birth_death_diagram = BirthDeathDiagram(axes[0][0], rips.transform(self.data))
-        birth_death_diagram.display(title='Persistent Diagram', x_label='Birth', y_label='Death')
+        birth_death_diagram.display(title=f'Persistent Diagram\n{data_shape}', x_label='Birth', y_label='Death')
 
     """ --------------------- Private supporting methods ------------------- """
 

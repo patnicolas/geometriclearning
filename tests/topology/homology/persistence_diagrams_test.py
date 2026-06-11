@@ -8,6 +8,16 @@ from topology.homology.shaped_data_generator import ShapedDataGenerator
 
 class PersistenceDiagramsTest(unittest.TestCase):
 
+    def test_display_circle(self):
+        try:
+            num_raw_points = 12
+            persistence_diagrams = PersistenceDiagrams.build(props={'n': num_raw_points, 'noise': 0.45},
+                                                             shaped_data_generator=ShapedDataGenerator.CIRCLE)
+            persistence_diagrams.display()
+        except ValueError as e:
+            logging.error(e)
+            self.assertFalse(True)
+
     @unittest.skip('Ignore')
     def test_display_sphere(self):
         try:
