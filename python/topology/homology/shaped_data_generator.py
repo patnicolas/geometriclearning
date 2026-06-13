@@ -100,28 +100,28 @@ class ShapedDataDisplay(object):
 
     def get_data(self,  props: Dict[AnyStr, Any], noise: float, limit: int = -1) -> Tuple[np.ndarray, np.ndarray, AnyStr]:
         # Synthetic data from the shape (noise null)
-        raw_data, shape_type = self.shaped_data_generator(props)
+        shape_data, shape_type = self.shaped_data_generator(props)
         # No need to display all shape data
         if limit != -1:
-            raw_data = raw_data[:limit]
+            shape_data = shape_data[:limit]
         # Add noise to the shape data
         props['noise'] = noise
         props['n'] = 10
         # shaped data
-        shaped_data, _ = self.shaped_data_generator(props)
-        return raw_data, shaped_data, shape_type
+        shape_noisy_data, _ = self.shaped_data_generator(props)
+        return shape_data, shape_noisy_data, shape_type
 
     def __call__(self, props: Dict[AnyStr, Any], noise: float) -> None:
-        raw_data, shaped_data, shape_type = self.get_data(props, noise)
+        shape_data, shape_noisy_data, shape_type = self.get_data(props, noise)
 
         fig = plt.figure(figsize=(8, 8))
         match shape_type:
             # 2D scatter plot
             case 'Circle':
-                ShapedDataDisplay.__plot2d(shape_type, shaped_data, raw_data)
+                ShapedDataDisplay.__plot2d(shape_type, shape_noisy_data, shape_data)
             # 3D scatter plot
             case 'Torus' | 'Swiss Roll' | 'Sphere':
-                ShapedDataDisplay.__plot3d(shaped_data, raw_data, fig)
+                ShapedDataDisplay.__plot3d(shape_noisy_data, shape_data, fig)
 
         plt.title(label=f"{shape_type} {props['n']} points with {props['noise']} noise",
                   fontdict={'family': 'serif', 'size': 14, 'weight': 'regular', 'color': 'blue'})
@@ -130,13 +130,13 @@ class ShapedDataDisplay(object):
     """ ------------------------  Private Supporting Methods ---------------------- """
 
     @staticmethod
-    def __plot2d(shape_type: AnyStr, shaped_data: np.ndarray, raw_data: np.ndarray) -> None:
-        plt.scatter(x=shaped_data[:, 0],
-                    y=shaped_data[:, 1],
+    def __plot2d(shape_type: AnyStr, shape_noisy_data: np.ndarray, shape_data: np.ndarray) -> None:
+        plt.scatter(x=shape_noisy_data[:, 0],
+                    y=shape_noisy_data[:, 1],
                     label=f'{shape_type} shaped data',
                     s=120)
-        plt.scatter(x=raw_data[:, 0],
-                    y=raw_data[:, 1],
+        plt.scatter(x=shape_data[:, 0],
+                    y=shape_data[:, 1],
                     label=f'{shape_type} raw data',
                     s=40)
         plt.legend()

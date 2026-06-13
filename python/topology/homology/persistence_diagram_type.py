@@ -63,7 +63,7 @@ class BirthDeathDiagram(PersistenceDiagramType):
     A persistence diagram maps the “birth” (appearance) and “death” (disappearance) times/scales of topological 
     features such as cavities, holes or connected components in a dataset as a collection of points in a 2D plot. 
     """
-    def __init__(self, ax: Axes, diagram_data: np.array) -> None:
+    def __init__(self, ax: Axes, diagram_data: np.ndarray) -> None:
         """
         Constructor for the persistence diagram (birth & death of simplicial complexes)
         @param ax: Plot axes
@@ -96,7 +96,7 @@ class PersistenceImage(PersistenceDiagramType):
     Bright colors represent high persistence while fainted colors represents low persistence. Persistence images
     preserve essential topological structure while giving a stable, computable representation.
     """
-    def __init__(self, ax: Axes, diagram_data: np.array) -> None:
+    def __init__(self, ax: Axes, diagram_data: np.ndarray) -> None:
         """
         Constructor for the persistence image
         @param ax: Plot axes
@@ -142,7 +142,7 @@ class PersistenceLandscape(PersistenceDiagramType):
         1 for loops
         2 for cavities
     """
-    def __init__(self, ax: Axes, diagram_data: np.array, hom_degree: int, depth: int, is_exact: bool) -> None:
+    def __init__(self, ax: Axes, diagram_data: np.ndarray, hom_degree: int, depth: int, is_exact: bool) -> None:
         """
         Constructor for the Approximation and Exact Persistence Landscape plots
         @param ax: Plot axes
