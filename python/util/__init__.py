@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,7 +38,8 @@ def log_size(x: torch.Tensor, comment: AnyStr = "") -> NoReturn:
     @param comment: Optional comments
     @type comment: AnyStr
     """
-    assert isinstance(x, torch.Tensor), '\nNot a Tensor type'
+    if not isinstance(x, torch.Tensor):
+        raise TypeError( '\nNot a Tensor type')
     sz = list(x.size())
     logging.info(f'{str(sz)} {comment}')
 
@@ -53,7 +54,8 @@ def log_size(x: torch.Tensor, y: torch.Tensor, comment: AnyStr = '') -> NoReturn
     @param comment: Optional comments
     @type comment: AnyStr
     """
-    assert isinstance(x, torch.Tensor) and isinstance(y, torch.Tensor), '\nNot a Tensor type'
+    if not isinstance(x, torch.Tensor) or not isinstance(y, torch.Tensor):
+        raise TypeError(f'\n{x} or {y} is not a tensor type')
     szx = list(x.size())
     szy = list(y.size())
     logging.info(f'{str(szx)} {str(szy)} {comment}')
@@ -72,7 +74,8 @@ def check_modules_availability(modules: List[AnyStr]) -> AnyStr:
     @return: Summary of modules available and missing
     @rtype: AnyStr
     """
-    assert len(modules) > 0, 'Cannot check availability of undefined set of Python modules'
+    if len(modules) <= 0:
+        raise ValueError('Cannot check availability of undefined set of Python modules')
 
     available = []
     missing = []
@@ -93,3 +96,12 @@ def check_modules_availability(modules: List[AnyStr]) -> AnyStr:
         for mod in missing:
             summary += f" - {mod}"
     return summary
+
+
+torch_device = (
+    torch.device("cuda") if torch.cuda.is_available() else
+    torch.device("mps") if getattr(torch.backends, "mps", None) and torch.backends.mps.is_available() else
+    torch.device("cpu")
+)
+
+

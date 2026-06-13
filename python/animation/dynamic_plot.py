@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 
 from manim import *
 from typing import Callable, AnyStr
-
 
 
 class LossFunctionPlot(object):
@@ -58,16 +57,10 @@ class DynamicPlotScene(Scene):
         loss_function = LossFunctionPlot(f=f, func_label=r'Loss\ Function', max_x=20, max_y=4)
         plane, graph, graph_lab = loss_function.get_graph()
 
-        self.play(
-            DrawBorderThenFill(plane),
-            run_time=1,
-            lag_ratio=0.1)
+        self.play( DrawBorderThenFill(plane),run_time=1, lag_ratio=0.1)
         self.add(graph_lab)
         self.play(Create(graph_lab))
-        self.play(
-            Create(graph),
-            run_time=8,
-            lag_ratio=0.3)
+        self.play(Create(graph),run_time=8, lag_ratio=0.3)
         self.wait()
 
 

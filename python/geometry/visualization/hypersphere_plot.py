@@ -1,5 +1,5 @@
-__author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__author__ = "Patrick R. Nicolas"
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +13,13 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from geometry.visualization.manifold_plot import ManifoldPlot
+# Standard Library imports
 from typing import List, Optional
+# 3rd Party imports
 import numpy as np
+# Library imports
+from geometry.visualization.manifold_plot import ManifoldPlot
+__all__ = ['HyperspherePlot']
 
 
 class HyperspherePlot(ManifoldPlot):

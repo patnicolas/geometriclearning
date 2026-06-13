@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,18 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
 import logging
-import util
+from typing import AnyStr, List
+import abc
+# 3rd Party imports
+from torch.utils.data import Dataset
+from deeplearning.model import GrayscaleToRGB
+from torchvision.transforms import InterpolationMode
+# Library imports
+import python
 from dataset import DatasetException
 from dataset.base_loader import BaseLoader
-from typing import AnyStr, List
-from torch.utils.data import Dataset
-from dl.model import GrayscaleToRGB
-from torchvision.transforms import InterpolationMode
 
 
 class Caltech101Loader(BaseLoader):
@@ -29,6 +33,7 @@ class Caltech101Loader(BaseLoader):
     def __init__(self, batch_size: int, split_ratio: float, resize_image: int = -1) -> None:
         """
         Constructor for the Caltech-101 data set
+
         @param batch_size: size of batch for loading the Caltech101 data set
         @param batch_size: 1
         @param split_ratio: Training-validation random split ratio
@@ -36,9 +41,12 @@ class Caltech101Loader(BaseLoader):
         @param resize_image: Size of image to be resized. The image is not resized if -1
         @type resize_image: int
         """
-        assert 0 < batch_size <= 8192, f'Batch size {batch_size} should be [1, 8192]'
-        assert 0.5 <= split_ratio <= 0.95, f'Training-validation split ratio {split_ratio} should be [0.5, 0.95]'
-        assert 0 < resize_image <= 8192, f'Resize image factor {resize_image} should be [1, 8192]'
+        if batch_size <= 0 or batch_size > 8192:
+            raise ValueError('Batch size {batch_size} should be [1, 8192]')
+        if split_ratio < 0.5 or split_ratio > 0.95:
+            raise ValueError(f'Training-validation split ratio {split_ratio} should be [0.5, 0.95]')
+        if resize_image <= 0 or resize_image > 8192:
+            raise ValueError(f'Resize image factor {resize_image} should be [1, 8192]')
 
         super(Caltech101Loader, self).__init__(batch_size=batch_size, num_samples=-1)
         self.split_ratio = split_ratio
@@ -74,7 +82,9 @@ class Caltech101Loader(BaseLoader):
 
     def _extract_datasets(self, root_path: AnyStr) -> (Dataset, Dataset):
         """
+        Polymorphic call
         Extract the training data and labels and test data and labels for this convolutional network.
+
         @param root_path: Root path to CIFAR10 data
         @type root_path: AnyStr
         @return Tuple (train data, labels, test data, labels)
@@ -98,16 +108,17 @@ class Caltech101Loader(BaseLoader):
             ])
 
             # Instantiate the data set
-            caltech_101_dataset = Caltech101(root=root_path, transform=transform, download=False)
+            caltech_101_dataset = Caltech101(root='./data', transform=transform, download=True)
 
             # Split training / validation data sets.
             train_size = int(self.split_ratio * len(caltech_101_dataset))
             test_size = len(caltech_101_dataset) - train_size
             return torch.utils.data.random_split(caltech_101_dataset, lengths=[train_size, test_size])
-
-        except RuntimeError as e:
-            logger.error(str(e))
+        except (RuntimeError, ValueError, TypeError) as e:
+            logging.error(str(e))
             raise DatasetException(str(e))
+
+    """ -------------------  Private Helper Methods -----------------------  """
 
     @staticmethod
     def __extract_images_and_labels(category_path: AnyStr, is_random: bool) -> (List[AnyStr], List[AnyStr]):

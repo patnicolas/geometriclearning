@@ -23,11 +23,17 @@ wheels/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
+.DS_Store
 *.egg
 MANIFEST
-.idea
+*idea
 python/.idea
-
+__pycache__
+*.log
+*.npy
+*.pt
+output/
+output_images/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

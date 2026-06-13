@@ -1,5 +1,5 @@
 _author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,15 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from enum import Enum
+
+class LaplacianType(Enum):
+    UpLaplacian = 'Upper-Laplacian'
+    DownLaplacian = 'Lower-Laplacian'
+    HodgeLaplacian = 'Hodge-Laplacian'
+
+
 class TopologyException(Exception):
     def __init__(self, *args, **kwargs):
         super(TopologyException, self).__init__(args, kwargs)
+

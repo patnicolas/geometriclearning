@@ -1,5 +1,5 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2023, 2025  All rights reserved."
+__copyright__ = "Copyright 2023, 2026  All rights reserved."
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,12 +13,14 @@ __copyright__ = "Copyright 2023, 2025  All rights reserved."
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Standard Library imports
 from dataclasses import dataclass
 from typing import AnyStr
+# 3rd Party imports
 from torch_geometric.data import Data
 __all__ = ['SubgraphExtractor', 'GraphVisualization']
 
-@dataclass
+@dataclass(slots=True, frozen=True)
 class SubgraphExtractor:
     """
     Attributes for sampling a graph for nodes and edges
@@ -48,7 +50,7 @@ class GraphVisualization(object):
 
         # Create NetworkX graph from edge index
         edge_index = data.edge_index.numpy()
-        transposed = edge_index.T
+        transposed = edge_index.CellDescriptor
         # Sample the edges of the graph
         condition = ((transposed[:, 0] >= subgraph_extractor.first_node_index) &
                      (transposed[:, 0] <= subgraph_extractor.last_node_index))
@@ -76,8 +78,8 @@ class GraphVisualization(object):
         """
         import matplotlib.pyplot as plt
         import networkx as nx
-
-        assert 20 < node_size < 512, f'Cannot draw sample with a node size {node_size}'
+        if node_size <= 20 or node_size >= 512:
+            raise ValueError(f'Cannot draw sample with a node size {node_size}')
 
         # Plot the graph using matplotlib
         plt.figure(figsize=(8, 8))
