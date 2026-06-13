@@ -19,16 +19,17 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.mpl_axes import Axes
 from ripser import ripser
 
+from topology.homology.persistence_diagrams import PersistenceDiagrams
 from topology.homology.shaped_data_generator import ShapedDataDisplay, ShapedDataGenerator
 
 
 class PersistentBarcodes(object):
     """ Labels and color for each Homology class """
-    homology_labels = (('H0', 'blue'), ('H1', 'red'), ('H2', 'black'))
+    homology_labels = (('H0', 'blue'), ('H1', 'orange'), ('H2', 'green'))
 
     def __init__(self, data: np.ndarray) -> None:
         # Ripser (Vietoris-Rips complex) library to process the data
-        rips_result = ripser(data, maxdim=1)
+        rips_result = ripser(data, maxdim=2)
 
         # Extract the diagrams using ripser dictionary
         self.diagrams = rips_result['dgms']
@@ -61,7 +62,7 @@ class PersistentBarcodes(object):
         ax.set_yticks(ticks)
         ax.set_yticklabels(labels, fontsize=14, fontweight='bold')
         ax.set_xlabel("Filtration Value ($\epsilon$)", fontsize=12)
-        ax.set_title(f"Persistence Barcode (10-Point Filtration) noise: 45%", fontsize=14, fontweight='bold')
+        ax.set_title(f"Persistence Barcode (10-Point Filtration) noise: 2%", fontsize=14, fontweight='bold')
         ax.grid(axis='x', linestyle='--', alpha=0.7)
 
         # Set x-limits safely
@@ -94,8 +95,17 @@ class PersistentBarcodes(object):
 
 
 if __name__ == '__main__':
-    noise_factor = 0.45
-    sphere_data_display = ShapedDataDisplay(ShapedDataGenerator.CIRCLE)
-    _, shaped_data, _ = sphere_data_display.get_data(props={'n': 200}, noise=noise_factor, limit=20)
+    num_raw_points = 50
+    noise_factor = 0.02
+
+    # Step 1 Generate shaped (Circle + Gaussian Noise) data
+    circle_data_display = ShapedDataDisplay(ShapedDataGenerator.CIRCLE)
+    _, shaped_data, _ = circle_data_display.get_data(props={'n': 200}, noise=0.02, limit=20)
+
+    # Step 2 Generate and display persistence diagram (component Birth-Death)
+    persistence_diagrams = PersistenceDiagrams(data=shaped_data, data_shape='Circle')
+    persistence_diagrams.display()
+
+    # Step 3 Generate bar codes
     barcodes = PersistentBarcodes(shaped_data)
     barcodes.display()

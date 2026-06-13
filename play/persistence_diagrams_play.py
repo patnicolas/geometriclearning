@@ -36,15 +36,14 @@ class PersistenceDiagramPlay(Play):
     - Evaluation
       https://github.com/patnicolas/geometriclearning/blob/main/play/persistence_diagrams_play.py
 
-    The features are implemented by the class PersistenceDiagrams in the source file
-                       python/topology/persistence_diagrams.py
-    The class persistence_diagramsPlay is a wrapper of the class persistence_diagrams
+    The features are implemented by the class PersistenceDiagrams in the source file persistence_diagrams.py
+    The class PersistenceDiagramsPlay is a wrapper of the class PersistenceDiagrams
     The execution of the tests follows the same order as in the Substack article
     """
     def __init__(self, props: Dict[AnyStr, Any],  shaped_data_generator: ShapedDataGenerator) -> None:
         super(PersistenceDiagramPlay, self).__init__()
-        self.persistence_diagrams =  PersistenceDiagrams.build(props=props,
-                                                               shaped_data_generator=shaped_data_generator)
+        self.persistence_diagrams = PersistenceDiagrams.build(props=props,
+                                                              shaped_data_generator=shaped_data_generator)
 
     def play(self) -> None:
         self.persistence_diagrams.display()
